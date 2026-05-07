@@ -7,6 +7,7 @@
 
 ## Topics
 
+- [Firm-Level AI Capability Measurement and Innovation Effects](topics/2026-05-07-firm-level-ai-capability-measurement-and-innovation-effects.md)
 ## Methods
 
 ## Queries
