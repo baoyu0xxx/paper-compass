@@ -1,6 +1,6 @@
-# zotero-rag-mcp
+# paper-compass
 
-最小化的个人论文检索基础设施项目。
+个人学术论文检索与知识导航基础设施。
 
 目标：
 - 读取 /mnt/d/zotero_backup 下的 Zotero 文献与附件

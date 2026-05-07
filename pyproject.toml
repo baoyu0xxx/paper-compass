@@ -1,7 +1,7 @@
 [project]
-name = "zotero-rag-mcp"
+name = "paper-compass"
 version = "0.1.0"
-description = "Minimal Zotero + PaperQA + wiki + MCP research stack"
+description = "Personal academic paper retrieval and knowledge navigation infrastructure"
 requires-python = ">=3.11"
 dependencies = [
   "pyyaml>=6.0",

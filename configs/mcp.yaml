@@ -1,7 +1,7 @@
 version: 1
 
 mcp:
-  server_name: zotero-rag-mcp
+  server_name: paper-compass
   enabled: true
 
   tools:
