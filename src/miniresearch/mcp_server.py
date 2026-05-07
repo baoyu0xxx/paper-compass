@@ -136,7 +136,7 @@ def _tool_search_library(
         for m in results
     ]
 
-    confidence = "high" if matches and matches[0].score > 3 else "medium" if matches else "low"
+    confidence = "high" if matches and matches[0]["score"] > 3 else "medium" if matches else "low"
     next_action = (
         "Use ask_research for deeper analysis of these results"
         if matches else
