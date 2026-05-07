@@ -1,0 +1,51 @@
+version: 1
+
+wiki:
+  enabled: true
+  ingest_mode: curated
+  auto_writeback: false
+  allow_manual_writeback: true
+
+  llm_role: wiki_ingest
+  query_llm_role: wiki_query
+  embedding_role: wiki_embedding
+
+  page_types:
+    - papers
+    - topics
+    - methods
+    - queries
+    - comparisons
+
+  query:
+    default_limit: 5
+    return_snippets: true
+    max_summary_pages: 3
+    enable_embedding_search: true
+
+  writeback:
+    default_target_type: queries
+    require_sources: true
+    require_confidence: true
+    update_index: true
+    update_log: true
+
+  frontmatter:
+    required_fields:
+      - title
+      - created
+      - updated
+      - type
+      - tags
+      - sources
+      - confidence
+
+  prompt_files:
+    ingest: prompts/wiki_ingest.md
+    query: prompts/wiki_query.md
+    merge: prompts/wiki_merge.md
+
+  confidence_defaults:
+    query_writeback: medium
+    topic_synthesis: medium
+    single_source_note: low

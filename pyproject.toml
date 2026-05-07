@@ -1,0 +1,15 @@
+[project]
+name = "zotero-rag-mcp"
+version = "0.1.0"
+description = "Minimal Zotero + PaperQA + wiki + MCP research stack"
+requires-python = ">=3.11"
+dependencies = [
+  "pyyaml>=6.0",
+  "pydantic>=2.7",
+  "paper-qa>=5",
+  "pytest>=8.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"

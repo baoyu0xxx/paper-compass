@@ -1,0 +1,21 @@
+version: 1
+
+paths:
+  zotero_pdf_root: /mnt/d/zotero_backup
+  zotero_sqlite_path: /mnt/d/zotero_backup/zotero_readonly.sqlite
+
+  export_dir: ./data/zotero-export
+  manifest_path: ./data/zotero-export/manifest.csv
+  library_json_path: ./data/zotero-export/library.json
+
+  wiki_root: ./wiki
+  wiki_index_path: ./wiki/index.md
+  wiki_log_path: ./wiki/log.md
+  wiki_purpose_path: ./wiki/purpose.md
+  wiki_schema_path: ./wiki/.wiki-schema.md
+
+  prompts_dir: ./prompts
+  log_dir: ./data/logs
+  query_trace_path: ./data/logs/query-trace.jsonl
+  pqa_home: ./.pqa
+  temp_dir: ./tmp

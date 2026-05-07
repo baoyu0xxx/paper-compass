@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+.pqa/
+tmp/
+data/logs/*.jsonl
+data/zotero-export/*.csv
+data/zotero-export/*.json
+wiki/.cache/
+*.pyc
