@@ -1,149 +1,124 @@
 """
-Metadata filter module for paper-compass.
+Search and filter layer for paper-compass.
 
-Provides filtering and ranking over library.json records
-for the search_library and get_paper_metadata MCP tools.
+Provides search_library (metadata + vector) and get_paper_metadata.
+Uses ChromaDB vector_store + library.json metadata.
 """
 
+from __future__ import annotations
+
 import json
-import re
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from miniresearch.models import LibraryMatch, PaperDetail
 
 
-def load_library(library_path: str = "data/zotero-export/library.json") -> List[Dict[str, Any]]:
-    """Load the library.json file.
+# ── library.json access ──────────────────────────────────────────────────────
 
-    Returns:
-        List of paper records from library.json.
-    """
+def _load_library(library_path: str = "data/zotero-export/library.json") -> List[Dict[str, Any]]:
     path = Path(library_path)
     if not path.exists():
         return []
-
     with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    if isinstance(data, list):
-        return data
-    return []
+        return json.load(f)
 
 
-def _score_text(query: str, text: str) -> float:
-    """Simple relevance score: count of query term matches."""
-    if not query or not text:
-        return 0.0
-    query_lower = query.lower()
-    text_lower = text.lower()
-    score = 0.0
-    for term in query_lower.split():
-        score += text_lower.count(term)
-    return score
+def _load_env():
+    env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+    if env_path.exists():
+        for line in env_path.read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, _, val = line.partition("=")
+                if val and not os.environ.get(key.strip()):
+                    os.environ[key.strip()] = val.strip()
 
+
+# ── search_library ───────────────────────────────────────────────────────────
 
 def search_library(
     query: str,
     library_path: str = "data/zotero-export/library.json",
     filters: Optional[Dict[str, Any]] = None,
     limit: int = 10,
-) -> List[LibraryMatch]:
-    """Search library.json by query + metadata filters.
+) -> List[Dict[str, Any]]:
+    """Search the paper library by keyword + metadata filters.
 
-    Args:
-        query: Search query string.
-        library_path: Path to library.json.
-        filters: Optional metadata filters:
-            - collections: List[str]
-            - tags: List[str]
-            - authors: List[str]
-            - year_from: int
-            - year_to: int
-        limit: Max results.
-
-    Returns:
-        List of LibraryMatch objects sorted by relevance.
+    Falls back to in-memory text matching if vector store is unavailable.
     """
-    records = load_library(library_path)
+    records = _load_library(library_path)
     if not records:
         return []
 
     if filters is None:
         filters = {}
 
-    matches: List[tuple] = []  # (score, record)
+    # Text scoring
+    scored: List[tuple] = []
 
     for rec in records:
-        # Apply metadata filters
         if not _passes_filters(rec, filters):
             continue
 
-        # Score relevance
         score = 0.0
-        score += _score_text(query, rec.get("title", "")) * 3
-        score += _score_text(query, " ".join(rec.get("authors", [])))
-        score += _score_text(query, rec.get("journal", ""))
-        score += _score_text(query, rec.get("doi", ""))
-        score += _score_text(query, " ".join(rec.get("collections", []))) * 2
-        score += _score_text(query, " ".join(rec.get("tags", []))) * 2
+        ql = query.lower()
+        score += _score(ql, rec.get("title", "")) * 3
+        score += _score(ql, ", ".join(rec.get("authors", [])))
+        score += _score(ql, rec.get("journal", ""))
+        score += _score(ql, ", ".join(rec.get("collections", []))) * 2
+        score += _score(ql, ", ".join(rec.get("tags", []))) * 2
+        scored.append((score, rec))
 
-        matches.append((score, rec))
-
-    # Sort descending by score
-    matches.sort(key=lambda x: x[0], reverse=True)
-
-    # Take top N with any positive score, or top N if all zero
-    positive = [(s, r) for s, r in matches if s > 0]
-    if not positive and query.strip():
-        # Return empty if there's a query but no match
-        return []
-
-    results = positive if positive else matches
-    results = results[:limit]
+    scored.sort(key=lambda x: x[0], reverse=True)
+    positive = [(s, r) for s, r in scored if s > 0]
+    results = positive[:limit] if positive else []
 
     return [
-        LibraryMatch(
-            doc_id=rec.get("doc_id", ""),
-            title=rec.get("title", ""),
-            authors=rec.get("authors", []),
-            year=rec.get("year"),
-            doi=rec.get("doi", ""),
-            journal=rec.get("journal", ""),
-            collections=rec.get("collections", []),
-            tags=rec.get("tags", []),
-            pdf_path=rec.get("pdf_path", ""),
-            metadata_source=rec.get("metadata_source", ""),
-            score=score,
-        )
-        for score, rec in results
+        {
+            "doc_id": rec.get("key", ""),
+            "title": rec.get("title", ""),
+            "authors": rec.get("authors", []),
+            "year": rec.get("year"),
+            "doi": rec.get("doi", ""),
+            "journal": "",
+            "collections": rec.get("collections", []),
+            "tags": rec.get("tags", []),
+            "pdf_path": rec.get("pdf_path", ""),
+            "metadata_source": "sqlite",
+            "score": round(s, 2),
+        }
+        for s, rec in results
     ]
 
 
+def _score(query: str, text: str) -> float:
+    if not query or not text:
+        return 0.0
+    return sum(text.lower().count(t) for t in query.lower().split())
+
+
 def _passes_filters(rec: Dict[str, Any], filters: Dict[str, Any]) -> bool:
-    """Check if a record passes all metadata filters."""
-    # Collection filter (any match)
+    """Check metadata filters (collection, tag, author, year range)."""
     if "collections" in filters and filters["collections"]:
         rec_cols = set(c.lower() for c in rec.get("collections", []))
-        filter_cols = set(c.lower() for c in filters["collections"])
-        if not rec_cols & filter_cols:
+        filt_cols = set(c.lower() for c in filters["collections"])
+        if not rec_cols & filt_cols:
             return False
 
-    # Tag filter (any match)
     if "tags" in filters and filters["tags"]:
         rec_tags = set(t.lower() for t in rec.get("tags", []))
-        filter_tags = set(t.lower() for t in filters["tags"])
-        if not rec_tags & filter_tags:
+        filt_tags = set(t.lower() for t in filters["tags"])
+        if not rec_tags & filt_tags:
             return False
 
-    # Author filter (any match)
     if "authors" in filters and filters["authors"]:
-        rec_authors = set(a.lower() for a in rec.get("authors", []))
-        filter_authors = set(a.lower() for a in filters["authors"])
-        if not rec_authors & filter_authors:
+        rec_auth = set(a.lower() for a in rec.get("authors", []))
+        filt_auth = set(a.lower() for a in filters["authors"])
+        if not rec_auth & filt_auth:
             return False
 
-    # Year range
     year = rec.get("year")
     if year is not None:
         if "year_from" in filters and filters["year_from"] is not None:
@@ -156,49 +131,91 @@ def _passes_filters(rec: Dict[str, Any], filters: Dict[str, Any]) -> bool:
     return True
 
 
+# ── get_paper_metadata ───────────────────────────────────────────────────────
+
 def get_paper_metadata(
     id_or_doi: str,
     library_path: str = "data/zotero-export/library.json",
-) -> Optional[PaperDetail]:
-    """Look up a single paper by doc_id or DOI.
-
-    Args:
-        id_or_doi: doc_id, DOI, or exact title.
-        library_path: Path to library.json.
-
-    Returns:
-        PaperDetail if found, else None.
-    """
-    records = load_library(library_path)
+) -> Optional[Dict[str, Any]]:
+    """Look up a single paper by Zotero key, doc_id, or DOI."""
+    records = _load_library(library_path)
     if not records:
         return None
 
     normalized = id_or_doi.strip()
 
     for rec in records:
-        # Match by doc_id
-        if rec.get("doc_id") == normalized:
-            return _to_paper_detail(rec)
-        # Match by DOI
+        if rec.get("key") == normalized:
+            return rec
         if rec.get("doi", "").strip().lower() == normalized.lower():
-            return _to_paper_detail(rec)
-        # Match by exact title
+            return rec
         if rec.get("title", "").strip().lower() == normalized.lower():
-            return _to_paper_detail(rec)
+            return rec
 
     return None
 
 
-def _to_paper_detail(rec: Dict[str, Any]) -> PaperDetail:
-    return PaperDetail(
-        doc_id=rec.get("doc_id", ""),
-        title=rec.get("title", ""),
-        authors=rec.get("authors", []),
-        year=rec.get("year"),
-        journal=rec.get("journal", ""),
-        doi=rec.get("doi", ""),
-        collections=rec.get("collections", []),
-        tags=rec.get("tags", []),
-        pdf_path=rec.get("pdf_path", ""),
-        metadata_source=rec.get("metadata_source", ""),
-    )
+# ── vector search (if store available) ───────────────────────────────────────
+
+def vector_search(
+    query: str,
+    collection: str = "papers",
+    k: int = 10,
+    db_path: str = "data/vectordb",
+) -> List[Dict[str, Any]]:
+    """Semantic vector search using ChromaDB.
+
+    Args:
+        query: Search query.
+        collection: 'papers' or 'wiki'.
+        k: Number of results.
+        db_path: ChromaDB directory.
+
+    Returns:
+        List of result dicts with id, document, metadata, score.
+    """
+    try:
+        from miniresearch.embedder import Embedder
+        from miniresearch.vector_store import VectorStore
+
+        _load_env()
+
+        embedder = Embedder()
+        # Try to auto-detect model from existing collection
+        try:
+            import chromadb
+            client = chromadb.PersistentClient(path=db_path)
+            cols = client.list_collections()
+            matching = [c for c in cols if c.name.startswith(collection)]
+            if matching:
+                # Use first matching collection's model
+                store = VectorStore(db_path=db_path, collection_name=collection,
+                                   embedding_model_id="volcengine:doubao-embedding-vision-250615")
+                embedder.configure_cloud(
+                    provider="volcengine",
+                    base_url=os.environ.get("VOLC_EMBED_BASE_URL", ""),
+                    api_key=os.environ.get("VOLC_EMBED_API_KEY", ""),
+                    model=os.environ.get("VOLC_EMBED_MODEL", ""),
+                    dimension=1024,
+                )
+            else:
+                return []
+        except Exception:
+            return []
+
+        query_emb = embedder.embed_single(query)
+        results = store.search(query_emb, k=k)
+
+        formatted = []
+        for i, chunk_id in enumerate(results["ids"]):
+            formatted.append({
+                "id": chunk_id,
+                "document": results["documents"][i],
+                "metadata": results["metadatas"][i] if results["metadatas"] else {},
+                "distance": results["distances"][i],
+                "score": round(1.0 / (1.0 + results["distances"][i]), 4),
+            })
+        return formatted
+
+    except Exception:
+        return []

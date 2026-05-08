@@ -1,19 +1,16 @@
 """
 Router module for paper-compass.
 
-Decides whether a research query should be answered from wiki (breadth)
-or escalated to PDF retrieval (depth), then executes accordingly.
+Decides retrieval strategy (wiki vs papers vs hybrid) and executes queries.
 
-The router encapsulates the logic described in the router_classify prompt:
-- Default: wiki first
-- Upgrade to PDF when detail-level evidence is needed
+Uses ChromaDB vector search for wiki + PDF chunks, with keyword fallback.
 """
+
+from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from miniresearch.models import ModeDecision, UnifiedResponse
-from miniresearch.wiki_query import answer_from_wiki, search_wiki_pages
-from miniresearch.filters import search_library
+from miniresearch.models import ModeDecision
 
 
 # Keywords that trigger PDF escalation
@@ -28,50 +25,21 @@ _DETAIL_TRIGGERS = [
 ]
 
 
-def _should_escalate_to_pdf(
-    query: str,
-    wiki_confidence: str,
-    wiki_match_count: int,
-) -> ModeDecision:
-    """Determine whether to escalate to PDF retrieval.
-
-    Returns a ModeDecision explaining the choice.
-    """
+def _should_escalate(query: str, wiki_count: int, wiki_top_score: float) -> ModeDecision:
     query_lower = query.lower()
+    triggers = [t for t in _DETAIL_TRIGGERS if t in query_lower]
 
-    # Explicit trigger words?
-    triggers_hit = [t for t in _DETAIL_TRIGGERS if t in query_lower]
-
-    if triggers_hit:
-        return ModeDecision(
-            requested="auto",
-            actual="hybrid",
-            reason=(
-                f"Query contains detail-level triggers: {', '.join(triggers_hit)}"
-            ),
-        )
-
-    # Wiki confidence insufficient?
-    if wiki_confidence == "low" and wiki_match_count == 0:
-        return ModeDecision(
-            requested="auto",
-            actual="pdf",
-            reason="Wiki has no relevant matches; escalating to PDF retrieval",
-        )
-
-    if wiki_confidence == "low":
-        return ModeDecision(
-            requested="auto",
-            actual="hybrid",
-            reason="Wiki confidence is low; supplementing with PDF retrieval",
-        )
-
-    # Default: wiki is sufficient
-    return ModeDecision(
-        requested="auto",
-        actual="wiki",
-        reason="Wiki provides adequate breadth coverage for this query",
-    )
+    if triggers:
+        return ModeDecision(requested="auto", actual="hybrid",
+                           reason=f"Detail triggers: {', '.join(triggers)}")
+    if wiki_count == 0:
+        return ModeDecision(requested="auto", actual="pdf",
+                           reason="No wiki matches")
+    if wiki_top_score < 0.3:
+        return ModeDecision(requested="auto", actual="hybrid",
+                           reason="Wiki matches have low relevance")
+    return ModeDecision(requested="auto", actual="wiki",
+                       reason="Wiki provides adequate coverage")
 
 
 def ask_research(
@@ -81,120 +49,90 @@ def ask_research(
     force_mode: str = "auto",
     filters: Optional[Dict[str, Any]] = None,
     max_sources: int = 5,
+    db_path: str = "data/vectordb",
 ) -> Dict[str, Any]:
-    """Answer a research question using the appropriate retrieval layer.
+    """Multi-layer research query with auto-routing.
 
-    This is the main entry point for the ask_research tool.
-    It:
-      1. Searches wiki for existing knowledge
-      2. Decides whether to escalate to PDF/library search
-      3. Returns a unified answer with mode decision and sources
-
-    Args:
-        query: The research question.
-        wiki_root: Path to the wiki directory.
-        library_path: Path to library.json.
-        force_mode: 'auto', 'wiki', 'pdf', or 'hybrid'.
-        filters: Optional collection/tag/author/year filters.
-        max_sources: Max sources to return.
-
-    Returns:
-        Dict suitable for serialization as UnifiedResponse data.
+    1. Search wiki vector store
+    2. Search library metadata
+    3. If escalation needed, search PDF chunks vector store
+    4. Merge and return
     """
-    warnings: List[str] = []
 
-    # Step 1: Always search wiki
-    wiki_pages = search_wiki_pages(query, wiki_root=wiki_root, limit=5)
-    wiki_answer = answer_from_wiki(query, wiki_root=wiki_root, max_pages=3)
+    # Step 1: Wiki search
+    from miniresearch.filters import vector_search
+    wiki_results = vector_search(query, collection="wiki", k=5, db_path=db_path)
+    wiki_top_score = wiki_results[0]["score"] if wiki_results else 0.0
 
     # Step 2: Decide mode
     if force_mode in ("wiki", "pdf", "hybrid"):
-        mode_decision = ModeDecision(
-            requested=force_mode,
-            actual=force_mode,
-            reason=f"Mode forced to {force_mode} by caller",
-        )
+        mode = ModeDecision(requested=force_mode, actual=force_mode,
+                           reason=f"Forced to {force_mode}")
     else:
-        mode_decision = _should_escalate_to_pdf(
-            query,
-            wiki_answer["confidence"],
-            len(wiki_pages),
-        )
+        mode = _should_escalate(query, len(wiki_results), wiki_top_score)
 
-    # Step 3: Execute based on mode
-    pdf_context = {
-        "docs_used": [],
-        "evidence_snippets": [],
-    }
+    # Step 3: Library metadata search
+    from miniresearch.filters import search_library
+    lib_results = search_library(query, library_path=library_path, filters=filters, limit=max_sources)
 
-    if mode_decision.actual in ("pdf", "hybrid"):
-        try:
-            lib_results = search_library(
-                query, library_path=library_path, filters=filters, limit=max_sources
-            )
-            if lib_results:
-                pdf_context["docs_used"] = [
-                    {
-                        "doc_id": m.doc_id,
-                        "title": m.title,
-                        "year": m.year,
-                    }
-                    for m in lib_results
-                ]
-        except Exception as e:
-            warnings.append(f"Library search failed: {e}")
+    # Step 4: PDF chunk search if escalation
+    pdf_chunks = []
+    if mode.actual in ("pdf", "hybrid"):
+        pdf_chunks = vector_search(query, collection="papers", k=max_sources, db_path=db_path)
 
-    # Step 4: Assemble answer
-    answer_parts = []
+    # Step 5: Assemble answer
+    parts = []
+    sources: List[Dict[str, str]] = []
 
-    if mode_decision.actual in ("wiki", "hybrid"):
-        answer_parts.append(f"[Wiki context]\n{wiki_answer['answer_text']}")
+    if wiki_results:
+        parts.append("[Wiki knowledge]")
+        for w in wiki_results[:3]:
+            meta = w.get("metadata", {})
+            parts.append(f"- {meta.get('title', w['id'])}: {w['document'][:200]}...")
+            sources.append({"source_type": "wiki_page", "id": w["id"],
+                          "title": meta.get("title", w["id"])})
 
-    if mode_decision.actual in ("pdf", "hybrid") and pdf_context["docs_used"]:
-        docs_list = "\n".join(
-            f"- {d['title']} ({d.get('year', 'n.d.')}) [doc_id: {d['doc_id']}]"
-            for d in pdf_context["docs_used"]
-        )
-        answer_parts.append(
-            f"\n[Library matches]\nThe following papers may be relevant:\n{docs_list}"
-        )
-    elif mode_decision.actual == "pdf" and not pdf_context["docs_used"]:
-        warnings.append(
-            "PDF retrieval requested but no library matches found. "
-            "Ensure library.json has been generated via sync_zotero."
-        )
+    if lib_results:
+        parts.append("\n[Library matches]")
+        for m in lib_results[:5]:
+            parts.append(f"- {m['title']} ({m.get('year', 'n.d.')}) [{m['doc_id']}]")
 
-    answer = "\n".join(answer_parts) if answer_parts else wiki_answer["answer_text"]
+    if pdf_chunks:
+        parts.append("\n[PDF evidence]")
+        for p in pdf_chunks[:5]:
+            meta = p.get("metadata", {})
+            parts.append(f"- [{meta.get('title', '?')}] p.{meta.get('page_num', '?')}: {p['document'][:200]}...")
+            sources.append({"source_type": "pdf_doc", "id": meta.get("item_key", p["id"]),
+                          "title": meta.get("title", "")})
 
-    # Determine confidence
-    confidence = wiki_answer.get("confidence", "low")
-    if mode_decision.actual == "hybrid" and pdf_context["docs_used"]:
+    answer = "\n".join(parts) if parts else "No relevant information found."
+
+    confidence = "low"
+    if mode.actual == "wiki" and wiki_top_score > 0.5:
         confidence = "medium"
-    elif mode_decision.actual == "pdf" and pdf_context["docs_used"]:
+    elif mode.actual in ("pdf", "hybrid") and (pdf_chunks or lib_results):
         confidence = "medium"
-
-    # Suggest writeback?
-    suggested_writeback = {
-        "recommended": confidence != "low" and len(pdf_context["docs_used"]) > 1,
-        "target_type": "queries",
-        "reason": (
-            "Multi-source synthesis with reuse value"
-            if len(pdf_context["docs_used"]) > 1
-            else ""
-        ),
-    }
 
     return {
         "answer": answer,
         "mode_decision": {
-            "requested": mode_decision.requested,
-            "actual": mode_decision.actual,
-            "reason": mode_decision.reason,
+            "requested": mode.requested,
+            "actual": mode.actual,
+            "reason": mode.reason,
         },
         "wiki_context": {
-            "pages_used": wiki_answer.get("pages_used", []),
-            "summary": wiki_answer.get("answer_text", ""),
+            "pages_used": [{"title": w.get("metadata", {}).get("title", ""),
+                           "page_path": w["id"]} for w in wiki_results[:3]],
         },
-        "pdf_context": pdf_context,
-        "suggested_writeback": suggested_writeback,
+        "pdf_context": {
+            "docs_used": [{"doc_id": m["doc_id"], "title": m["title"],
+                          "year": m.get("year")} for m in lib_results[:5]],
+            "evidence_snippets": [{"doc_id": p.get("metadata", {}).get("item_key", ""),
+                                  "snippet": p["document"][:300]}
+                                 for p in pdf_chunks[:5]],
+        },
+        "suggested_writeback": {
+            "recommended": confidence != "low" and len(lib_results) > 1,
+            "target_type": "queries",
+        },
     }
