@@ -1,8 +1,13 @@
 """
-LLM-driven wiki page generator for paper-compass.
+LLM-driven wiki page generator for paper-compass — empirical economics edition.
 
-Takes extracted PDF text → calls LLM (Mimo) with ingest prompt → produces
-structured markdown wiki pages with frontmatter.
+Two-pass architecture:
+  Pass 1 (classify):  wiki_router.md      → paper_type (empirical|theoretical|review|descriptive)
+  Pass 2 (generate):  If empirical: wiki_econ_overview.md + wiki_econ_empirical.md
+                      If non-empirical: wiki_econ_overview.md only
+                      Fallback: wiki_ingest.md (generic)
+
+Uses the wiki_generation provider from configs/providers.yaml (Mimo by default).
 """
 
 from __future__ import annotations
@@ -20,103 +25,44 @@ logger = logging.getLogger(__name__)
 
 
 class WikiGenerator:
-    """Generate wiki pages from paper text using an LLM.
+    """Generate structured economics wiki pages from paper text using an LLM.
 
-    Uses the wiki_generation provider from configs/providers.yaml.
+    Automatic two-pass: (1) classify paper type, (2) generate tailored wiki content.
     """
 
     def __init__(self, config_dir: str = "configs"):
         self._configs = load_all_configs(config_dir)
         self._provider = get_provider_config("wiki_generation", self._configs)
-        self._ingest_prompt = self._load_prompt("prompts/wiki_ingest.md")
 
-    def _load_prompt(self, path: str) -> str:
+        # Prompt files
+        self._router_prompt = self._load("prompts/wiki_router.md")
+        self._overview_prompt = self._load("prompts/wiki_econ_overview.md")
+        self._empirical_prompt = self._load("prompts/wiki_econ_empirical.md")
+        self._fallback_prompt = self._load("prompts/wiki_ingest.md")
+
+    # ── helpers ───────────────────────────────────────────────────────────
+
+    def _load(self, path: str) -> str:
         p = Path(path)
-        if p.exists():
-            return p.read_text(encoding="utf-8")
-        return ""
+        return p.read_text(encoding="utf-8") if p.exists() else ""
 
-    def generate(
-        self,
-        title: str,
-        paper_text: str,
-        metadata: Optional[Dict[str, Any]] = None,
-        max_input_chars: int = 8000,
-    ) -> Dict[str, Any]:
-        """Generate a wiki page from a paper's extracted text.
-
-        Args:
-            title: Paper title.
-            paper_text: Full or partial text extracted from the PDF.
-            metadata: Optional metadata (authors, year, doi, etc.).
-            max_input_chars: Max chars from paper_text to send to LLM.
-
-        Returns:
-            Dict with: title, content (markdown), target_type, tags, confidence.
-        """
-        if metadata is None:
-            metadata = {}
-
-        # Truncate input
-        text_snippet = paper_text[:max_input_chars]
-
-        # Build user prompt
-        authors = ", ".join(metadata.get("authors", [])) or "(unknown)"
-        year = metadata.get("year") or metadata.get("date", "")[:4] or "(n.d.)"
-        doi = metadata.get("doi", "")
-
-        user_prompt = f"""Analyze the following academic paper and create a concise wiki page entry for a personal research wiki.
-
-Paper: {title}
-Authors: {authors}
-Year: {year}
-DOI: {doi}
-
-Extracted text (first {max_input_chars} chars):
----
-{text_snippet}
----
-
-Create a wiki page with:
-1. Research Focus (1-2 sentences on what the paper studies)
-2. Key Methodology (brief description of approach, data, identification)
-3. Main Findings (2-4 key results, with cautious academic tone — use "suggests", "finds evidence that", "reports a positive association" etc.)
-4. Relevance to my research (how this connects to family firm succession, labor structure, DID, or related topics if applicable)
-5. Open Questions or limitations mentioned by the authors
-
-Output ONLY valid YAML frontmatter + markdown body. Use tags from: identification, DID, event-study, family-firm, labor, management, China, innovation, AI, governance, methodology.
-
-Frontmatter must include: title, type (topics/methods/papers), tags (list), confidence (high/medium/low)."""
-
-        content = self._call_llm(user_prompt)
-
-        # Parse frontmatter vs body
-        fm, body = self._split_frontmatter(content, title)
-
-        return {
-            "title": fm.get("title", title),
-            "content": body,
-            "target_type": fm.get("type", "topics"),
-            "tags": fm.get("tags", []),
-            "confidence": fm.get("confidence", "medium"),
-        }
-
-    def _call_llm(self, user_prompt: str) -> str:
-        """Call the LLM API (Mimo OpenAI-compatible endpoint)."""
+    def _call(self, system_prompt: str, user_prompt: str,
+              max_tokens: int = 2500, temperature: float = 0.1) -> str:
+        """Call LLM API and return content string."""
         base_url = self._provider.get("base_url", "").rstrip("/")
         api_key = self._provider.get("api_key", "")
         model = self._provider.get("model", "mimo-v2.5-pro")
 
         messages = []
-        if self._ingest_prompt:
-            messages.append({"role": "system", "content": self._ingest_prompt})
+        if system_prompt.strip():
+            messages.append({"role": "system", "content": system_prompt})
         messages.append({"role": "user", "content": user_prompt})
 
         payload = json.dumps({
             "model": model,
             "messages": messages,
-            "temperature": 0.1,
-            "max_tokens": 2000,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
         }).encode("utf-8")
 
         req = urllib.request.Request(
@@ -128,22 +74,180 @@ Frontmatter must include: title, type (topics/methods/papers), tags (list), conf
             },
             method="POST",
         )
-
-        with urllib.request.urlopen(req, timeout=120) as resp:
+        with urllib.request.urlopen(req, timeout=180) as resp:
             result = json.loads(resp.read().decode("utf-8"))
             return result["choices"][0]["message"]["content"]
 
+    # ── Pass 1: classification ────────────────────────────────────────────
+
+    def classify(self, title: str, paper_text: str,
+                 metadata: Optional[Dict[str, Any]] = None) -> str:
+        """Classify paper as empirical, theoretical, review, or descriptive.
+
+        Returns one of: 'empirical', 'theoretical', 'review', 'descriptive'.
+        """
+        if not self._router_prompt:
+            logger.warning("wiki_router.md not found — defaulting to 'empirical'")
+            return "empirical"
+
+        authors = ", ".join(metadata.get("authors", [])) if metadata else ""
+        year = (metadata or {}).get("year", "")
+
+        user_prompt = (
+            f"Paper: {title}\n"
+            f"Authors: {authors}\n"
+            f"Year: {year}\n\n"
+            f"Text (abstract + introduction):\n---\n{paper_text[:4000]}\n---"
+        )
+
+        raw = self._call(self._router_prompt, user_prompt, max_tokens=100, temperature=0.0)
+
+        # Parse JSON from response (handle possible markdown wrapping)
+        raw = raw.strip()
+        if raw.startswith("```"):
+            raw = raw.split("\n", 1)[1] if "\n" in raw else raw
+            if raw.endswith("```"):
+                raw = raw[:-3]
+        raw = raw.strip()
+
+        try:
+            result = json.loads(raw)
+            paper_type = result.get("paper_type", "empirical")
+        except json.JSONDecodeError:
+            # Fallback: scan response text for keywords
+            lower = raw.lower()
+            if "theoretical" in lower:
+                paper_type = "theoretical"
+            elif "review" in lower:
+                paper_type = "review"
+            elif "descriptive" in lower:
+                paper_type = "descriptive"
+            else:
+                paper_type = "empirical"
+
+        if paper_type not in ("empirical", "theoretical", "review", "descriptive"):
+            paper_type = "empirical"
+
+        logger.info("Classified [%s] as '%s'", title[:60], paper_type)
+        return paper_type
+
+    # ── Pass 2: generation ────────────────────────────────────────────────
+
+    def generate(
+        self,
+        title: str,
+        paper_text: str,
+        metadata: Optional[Dict[str, Any]] = None,
+        max_input_chars: int = 12000,
+        paper_type: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Generate a wiki page. Auto-classifies if paper_type not provided.
+
+        Args:
+            title: Paper title.
+            paper_text: Full or partial PDF text.
+            metadata: Optional metadata dict (authors, year, key, etc.).
+            max_input_chars: Max chars from paper_text to send.
+            paper_type: Override classification. If None, auto-classify via Pass 1.
+
+        Returns:
+            Dict with: title, content (markdown), target_type, tags, confidence, paper_type.
+        """
+        if metadata is None:
+            metadata = {}
+
+        text_snippet = paper_text[:max_input_chars]
+
+        # Pass 1: classify if needed
+        if paper_type is None:
+            paper_type = self.classify(title, paper_text, metadata)
+
+        # Pass 2: compose system prompt based on paper_type
+        if paper_type == "empirical":
+            system_prompt = (
+                self._overview_prompt
+                + "\n\n---\n\n"
+                + self._empirical_prompt
+            )
+            max_tok = 3500
+        elif paper_type in ("theoretical", "review", "descriptive"):
+            system_prompt = self._overview_prompt
+            max_tok = 2000
+        else:
+            # Generic fallback
+            system_prompt = self._fallback_prompt
+            max_tok = 2000
+
+        # Build user prompt
+        authors = ", ".join(metadata.get("authors", [])) or "(unknown)"
+        year = metadata.get("year") or metadata.get("date", "")[:4] or "(n.d.)"
+        key = metadata.get("key", "")
+
+        user_prompt = (
+            f"Paper: {title}\n"
+            f"Authors: {authors}\n"
+            f"Year: {year}\n"
+            f"Zotero Key: {key}\n\n"
+            f"Extracted text (first {max_input_chars} chars):\n"
+            f"---\n{text_snippet}\n---\n\n"
+            f"Paper type (pre-classified): {paper_type}\n"
+        )
+
+        if paper_type == "empirical":
+            user_prompt += (
+                "\nGenerate a complete wiki page with ALL four sections "
+                "(Core Elements, Economic Story, Preliminary Assessment, "
+                "Empirical Design). Use the full combined system prompt.\n"
+            )
+        else:
+            user_prompt += (
+                "\nGenerate a wiki page with the first three sections "
+                "(Core Elements, Economic Story, Preliminary Assessment). "
+                "Do NOT include Empirical Design since this is not an empirical paper.\n"
+            )
+
+        content = self._call(system_prompt, user_prompt, max_tokens=max_tok)
+
+        # Parse frontmatter vs body
+        fm, body = self._split_frontmatter(content, title)
+        fm["paper_type"] = paper_type  # ensure paper_type in metadata
+
+        return {
+            "title": fm.get("title", title),
+            "content": body,
+            "target_type": "papers",
+            "tags": fm.get("tags", []),
+            "confidence": fm.get("confidence", "medium"),
+            "paper_type": paper_type,
+        }
+
+    # ── frontmatter parsing ───────────────────────────────────────────────
+
     @staticmethod
     def _split_frontmatter(text: str, fallback_title: str) -> tuple:
-        """Split LLM output into (frontmatter_dict, body_markdown)."""
-        fm: Dict[str, Any] = {"title": fallback_title, "type": "topics", "tags": [], "confidence": "medium"}
+        """Split LLM output into (frontmatter_dict, body_markdown).
+
+        Handles both bare YAML frontmatter and code-fenced frontmatter.
+        """
+        fm: Dict[str, Any] = {
+            "title": fallback_title, "type": "paper", "tags": [],
+            "confidence": "medium", "paper_type": "empirical",
+        }
         body = text
 
-        # Try YAML frontmatter
-        lines = text.split("\n")
+        # Strip outer ``` fences if present
+        stripped = text.strip()
+        if stripped.startswith("```"):
+            first_nl = stripped.find("\n")
+            if first_nl > 0:
+                stripped = stripped[first_nl + 1:]
+            if stripped.endswith("```"):
+                stripped = stripped[:-3].strip()
+
+        lines = stripped.split("\n")
         if lines and lines[0].strip() == "---":
             end_idx = None
-            for i in range(1, min(len(lines), 30)):
+            for i in range(1, min(len(lines), 40)):
                 if lines[i].strip() == "---":
                     end_idx = i
                     break
@@ -151,15 +255,68 @@ Frontmatter must include: title, type (topics/methods/papers), tags (list), conf
                 fm_block = "\n".join(lines[1:end_idx])
                 for line in fm_block.split("\n"):
                     line = line.strip()
-                    if ":" in line and not line.startswith("#"):
-                        key, _, val = line.partition(":")
-                        key = key.strip()
-                        val = val.strip().strip('"').strip("'")
-                        if key == "tags" and val.startswith("[") and val.endswith("]"):
-                            import re
-                            fm[key] = [t.strip().strip('"').strip("'") for t in val[1:-1].split(",") if t.strip()]
+                    if ":" not in line or line.startswith("#"):
+                        continue
+                    key, _, val = line.partition(":")
+                    key = key.strip()
+                    val = val.strip().strip('"').strip("'")
+                    if key == "tags":
+                        # Handle YAML list: tags:\n  - tag1\n  - tag2
+                        # (already handled by looking for ":" in line — but need in-body tags)
+                        if val.startswith("[") and val.endswith("]"):
+                            fm[key] = [
+                                t.strip().strip('"').strip("'")
+                                for t in val[1:-1].split(",") if t.strip()
+                            ]
                         else:
-                            fm[key] = val
+                            fm[key] = [val]
+                    elif key == "authors":
+                        if val.startswith("[") and val.endswith("]"):
+                            fm[key] = [
+                                a.strip().strip('"').strip("'")
+                                for a in val[1:-1].split(",") if a.strip()
+                            ]
+                        else:
+                            fm[key] = [val]
+                    else:
+                        fm[key] = val
+
+                # Also parse tags/authors from YAML list format (indented items)
+                in_tags = False
+                in_authors = False
+                tag_items = []
+                author_items = []
+                for line in fm_block.split("\n"):
+                    line = line.strip()
+                    if line == "tags:":
+                        in_tags = True
+                        in_authors = False
+                        continue
+                    elif line == "authors:":
+                        in_authors = True
+                        in_tags = False
+                        continue
+                    elif line and ":" in line and not line.startswith(" "):
+                        in_tags = False
+                        in_authors = False
+                        continue
+                    if in_tags and line.startswith("- "):
+                        tag_items.append(line[2:].strip().strip('"').strip("'"))
+                    if in_authors and line.startswith("- "):
+                        author_items.append(line[2:].strip().strip('"').strip("'"))
+                if tag_items:
+                    fm["tags"] = tag_items
+                if author_items:
+                    fm["authors"] = author_items
+
                 body = "\n".join(lines[end_idx + 1:])
 
         return fm, body.strip()
+
+
+# ── convenience ────────────────────────────────────────────────────────────────
+
+
+def load_generator(config_dir: str = "configs") -> WikiGenerator:
+    """Factory: load config, initialize provider, return ready-to-use generator."""
+    return WikiGenerator(config_dir)

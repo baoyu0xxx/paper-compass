@@ -5,6 +5,9 @@
 
 ## Papers
 
+- [Family Involvement in Middle Management and Its Impact on the Labor Productivity of Family Firms](papers/2026-05-08-family-involvement-in-middle-management-and-its-impact-on-the-labor-productivity.md)
+- [Innovation activities during intra-family leadership succession in family firms: An empirical study from a socioemotional wealth perspective](papers/2026-05-08-innovation-activities-during-intra-family-leadership-succession-in-family-firms-.md)
+- [A Far-Reaching Parental Love? Co-Governance of Intergenerational Succession and Innovation Activities in Chinese Family Firms](papers/2026-05-08-a-far-reaching-parental-love-co-governance-of-intergenerational-succession-and-i.md)
 ## Topics
 
 - [Family involvement in middle management and its impact on the labor productivity of family firms](topics/2026-05-08-family-involvement-in-middle-management-and-its-impact-on-the-labor-productivity.md)

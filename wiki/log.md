@@ -55,3 +55,15 @@
 ## [2026-05-08 04:32] writeback | queries
 - Page: [E2E Final v2](wiki/queries/2026-05-08-e2e-final-v2.md)
 - Type: queries
+
+## [2026-05-08 07:09] writeback | papers
+- Page: [A Far-Reaching Parental Love? Co-Governance of Intergenerational Succession and Innovation Activities in Chinese Family Firms](wiki/papers/2026-05-08-a-far-reaching-parental-love-co-governance-of-intergenerational-succession-and-i.md)
+- Type: papers
+
+## [2026-05-08 07:10] writeback | papers
+- Page: [Innovation activities during intra-family leadership succession in family firms: An empirical study from a socioemotional wealth perspective](wiki/papers/2026-05-08-innovation-activities-during-intra-family-leadership-succession-in-family-firms-.md)
+- Type: papers
+
+## [2026-05-08 07:11] writeback | papers
+- Page: [Family Involvement in Middle Management and Its Impact on the Labor Productivity of Family Firms](wiki/papers/2026-05-08-family-involvement-in-middle-management-and-its-impact-on-the-labor-productivity.md)
+- Type: papers
