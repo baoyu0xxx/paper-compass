@@ -187,13 +187,18 @@ class VectorStore:
         if not force and self._bm25_index is not None:
             return
 
-        from rank_bm25 import BM25Okapi
+        try:
+            from rank_bm25 import BM25Okapi
 
-        all_data = self.collection.get(include=["documents"])
-        self._bm25_ids = all_data.get("ids", [])
-        corpus = all_data.get("documents", [])
-        self._bm25_corpus = [doc.split() for doc in corpus]
-        self._bm25_index = BM25Okapi(self._bm25_corpus, self._bm25_ids)
+            all_data = self.collection.get(include=["documents"])
+            self._bm25_ids = all_data.get("ids", [])
+            corpus = all_data.get("documents", [])
+            self._bm25_corpus = [doc.split() for doc in corpus]
+            self._bm25_index = BM25Okapi(self._bm25_corpus, self._bm25_ids)
+        except Exception:
+            # BM25 is optional — graceful degradation
+            self._bm25_index = None
+            self._bm25_ids = []
 
     def _ensure_bm25(self) -> None:
         if self._bm25_index is None:

@@ -1,0 +1,2220 @@
+Innovation activities during intra-family leadership succession in
+family ﬁrms: An empirical study from a socioemotional wealth
+perspective
+Jana Hauck a,b,*, Reinhard Pru¨ gl a,b,1
+a Zeppelin University, Friedrichshafen Institute for Family Entrepreneurship (FIF), Am Seemooser Horn 20, 88045 Friedrichshafen, Germany
+b Zeppelin University, Zeppelin University, Chair of Innovation, Technology & Entrepreneurship, Am Seemooser Horn 20, 88045 Friedrichshafen, Germany
+Introduction
+Innovation leads to the development of competitive advan-
+tages (Porter, 1990) and serves as a key driver of (family)
+ﬁrm performance (Kellermanns, Eddleston, Sarathy, & Murphy,
+2012) as well as the long-term survival of (family) ﬁrms
+(Schumpeter, 1934). Innovation activities in this sense are,
+broadly speaking, a way to adapt to changes and to exploit
+changes as entrepreneurial opportunities (Craig & Dibrell, 2006;
+Drucker, 1985).2 In the context of family ﬁrms3 and their vision
+to succeed across multiple generations, the need for long-term
+survival through innovation becomes even more evident (Cruz &
+Nordqvist, 2012).
+Given the pivotal role of innovation activities for long-term ﬁrm
+survival as well as the utmost importance of family ﬁrms around the
+world (La Porta, Lopez-de-Silanes, & Shleifer, 1999; Villalonga &
+Amit, 2009), it is actually surprising that our knowledge of
+innovation in family ﬁrms remains incomplete and inconsistent.
+On the one hand, family ﬁrms are often described as resistant to
+change, conservative, and traditional (Dunn, 1996; Hall, Melin, &
+Nordqvist, 2004). On the other hand, there is a ‘‘mysterious
+something’’ about family ﬁrms that may support their innovation
+activities (Gudmundson, Tower, & Hartman, 2003, p. 15) and makes
+them a driver of, e.g., technological innovation (Zahra, 2005). In fact,
+we see that there exist many highly innovative family ﬁrms, even in
+non-technology industries. Take, for example, Spa Hotel Post in
+Bezau (Austria), which was founded as a post ofﬁce in 1850 and is
+now a large and luxurious spa and design hotel led by Susanne
+Kaufmann (ﬁfth generation) with a gourmet restaurant awarded
+with a Gault Millau chef’s hat.4 The Kaufmann family intentionally
+Journal of Family Business Strategy xxx (2015) xxx–xxx
+A R T I C L E 
+I N F O
+Article history:
+Received 31 December 2013
+Received in revised form 8 October 2014
+Accepted 4 November 2014
+Keywords:
+Family ﬁrms
+Innovation
+Leadership succession
+Socioemotional wealth
+Intergenerational business transfer
+CEO transition
+Tourism industry
+A B S T R A C T
+We reason that the intra-family leadership succession phase has distinct characteristics that render it a
+peculiar time frame for innovation. However, the incumbent owner-manager’s willingness to support
+innovation during that phase is of decisive importance. Building on this argument, the article provides an
+investigation of how socioemotional factors are related to the owner-manager’s perception of the intra-family
+leadership succession phase as an opportunity for innovation activities in family ﬁrms. We use quantitative
+data from a unique research setting in which family inﬂuence in terms of ownership and management, and
+thus the ability to innovate, as well as major contextual variables were heldconstant. Overall,the results of our
+study show that socioemotional factors have both dark and bright sides in the context of innovation. In
+particular, we ﬁnd that family adaptability and a family member’s closeness to the ﬁrm are positively
+associated with perceiving the succession phase as an opportunity for innovation. On the contrary,
+intergenerational authority and the history of family bonds are negatively related with the perception of the
+succession phase as a suitable time frame for innovation. Our ﬁndings primarily contribute to the literature on
+innovation and succession in family ﬁrms and emphasize the inherent heterogeneity of family ﬁrm behavior.
+ 2014 Elsevier Ltd. All rights reserved.
+* Corresponding author. Tel.: +49 7541 6009 2080; fax: +49 7541 6009 1299.
+E-mail addresses: jana.hauck@zu.de (J. Hauck), reinhard.pruegl@zu.de (R. Pru¨gl).
+1 Tel.: +49 7541 6009 1283; fax: +49 7541 6009 1299.
+2 We follow the Schumpeterian deﬁnition of innovation as the commercialization
+of new products and services, new processes, new organizational structures, and
+new business models (Schumpeter, 1934).
+3 We apply a narrow deﬁnition provided by Chua, Chrisman, and Sharma (1999):
+A family ﬁrm is ‘‘a business governed and [. . .] managed with the intention to shape
+and pursue the vision of the business held by a dominant coalition controlled by
+members of the same family or a small number of families in a manner that is
+potentially sustainable across generations of the family or families’’ (p. 25).
+4 Information on Spa Hotel Post was gathered on the family ﬁrm’s website
+(http://www.hotelpostbezau.com) and in an interview with Susanne Kaufmann.
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+Contents lists available at ScienceDirect
+Journal of Family Business Strategy
+jou r nal h o mep ag e: w ww .elsevier .co m /loc ate/jfb s
+http://dx.doi.org/10.1016/j.jfbs.2014.11.002
+1877-8585/ 2014 Elsevier Ltd. All rights reserved.
+
+seized the last succession phase for innovation: Susanne engaged in
+product 
+and 
+service 
+innovations, 
+renewed 
+processes 
+and
+even developed new business models. However, it was only possible
+for her to pursue innovation activities because the incumbent
+owner-manager supported her in the daily business and inten-
+tionally granted freedom of discretion to Susanne. Certainly, the
+owner-manager’s perception of the succession phase as a unique
+chance for innovation was a crucial factor in preparing the family
+ﬁrm for the future. What would have happened if the owner-
+manager did not perceive the succession phase as an opportunity for
+renewal and innovation? Could the heterogeneous innovation
+behavior of family ﬁrms be explained by the willingness rather than
+the ability to innovate?
+This question is taken up by the recently introduced ‘Ability and
+Willingness Paradox’ (De Massis, Kotlar, Chua, & Chrisman, 2014;
+Chrisman et al., in press). The authors postulate that due to
+concentrated family ownership and the family owners’ power to
+control resources, family ﬁrms have an unusual ability to innovate.
+However, family ﬁrms have various levels of willingness to
+innovate that may impede or support innovation activities. The
+willingness to innovate is driven by non-economic or socio-
+emotional factors (Chrisman et al., in press; Chrisman & Patel,
+2012). In sum, the ‘Ability and Willingness Paradox’ is an
+unpretentious but very powerful framework in explaining the
+heterogeneous innovation behavior of family ﬁrms by integrating
+non-economic factors and the willingness view next to the
+predominant ability view in existing research. Some previous
+studies indeed compare willingness with ability and describe the
+dilemma between these two views of innovation (e.g., Chrisman &
+Patel, 2012). However, existing studies fail to recognize that
+different non-economic factors may have different effects on the
+willingness to innovate. Thus, this article focuses on the relation-
+ship between various non-economic factors and the willingness to
+innovate during the intra-family leadership succession phase.
+As shown in the aforementioned example of the Austrian
+tourism industry,5 the time frame of succession might have
+distinct characteristics that render it a peculiar time frame for
+innovation. Accordingly, this article addresses the following
+research question: How are socioemotional factors related to
+owner-managers’ perceptions of the suitability of the intra-family
+leadership succession phase for innovation activities in family ﬁrms
+(the willingness to innovate)? To answer this question and to test
+our hypotheses, we conducted a quantitative survey among the
+owner-managers of family ﬁrms in the Austrian tourism industry.
+We show that non-economic factors can be both positively and
+negatively related to the willingness to innovate in terms of owner-
+managers’ perceptions of the suitability of the intra-family
+leadership succession phase for innovation.
+Prior research on innovation in family ﬁrms does not fully
+address the time frame of intra-family leadership succession
+despite the obvious relevance of this topic.6 Thus, our ﬁrst
+contribution is to address this research gap in the literature on
+innovation and succession in family ﬁrms. Second, we conﬁrm the
+usefulness of considering non-economic factors as drivers of family
+ﬁrm behavior. Although we argue that the time frame of leadership
+succession may be a peculiar time frame for family ﬁrms to
+innovate, different non-economic factors may affect the willing-
+ness to innovate and thereby help to explain the heterogeneity of
+family ﬁrm innovation behavior (Chrisman et al., in press). In order
+to account for non-economic factors, the theoretical framework of
+socioemotional wealth (SEW) has recently gained attention (e.g.,
+Berrone, Cruz, & Go´mez-Mejı´a, 2012; Go´mez-Mejı´a, Haynes,
+Nu´ n˜ez-Nickel, Jacobson, & Moyano-Fuentes, 2007). Although it
+is widely acknowledged that family ﬁrms are a heterogeneous
+population (e.g., Chrisman, Chua, Pearson, & Barnett, 2012; Basco,
+2013; Ko¨nig, Kammerlander, & Enders, 2013) as a result of the
+inherent heterogeneity of families and their unique goal set (Dyer
+& Dyer, 2009; Kotlar & De Massis, 2013), the majority of prior
+studies oversimpliﬁes the world by measuring merely potential
+family inﬂuence via ownership and management as a proxy for
+SEW (Miller & Le Breton-Miller, 2014). Moreover, we contribute to
+the recent discussion on the dark and bright sides of SEW
+(Kellermanns, Eddleston, & Zellweger, 2012; Miller & Le Breton-
+Miller, 2014; Naldi, Cennamo, Corbetta, & Go´mez-Mejı´a, 2013).
+Third, we conﬁrm and even extend the notion of the heterogeneity
+of family ﬁrms caused by different non-economic factors: Despite
+intentionally maintaining family inﬂuence via ownership and
+management, or the ability to innovate, as well as major contextual
+factors constant in our research setting, we still observe high levels
+of heterogeneity in our dependent variable.
+The article is organized as follows. We begin with a brief
+literature review on innovation in family ﬁrms and discuss why the
+succession process is a peculiar time frame for innovation. Next,
+we introduce SEW, on whose various aspects we develop our ﬁve
+hypotheses. Subsequently, we present our methodology as well as
+the ﬁndings of the study at hand. We conclude by discussing our
+results.
+Background
+Innovation in family ﬁrms
+Despite increasing scholarly interest in the topic of innovation in
+family ﬁrms, our understanding is still incomplete and inconsistent
+(De Massis, Frattini, & Lichtenthaler, 2013). Some studies, such as
+Craig and Moores (2006) or Bergfeld and Weber (2011), stress the
+great importance that family ﬁrms attach to innovation in order to
+ensure long-term survival. Other studies, such as Dunn (1996), state
+that family ﬁrms are traditional and conservative rather than
+innovative and creative. Moreover, these studies ascribe family
+ﬁrms a hesitant attitude toward opening their boundaries, e.g.,
+toward external sources or collaborations (Classen, Van Gils,
+Bammens, & Carree, 2012). The inconsistency of ﬁndings has
+recently been addressed by De Massis et al. (2014) as well as
+Chrisman et al. (in press) by introducing the ‘Ability and
+Willingness Paradox.’ This paradox is manifested by family ﬁrms
+innovating less despite having the ability to do more. The
+(un-)willingness to innovate is considered to originate from
+non-economic factors, e.g., risk aversion, the hesitancy to share
+control, or the commitment to traditional products (Chrisman et al.,
+in press). For example, Chrisman and Patel (2012) show that family
+ﬁrm owners have the ability to commit a superior level of resources
+to R&D (in comparison to non-family ﬁrms) – but most are not
+willing to do so due to non-economic factors. Accordingly,
+non-economic or socioemotional factors can account for the
+heterogeneity of family ﬁrms and their particularistic innovation
+behavior (Chrisman et al., in press; Chrisman & Patel, 2012). While
+previous studies mainly compare willingness with ability and
+describe the resulting dilemma between both (e.g., Chrisman &
+Patel, 2012), the relationships between different non-economic
+factors and the willingness to innovate are, to the best of our
+knowledge, far from being fully understood in the existing research.
+Prior research has mainly treated family ﬁrms as a homogenous
+population and lacks a differentiated perspective on the ‘family
+variable’ (e.g., Craig & Dibrell, 2006; Dyer, 2003; Hirigoyen &
+5 Family ﬁrms are the most important organizational form in Austria (90% of the
+national ﬁrms) and especially dominant in the Austrian tourism industry (93% of
+the national ﬁrms) (Pleininger, 2014). More details on the research context can be
+found in section ‘‘Methods’’.
+6 An example of a related study is that of Au et al. (2013) which investigates the
+nurturing of intergenerational entrepreneurship by incubating the next generation
+in spin-offs of the family ﬁrm.
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx
+2
+
+Labaki, 2012). Studies have focused on investigating whether
+family inﬂuence – measured in terms of family ownership and
+management – is negatively or positively related to innovation
+propensity, most often in a dichotomous comparison with non-
+family ﬁrms. These studies have reported contradictory results:
+Some studies report a positive relationship between family
+inﬂuence and innovation (Gudmundson et al., 2003; Hsu & Chang,
+2011; Llach & Nordqvist, 2010) as well as entrepreneurial activities
+in general (Zahra, 2005; Zahra, Neubaum, & Huse, 2000). Other
+studies ﬁnd a negative relationship between family inﬂuence and
+innovation (e.g., Block, 2012; Chen & Hsu, 2009; Chin, Chen,
+Kleinman, & Lee, 2009; Czarnitzki & Kraft, 2009; Munari, Oriani, &
+Sobrero, 2010; Mun˜oz-Bullo´n & Sanchez-Bueno, 2011). The
+conﬂicting results might partly be due to the oversimpliﬁed
+measurement of family inﬂuence by merely considering potential
+family inﬂuence through ownership and control. Recent studies
+react to this critique and take a more differentiated perspective on
+how the ‘family variable’ as well as non-economic factors impact
+innovation behavior. For example, Ko¨nig et al. (2013) develop
+propositions on how family inﬂuence affects the adoption of
+discontinuous technologies in incumbent ﬁrms. They theorize that
+higher levels of family inﬂuence may cause a ﬁrm to recognize the
+strategic relevance of discontinuous technologies later than ﬁrms
+with less family inﬂuence – but if the adoption decision was made,
+family ﬁrms implement it faster and with more stamina. Thus,
+family inﬂuence can have both fostering and impeding effects on
+handling change and innovation. Kammerlander and Ganter (in
+press) additionally stress the role of owner-managers’ non-
+economic goals in regard to adopting discontinuous technologies.
+Kotlar, De Massis, Frattini, Bianchi, and Fang (2013) state that the
+non-economic endeavor of maintaining control over the family
+ﬁrm’s technological trajectory causes family ﬁrm’s hesitancy in
+acquiring external technologies. A set of family-related enabling
+and constraining factors for product innovation is proposed by
+Cassia, De Massis, and Pizzurno (2011) based on a qualitative
+study. Amongst the enabling factors are high levels of communi-
+cation among family members, a high desire to keep the family’s
+reputation and name, and high levels of family members’
+commitment to the ﬁrm. The main constraining factors are risk
+aversion, high levels of family conﬂict and closure toward external
+information from investors. In summary, it is reasonable to assume
+that non-economic factors can enable and constrain family ﬁrms’
+willingness to innovate at the same time.
+A few studies have investigated the effect of the duration of
+family control on innovation and report a decreasing innovation
+propensity over time (Beck, Janssens, Debruyne, & Lommelen,
+2011; Craig & Moores, 2006; Kellermanns, Eddleston, et al., 2012;
+Litz & Kleysen, 2001). On the one hand, later-stage family ﬁrms
+typically have more formalized structures and well-established
+processes (Westhead, Howorth, & Cowling, 2002), which are likely
+to reduce the capabilities to react to external changes (Beck et al.,
+2011). On the other hand, later-stage family ﬁrms may be less
+willing to innovate due to risk aversion and an increased desire to
+maintain the status quo (Kellermanns, Eddleston, et al., 2012).
+While these studies consider the life stage of the family ﬁrm, there
+remains a blind spot concerning innovation behavior during
+particular phases in the lifecycle of family ﬁrms, e.g., the time
+frame of intra-family leadership succession in family ﬁrms.
+However, this time frame displays distinct characteristics that
+clearly suggest investigating the time frame in the context of
+innovation (De Massis et al., 2013).
+Intra-family leadership succession and innovation
+Leadership succession is one of the key topics in family ﬁrm
+research (Sharma, Chrisman, & Chua, 1997). We view the
+prototypical succession process as a multi-year process7 of
+collaboration between the senior and junior generation that
+involves the transfer of managerial control in which power is
+gradually shifted from one generation to the other. This transition
+phase ideally includes an increasing involvement of the next
+generation while the senior generation should simultaneously
+reduce its involvement (e.g., Cabrera-Sua´rez, De Saa´-Pe´rez, &
+Garcı´a-Almeida, 2001; Sharma, Chrisman, Pablo, & Chua, 2001).
+Succession per se is a process of signiﬁcant changes (e.g., Handler,
+1992; Sharma et al., 2001) and leads to a redistribution of patterns
+of authority in both family and ﬁrm (Beckhard & Dyer, 1983;
+Lansberg, 1988).
+To date, the literature on succession in the context of family
+ﬁrms has mainly treated succession as a problem-ridden threat
+than as a chance (Le Breton-Miller, Miller, & Steier, 2004; Miller,
+Steier, & Le Breton-Miller, 2003). Accordingly, the topic of
+innovation plays no signiﬁcant role in the existing literature on
+leadership 
+succession 
+in 
+family 
+ﬁrms. 
+In 
+the 
+mainstream
+management literature, CEO succession is considered as a periodic
+opportunity to break out of inertial paths and as a mechanism to
+realign the organization in order to stay competitive (Pfeffer &
+Salancik, 1978; Quigley & Hambrick, 2012). It is argued that
+established organizations tend to become inert and may react (too)
+late to external changes if the CEO remains in his/her position for
+too long (Fredrickson & Iaquinto, 1989; Freeman, 1977; Romanelli
+& Tushman, 1994). This might be the case because their CEOs may
+not be enduringly open-minded (Miller, 1991) but become
+increasingly committed to their paradigms (Ghemawat, 1991;
+Sydow, Schreyo¨gg, & Koch, 2009) and have difﬁculties revising
+earlier decisions (Hambrick & Fukutomi, 1991). Over time, this
+makes it increasingly difﬁcult to perceive the need for innovation
+and renewal leading to an accumulated innovation pressure over
+the incumbent’s tenure (Gersick, Lansberg, Desjardins, & Dunn,
+1999). Since innovation depends on the exchange and combination
+of different knowledge, experience, and opinions (Nahapiet &
+Ghoshal, 1998; Schumpeter, 1934), we argue that the involvement
+of the successor can act as ‘‘catalyst of change’’ and thus as a
+unique opportunity for innovation activities (Kotlar & De Massis,
+2013, p. 1281).
+Indeed, the succession phase has characteristics that render it a
+peculiar time frame for innovation: First, successors are identiﬁers
+of new entrepreneurial opportunities (Salvato, 2004) and de-
+scribed as drivers of innovation (Litz & Kleysen, 2001). They act as a
+source of new information, knowledge, and resources, which is a
+fertile ground for innovation (Aldrich & Cliff, 2003; Handler, 1992).
+Second, the succession phase is usually accompanied by increased
+goal diversity (Kotlar & De Massis, 2013) and conﬂict (Kellermanns,
+Eddleston, Barnett, & Pearson, 2008). Conﬂict might be construc-
+tive in terms of challenging rigid belief structures and attitudes
+that hinder innovation (Gersick et al., 1999; Kepner, 1991). Third,
+the successor may feel the need to establish his/her own
+entrepreneurial reputation, which is most likely to be achieved
+by challenging and changing the status quo (Kepner, 1991). Fourth,
+the time of collaboration between the generations offers additional
+7 While the duration of the succession process can of course vary among family
+ﬁrms, succession starts long before and ends after the actual leadership transfer
+(Handler, 1994). Following up on this, Kotlar and De Massis (2013) ﬁnd that goal
+diversity increases distinctly around two years before and two years after the
+leadership transfer takes place. Accordingly, Longenecker and Schoen (1978) state
+that successors may need at least two years to master the complexities of the
+position after the point of the actual leadership transfer. Studies investigating
+succession-related topics usually take into account a time frame of ﬁve to ten years
+in order to grasp this phase (e.g., Chrisman et al., 1998; Miller et al., 2003). Thus,
+conceptualizing succession as a multiyear process emphasizes the need to innovate
+during this long time as well.
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx 
+3
+
+resources (‘‘man power’’) to pursue the task of innovation
+(Cabrera-Sua´rez et al., 2001).
+Referring to the ‘Ability and Willingness Paradox,’ we can
+assume that the time frame of succession may offer a peculiar
+environment for innovation activities. The willingness to behave
+idiosyncratically is dependent upon the perceived feasibility of a
+given behavior (Chrisman et al., in press). Therefore, the perception
+of the time frame of leadership succession for innovation plays a
+critical role in the willingness to innovate during that time frame.8
+However, non-economic factors are considered to inﬂuence the
+willingness to exploit the potential ability to innovate during this
+particular phase and thus account for heterogeneous behavior
+(Chrisman et al., in press; Chrisman & Patel, 2012).
+Socioemotional wealth
+The non-economic factors that may affect the willingness of
+innovation and thereby explain the heterogeneous innovation
+behavior of family ﬁrms (Chrisman et al., in press) can be grasped
+by the theoretical framework of SEW. While SEW is anchored in the
+behavioral tradition of the management ﬁeld, it builds on the body
+of research on family ﬁrm studies and is positioned as a
+‘‘homegrown’’ theory of the ﬁeld (Berrone et al., 2012, p. 259;
+Go´mez-Mejı´a, Cruz, Berrone, & De Castro, 2011; Go´mez-Mejı´a
+et al., 2007). We apply SEW as a theoretical lens because it
+prioritizes the controlling family, focuses on explaining family
+members’ 
+perceptions 
+and 
+decision-making 
+behaviors 
+and
+accounts for the heterogeneity of family ﬁrms (e.g., Berrone
+et al., 2012). The core of SEW is that decision-making in family
+ﬁrms is not only driven by economic aspects but also in particular
+by non-economic aspects that meet the family’s affective needs,
+such as the retention of a strong family reputation derived by the
+ﬁrm or the family members’ relationship to the ﬁrm (Berrone et al.,
+2012; Go´mez-Mejı´a et al., 2007). SEW has started to be adopted as
+the main theoretical framework in empirical studies of family
+ﬁrms (e.g., Miller, Le Breton-Miller, & Lester, 2013; Vandekerkhof,
+Steijvers, Hendriks, & Voordeckers, in press). However, a recent
+critical discussion postulates that SEW has not only bright but also
+dark sides (Kellermanns, Eddleston, & Zellweger, 2012; Miller & Le
+Breton-Miller, 2014; Naldi et al., 2013). Moreover, SEW still poses
+important challenges, especially in its methodological application
+(e.g., Miller & Le Breton-Miller, 2014). Prior studies measured SEW
+indirectly by the family’s stock ownership (e.g., Berrone et al.,
+2012; Miller & Le Breton-Miller, 2014). However, stock ownership
+and thus potential family inﬂuence is unlikely to capture all
+aspects of SEW, e.g., interfamilial relationships may be very
+different from one family ﬁrm to the other, despite the same level
+of stock ownership (e.g., Hoy & Sharma, 2010; Miller & Le Breton-
+Miller, 2014). Taking this into account, two thoughts regarding the
+heterogeneity of family ﬁrms guided the study at hand: First,
+family ﬁrms are inﬂuenced by non-economic factors, leading to
+varying levels of willingness and thus heterogeneous innovation
+behavior, even with similar levels of family ownership (ability)
+(e.g., Chrisman et al., in press; Kammerlander and Ganter, in press).
+Second, and as a logical consequence, the heterogeneity of family
+ﬁrms requires a speciﬁc multi-dimensional measurement of family
+inﬂuence beyond merely family ownership and management
+(Chrisman et al., in press; Miller & Le Breton-Miller, 2014).
+In summary, a research gap concerning innovation during the
+succession phase could be identiﬁed due to the distinctive
+characteristics of the succession phase in family ﬁrms that may
+offer a peculiar time frame for innovation activities. However, the
+willingness to seize the chance to innovate is likely to be inﬂuenced
+both positively and negatively by non-economic factors. To the
+best knowledge of the authors, no attempts have been made so far
+to investigate the relationship between non-economic aspects and
+the perceived suitability of the intra-family leadership succession
+phase for innovation activities. This article tries to ﬁll this gap
+through a quantitative survey of Austrian family ﬁrms that applies
+the theoretical framework of SEW.
+Hypotheses
+The existing literature describes several aspects of SEW that
+refer to three broad categories: (1) the family (section ‘‘Family
+inﬂuence’’), (2) the relationship between the family and the ﬁrm
+(section ‘‘Family-ﬁrm relationship’’), as well as (3) the relation-
+ship between the family ﬁrm and the community (section
+‘‘Family ﬁrm-community relationship’’) (e.g., Berrone et al.,
+2012). We will derive hypotheses based on these aspects in the
+following section.
+Family inﬂuence
+SEW acknowledges that the boundaries between the family
+and the ﬁrm are blurred and permeable (Berrone et al., 2012).9
+Thus, the family and its inherent complex interpersonal relation-
+ships, goals, and norms of behavior exert inﬂuence on the ﬁrm
+(Berrone, Cruz, Go´ mez-Mejı´a, & Larraza-Kintana, 2010; Habber-
+shon & Williams, 1999). We argue that two family-related
+variables should be taken into account in the context of
+innovation. First, we investigate the family’s attitude toward
+and enjoyment of coping with change, problems, and challenges.
+Second, we focus on the role of intergenerational authority
+structures in the family context.
+Family’s adaptability and innovation during succession
+The family is described as a problem-solving unit (Olson, 1988).
+However, adaptability – deﬁned as attitude toward and enjoyment
+of coping with challenges and adopting to change – differs among
+families (Grotevant & Carlson, 1989; Walsh, 1998). In the
+mainstream innovation literature, Damanpour (1991) ﬁnds that
+managers’ positive attitude toward change is an important
+antecedent of innovation. While the family’s adaptability is
+demanded during all life stages of the family ﬁrm, the succession
+phase demands even more adaptability due to its inherent
+complexity, which is not as pronounced in more stable phases
+of both the family and the ﬁrm. The succession phase can be
+described as an exceptional time frame characterized by many
+challenges and changes to both the family and the ﬁrm (e.g.,
+Handler, 1994; Kotlar & De Massis, 2013). We argue that families
+with low levels of adaptability will perceive the succession phase
+as a problem-ridden threat and burden. Those families will
+primarily devote a considerable amount of their time and
+resources, which will no longer be available for innovation, to
+dealing with typical succession-related issues and conﬂicts. In
+contrast, families with high levels of adaptability will seize
+8 The notion that perception inﬂuences behavior has long been recognized
+(Dijksterhuis & van Knippenberg, 1998; James, 1890). Underlying this idea is that
+apart from perceptual or cognitive representations, behaviors are mentally
+represented and intimately linked (Dijksterhuis & van Knippenberg, 1998).
+Perceptions constitute variables in various quantitative studies, e.g., Cruz et al.
+(2010) or Davis et al. (2010).
+9 According to Berrone et al. (2012), one aspect of SEW is family control and
+inﬂuence, which refer to the degree of control and inﬂuence of family members over
+decision making. This aspect is intentionally kept constant in our research setting
+(exclusively family ﬁrms with 100% family ownership and management) in order to
+observe heterogeneous behavior related to family inﬂuence beyond ownership and
+management. Instead, we consider two variables related to informal family
+inﬂuence (Berrone et al., 2012).
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx
+4
+
+conﬂicts in a productive way and engage in effective communica-
+tion (Bjo¨rnberg & Nicholson, 2007; Olson, 1988) that enables
+innovation (Cassia et al., 2011). Moreover, those families will
+perceive the time frame of succession as a chance, will have a
+positive ‘can-do’ attitude toward succession, and will have more
+resources left over to dedicate to innovation activities, which will
+make those owner-managers more likely to perceive the succes-
+sion phase as a unique opportunity to engage in innovation
+activities. We therefore expect:
+H1. Higher levels of the family’s adaptability will be positively
+related to the perceived suitability of intra-family leadership suc-
+cession phase for innovation activities.
+Intergenerational authority and innovation during succession
+Intergenerational authority is deﬁned as the authority relation-
+ships between the senior and junior generation that determines the
+degree of liberty or constraint in working relationships – and thus
+the extent to which the successor has a say in decision-making
+during leadership succession (Bjo¨rnberg & Nicholson, 2007; Ger-
+sick, Davis, Hampton, & Lansberg, 1997). Authority structures
+within the family and the ﬁrm are considered to be equivalent and
+thus represent working relationships between the generations
+during the succession phase (Bjo¨rnberg & Nicholson, 2007; Tagiuri &
+Davis, 1992). One the one hand, concentrated decision-making
+authority is considered to positively affect innovation as a result of
+speed and stamina (Ko¨nig et al., 2013). On the other hand,
+centralized decision-making authority limits the exchange of
+information and ideas (Zahra, Hayton, & Salvato, 2004), which
+makes the family ﬁrm less adaptive to changes in the environment
+(Kohli & Jaworski, 1990). Moreover, incumbents tend to become
+increasingly committed to their paradigms (Ghemawat, 1991;
+Sydow et al., 2009) and may lose their open-mindedness over time
+(Miller, 1991), which is likely to result in accumulated innovation
+pressure (Gersick et al., 1999). Indeed, successors are identiﬁers of
+entrepreneurial opportunities (Salvato, 2004) and drivers of
+innovation (Litz & Kleysen, 2001). However, the next generation’s
+innovation spirit can only come to the fore if authority structures
+allow for it. Certainly, authority structures are in states of change
+during the succession phase: ideally, the senior generation’s
+authority decreases, while the next generation’s authority increases
+(Beckhard & Dyer, 1983; Cabrera-Sua´rez et al., 2001). It is highly
+unlikely that the senior generation’s role and the junior generation’s
+role in decision-making are as clearly deﬁned during the time frame
+of leadership succession as they are during more stable phases of the
+family ﬁrm’s lifecycle. We argue that the level of intergenerational
+authority from which the mutual authority adjustment of the senior
+generation and the next generation during succession starts has a
+signiﬁcant impact: In the case of low starting levels of intergenera-
+tional authority, the owner-manager will rather soon consider the
+successor’s ideas, information and identiﬁed opportunities during
+the phase of leadership transition and will be open to participative
+decision-making at eyelevel, which is beneﬁcial in terms of
+innovation (e.g., Cassia et al., 2011). In contrast, high starting levels
+of intergenerational authority will make the perception of the
+succession phase as an opportunity for innovation less likely. This
+is expected to be the case because the path to the threshold at
+which the owner-manager will allow for the successor’s ideas,
+information, and identiﬁed opportunities to come to the surface in
+decision-making will be longer and more difﬁcult. These consider-
+ations suggest the following hypothesis:
+H2. Higher levels of intergenerational authority within the family will
+be negatively related to the perceived suitability of intra-family
+leadership succession phase for innovation activities.
+Family-ﬁrm relationship
+SEW also refers to the relationship between the family and the
+ﬁrm as well as the history of family bonds (Berrone et al., 2012).
+Family members’ closeness to the family ﬁrm and innovation during
+succession
+It is engrained in the nature of the family ﬁrm that there exists an
+overlap between the family and the ﬁrm’s system (Habbershon &
+Williams, 1999; von Schlippe & Frank, 2013) and identity. Family
+members’ closeness to the ﬁrm induces a strong sense of
+responsibility and pro-organizational behavior (Miller, Le Breton-
+Miller, & Scholnick, 2008), which positively affects innovation (Ng,
+Feldman, & Lam, 2010). For example, family members’ relationship
+to the ﬁrm inﬂuences the attitudes toward internal processes and
+the quality of the services and products provided (Carrigan &
+Buckley, 2008; Teal, Upton, & Seaman, 2003). However, the
+literature also draws attention to the fact that the closeness
+between an incumbent and the ﬁrm might result in strong emotional
+ties to the status quo (Ko¨nig et al., 2013; Sydow et al., 2009). This ego-
+centered goal of preserving the status quo might hinder innovation
+activities, as innovation typically requires a reorchestration of
+organizational structures and various types of resources (Adner,
+2012; Teece, 2006). However, the priorities of goals may change
+depending on the circumstances of the family and the ﬁrm
+(Chrisman & Patel, 2012). We deﬁnitely see the succession phase
+as one such particular circumstance. Therefore, we argue that the
+negative relationship between an owner-manager’s closeness to the
+ﬁrm and innovation is not the case during the special time frame of
+succession. Succession is accompanied by increased goal diversity
+(Kotlar & De Massis, 2013) and is characterized by an inherent
+instability in both the family and the ﬁrm (e.g., Handler, 1992;
+Sharma et al., 2001). Moreover, succession will direct family
+members’ view towards the future of the ﬁrm, as the decision
+involves preserving the family ﬁrm as a family asset for the next
+generation. Thus, ego-centered emotional ties to the status quo will
+be ruled out by ‘higher order’ goals of long-term ﬁrm survival and the
+perpetuation of the family’s reputation – goals which may not be as
+prominent in more stable phases of both the family and the ﬁrm.
+This, in turn, makes the owner-manager’s support of innovation
+during the succession phase more likely.
+Taken together, we expect that high levels of the owner-
+manager’s closeness to the family ﬁrm will positively affect the
+dependent variable:
+H3. Higher levels of family members’ closeness to the family ﬁrm will
+be positively related to the perceived suitability of intra-family
+leadership succession phase for innovation activities.
+History of family bonds and innovation during succession
+Another variable describing the family-ﬁrm relation is the
+history of family control over the ﬁrm through intra-family
+succession. The history of past events and shared experiences
+during the history of family bonds inﬂuences and may even
+dominate everyday organizational work and thus innovation
+activities (Berrone et al., 2012). The literature on innovation in
+family ﬁrms concludes that innovation propensity tends to
+generally decrease over the history of family bonds (e.g., Beck
+et al., 2011). In regard to the special time frame of succession, we
+argue that the history of family bonds is negatively related to the
+perception of this phase for innovation in three ways: the need to
+master increased complexity, the feeling of being ‘unsinkable’
+(‘Titanic effect’) and the predominance of family-centered over
+ﬁrm-centered goals. First, it is commonly accepted that the
+complexity of family ﬁrms increases – due to larger ﬁrm size
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx 
+5
+
+(Evans, 1987) and higher degrees of formalization (Bammens,
+Voordeckers, & Van Gils, 2008) –over time (Gersick et al., 1997;
+Kellermanns, Eddleston, et al., 2012). Additionally, increased
+ownership dispersion across multiple family members, maybe
+even across multiple generations and family branches (Gersick et al.,
+1997), can lead to shareholder conﬂicts during the succession phase
+(Davis & Harveston, 1999).10As ﬁrm- and family-induced complex-
+ity particularly increases during the succession phase, a consider-
+able amount of resources to solve conﬂicts and to train the successor
+in complex ﬁrm structures is needed – resources that are no longer
+available for innovation. Additionally, it is likely that a rather
+problem-centered perception of the succession phase will occur and
+result in higher risk aversion, impeding innovation during the
+succession phase (Cassia et al., 2011; Kellermanns, Eddleston, et al.,
+2012; Litz & Kleysen, 2001). Second, a long history of family bonds
+signals that the ﬁrm has been successful in the past. Family
+members might see the ﬁrm as ‘unsinkable,’ and this ‘Titanic effect’
+could lead to a decreased perception of the need for innovation.
+Especially during the time frame of succession, innovation may not
+be top priority but rather step back behind other challenges. Third,
+and connecting to the ‘Titanic effect,’ Le Breton-Miller and Miller
+(2013) state that family-centered goals tend to dominate over ﬁrm-
+centered goals over time. Particularly during the time frame of
+succession, family-related goals, such as family harmony and
+cohesion (which may not be as endangered in more stable phases),
+may come to the fore and dominate over ﬁrm-related goals, such as
+innovation. Taken together, a longer history of family bonds is
+expected to lead to a concentration of efforts preserving the status
+quo of the family rather than on developing ﬁrm-centered potential
+during the succession phase. We therefore hypothesize:
+H4. A longer history of family bonds will be negatively related to the
+perceived suitability of intra-family leadership succession phase for
+innovation activities.
+Family ﬁrm-community relationship
+Family ﬁrms are often deeply embedded in their communities,
+and hence, SEW takes binding social ties with the ﬁrm’s
+environment, collaborative behavior, and social commitment into
+account (Berrone et al., 2012, 2010).
+Investment in social ties and innovation during succession
+Family ﬁrms’ investment in developing and maintaining social
+ties, e.g., in local politics, regional industry associations or clubs,
+will foster the exchange of information about environmental
+changes, which are potentially relevant for innovation activities.
+While this form of information exchange will trigger an awareness
+of the types of changes needed and thus foster innovation during
+all life stages of the family ﬁrm, we argue that investing in social
+ties may be even more powerful in the time frame of succession:
+First, investing in social ties will increase the likelihood of
+considering the next generation’s innovation ideas due to the
+mere exposure effect (e.g., Zajonc, 2001).11 If the incumbent is
+confronted with the need for innovation by different sources, the
+likelihood of engaging in innovation activities during succession
+will increase. Second, social ties to the environment may serve as a
+support network that offers information on and raises awareness
+of how other family ﬁrms handle the succession phase. This
+adds conﬁdence to succession planning and supports a ‘can-do’
+attitude that may again positively inﬂuence the engagement in
+innovation. Third, family ﬁrms are considered to particularly aim
+for the perpetuation of a positive family image and reputation in
+the community (e.g., Berrone et al., 2012; Binz, Hair, Pieper, &
+Baldauf, 2013). Since succession is a critical period of time for ﬁrm
+survival (Beckhard & Dyer, 1983), the fact of having a capable and
+innovative successor and of intentionally seizing the succession
+phase for the sake of making the ﬁrm viable for the future might
+gain relevance (Cassia et al., 2011). Beyond this, the engagement in
+other activities peripheral to the family ﬁrm, such as local politics,
+may 
+provide 
+a 
+meaningful 
+alternative 
+activity 
+to 
+the
+senior generation during and after the succession phase. This
+might complement the feared loss of identity and power in the
+community when retiring (Handler, 1994). This is, in turn,
+positively related to the willingness to let go and to grant the
+discretion of freedom to the successor – both positive antecedents
+to innovation (Quigley & Hambrick, 2012). Taken together, we
+hypothesize the following:
+H5. Higher levels of investment in social ties will be positively related
+to the perceived suitability of intra-family leadership succession phase
+for innovation activities.
+Methods
+We applied a cross-sectional quantitative survey design to
+approach the research question at hand. Beforehand, we conducted
+eight semi-structured qualitative interviews in order to gain
+insights in the speciﬁcs of the industry and region.12 Quantitative
+data were collected from the owner-managers of entirely family-
+owned (100%) and -managed hotels and guesthouses located in a
+ski resort in Austria. We chose to hold family ownership and
+management (100%) constant in order to observe potential
+heterogeneity in the perception of the succession phase for
+innovation originating from family inﬂuence beyond ownership
+and control. Moreover, we deliberately concentrated our effort on
+one industry and one geographical region in order to keep
+environmental conditions close to constant, thus avoiding poten-
+tial disturbing variables and thereby increasing internal validity.13
+In common with other studies of family ﬁrms (e.g., Kellermanns
+et al., 2008), a key informant approach was employed (Kumar,
+Stern, & Anderson, 1993; Seidler, 1974). We chose to focus on
+owner-managers because they are key players and hold substantial
+decision power to affect ﬁrm behavior (e.g., Finkelstein &
+Hambrick, 1990), which is in line with other studies on innovation
+in the context of family ﬁrms (e.g., Kammerlander & Ganter, in
+press).
+Research context
+Austria is a leading tourism destination in the world, with a
+world market share of 2.3% (2011) and a market share in the
+European Union of approximately 6% (2012). Moreover, of all
+10 While the ﬁrms in our sample are entirely family-owned, only 41.6% of the
+family ﬁrms are owned by merely one family member. The majority of these ﬁrms
+(58.4%) are owned by up to ﬁve family members (while the majority stakeholder is
+always the owner-manager). Therefore, intra-family ownership dispersion and
+intra-family shareholder conﬂicts (Gersick et al., 1997) are deﬁnitely an issue for the
+family ﬁrms in our sample.
+11 The exposure effect postulates that the preference for an object, in our case an
+innovative idea, emerges if an individual is repeatedly exposed to this particular
+stimulus object (e.g., Zajonc, 2001).
+12 The interviews were conducted in July 2013 and lasted between 60 and
+120 min. In three business-owning families, we interviewed one member of each
+senior and junior generation. In two other business-owning families, we
+interviewed two more members of the senior generation. Three of the families
+owned and managed hotels; two of the families owned and managed guesthouses.
+13 The industry is considered to systemically affect the innovation behavior of
+ﬁrms and should therefore be recognized as a confounding variable (Craig & Dibrell,
+2006; Czarnitzki & Kraft, 2009; De Massis et al., 2013; Powell, 1996). Most of the
+studies on innovation in family ﬁrms – as well as our study – concentrate on one
+single industry (e.g., Chrisman & Patel, 2012; Classen et al., 2012).
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx
+6
+
+countries worldwide, Austria receives the greatest touristic income
+per capita from abroad (2218 USD in 2011). The hotel and tourism
+industry has an enormous economic importance in Austria,
+accounting for 15% of the national GDP and providing approxi-
+mately 20% of the country’s full-time jobs.14 Family ﬁrms make up
+93% of all ﬁrms in the tourism industry and are thus a crucial
+cornerstone of the focal industry (Pleininger, 2014).
+We argue that family ﬁrms’ reaction to innovation pressure
+could be particularly well-observed in the context of Alpine hotels
+and guesthouses. In general, the hotel industry is under great
+pressure to innovate as guests constantly expect improved and
+different offerings in terms of new products, processes, and
+services (Martı´nez-Ros & Orﬁla-Sintes, 2012; Sundbo, Orﬁla-
+Sintes, & Sørensen, 2007). Based on recent reports and studies15
+as well as our qualitative explorations, the Austrian tourism
+industry is characterized by a highly competitive environment and
+changes in guest structure (e.g., internationalization), booking
+patterns (e.g., less regular customers, shorter duration of stay), and
+communication and sales channels (e.g., online booking) as well as
+the general downturn during the summer season. All of these
+factors result in aggressive price competition and, in particular, in
+value competition, which puts innovation pressure on Alpine
+hotels and guesthouses. Because these small- and medium-sized
+ﬁrms are unable to obtain a low-cost advantage (Smeral & Witt,
+1996), they need to focus on differentiation strategies based on
+innovation activities (Pikkemaat, 2008). Next to product and
+service innovations, which can be services such as childcare in the
+context of hotels and guesthouses, other types of innovation can be
+pursued. Process innovations often concern energy and water use
+or 
+IT 
+processes 
+(Nicolau 
+& 
+Santa-Marı´a, 
+2013). 
+Moreover,
+organizational innovations can be, e.g., the introduction of variable
+salary components, while business model innovations that occur
+in the tourism industry are, e.g., the market launch of own spa
+products or, as in our sample, the offer of hiking tours in
+cooperation with several neighboring hotels and guesthouses
+(Nicolau & Santa-Marı´a, 2013).16 Taken together, the chosen
+research setting is well-suited for an insightful study on how
+family ﬁrms may react to innovation pressures in their environ-
+ment during the phase of succession.
+Data collection
+We developed a standardized questionnaire to gather the
+data. Upfront, the ﬁnal survey design was trialed on several
+members of the target group to check the length and face validity
+of the questionnaire content. Minor adaptions were made
+accordingly. Of a population of 236 family ﬁrms, we visited
+209 families personally to invite the owner-managers to take
+part in the survey. The respondents had the choice of completing
+the questionnaire either online or paper-based (returned via
+mail). No differences regarding the mode of dispatch of the
+questionnaire could be found. We ended up with a sample of 103
+(response rate of 49.3%), which was reduced to a useable sample
+of 81 questionnaires due to missing values (effective response
+rate of 38.8%).
+To explore the possibility of non-response bias, we compared
+the data obtained from early (ﬁrst mailing) and late (second and
+third mailings) respondents using an analysis of variance (ANOVA)
+(Armstrong & Overton, 1977). No statistically signiﬁcant differ-
+ences were found in either sample on any of the variables analyzed
+in this study, which mitigates non-response concerns. We further
+conducted an ANOVA between the respondents that answered
+all relevant questions for our study and the respondents who did
+not respond to the questions used to measure our dependent
+variable. Here again, no signiﬁcant differences emerged. We
+addressed the potential for multicollinearity and common method
+bias as follows. First, the correlations of variables are relatively low
+(Table 3), and the variance inﬂation factor (VIF) is below 1.71. Thus,
+multicollinearity did not appear to be a concern (Hair, Black, Babin,
+Anderson, & Tatham, 2006; Tabachnick & Fidell, 1996). Second, we
+performed tests for common method bias using Harman’s one-
+factor test suggested by Podsakoff, MacKenzie, Jeong-Yeon, &
+Podsakoff (2003). We entered items of control, independent
+variables, and dependent variables into a single-factor analysis.
+Nine factors with eigenvalues >1.0 accounting for 73.47% of the
+variance were extracted. The ﬁrst factor accounted for 28.11% of
+the variance, while the remaining factors accounted for 45.36% of
+the variance. Since no common method factor and no single factor
+emerged, we concluded that common method bias was not a
+signiﬁcant concern. Potential concerns for common method bias
+are further mitigated due to the prospective design of our study,
+making consistency effects unlikely (Podsakoff et al., 2003).
+Sample
+On the ﬁrm level, our sample consists of ﬁrms with an average
+age of 55 years, with 75.3% of these being later-generation family
+ﬁrms (managed and held by descendants of the founders of the
+family ﬁrm). The ﬁrms are entirely owned (100%) and managed
+by the family. The next succession phase will begin in 11 years
+(from 1 to 30 years) on average. Information on the type of
+activities, size, and quality standards is given in Table 1 in
+comparison to the population of ﬁrms in the hotel industry in
+Austria. The average age of the family ﬁrms in our sample
+(55 years) is comparable to the average age of the ﬁrms in a
+sample containing German and Swiss family ﬁrms investigated
+by Zellweger, Kellermanns, Chrisman, and Chua (2012) (67 years
+for Swiss ﬁrms and 49 years for German ﬁrms).17The ﬁrms in our
+sample are representative regarding the types of activities, while
+being slightly larger and offering higher quality standards than
+the hotels on the national level in Austria.18
+In regard to the responding owner-managers, 50.6% (49.4%) are
+female (male), have 2.32 children on average and are 42 years old
+on average. Their age is similar to the owner-managers’ average
+Table 1
+Comparison of sample characteristics and Austrian hotel population.
+Variables 
+Sample 
+Austria
+Type 
+Hotel (%) 
+46.9 
+46.2
+Bed and Breakfast (%) 
+34.6 
+33.7
+Flats and apartments (%) 
+18.5 
+20.1
+Size 
+Number of beds (mean) 
+36.3 
+33.1
+Number of employees (mean) 
+13.8 
+10.3
+Quality 
+High: Three stars or more (%) 
+90.9 
+72.0
+Notes. Data for Austria sourced from Hotel Industry Association of the Austrian
+Federal Economic Chamber, Statistics Austria.
+14 According to data from the Hotel Industry Association of the Austrian Federal
+Economic Chamber (www.wko.at) and Statistics Austria (www.statistik.at).
+15 According to the aforementioned sources as well as ‘Tourism horizon Austria
+2013’ (http://issuu.com/oehv/docs/tourismushorizont2013).
+16 In Austria, innovation activities during succession are supported institutionally:
+Family ﬁrms are supported by tax advantages regarding real property transfer and
+inheritance as well as by, e.g., the Austrian Tourism Bank (OETH), which provides
+comprehensive state guarantees for investments during succession.
+17 If there were no data available for the speciﬁc population in Austria, we
+compared our sample to that of other related studies with a family ﬁrm sample in
+German-speaking countries.
+18 This region was nominated as a ‘‘World Gourmet Village’’ by Falstaff, the
+Austrian gourmet guide, in 2008 and is consistently one of the Top 10 Austrian
+Winter tourism destinations according to the Hotel Industry Association of the
+Austrian Federal Economic Chamber.
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx 
+7
+
+ages in Swiss (46 years) and German ﬁrms (44 years) reported in
+national studies (Sternberg & Lu¨ckgen, 2005; Volery, Bergmann,
+Gruber, Haour, & Leleux, 2007).
+Measures
+To better document the relationship between different non-
+economic factors and our dependent variable, this study sought to
+delineate non-economic factors through the use of well-established,
+validated and reliable measures from the ﬁeld of family business
+research (Table 2). Berrone et al. (2012) have recently introduced the
+‘FIBER’ dimensions of SEW and proposed a ﬁrst approximation for
+the measurement of SEW with psychometric scales in surveys.
+Authors such as Miller and Le Breton-Miller (2014) stress the need
+for a multi-dimensional measurement (beyond the commonly
+applied proxy of family ownership) and underline the development,
+testing, and validation of the SEW measurement as an important
+future research avenue. We conceptualized and measured SEW as
+follows (see also Fig. 1, Appendix):
+Family inﬂuence: In our study, we deliberately kept family
+inﬂuence via ownership and management constant and instead
+grasped the rather informal family inﬂuence through the family
+climate, as recommended by Berrone et al. (2012). We adapted the
+measurement to the research context and applied two innovation-
+related 
+multi-item 
+scales 
+(adaptability 
+and 
+intergenerational
+authority19) developed by Bjo¨rnberg and Nicholson (2007).
+Family-ﬁrm relationship: Due to its intrinsic proximity, we
+merged Berrone et al.’s (2012) dimensions ‘‘family members’
+Table 2
+Measures of dependent and independent variables.
+Dependent variable 
+Reference 
+Alpha
+Perceived suitability of the succession phase for innovation activities
+5-point Likert scale (from ‘not suitable at all’ to ‘very suitable’) 
+Adapted from Spriggs et al. (2013) 
+0.86
+How do you perceive the succession phase for the following innovation activities?
+(1) Introducing new products or services
+(2) Creating new organizational structures
+(3) Establish new processes
+(4) Test new business models
+Independent variables 
+Reference 
+Alpha
+Family inﬂuence
+Adaptability
+5-point Likert scale (from ‘I strongly disagree’ to ‘I strongly agree’) 
+Bjo¨rnberg and Nicholson (2007) 
+0.83
+In our family. . .
+(1) We face challenges very effectively
+(2) We are ﬂexible and adaptable in how we deal with difﬁculties
+(3) We are poor at dealing with the unexpecteda
+(4) We are always able to help each other when the need arises
+(5) In solving problems, we are not often willing to change our routinesa
+(6) We approach problems with a positive mindset
+(7) We know we have the power to solve major problems
+(8) When we face difﬁculties we work together effectively
+Intergenerational authority
+5-point Likert scale (from ‘I strongly disagree’ to ‘I strongly agree’) 
+Bjo¨rnberg and Nicholson (2007) 
+0.78
+In our family. . .
+(1) The younger generations try to conform with what the older
+generation would want
+(2) The wishes of the older generation are obeyed
+(3) The authority of the older generation is not questioned
+(4) Family members of the older generation set the rules
+(5) The word of the older generation is law
+Family-ﬁrm relationship
+Family member’s closeness to the ﬁrm
+5-point Likert scale (from ‘I strongly disagree’ to ‘I strongly agree’) 
+Birley (2002); Bjo¨rnberg and Nicholson (2012) 
+0.85
+(1) I feel as if I belong to the family business
+(2) I care about the family business
+(3) I feel detached from the family businessa
+(4) I feel close to the family business
+(5) The family business is an important part of who I am
+(6) The fate of the family business is not relevant to mea
+(7) I identify with the family business
+(8) What happens to the family business matters to me
+History of family bonds
+In which year has your family ﬁrm been established? 
+Zellweger et al. (2012)
+Family ﬁrm-community relationship
+Investment in social ties
+5-point Likert scale (from ‘not active’ to ‘very active’) 
+Cruz et al. (2012) 
+0.71
+How active are you at the community level in the following three areas:
+(1) local politics
+(2) clubs/associations primarily for the public’s beneﬁt
+(3) regional working groups
+a Reverse scaled.
+19 We measured intergenerational authority at the time of data collection. Being
+aware of the fact that intergenerational authority may change over a family ﬁrm’s
+lifecycle, the main focus of this article is to compare multiple family ﬁrms regarding
+various SEW compositions on the perceived suitability of innovation in the
+succession period.
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx
+8
+
+identiﬁcation with the ﬁrm’’ and ‘‘emotional attachment’’ and relied
+on well-established items developed by Birley (2002) and Bjo¨rnberg
+and Nicholson (2012) to measure the family member’s closeness to the
+ﬁrm. We thereby kept the measurement as parsimonious as possible.
+We measured the history of family bonds retrospectively according to
+Zellweger et al. (2012) (founding year).
+Family ﬁrm-community relationship: We measured investment in
+social ties according to Cruz, Justo, and De Castro (2012) by relating
+to family members’ activities in local political, social, and working
+groups.
+As shown in Table 2, we relied on well-established, validated,
+and reliable multi-item scales from the ﬁeld of family business
+research measured on ﬁve-point Likert-type scales. The Cronbach’s
+alpha measures are all well above the recommended value of 0.60
+(Nunnally & Bernstein, 1994). Questionnaire items were taken
+from the English literature and translated into German according
+to Brislin’s back-translation procedure (1970).
+Building on prior research, we used four control variables in
+order to partial out the effects that could potentially confound our
+results. We included the responding owner-manager’s age (e.g., Le
+Breton-Miller et al., 2004; Zellweger & Astrachan, 2008) and sex
+(Harveston, Davis, & Lyden, 1997) (0 = female, 1 = male) since
+these variables are considered to affect factors such as risk
+perception. Taking into account the relevance of ﬁrm size to the
+perception of strategic initiatives (Milliken, Martins, & Morgan,
+1998), we controlled for size because our context is best measured
+through bed capacity (number of beds offered) according to Peters
+and Buhalis (2004). Moreover, we measure time to next succession
+phase (years) to control for the closeness of the event (Kotlar & De
+Massis, 2013), which might potentially affect the suitability of this
+phase for innovation activities.
+Findings
+Means, standard deviations, and correlations are shown in
+Table 3. In general, responding owner-managers perceived the
+succession phase as quite suitable for innovation (M = 3.79).
+Responses range from 1 to 5, and the considerable standard
+deviation of 0.92 illustrates the heterogeneity of owner-managers’
+willingness to innovate. The standard deviations in the indepen-
+dent variables (ranging from 0.68 to 0.92) also reﬂect the
+heterogeneity of family ﬁrms.
+In line with other research on family ﬁrms with a dependent
+variable measured on Likert-type scales (e.g., Ling & Kellermanns,
+2010; Spriggs, Yu, Deeds, & Sorenson, 2013), the hypotheses were
+tested using OLS regression analyses.20 We entered the control
+variables in Model 1, while the independent variables were
+entered in Model 2 (see Table 4). Overall, Model 1 is signiﬁcant
+(p < 0.01) and displays an adjusted R2 of 0.116. The model shows
+that respondents’ age is positively and signiﬁcantly related to the
+perceived suitability of the succession phase for innovation
+activities 
+(p < 0.001), 
+ﬁrm 
+size 
+(p < 0.05), 
+and 
+signiﬁcantly
+negatively 
+related 
+to 
+time 
+to 
+next 
+generational 
+transition
+(p < 0.10). Including the independent variables in Model 2, the
+adjusted R2 increases to 0.353 (p < 0.001). Adaptability (b = 0.328,
+p < 0.001) and family member’s closeness to the ﬁrm (b = 0.203,
+p < 0.01) are positively and signiﬁcantly related to the dependent
+variable. Thus, H1 and H3 are supported. Similarly, intergenera-
+tional authority (b = 0.234, p < 0.01) and the history of family
+bonds (b = 0.230, p < 0.01) are negatively and signiﬁcantly
+related to the dependent variable and thereby provide support
+for H2 and H4. Investment in social ties is not signiﬁcantly related
+to the dependent variable. Accordingly, H5 is not supported.
+Robustness checks
+We ran several robustness checks to ensure that our results are
+not artifacts of the variables used in the study or the method
+chosen for data analysis. The relationships found in our primary
+analysis held when the history of family bonds was measured in the
+number of generations instead of the age of the ﬁrm. The age of
+the ﬁrm can be regarded as a useful proxy for the generations of the
+family in control of the ﬁrm because founder-controlled ﬁrms tend
+to be younger than successor-controlled ﬁrms. However, although
+ﬁrm age and the number of generations are highly and signiﬁcantly
+correlated (in our sample, r = 0.505, p < 0.001), they are not
+Table 3
+Correlation Matrix, Means, and Standard Deviations.
+Variables 
+Mean 
+SD 
+1 
+2 
+3 
+4 
+5
+1 
+Age (respondent) 
+42.00 
+15.88 
+–
+2 
+Sex (respondent; 0 = female; 1 = male) 
+0.49 
+0.50 
+0.073 
+–
+3 
+Size (ﬁrm; number of beds) 
+36.29 
+29.70 
+0.032 
+0.029 
+–
+4 
+Time to next transgenerational transition (ﬁrm) 
+11.32 
+9.08 
+0.106 
+0.038 
+0.173 
+–
+5 
+Adaptability (family inﬂuence) 
+3.52 
+0.68 
+0.205 
+0.051 
+0.187 
+0.061 
+–
+6 
+Intergenerational authority (family inﬂuence) 
+2.58 
+0.88 
+0.192 
+0.137 
+0.156 
+0.158 
+0.203
+7 
+Family member’s closeness to ﬁrm (family-ﬁrm relation) 
+3.61 
+0.75 
+0.123 
+0.085 
+0.148 
+0.041 
+0.218
+8 
+History of family bonds (family-ﬁrm relation) 
+55.41 
+53.53 
+0.093 
+0.104 
+0.225 
+0.042 
+0.026
+9 
+Investment in social ties (family ﬁrm-community relation) 
+2.12 
+0.92 
+0.024 
+0.151 
+0.043 
+0.003 
+0.025
+10 
+Perceived suitability of succession phase for innovation activities (DV) 
+3.79 
+0.92 
+0.326 
+0.020 
+0.190 
+0.151 
+0.328
+Variables 
+Mean 
+SD 
+6 
+7 
+8 
+9 
+10
+1 
+Age (respondent) 
+42.00 
+15.88
+2 
+Sex (respondent; 0 = female; 1 = male) 
+0.49 
+0.50
+3 
+Size (ﬁrm; number of beds) 
+36.29 
+29.70
+4 
+Time to next transgenerational transition (Firm) 
+11.32 
+9.08
+5 
+Adaptability (family inﬂuence) 
+3.52 
+0.68
+6 
+Intergenerational authority (family relation) 
+2.58 
+0.88 
+–
+7 
+Family member’s closeness to ﬁrm (family-ﬁrm relation) 
+3.61 
+0.75 
+0.173 
+–
+8 
+History of family bonds (family-ﬁrm relation) 
+55.41 
+53.53 
+0.078 
+0.020 
+–
+9 
+Investment in social ties (family ﬁrm-community relation) 
+2.12 
+0.92 
+0.034 
+0.077 
+0.182 
+–
+10 
+Perceived suitability of succession phase for innovation activities (DV) 
+3.79 
+0.92 
+0.240 
+0.208 
+0.234 
+0.075 
+–
+Notes. Correlations above j0.165j are signiﬁcant at p < 0.05. N = 81.
+20 In the social sciences, ordinal-level variables, such as Likert-type scales from
+survey questions, are commonly used as dependent variables. The categories are
+typically treated as though they were measured on an interval scale, which enables
+the use of OLS regressions (Andersen, 2004; Field, 2011). Further justiﬁcation for the
+appropriateness of the method of data analysis for the variables at hand is provided
+by Glass, Peckham, and Sanders (1972) and Cariﬁo and Perla (2007). In order to
+check for the robustness of the method of data analysis chosen, we conducted an
+ordinal regression. The results were conﬁrmed and remained stable.
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx 
+9
+
+identical. Nevertheless, we decided to use ﬁrm age in our main
+analysis, as the number of generations was a categorical variable,
+while ﬁrm age was measured continuously. Furthermore, as
+mentioned above, we used bed capacity as our preferred measure
+of ﬁrm size, as is typical for studies in the hotel industry (e.g.,
+Pikkemaat & Peters, 2006). Again, the relationships found in our
+primary analysis held when we measured ﬁrm size in terms of the
+number of employees during the main season (full-time equiva-
+lents) or entered the type of business (e.g., hotel, B&B, holiday ﬂat)
+as a size proxy. Furthermore, in order to check for the robustness of
+the method of data analysis, our results were conﬁrmed and
+remained stable when we applied ordinal regressions. As a last
+robustness check, following Molly, Laveren, & Deloof (2010), we
+explored the possibility that multicollinearity has an effect on our
+results by examining the correlations among the independent
+variables in Table 3. Although the correlations among the
+independent variables are relatively low, the highest correlation
+can be found with regard to ﬁrm size and the history of family bonds
+(r = 0.225, p < 0.05). We therefore replicated our analyses by
+excluding one of these variables from our model. However, the
+resulting effects were identical to those found in Table 4. In addition,
+as reported above, an alternative measure of ﬁrm size was integrated
+in our analyses. However, the use of this alternative size measure
+does not change our results. Moreover, the correlations between the
+dependent and independent variables (see Table 3) are entirely
+consistent with the results of the regression analysis (Table 4).
+Overall, we conclude that our results are robust and thus not artifacts
+of the variables or the analysis method used in the study.
+Supplemental analysis
+A supplemental analysis revealed some interesting insights
+regarding (1) the selection criteria for successors, (2) the role of the
+incumbent during and after leadership transition, (3) the formal
+planning of the leadership transition phase.
+(1) We found a modest positive correlation between the impor-
+tance of a family internal successor21 and our dependent
+variable (r = 0.240, p < 0.05). Additionally, the importance of
+the industry-external experience of a potential successor22 and
+our dependent variable are positively related to each other
+(r = 0.236, p < 0.05). It seems that owner-managers attribute a
+higher suitability of the succession phase to innovation
+purposes if a family internal successor can be found that
+brings with her/him experience from outside the focal
+industry. This is in line with the innovation literature, which
+recently started exploring the transfer of (already existing)
+innovative solutions across industry borders from analogous
+domains (Keinz & Pru¨gl, 2010; Poetz & Pru¨gl, 2010).
+(2) Innovation activities during the succession phase seem to be
+more likely if a clear and common understanding between the
+two generations regarding the incumbent’s role during and
+after the phase of leadership transition is seen as important by
+the responding owner-managers23 (r = 0.278, p < 0.05). There
+is also a signiﬁcant positive correlation between our depen-
+dent variable and whether the owner-managers perceive it
+to be critical to the success of the leadership succession that
+they are able to ‘‘let go’’24 (r = 0.424, p < 0.001). This again
+underlines the importance of granting the freedom of
+discretion to the successor. However, because predecessors
+usually enjoy a central role in the family ﬁrm (Rubenson &
+Gupta, 1996), they may inﬂuence decisions even after the
+succession and regardless of their formal role (Davis &
+Harveston, 1998).
+(3) The perception of the succession phase as an opportunity for
+innovation is strongly correlated with the respondents’ rating
+of the importance of timely and detailed succession plan-
+ning25 (r = 0.509, p < 0.001). Succession planning usually
+involves deﬁning the roles of both the predecessor and
+successor (Lansberg, 1988; Mitchell, Hart, Valcea, & Town-
+send, 2009). By dividing the responsibilities between both
+generations, it will be more likely that the successor is granted
+the freedom of discretion to engage in innovation activities
+(Mitchell et al., 2009).
+Table 4
+Results of regression analyses.
+Variables 
+Model 1 
+Model 2
+Controls
+Respondent 
+Age 
+0.318***
+0.319***
+Sex (0 = female; 1 = male) 
+0.026 
+0.028
+Firm 
+Size (number of beds) 
+0.186*
+0.185*
+Time to next transgenerational transition 
+0.139y
+0.136y
+Independent variables
+Family inﬂuence 
+Adaptability 
+0.328***
+Intergenerational authority 
+0.234**
+Family-ﬁrm relation 
+Family member’s closeness to ﬁrm 
+0.203**
+History of family bonds 
+0.230**
+Family ﬁrm-community relation 
+Investment in social ties 
+0.076
+R2
+0.160 
+0.426
+Adjusted R2
+0.116 
+0.353
+DR2
+0.266***
+F 
+3.625**
+5.852***
+Notes. Standardized regression weights are shown. N = 81. DV: Perceived suitability of succession phase for innovation activities.
+y p < 0.10.
+* p < 0.05.
+** p < 0.01.
+*** p < 0.001.
+21 ‘How important is a family internal successor from your point of view?’ from
+1 = not important at all to 5 = very important.
+22 ‘How important is industry-external experience of a potential successor from your
+point of view?’ from 1 = not important at all to 5 = very important.
+23 ‘We (my successor and I) have a common understanding of my (the incumbent’s)
+role and responsibilities during and after leadership succession’ from 1 = I strongly
+disagree to 5 = I strongly agree.
+24 ‘How important is the senior generation’s ability to let go for the overall success of
+the leadership succession from your point of view?’ from 1 = not critical at all to
+5 = very critical.
+25 ‘How important is timely and detailed succession planning for the overall success of
+the leadership succession from your point of view?’ from 1 = not critical at all to
+5 = very critical.
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx
+10
+
+Discussion
+We argue that the intra-family leadership succession phase
+offers a peculiar time frame for the pursuit of innovation activities.
+We followed Chrisman et al. (in press) and tested the relationship
+between non-economic factors and the willingness to innovate (in
+our study, the perceived suitability of the succession phase for
+innovation activities). We conﬁrmed the well-founded notion that
+non-economic factors account for a considerable amount of variance
+in our dependent variable and that they can both enable and hinder
+innovation activities (e.g., Cassia et al., 2011; Miller & Le Breton-
+Miller, 2014; Naldi et al., 2013). In detail, the ﬁndings show that
+family 
+relations 
+and 
+structures 
+could 
+be 
+positively 
+(family
+adaptability) or negatively (intergenerational authority) related to
+innovation during succession. Thus, we transfer (and conﬁrm)
+Damanpour’s (1991) ﬁnding that managerial adaptability positively
+affects innovation in the family business sphere. Moreover, we argue
+that a positive mindset toward being able to handle all succession-
+related issues and conﬂicts will pay off in terms of innovation during
+this peculiar time frame. In regard to the negative relationship
+between intergenerational authority and the perception of the
+succession phase for innovation, we conﬁrm the literature on the
+hindering effects of centralized decision-making (Salvato, 2004;
+Zahra et al., 2004) and low levels of communication (Cassia et al.,
+2011) on innovation. While Ko¨nig et al. (2013) propose a positive
+relationship between centralized decision-making and discontinu-
+ous innovation, our empirical ﬁndings (which involve continuous
+and discontinuous innovation) suggest that this proposition may
+not be transferred to all types of innovation.
+We also ﬁnd ambiguous relationships for the family-ﬁrm
+relation of SEW: A close relationship between the owner-manager
+and the ﬁrm is positively associated with potential innovation
+activities in the succession phase. This result partly contradicts
+Ko¨nig et al. (2013), who again only focused on discontinuous
+innovation, but may stress even more the fact that the succession
+phase is distinct to other phases of the family ﬁrm’s lifecycle. The
+history of family bonds shows negative effects, which is consistent
+with the notion that the existing literature on innovation in family
+ﬁrms generally conﬁrms a declining innovation propensity over
+time (Beck et al., 2011). However, we extend the literature by
+showing that increasing inertia also affects the succession phase in
+aging family ﬁrms. Increasing risk aversion, the predominance of
+family-centered goals over ﬁrm-centered goals, and the propensity
+to rest on the laurels of past success might further diminish the
+perception of succession as an opportunity for innovation. We
+thereby provide support for Le Breton-Miller and Miller’s (2013)
+notion of changing SEW priorities across the family ﬁrm lifecycle.
+To our surprise, no signiﬁcant effects were found for the family
+ﬁrm-community relationship proposed by SEW for various reasons.
+First, we only measured one speciﬁc aspect of the multifaceted
+possibilities of relations that a family ﬁrm is able to establish with its
+wider community, namely, social ties to the local community. Thus,
+further research should take into account a broader measurement,
+including relationships with important stakeholders, such as
+customers, vendors or suppliers (Berrone et al., 2012; Uhlaner,
+2006). Second, it is possible that owner-managers prefer to discuss
+sensitive succession- as well as innovation-related topics in contexts
+other than the existing well-established community relations (‘close
+or strong ties’) due to anxiety about reputation losses when openly
+sharing succession- and innovation-related problems. For example,
+anecdotal evidence shows that incumbent owner-get closer to
+leadership transition phase often start to join events, conferences,
+and associations dedicated to discussing succession-related issues.
+Similarly, new information that is useful for coping with succession
+and innovation challenges may originate from newly created
+relations (‘weak or bridging ties,’ e.g., Granovetter, 1973).
+Another interesting observation stems from our control vari-
+ables, namely, the signiﬁcant relationship between owner-man-
+agers’ age and our dependent variable. Over time, senior managers
+develop a unique set of beliefs based on a shared legacy within the
+ﬁrm (Prahalad & Bettis, 1986; Tripsas & Gavetti, 2000). As a
+consequence, even in the face of environmental shifts, incumbents
+make fewer changes as their tenure advances and often leave ﬁrms
+with a strong need for innovation (Henderson, Miller, & Hambrick,
+2006). The established literature on the organizational behavior of
+CEOs clearly indicates that over time, CEOs often believe that past
+conditions still 
+exist, that their 
+chosen strategies are 
+still
+appropriate, or that they become increasingly committed to their
+paradigms (Hambrick, Geletkanycz, & Fredrickson, 1993). Contrary
+to the mainstream literature, we observe two things in the family
+business context: the owner-manager’s age is positively related to
+the suitability of innovation activities during the phase of
+transition, and the closer the transition comes, the stronger the
+perceived need for innovation during succession. While this was
+not in the main focus of this study because we only controlled for
+these issues, we believe that this aspect merits future attention, as
+family ﬁrm managers in our sample seem to recognize the need for
+change and achievable innovation by passing the baton. On the
+other hand, there are many well-known examples in which the
+incumbent is still in ofﬁce in her/his eighties or even nineties (e.g.,
+Hans Riegel, the former owner-manager of HARIBO, still went to
+the ofﬁce on an almost daily basis even at the age of 90).
+Contributions
+The article offers relevant contributions that stand at the
+interface of innovation, succession, and the particularistic behavior
+of family ﬁrms. First, prior research on family ﬁrms did not fully
+address the phase of intra-family leadership succession as a peculiar
+time frame for innovation activities. This article extends this largely
+overlooked but highly important literature stream by linking
+innovation activities with the phase of leadership succession (De
+Massis et al., 2013). Second, we are able to conﬁrm the usefulness of
+considering non-economic factors as drivers of family ﬁrm
+behavior. We thereby show that distinguishing between ability
+and willingness helps to 
+better 
+understand the 
+behavioral
+heterogeneity of family ﬁrms in the context of innovation (Chris-
+man et al., in press). We argue that indeed a special time frame of
+leadership succession offers a peculiar environment for family ﬁrms
+to engage in innovation activities but that willingness, i.e., the
+perception of the succession phase as an opportunity for innovation,
+varies depending on different non-economic factors. Moreover, our
+results contribute to the recent discussion of the constraining and
+enabling effects of non-economic factors (Miller & Le Breton-Miller,
+2014; Naldi et al., 2013) and provide empirical support for this
+notion. Third, we conﬁrm and even extend the importance of the
+notion of heterogeneity in family ﬁrms’ behavior by choosing a very
+restricted setting: in our sample, many confounding contextual
+factors as well as formal family inﬂuence (ownership and
+management, thus, the ability to innovate) were held constant
+(Naldi et al., 2013; Thornton, Ocasio, & Lounsbury, 2012). Thus, the
+behavioral heterogeneity of family ﬁrms depending on the
+willingness to innovate is strongly supported by our ﬁndings.
+Limitations and future research
+We acknowledge a variety of limitations associated with
+survey-related data collection and analysis. First, even though in
+line with the majority of related studies (De Massis et al., 2013), we
+used a cross-sectional design not allowing for an empirical test of
+causality. We view the results as indicators of directionality rather
+than absolute proof. A longitudinal data collection approach could
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx 
+11
+
+help in order to establish causal effects and to understand the
+changes in perceptions and related innovation activities over time.
+Additionally, because biases associated with a single informant per
+ﬁrm are a limitation, we suggest a multi-informant approach by,
+e.g., surveying several family members for future research.
+Second, our sample is focused on one industry and region. As
+outlined above, this approach has its merits, but it clearly limits the
+generalizability of our ﬁndings. Future research should expand
+data collection to other industries, geographical regions/cultural
+contexts, family and ﬁrm sizes as well as varying degrees of family
+inﬂuence in terms of ownership and management.
+Third, as our dependent variable refers to the perceived
+suitability of the succession phase for innovation activities, taking
+into account implemented innovation effort and success before,
+during, and after the succession phase could be a fruitful path for
+future research. In fact, it is promising to empirically investigate
+under which conditions innovation is supported in family ﬁrms
+and how the succession phase is substantially different from other
+phases in the family ﬁrm lifecycle regarding the likelihood of
+innovation.26Similarly, investigating the dynamics of non-eco-
+nomic factors during the succession phase and the lifecycle of the
+family ﬁrm might contribute to a better understanding of family
+ﬁrm behavior (Le Breton-Miller & Miller, 2013).
+Fourth, while starting with the owner-managers’ perspective
+and perceptions has its own merits, it would be fruitful to investigate
+the next generation’s perspective, skills, abilities, and motivation in
+the context of innovation (Mitchell et al., 2009).27 Our supplemen-
+tary analysis revealed that owner-managers seem to attribute a
+higher suitability of the succession phase for innovation activities if
+a family internal successor holds experience from outside the focal
+industry. In fact, recent innovation literature started exploring the
+transfer of (already existing) innovative solutions across industry
+borders from analogous domains (Keinz & Pru¨gl, 2010; Poetz &
+Pru¨gl, 2010). We currently lack knowledge on how the (family
+internal) successors’ industry-external experience inﬂuences the
+innovation behavior of family ﬁrms. It could be very interesting to
+see if the potential downside of family CEOs for innovation (e.g.,
+Chen & Hsu, 2009; Chin et al., 2009) could be mitigated by industry-
+external experience. Following up on this, we suggest an exploration
+of whether the investigated relationships differ when comparing
+family and non-family successors as well as when comparing a
+single successor and succeeding teams (e.g., siblings).
+Fifth, predecessors usually enjoy a central role in the family ﬁrm
+(Rubenson & Gupta, 1996) and may inﬂuence decisions even after
+succession and regardless of their formal roles (Davis & Harveston,
+1998). Therefore, a detailed understanding of the predecessors’
+formal and informal inﬂuence on innovation activities could be an
+interesting research topic.28 Finally, the role of succession planning
+could be considered to better illuminate the concept of innovation
+during leadership succession. The degree to which the roles of both
+predecessor and successor are explicitly deﬁned (Lansberg, 1988;
+Mitchell et al., 2009) seems to impact the perception of this phase
+as an opportunity rather than a threat. Thus, the degree to which
+responsibilities and tasks will be clearly divided between both
+generations is able to provide the successor with room for the
+needed innovation activities (Mitchell et al., 2009).
+In addition, our study strongly encourages the (empirical)
+consideration of the heterogeneity of family ﬁrms, the life stage of
+family ﬁrms and distinct phases in the family ﬁrm lifecycle, as well
+as the importance of contextual factors for future research.
+Managerial implications
+Adapting to changes by innovating products and services,
+organizational structures, processes or even business models is
+critical for long-term business survival and should thus be one of the
+core issues for decision-makers. Due to its speciﬁc characteristics, the
+succession phase is a peculiar time frame for innovation activities.
+Therefore, business-owning families should take this unique
+opportunity into account in succession planning – even if succession
+is accompanied by many other challenges. Since non-economic
+factors are both positively and negatively related to this important
+perception, it is recommendable for business-owning families to
+review their family climate and the relationship between the family
+and the ﬁrm. Day-to-day behaviors that support a positive mindset
+toward challenges (adaptability) should be encouraged in families.
+Furthermore, the senior generation should review its intergenera-
+tional and organizational authority, especially around the time frame
+of leadership succession. The dispersion of power, either to non-
+family employees or to family successors, can potentially function as
+an innovation booster during that peculiar phase. Moreover, a
+reciprocal integration of the family and the ﬁrm in order to create a
+close relationship should be encouraged: Talking about current
+strategic or operational business issues at the dinner table and
+fostering adolescents’ activities in the family ﬁrm (e.g., holiday jobs)
+might be appropriate tools to support family members’ closeness to
+the ﬁrm. Finally, we showed that the history of family bonds with the
+ﬁrm is negatively associated with the perception of the succession
+phase as an opportunity for innovation. It is thus recommendable,
+especially for later-stage family ﬁrms, which tend to become stuck in
+their inertial paths, to intentionally seize the opportunities the
+succession process offers for (overdue) innovation activities.
+Acknowledgements
+First of all, we wish to thank the Special Issue Guest Editor
+Nadine Kammerlander as well as the two anonymous reviewers for
+their excellent support in developing this article throughout the
+review process. We also thank Andrea Calabro`, Alfredo De Massis,
+Mark Mietzner, Peter Rosa, and Jelle Schepers for sharing their
+inspiring thoughts and constructive suggestions on this piece on
+several occasions (especially SIG ‘Family Business Research’ at
+EURAM 2014 in Valencia, Spain; IFERA 2014 in Laappeenranta,
+Finland; and IFERA RDW 2014 at FIFO/WU Vienna, Austria).
+Moreover, the FIF Advisory Board, Ulrich Hutschek, Ursula Koners,
+Maximilian Lude, and Martin Jochum deserve our acknowledg-
+ment and gratitude for the family entrepreneurs’ view, moral
+support, and their enabling and supporting role in data collection.
+Last but not least, we thank all interview partners and survey
+participants for making this learning journey possible by dedicat-
+ing their time and energy to this project and openly sharing their
+views and experiences with us.
+Appendix A
+See Fig. 1
+26 The ﬁrst steps to investigate innovation in family ﬁrms in relation to the life
+stage of the family ﬁrm were undertaken by Craig and Moores (2006).
+27 Following Handler (1989) as well as Bjo¨rnberg and Nicholson (2012), we
+strongly encourage future research on successors’ viewpoints because we found
+important hints of this phenomenon in our qualitative interviews. For example, an
+owner-manager argued that they ‘‘had a boost in innovations, mainly caused by long-
+term oriented investments, which will only be realizable once a generation.’’ However,
+we found evidence that the freedom of discretion is a big challenge for the
+succeeding generation – which was in this special case only granted due to the
+predecessor’s sudden illness: ‘‘The advantage was that we could realize projects
+according to our strategic vision and not the vision of my parents.’’
+28 We found evidence in our qualitative and quantitative data that the willingness
+to let go and give the successor freedom of discretion is critical: ‘‘If the senior
+generation is not able to let go, problems are inevitable.’’ In fact, this owner-manager’s
+retired father stated that ‘‘To be honest, the more we kept our nose out of operations
+and decision making, the better it got.’’
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx
+12
+
+References
+Adner, R. (2012). The wide lens: A new strategy for innovation.. London: Penguin.
+Aldrich, H. E., & Cliff, J. E. (2003). The pervasive effects of family on entrepreneurship:
+Toward a family embeddedness perspective. Journal of Business Venturing, 18(5),
+573–596.
+Andersen, R. (2004). Regression models for ordinal data. In M. Lewis-Beck, A. Bryman, &
+T. Liao (Eds.), Encyclopedia of social science research methods (pp. 942–943).
+Thousand Oaks, CA: SAGE Publications, Inc.
+Armstrong, J. S., & Overton, T. S. (1977). Estimating nonresponse bias in mail surveys.
+Journal of Marketing Research, 14(3), 396–402.
+Au, K., Chiang, F. F., Birtch, T. A., & Ding, Z. (2013). Incubating the next generation to
+venture: The case of a family business in Hong Kong. Asia Paciﬁc Journal of
+Management, 30(3), 749–767.
+Bammens, Y., Voordeckers, W., & Van Gils, A. (2008). Boards of directors in family ﬁrms:
+A generational perspective. Small Business Economics, 31(2), 163–180.
+Basco, R. (2013). The family’s effect on family ﬁrm performance: A model testing
+the demographic and essence approaches. Journal of Family Business Strategy, 4(1),
+42–66.
+Beck, L., Janssens, W., Debruyne, M., & Lommelen, T. (2011). A study of the relationships
+between generation, market orientation, and innovation in family ﬁrms. Family
+Business Review, 24(3), 252–272.
+Beckhard, R., & Dyer, W. G., Jr. 
+(1983). Managing continuity in the family-owned
+business. Organizational Dynamics, 12(1), 5–12.
+Bergfeld, M.-M.H., & Weber, F.-M. (2011). Dynasties of innovation: Highly performing
+German family ﬁrms and the owners’ role for innovation. International Journal of
+Entrepreneurship and Innovation Management, 13(1), 80–94.
+Berrone, P., Cruz, C., & Go´mez-Mejı´a, L. R. (2012). Socioemotional wealth in family ﬁrms
+theoretical dimensions, assessment approaches, and agenda for future research.
+Family Business Review, 25(3), 258–279.
+Berrone, P., Cruz, C., Go´mez-Mejı´a, L. R., & Larraza-Kintana, M. (2010). Socioemotional
+wealth and corporate responses to institutional pressures: Do family-controlled
+ﬁrms pollute less? Administrative Science Quarterly, 55(1), 82–113.
+Binz, C., Hair, J. F., Pieper, T. M., & Baldauf, A. (2013). Exploring the effect of distinct
+family ﬁrm reputation on consumers’ preferences. Journal of Family Business
+Strategy, 4(1), 3–11.
+Birley, S. (2002). Attitudes of owner-managers’ children towards family and business
+issues. Entrepreneurship: Theory & Practice, 26(3), 5–19.
+Bjo¨rnberg, A˚ ., & Nicholson, N. (2007). The family climate scales—Development of a
+new measure for use in family business research. Family Business Review, 20(3),
+229–246.
+Bjo¨rnberg, A˚ ., & Nicholson, N. (2012). Emotional ownership the next generation’s
+relationship with the family ﬁrm. Family Business Review, 25(4), 374–390.
+Block, J. H. (2012). R&D investments in family and founder ﬁrms: An agency perspec-
+tive. Journal of Business Venturing, 27(2), 248–265.
+Brislin, R. W. (1970). Back-translation for cross-cultural research. Journal of Cross-
+Cultural Psychology, 1(3), 185–216.
+Cabrera-Sua´rez, K., De Saa´-Pe´rez, P., & Garcı´a-Almeida, D. (2001). The succession
+process from a resource-and knowledge-based view of the family ﬁrm. Family
+Business Review, 14(1), 37–46.
+Cariﬁo, J., & Perla, R. J. (2007). Ten common misunderstandings, misconceptions,
+persistent myths and urban legends about Likert scales and Likert response
+formats and their antidotes. Journal of Social Sciences, 3(3), 106–116.
+Carrigan, M., & Buckley, J. (2008). ‘What’s so special about family business? An
+exploratory study of UK and Irish consumer experiences of family businesses.
+International Journal of Consumer Studies, 32(6), 656–666.
+Cassia, L., De Massis, A., & Pizzurno, E. (2011). An exploratory investigation on NPD in
+small family businesses from northern Italy. International Journal of Business,
+Management and Social Sciences, 2(2), 1–14.
+Chen, H.-L., & Hsu, W.-T. (2009). Family ownership, board independence, and R&D
+investment. Family Business Review, 22(4), 347–362.
+Chin, C.-L., Chen, Y.-J., Kleinman, G., & Lee, P. (2009). Corporate ownership structure and
+innovation: Evidence from Taiwan’s electronics industry,. Journal of Accounting,
+Auditing & Finance, 24(1), 145–175.
+Chrisman, J.J., Chua, J.H., De Massis, A., Frattini, F., & Wright, M. (in press). The ability
+and willingness paradox in family ﬁrm innovation. Journal of Product Innovation
+Management.
+Chrisman, J. J., Chua, J. H., Pearson, A. W., & Barnett, T. (2012). Family involvement,
+family inﬂuence, and family-centered non-economic goals in small ﬁrms. Entre-
+preneurship Theory and Practice, 36(2), 267–293.
+Chrisman, J. J., Chua, J. H., & Sharma, P. (1998). Important attributes of successors
+in family businesses: An exploratory study. Family Business Review, 11(1), 19–34.
+Chrisman, J. J., & Patel, P. C. (2012). Variations in R&D investments of family and
+nonfamily ﬁrms: Behavioral agency and myopic loss aversion perspectives.
+Academy of Management Journal, 55(4), 976–997.
+Chua, J. H., Chrisman, J. J., & Sharma, P. (1999). Deﬁning the Family Business by
+Behavior. Entrepreneurship Theory & Practice, 23(4), 19–39.
+Classen, N., Van Gils, A., Bammens, Y., & Carree, M. (2012). Accessing resources from
+innovation partners: The search breadth of family SMEs. Journal of Small Business
+Management, 50(2), 191–215.
+Craig, J., & Dibrell, C. (2006). The natural environment, innovation, and ﬁrm perfor-
+mance: A comparative study. Family Business Review, 19(4), 275–288.
+Craig, J. B., & Moores, K. (2006). A 10-year longitudinal investigation of strategy,
+systems, and environment on innovation in family ﬁrms. Family Business Review,
+19(1), 1–10.
+Cruz, C., Justo, R., & De Castro, J. O. (2012). Does family employment enhance MSEs
+performance? Integrating socioemotional wealth and family embeddedness
+perspectives. Journal of Business Venturing, 27(1), 62–76.
+Cruz, C., & Nordqvist, M. (2012). Entrepreneurial orientation in family ﬁrms:
+A generational perspective. Small Business Economics, 38(1), 33–49.
+Cruz, C. C., Go´mez-Mejı´a, L. R., & Becerra, M. (2010). Perceptions of benevolence and the
+design of agency contracts: CEO-TMT relationships in family ﬁrms. Academy of
+Management Journal, 53(1), 69–89.
+Czarnitzki, D., & Kraft, K. (2009). Capital control, debt ﬁnancing and innovative activity.
+Journal of Economic Behavior & Organization, 71(2), 372–383.
+Damanpour, F. (1991). Organizational innovation: A meta-analysis of effects of deter-
+minants and moderators. Academy of Management Journal, 34(3), 555–590.
+Davis, J. H., Allen, M. R., & Hayes, H. D. (2010). Is blood thicker than water? A study of
+stewardship perceptions in family business. Entrepreneurship Theory and Practice,
+34(6), 1093–1116.
+Davis, P. S., & Harveston, P. D. (1998). The inﬂuence of family on the family business
+succession process: A multi-generational perspective. Entrepreneurship Theory and
+Practice, 22(3), 31–54.
+Davis, P. S., & Harveston, P. D. (1999). In the founder’s shadow: Conﬂict in the family
+ﬁrm. Family Business Review, 12(4), 311–323.
+De Massis, A., Frattini, F., & Lichtenthaler, U. (2013). Research on technological
+innovation in family ﬁrms present debates and future directions. Family Business
+Review, 26(1), 10–31.
+De Massis, A., Kotlar, J., Chua, J. H., & Chrisman, J. J. (2014). Ability and willingness as
+sufﬁciency conditions for family-oriented particularistic behavior: Implications
+for theory and empirical studies. Journal of Small Business Management, 52(2),
+344–364.
+Dijksterhuis, A., & van Knippenberg, A. (1998). The relation between perception and
+behavior, or how to win a game of trivial pursuit. Journal of Personality and Social
+Psychology, 74(4), 865–877.
+Drucker, P. (1985). Innovation and entrepreneurship. New York, NY: Harper & Row.
+Dunn, B. (1996). Family enterprises in the UK: A special sector? Family Business Review,
+9(2), 139–155.
+Dyer, W. G. (2003). The family: The missing variable in organizational research.
+Entrepreneurship Theory & Practice, 27(4), 401–416.
+Dyer, W. G., & Dyer, W. J. (2009). Putting the family into family business research.
+Family Business Review, 22(3), 216–219.
+F: Family Contro
+ 
+l and
+influence
+I: Identificatio
+ 
+n of famil y
+member s wit h th e fir m
+B: Bind ing  socia
+ 
+l tie
+ 
+s
+E: Emotional attachment of
+famil y member s
+R: Renewal of famil y bonds
+through dynastic succession
+Investment
+ 
+ in socia
+ 
+l tie
+ 
+s
+(Cruz et  al.,
+ 
+ 2012)
+Family firm
+ 
+-
+community  relat
+ 
+ion
+Family  member‘ s closenes
+ 
+s to fir m (Birle
+ 
+y, 
+2002; Björnberg & Nicholson, 2012)
+Family-firm
+relation
+Histor y of famil y bonds
+(Zell
+ 
+weger et  al.,
+ 
+ 2012)
+FIBER Di mensions according to
+Berrone et al.
+ 
+ (2012
+ 
+)
+Dimension
+ 
+s of SEW accordin
+ 
+g to thi
+ 
+s pape
+ 
+r
+Adaptabilit
+ 
+y
+(Björnberg & Nicholson, 2007)
+Family infl uence
+Intergenerational
+ 
+ authorit
+ 
+y
+(Björnberg & Nicholson, 2007)
+Family ownershi
+ 
+p & manag
+ 
+ement1
+Fig. 1. FIBER Dimensions of SEW and dimensions of SEW in this article.
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx 
+13
+
+Evans, D. S. (1987). The relationship between ﬁrm growth, size, and age: Estimates for
+100 manufacturing industries. Journal of Industrial Economics, 35(4), 567–581.
+Field, A. P. (2011). Discovering statistics using SPSS (3rd ed.). Los Angeles: Sage.
+Finkelstein, S., & Hambrick, D. C. (1990). Top-management-team tenure and organiza-
+tional outcomes: The moderating role of managerial discretion. Administrative
+Science Quarterly, 35(3), 484–503.
+Fredrickson, J. W., & Iaquinto, A. L. (1989). Inertia and creeping rationality in strategic
+decision processes. Academy of Management Journal, 32(3), 516–542.
+Freeman, J. (1977). The population ecology of organizations. American Journal of
+Sociology, 82(5), 929–964.
+Gersick, K. E., Davis, J. A., Hampton, M. M., & Lansberg, I. (1997). Generation to
+generation: Life cycles of the family business. Boston: Harvard Business School Press.
+Gersick, K. E., Lansberg, I., Desjardins, M., & Dunn, B. (1999). Stages and transitions:
+Managing change in the family business. Family Business Review, 12(4), 287–297.
+Ghemawat, P. (1991). Commitment: The dynamic of strategy. New York: Free Press.
+Glass, G. V., Peckham, P. D., & Sanders, J. R. (1972). Consequences of failure to meet
+assumptions underlying the ﬁxed effects analyses of variance and covariance.
+Review of Educational Research, 42(3), 237–288.
+Go´mez-Mejı´a, L. R., Cruz, C., Berrone, P., & De Castro, J. (2011). The bind that ties:
+Socioemotional wealth preservation in family ﬁrms. Academy of Management
+Annals, 5(1), 653–707.
+Go´mez-Mejı´a, L. R., Haynes, K. T., Nu´ n˜ez-Nickel, M., Jacobson, K. J., & Moyano-Fuentes, J.
+(2007). Socioemotional wealth and business risks in family-controlled ﬁrms: Evi-
+dence from Spanish olive oil mills. Administrative Science Quarterly, 52(1), 106–137.
+Granovetter, M. S. (1973). The strength of weak ties. American Journal of Sociology,
+78(6), 1360–1380.
+Grotevant, H. D., & Carlson, C. I. (1989). Family assessment: A guide to methods and
+measures. New York: Guilford Press.
+Gudmundson, D., Tower, C. B., & Hartman, E. A. (2003). Innovation in small businesses:
+Culture and ownership structure do matter. Journal of Developmental Entrepreneur-
+ship, 8(1), 1–18.
+Habbershon, T. G., & Williams, M. L. (1999). A resource-based framework for assessing
+the strategic advantages of family ﬁrms. Family Business Review, 12(1), 1–25.
+Hair, J. F., Black, B., Babin, B., Anderson, R. E., & Tatham, R. I. (2006). Multivariate data
+analysis. Upper Saddle River, NJ: Prentice Hall.
+Hall, A., Melin, L., & Nordqvist, M. (2004). Entrepreneurship as radical change in the
+family business: Exploring the role of cultural patterns. Family Business Review,
+14(3), 193–208.
+Hambrick, D. C., & Fukutomi, G. D. (1991). The seasons of a CEO’s tenure. Academy of
+Management Review, 16(4), 719–742.
+Hambrick, D. C., Geletkanycz, M. A., & Fredrickson, J. W. (1993). Top executive
+commitment to the status quo: Some tests of its determinants. Strategic Manage-
+ment Journal, 14(6), 401–418.
+Handler, W. C. (1989). Methodological issues and considerations in studying family
+businesses. Family Business Review, 2(3), 257–276.
+Handler, W. C. (1992). The succession experience of the next generation. Family
+Business Review, 5(3), 283–307.
+Handler, W. C. (1994). Succession in family business: A review of the research. Family
+Business Review, 7(2), 133–157.
+Harveston, P. D., Davis, P. S., & Lyden, J. A. (1997). Succession planning in family
+business: The impact of owner gender. Family Business Review, 10(4), 373–396.
+Henderson, A. D., Miller, D., & Hambrick, D. C. (2006). How quickly do CEOs become
+obsolete? Industry dynamism, CEO tenure, and company performance. Strategic
+Management Journal, 27(5), 447–460.
+Hirigoyen, G., & Labaki, R. (2012). The role of regret in the owner-manager decision-
+making in the family business: A conceptual approach. Journal of Family Business
+Strategy, 3(2), 118–126.
+Hoy, F., & Sharma, P. (2010). Entrepreneurial family ﬁrms. New York, NY: Prentice Hall.
+Hsu, L.-C., & Chang, H.-C. (2011). The role of behavioral strategic controls in family ﬁrm
+innovation. Industry and Innovation, 18(7), 709–727.
+James, W. (1890). Principles of psychology. New York: Holt.
+Kammerlander, N., & Ganter, M. (in press). Attention-based view of family ﬁrm
+adaptation to discontinuities: The role of non-ﬁnancial goals. Journal of Product
+Innovation Management.
+Keinz, P., & Pru¨gl, R. (2010). A user community-based approach to leveraging techno-
+logical competences: An exploratory case study of a technology start-up from MIT.
+Creativity and Innovation Management, 19(3), 269–289.
+Kellermanns, F. W., Eddleston, K. A., Barnett, T., & Pearson, A. (2008). An exploratory
+study of family member characteristics and involvement: Effects on entrepreneur-
+ial behavior in the family ﬁrm. Family Business Review, 21(1), 1–14.
+Kellermanns, F. W., Eddleston, K. A., Sarathy, R., & Murphy, F. (2012). Innovativeness
+in family ﬁrms: A family inﬂuence perspective. Small Business Economics, 38(1),
+85–101.
+Kellermanns, F. W., Eddleston, K. A., & Zellweger, T. M. (2012). Extending the socio-
+emotional wealth perspective: A look at the dark side. Entrepreneurship: Theory &
+Practice, 36(6), 1175–1182.
+Kepner, E. (1991). The family and the ﬁrm: A coevolutionary perspective. Family
+Business Review, 4(4), 445–461.
+Kohli, A. K., & Jaworski, B. J. (1990). Market orientation: The construct, research
+propositions, and managerial implications. Journal of Marketing, 54(2), 1–18.
+Ko¨nig, A., Kammerlander, N., & Enders, A. (2013). The family innovator’s dilemma: How
+family inﬂuence affects the adoption of discontinuous technologies by incumbent
+ﬁrms. Academy of Management Review, 38(3), 418–441.
+Kotlar, J., & De Massis, A. (2013). Goal setting in family ﬁrms: Goal diversity, social
+interactions, and collective commitment to family-centered goals. Entrepreneur-
+ship: Theory & Practice, 37(6), 1263–1288.
+Kotlar, J., De Massis, A., Frattini, F., Bianchi, M., & Fang, H. (2013). Technology acquisi-
+tion in family and nonfamily ﬁrms: A longitudinal analysis of Spanish manufactur-
+ing ﬁrms. Journal of Product Innovation Management, 30(6), 1073–1088.
+Kumar, N., Stern, L. W., & Anderson, J. C. (1993). Conducting interorganizational
+research using key informants. Academy of Management Journal, 36(6), 1633–1651.
+La Porta, R., Lopez-de-Silanes, F., & Shleifer, A. (1999). Corporate ownership around the
+world. Journal of Finance, LIV(2), 471–517.
+Lansberg, I. (1988). The succession conspiracy. Family Business Review, 1(2), 119–143.
+Le Breton-Miller, I., Miller, D., & Steier, L. P. (2004). Toward an integrative model of
+effective FOB succession. Entrepreneurship Theory and Practice, 28(4), 305–328.
+Le Breton-Miller, I., & Miller, D. (2013). Socioemotional wealth across the family ﬁrm
+life cycle: A commentary on ‘‘Family Business Survival and the Role of Boards’’.
+Entrepreneurship Theory and Practice, 37(6), 1391–1397.
+Ling, Y., & Kellermanns, F. W. (2010). The effects of family ﬁrm speciﬁc sources of TMT
+diversity: The moderating role of information exchange frequency. Journal of
+Management Studies, 47(2), 322–344.
+Litz, R. A., & Kleysen, R. F. (2001). Your old men shall dream dreams, your young men
+shall see visions: Toward a theory of family ﬁrm innovation with help from the
+Brubeck family. Family Business Review, 14(4), 335–352.
+Llach, J., & Nordqvist, M. (2010). Innovation in family and non-family businesses: A
+resource perspective. International Journal of Entrepreneurial Venturing, 2(3), 381–399.
+Longenecker, J. G., & Schoen, J. E. (1978). Management succession in the family
+business. Journal of Small Business Management, 16(3), 1–6.
+Martı´nez-Ros, E., & Orﬁla-Sintes, F. (2012). Training plans, manager’s characteristics
+and innovation in the accommodation industry. International Journal of Hospitality
+Management, 31(3), 686–964.
+Miller, D. (1991). Stale in the saddle: CEO tenure and the match between organization
+and environment. Management Science, 37(1), 34–52.
+Miller, D., Le Breton-Miller, I., & Lester, R. H. (2013). Family ﬁrm governance, strategic
+conformity, and performance: Institutional vs. strategic perspectives. Organization
+Science, 24(1), 189–209.
+Miller, D., & Le Breton-Miller, I. (2014). Deconstructing Socioemotional Wealth. Entre-
+preneurship Theory and Practice, 38(4), 713–720.
+Miller, D., Le Breton-Miller, I., & Scholnick, B. (2008). Stewardship vs. stagnation: An
+empirical comparison of small family and non-family businesses. Journal of Man-
+agement Studies, 45(1), 51–78.
+Miller, D., Steier, L., & Le Breton-Miller, I. (2003). Lost in time: Intergenerational
+succession, change, and failure in family business. Journal of Business Venturing,
+18(4), 513–531.
+Milliken, F. J., Martins, L. L., & Morgan, H. (1998). Explaining organizational respon-
+siveness to work-family issues: The role of human resource executives as issue
+interpreters. Academy of Management Journal, 41(5), 580–592.
+Mitchell, J. R., Hart, T. A., Valcea, S., & Townsend, D. M. (2009). Becoming the boss:
+Discretion and postsuccession success in family ﬁrms. Entrepreneurship Theory and
+Practice, 33(6), 1201–1218.
+Molly, V., Laveren, E., & Deloof, M. (2010). Family business succession and its impact on
+ﬁnancial structure and performance. Family Business Review, 23(2), 131–147.
+Munari, F., Oriani, R., & Sobrero, M. (2010). The effects of owner identity and external
+governance systems on R&D investments: A study of Western European ﬁrms.
+Research Policy, 39(8), 1093–1104.
+Mun˜oz-Bullo´n, F., & Sanchez-Bueno, M. J. (2011). The impact of family involvement
+on the R&D intensity of publicly traded ﬁrms. Family Business Review, 24(1), 62–70.
+Nahapiet, J., & Ghoshal, S. (1998). Social capital, intellectual capital, and the organiza-
+tional advantage. Academy of Management Review, 23(2), 242–266.
+Naldi, L., Cennamo, C., Corbetta, G., & Go´mez-Mejı´a, L. (2013). Preserving socioemo-
+tional wealth in family ﬁrms: Asset or liability? The moderating role of business
+context. Entrepreneurship Theory and Practice, 37(6), 1341–1360.
+Ng, T. W., Feldman, D. C., & Lam, S. S. (2010). Psychological contract breaches,
+organizational commitment, and innovation-related behaviors: A latent growth
+modeling approach. Journal of Applied Psychology, 95(4), 744.
+Nicolau, J. L., & Santa-Marı´a, M. J. (2013). The effect of innovation on hotel market value.
+International Journal of Hospitality Management, 32(1), 71–79.
+Nunnally, J. C., & Bernstein, I. H. (1994). Psychometric theory (3rd ed.). New York:
+McGraw-Hill.
+Olson, D. H. (1988). The circumplex model of family systems VIII: Family assessment
+and intervention. In D. H. Olson, C. S. Russell, & D. H. Sprenkle (Eds.), The circumplex
+model: Systemic assessment and treatment of families. New York: Haworth.
+Peters, M., & Buhalis, D. (2004). Family hotel businesses: Strategic planning and the
+need for education and training. Education + Training, 46(8/9), 406–415.
+Pfeffer, J., & Salancik, G. R. (1978). The external control of organizations: A resource
+dependence perspective. New York: Harper & Row.
+Pikkemaat, B. (2008). Innovation in small and medium-sized tourism enterprises
+in Tyrol Austria. International Journal of Entrepreneurship and Innovation, 9(3),
+187–197.
+Pikkemaat, B., & Peters, M. (2006). Towards the measurement of innovation—A pilot
+study in the small and medium sized hotel industry. Journal of Quality Assurance in
+Hospitality & Tourism, 6(3–4), 89–112.
+Pleininger, H. (2014). Familienbetriebe setzen 365 Milliarden s um. Wirtschafts Blatt
+Retrieved from http://wirtschaftsblatt.at/home/events/familienunternehmen/
+1570141/Familienbetriebe-setzen-365-Milliarden-um
+Podsakoff, P. M., MacKenzie, S. B., Jeong-Yeon, L., & Podsakoff, N. P. (2003). Common
+method biases in behavioral research: A critical review of the literature and
+recommended remedies. Journal of Applied Psychology, 88(5), 879.
+Poetz, M. K., & Pru¨ gl, R. (2010). Crossing domain-speciﬁc boundaries in search of
+innovation: Exploring the potential of pyramiding. Journal of Product Innovation
+Management, 27(6), 897–914.
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx
+14
+
+Porter, M. E. (1990). The competitive advantage of nations. New York [u.a.] Free Press.
+Powell, T. C. (1996). Research notes and communications. How much does industry
+matter? An alternative empirical test. Strategic Management Journal, 17(4), 323–334.
+Prahalad, C. K., & Bettis, R. A. (1986). The dominant logic: A new linkage between
+diversity and performance. Strategic Management Journal, 7(6), 485–501.
+Quigley, T. J., & Hambrick, D. C. (2012). When the former CEO stays on as board chair:
+Effects on successor discretion, strategic change, and performance. Strategic Man-
+agement Journal, 33(7), 834–859.
+Romanelli, E., & Tushman, M. L. (1994). Organizational transformation as punctuated
+equilibrium: 
+An 
+empirical 
+test. 
+Academy 
+of 
+Management 
+Journal, 
+37(5),
+1141–1166.
+Rubenson, G. C., & Gupta, A. K. (1996). The initial succession: A contingency model of
+founder tenure. Entrepreneurship Theory and Practice, 21(2), 21–35.
+Salvato, C. (2004). Predictors of entrepreneurship in family ﬁrms. Journal of Private
+Equity, 7(3), 68–76.
+Schumpeter, J. A. (1934). The theory of economic development (14th print. ed.). New
+Brunswick, NJ [u.a.] Transaction Publ..
+Seidler, J. (1974). On using informants: A technique for collecting quantitative data and
+controlling measurement error in organization analysis. American Sociological
+Review, 39(6), 816–831.
+Sharma, P., Chrisman, J. J., & Chua, J. H. (1997). Strategic management of the family
+business: Past research and future challenges. Family Business Review, 10(1),
+1–35.
+Sharma, P., Chrisman, J. J., Pablo, A. L., & Chua, J. H. (2001). Determinants of initial
+satisfaction with the succession process in family ﬁrms: A conceptual model.
+Entrepreneurship Theory and Practice, 25(3), 17–36.
+Smeral, E., & Witt, S. F. (1996). Econometric forecasts of tourism demand to 2005.
+Annals of Tourism Research, 23(4), 891–907.
+Spriggs, M., Yu, A., Deeds, D., & Sorenson, R. L. (2013). Too many cooks in the kitchen
+innovative capacity, collaborative network orientation, and performance in small
+family businesses. Family Business Review, 26(1), 32–50.
+Sternberg, L., & Lu¨ ckgen, I. (2005). Global entrepreneurship monitor – German report.
+Germany: Cologne.
+Sundbo, J., Orﬁla-Sintes, F., & Sørensen, F. (2007). The innovative behaviour of
+tourism ﬁrms—Comparative studies of Denmark and Spain. Research Policy,
+36(1), 88–106.
+Sydow, J., Schreyo¨gg, G., & Koch, J. (2009). Organizational path dependence: Opening
+the black box. Academy of Management Review, 34(4), 689–709.
+Tabachnick, B. G., & Fidell, L. S. (1996). Using Multivariate Statistics. New York:
+HarperCollins.
+Tagiuri, R., & Davis, J. A. (1992). On the goals of successful family companies. Family
+Business Review, 5(1), 43–62.
+Teal, E. J., Upton, N., & Seaman, S. L. (2003). A comparative analysis of strategic
+marketing practices of high-growth US family and non-family ﬁrms. Journal of
+Developmental Entrepreneurship, 8(2), 177–195.
+Teece, D. J. (2006). Reﬂections on ‘‘proﬁting from innovation’’. Research Policy, 35(8),
+1131–1146.
+Thornton, P. H., Ocasio, W., & Lounsbury, M. (2012). The institutional logics perspective:
+A new approach to culture, structure and process. Oxford: Oxford University Press.
+Tripsas, M., & Gavetti, G. (2000). Capabilities, cognition, and inertia: Evidence from
+digital imaging. Strategic Management Journal, 21(10–11), 1147–1161.
+Uhlaner, L. M. (2006). Business family as a team: Underlying force for sustained
+competitive advantage. In P. Z. Poutziouris, K. X. Smyrnios, & S. B. Klein (Eds.),
+Handbook of research on family business (pp. 125–144). Cheltenham, England:
+Edward Elgar.
+Vandekerkhof, P., Steijvers, T., Hendriks, W., & Voordeckers, W. (in press). The effect of
+organizational characteristics on the appointment of nonfamily managers in
+private family ﬁrms: The moderating role of socioemotional wealth. Family
+Business Review.
+Villalonga, B., & Amit, R. (2009). How are US family ﬁrms controlled? Review of Financial
+Studies, 22(8), 3047–3091.
+Volery, T., Bergmann, H., Gruber, M., Haour, G., & Leleux, B. (2007). Global Entrepreneur-
+ship Monitor – Swiss executive report. St. Gallen, Switzerland University of St. Gallen.
+von Schlippe, A., & Frank, H. (2013). The theory of social systems as a framework for
+understanding family businesses. Family Relations, 63(3), 384–398.
+Walsh, F. (1998). Strengthening family resilience. New York: Guilford Press.
+Westhead, P., Howorth, C., & Cowling, M. (2002). Ownership and management issues in
+ﬁrst generation and multi-generation family ﬁrms. Entrepreneurship & Regional
+Development, 14(3), 247–269.
+Zahra, S. A. (2005). Entrepreneurial risk taking in family ﬁrms. Family Business Review,
+18(1), 23–40.
+Zahra, S. A., Hayton, J. C., & Salvato, C. (2004). Entrepreneurship in family vs. non-family
+ﬁrms: A resource-based analysis 
+of the effect of organizational 
+culture.
+Entrepreneurship Theory and Practice, 28(4), 363–381.
+Zahra, S. A., Neubaum, D. O., & Huse, M. (2000). Entrepreneurship in medium-size
+companies: Exploring the effects of ownership and governance systems. Journal of
+Management, 26(5), 947–976.
+Zajonc, R. B. (2001). Mere exposure: A gateway to the subliminal. Current Directions in
+Psychological Science, 10(6), 224–228.
+Zellweger, T. M., & Astrachan, J. H. (2008). On the emotional value of owning a ﬁrm.
+Family Business Review, 21(4), 347–363.
+Zellweger, T. M., Kellermanns, F. W., Chrisman, J. J., & Chua, J. H. (2012). Family control
+and family ﬁrm valuation by family CEOs: The importance of intentions for
+transgenerational control. Organization Science, 23(3), 851–868.
+G Model
+JFBS-157; No. of Pages 15
+Please cite this article in press as: Hauck, J., & Pru¨gl, R. Innovation activities during intra-family leadership succession in family ﬁrms: An
+empirical study from a socioemotional wealth perspective. Journal of Family Business Strategy (2015), http://dx.doi.org/10.1016/
+j.jfbs.2014.11.002
+J. Hauck, R. Pru¨gl / Journal of Family Business Strategy xxx (2015) xxx–xxx 
+15

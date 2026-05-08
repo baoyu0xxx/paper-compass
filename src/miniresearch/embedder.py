@@ -165,10 +165,17 @@ class Embedder:
         cfg = self._cloud_config
         all_vectors: List[List[float]] = []
 
-        for i in range(0, len(texts), batch_size):
-            batch = texts[i : i + batch_size]
-            vectors = self._call_cloud_api(batch, cfg)
-            all_vectors.extend(vectors)
+        # Volcengine multimodal only supports 1 text per request
+        is_multimodal = "volces" in cfg.get("base_url", "") or "multimodal" in cfg.get("base_url", "")
+        if is_multimodal:
+            for text in texts:
+                vectors = self._call_cloud_api([text], cfg)
+                all_vectors.extend(vectors)
+        else:
+            for i in range(0, len(texts), batch_size):
+                batch = texts[i : i + batch_size]
+                vectors = self._call_cloud_api(batch, cfg)
+                all_vectors.extend(vectors)
 
         return all_vectors
 

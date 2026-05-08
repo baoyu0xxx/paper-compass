@@ -165,57 +165,58 @@ def vector_search(
 ) -> List[Dict[str, Any]]:
     """Semantic vector search using ChromaDB.
 
-    Args:
-        query: Search query.
-        collection: 'papers' or 'wiki'.
-        k: Number of results.
-        db_path: ChromaDB directory.
-
-    Returns:
-        List of result dicts with id, document, metadata, score.
+    Auto-detects embedding model and dimension from existing collections.
     """
+    from miniresearch.embedder import Embedder
+    from miniresearch.vector_store import VectorStore
+    import chromadb as _cdb
+    from chromadb.config import Settings as _CSet
+
+    _load_env()
+
+    db_dir = Path(db_path)
+    if not db_dir.exists():
+        return []
+
+    # Discover collections via ChromaDB API (same Settings as VectorStore)
+    _client = _cdb.PersistentClient(path=db_path, settings=_CSet(anonymized_telemetry=False))
     try:
-        from miniresearch.embedder import Embedder
-        from miniresearch.vector_store import VectorStore
-
-        _load_env()
-
-        embedder = Embedder()
-        # Try to auto-detect model from existing collection
-        try:
-            import chromadb
-            client = chromadb.PersistentClient(path=db_path)
-            cols = client.list_collections()
-            matching = [c for c in cols if c.name.startswith(collection)]
-            if matching:
-                # Use first matching collection's model
-                store = VectorStore(db_path=db_path, collection_name=collection,
-                                   embedding_model_id="volcengine:doubao-embedding-vision-250615")
-                embedder.configure_cloud(
-                    provider="volcengine",
-                    base_url=os.environ.get("VOLC_EMBED_BASE_URL", ""),
-                    api_key=os.environ.get("VOLC_EMBED_API_KEY", ""),
-                    model=os.environ.get("VOLC_EMBED_MODEL", ""),
-                    dimension=1024,
-                )
-            else:
-                return []
-        except Exception:
+        cols = _client.list_collections()
+        matching = [c for c in cols if c.name.startswith(collection + "_")]
+        if not matching:
             return []
 
-        query_emb = embedder.embed_single(query)
-        results = store.search(query_emb, k=k)
+        # Get model_id from collection metadata
+        meta = matching[0].metadata
+        model_id = meta.get("embedding_model", "volcengine:unknown")
 
-        formatted = []
-        for i, chunk_id in enumerate(results["ids"]):
-            formatted.append({
-                "id": chunk_id,
-                "document": results["documents"][i],
-                "metadata": results["metadatas"][i] if results["metadatas"] else {},
-                "distance": results["distances"][i],
-                "score": round(1.0 / (1.0 + results["distances"][i]), 4),
-            })
-        return formatted
+        # Detect vector dimension
+        _sample = matching[0].get(limit=1, include=["embeddings"])
+        actual_dim = 2048
+        if _sample and _sample.get("embeddings") and _sample["embeddings"]:
+            actual_dim = len(_sample["embeddings"][0])
+    finally:
+        _client.clear_system_cache()
 
-    except Exception:
-        return []
+    embedder = Embedder()
+    embedder.configure_cloud("volcengine",
+        os.environ.get("VOLC_EMBED_BASE_URL", ""),
+        os.environ.get("VOLC_EMBED_API_KEY", ""),
+        os.environ.get("VOLC_EMBED_MODEL", ""),
+        actual_dim)
+
+    store = VectorStore(db_path=db_path, collection_name=collection,
+                       embedding_model_id=model_id)
+    query_emb = embedder.embed_single(query)
+    results = store.search(query_emb, k=k)
+
+    formatted = []
+    for i, chunk_id in enumerate(results["ids"]):
+        formatted.append({
+            "id": chunk_id,
+            "document": results["documents"][i],
+            "metadata": results["metadatas"][i] if results["metadatas"] else {},
+            "distance": results["distances"][i],
+            "score": round(1.0 / (1.0 + results["distances"][i]), 4),
+        })
+    return formatted

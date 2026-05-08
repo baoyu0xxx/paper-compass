@@ -1,0 +1,2473 @@
+A Far-Reaching Parental Love? Co-Governance of
+Intergenerational Succession and Innovation
+Activities in Chinese Family Firms
+Zhenduo Zhu1 and Yuanfei Kang2
+1Guangdong University of Foreign Studies, China, and
+2Massey University, New Zealand
+ABSTRACT
+Motivated by the research gap on intergenerational succession dynamics of
+family firms, this study examines the effects of initiating intergenerational succession on
+firms’ innovation activities. We propose that initiation of intra-family succession can result
+in founder–successor co-governance that represents a strategic transition to the succession
+and incorporates the two conflicting yet complementary directions of change and
+continuity. Grounded in the theory of altruism, we suggest that co-governance will
+positively affect firms’ innovation activities and that this positive link is contingent on the
+idiosyncratic intra-family relationships of kinship type, age difference, and
+gender difference between the founder and the successor. Furthermore, we posit that
+co-governance will lead to a flow of resources to low risk, rather than more inventive but
+higher risk, innovations. Based on the unbalanced panel data of 4,694 firm-year
+observations in our sample from listed Chinese family firms during the 2006–2015 period,
+empirical analysis supports our hypotheses and confirms that when examining family firms’
+innovation, there is a need to take the heterogeneity of the intra-family governance
+structure more fully into consideration.
+KEYWORDS altruism, co-governance, innovation, intergenerational succession
+ACCEPTED BY Deputy Editor Peter Ping Li
+INTRODUCTION
+Intergenerational succession has long been a significant topic in family firm
+research (Dyer & Sánchez, 1998; Garcia, Sharma, De Massis, Wright, &
+Scholes, 2019; Gilding, Gregory, & Cosson, 2015; Le Breton-Miller, Miller, &
+Steier, 2004; Shi, Graves, & Barbera, 2019), as a smooth succession plays a
+crucial role in the sustainable growth of family firms. The succession issue is espe-
+cially important for family firms in China, because first-generation entrepreneurs
+as the family firm founders and owners, who emerged in the process of China’s
+opening up and economic reform, are increasingly reaching an advanced age
+Corresponding author: Yuanfei Kang (y.kang@massey.ac.nz)
+Management and Organization Review 18:2, April 2022, 358–394
+doi: 10.1017/mor.2021.45
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+and the family firms they created are facing an urgent need for intergenerational
+succession. Moreover, intergenerational succession is even more difficult for first-
+generation family firms, as these firms have a strong dependence on the founders
+in terms of governance capability, business network relationships, and entrepre-
+neurial spirit, for their sustainable growth and development.
+Prior research on intergenerational succession mainly focuses on the choice of
+succession model between intra-family succession and introduction of external pro-
+fessional executives, as well as on the motivating factors and outcomes of such
+choices (Gilding et al., 2015; Lambrecht, 2005; Michel & Kammerlander, 2015;
+Schulze, Lubatkin, & Dino, 2003a). Although important insights have been
+derived from existing research to explain succession in family firms, significant
+gaps still remain. First, existing research on Chinese family firm succession tends
+to take some individual events, such as the successor’s entry to the top management
+team (TMT) or taking over the top position of the firm, as signifying succession,
+thus resulting in neglect of important succession dynamics in the transitional
+period when the founder and successor jointly take charge of the firm (Zhao,
+Carney, Zhang, & Zhu, 2020). However, as a continuous process, intergenera-
+tional succession runs through the whole transitional period, through which
+governance and managerial power incrementally shift to the successor (Hauck &
+Prügl, 2015). Treating intergenerational succession as a single event would
+conceal the dynamic features of strategic changes such as innovation activities
+during the succession process. While intra-family succession represents a main-
+stream mode, inclusion of both the founder and successor in the TMT is a
+common phenomenon in intergenerational succession as a transitional governance
+structure (Dou & Li, 2013; Zhao et al., 2020). Building on these prior studies, we
+conceptualize the inclusion of both the incumbent and successor in the TMT as the
+co-governance of the family firm and define it as a governance structure in which
+both the founder and successor generations of the owning family take key positions
+in the governing body and/or TMT, signifying the transitional process for interge-
+nerational succession.
+Second, results from prior studies examining the relationship between inter-
+generational succession and innovation have been inconclusive and inconsistent
+(De Massis, Di Minin, & Frattini, 2015; Richards, Kammerlander, & Zellweger,
+2019). On the one hand, intergenerational succession represents a long-term orien-
+tation of family firms, which fosters innovation because innovation is associated
+with long-term growth and survival (Chrisman & Patel, 2012; Kraiczy, Hack, &
+Kellermanns, 2015; Laforet, 2013). On the other hand, the risk aversion tendency
+due to the desire to preserve the family legacy and tradition during intergenera-
+tional succession deters family firms from innovation given the involved risk
+(Block, 2012; Gomez-Mejia, Neacsu, & Martin, 2019; Miller & Le Breton-
+Miller, 2014). The inconsistent views demonstrate the heterogeneous nature of
+family firm innovation and indicate that there is a hidden link between intergenera-
+tional succession and innovation of family firms, resulting in a call for research to
+359
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+identify the drivers and mechanisms for heterogeneity (Chrisman & Patel, 2012;
+Diaz-Moriana, Clinton, Kammerlander, Lumpkin, & Craig, 2020).
+Responding to this call, our study aims to address existing research gaps by
+examining the research question of how intergenerational co-governance during
+the succession process influences firms’ innovation activities. Intergenerational suc-
+cession is structured as a staged process (Le Breton-Miller et al., 2004; Zhao et al.,
+2020) in which a potential successor is groomed and gradually integrated into top
+management until attaining a full leadership role. The governance team of family
+firms in China is characterized as an inner circle that includes spouses, siblings,
+children, and trusted nonfamily members (Chung & Luo, 2008). The succession
+process starts when a next-generational family member, typically the only child
+in contemporary China, takes one of the key positions in the firm (Cao,
+Cumming, & Wang, 2015). Based on progress made in the succession process,
+co-governance includes two stages, with the older generation taking the leading
+role in the first stage and the successor generation taking the leading role in the
+second stage, respectively. This study focuses on co-governance as a whole
+process by including both stages.
+The Chinese saying that ‘the true love of parents would be far-reaching’
+describes the unselfish love for their children and suggests that parental care will
+be far-sighted. Reflecting this parental altruistic behavior, intergenerational succes-
+sion of the family firm can provide the impetus for significant strategic changes
+(Zhao et al., 2020) to pave the way for succession with a long-term orientation.
+As one of the major strategic changes, co-governance may emerge as the transi-
+tional governance structure during the succession process and, in turn, co-govern-
+ance is likely to lead to major changes in the firm’s business strategies, especially in
+innovation. This is because innovation represents an investment in future growth
+(Coad & Rao, 2011; Diaz-Moriana et al., 2020; Duran, Kammerlander, Van
+Essen, & Zellweger, 2016) by establishing sustainable competitive advantage of
+the firm (Gomez-Mejia, Campbell, Martin, Hoskisson, Makri, & Sirmon 2014;
+Lumpkin & Brigham, 2011; Miller & Le Breton-Miller, 2014). Innovation is
+even more important for Chinese family firms, as they are operating in an
+economy that is undergoing a dramatic process of economic transformation and
+industrial advancement. Our study examines innovation activities of family firms
+from the aspect of ‘far-sightedness’, which refers to long-term orientation of innov-
+ation activities for the future development of the firm. Adopting altruism as the
+theoretical approach and based on empirical data of Chinese family firms listed
+in Shanghai and Shenzhen Stock Exchanges during the ten-year period of
+2006–2015, our study examines the influence of co-governance in family firms
+on their innovation activities and the moderating effects of factors drawn from
+the altruism approach on the direct relationship between co-governance and
+innovation activities.
+Our study contributes to the literature in two ways. First, the primary theor-
+etical contribution of the study lies in providing an alternative explanation for the
+360
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+hidden link between intergeneration succession and innovation by focusing on the
+effect of co-governance on innovation. Prior research suggests that succession pre-
+sents a pivotal time period for renewal and strategic changes of family firms
+(Cucculelli, Le Breton-Miller, & Miller, 2016; De Massis, Chua, & Chrisman,
+2008; Zhao et al., 2020) and that there is greater variability in innovation invest-
+ment in family firms than in nonfamily firms, depending on situational and con-
+textual factors (Roed, 2016). Extending this line of research, we propose co-
+governance as a major situational factor that affects innovation activities of
+family firms, shedding light on the change-continuity paradox during intergenera-
+tional succession of innovation in family firms (Rondi, De Massis, & Kotlar, 2019;
+Zhao et al., 2020). To our knowledge, our study is the first to conceptualize co-gov-
+ernance as a governance structure of family firms and empirically examine its influ-
+ence on strategic management in terms of innovation activities of family firms.
+Second, by conceptualizing co-governance as a governance structure during
+the succession process and empirically testing its direct effect on innovation, our
+study reveals the unique role of co-governance as a novel mechanism to facilitate
+innovation, thus enriching family firm research. Furthermore, following the altru-
+ism approach, we draw on factors of kinship relationship, age difference, and
+gender difference on the basis that they are reflective of heterogeneity in interge-
+nerational family relationships. By examining the moderating effects of these
+factors on altruistic behavior occurring in the succession process, our study
+addresses the important issue of how different intra-family relationships influence
+innovation through moderating the direct link between co-governance and innov-
+ation of the family firm. Our empirical results show that these factors can act as
+contingent conditions to moderate the influence of co-governance on innovation.
+Furthermore, our results suggest that co-governance results in a risk-based differ-
+entiation of innovation activities, that is, resources flow to low risk, rather than high
+risk but more inventive, innovations.
+THEORETICAL BACKGROUND AND HYPOTHESES
+DEVELOPMENT
+Intergenerational Succession, Co-Governance, and Innovation
+As an organizational form with a dual-system structure, family firms integrate
+socio-emotional wealth and business efficiency (Berrone, Cruz, & Gomez-Mejia,
+2012; Gómez-Mejía, Haynes, Núñez-Nickel, Jacobson, & Moyano-Fuentes,
+2007). Accordingly, governance and decision-making in family firms tend to
+adopt a hierarchical structure and also involve family ethics (Schulze et al.,
+2003a). To examine organizational behavior and decision-making patterns of
+family firms, prior research has adopted various theoretical approaches, such as
+agency theory (Block, 2012; Morck & Yeung, 2003), stewardship theory (Miller
+& Le Breton-Miller, 2006), the institution-based view (Peng, Sun, Vlas,
+361
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+Minichilli, & Corbetta, 2018), or the resource-based view of the firm (Habbershon,
+Williams, & MacMillan, 2003). However, these theoretical approaches were devel-
+oped to examine organizational behavior where economic instrumentality is
+assumed, and thus fail to adequately deal with the uniqueness of family firms
+(Berrone et al., 2012). Thus, there have been explicit calls for the development
+of theories that are more specific to family firms (Hauck, Suess-Reyes, Beck,
+Prügl, & Frank, 2016; Zellweger, Kellermanns, Chrisman, & Chua, 2012).
+To examine the parental altruistic behavior demonstrated in the process of
+intergenerational succession, our study adopts altruism as the theoretical approach
+to address the research question of how intergenerational co-governance influences
+innovation activities. Affection – feelings and emotions – is a branch of family firm
+research that deserves more attention (Baron, 2008; Morgan & Gomez-Mejia,
+2014). From a philosophical perspective, altruism refers to a motivational state
+with the goal of increasing another’s welfare without expectation of a reward in
+return (Darity, 2008; van Aaken, Rost, & Seidl, 2017). In particular, altruism in
+economics is considered a practical function that connects the welfare of one indi-
+vidual to that of others (Karra, Tracey, & Phillips, 2006; Schulze et al., 2003a).
+Prior research suggests that family firms are theoretically distinctive from private
+nonfamily firms because agency relationships in family firms are characterized
+by parental altruism (Lubatkin, Schulze, Ling, & Dino, 2005). As a trait that posi-
+tively links a parent’s welfare to that of their children (Stark, 1995), parental altru-
+ism can promote family bonds, which in turn help to align incentives and reduce
+information asymmetries among a family firm’s key decision makers, thereby redu-
+cing the cost of governance (Lubatkin et al., 2005).
+The culture of parental love has a long history in Chinese society. The ancient
+history book titled Intrigues of the Warring States more than two thousand years ago
+states that ‘the true love of parents would be far-reaching’. This statement describes
+the unselfish devotion of parental altruistic behavior in Chinese society toward
+their children. The parent–children relationship has a duality. In addition to
+bearing the natural responsibility of human reproduction, parents are also respon-
+sible for engaging in societal activities such as economic production. Thus, parental
+altruistic behavior has been examined as a type of socio-economic behavior and
+can be extended through family networks of distant kinship ties (Karra et al.,
+2006). In particular, based on an analysis of the social structure of Chinese
+society, the ‘differential sequence’ argument proposed by the influential Chinese
+sociologist Fei (1948) provides a theoretical perspective to examine the altruistic
+parental behavior expressed in the process of intergenerational succession of
+Chinese family firms.
+As a widely existing phenomenon in Chinese family firms, paternalism-based
+altruistic parental behavior can manifest in various forms (Cheng, Chou, Wu,
+Huang, & Farh, 2004). The parent generation places second-generation
+members of the family in key positions in the firm to gain managerial experience
+and even arranges trusted executives to assist them in the process (Zhao et al.,
+362
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+2020); the founder generation could even create ‘secret reserves’ in the firm for
+future performance to prepare for the take-over of the successor, to the detriment
+of current achievement (Wei & Chen, 2015). Using the metaphor of ‘helping to get
+onto horseback and escorting for a while’, the study by Zhu, Li, and Ye (2018) sug-
+gested that the founder generation would initiate necessary strategic transforma-
+tions of the firm, which come at the cost of the firm’s current performance,
+to prepare for intergeneration succession. These prior studies suggest that altruism
+provides a useful approach to examine parental altruistic behavior, which is based
+on blood or marriage ties, especially the altruistic behavior of the founder gener-
+ation toward their successor when preparing for intergenerational succession.
+Altruistic behavior facilitates the long-term orientation of family firms (Diaz-
+Moriana et al., 2020). Thus, following the altruism approach, we expect that
+co-governance as a transitional governance arrangement provides a mechanism
+to explain the enhanced innovation of family firms during intergenerational succes-
+sion. Enhanced innovation would enable the successor generation to receive the
+return from the innovation after their full take-over of the family firm, so that the
+family wealth and business can be preserved (Zellweger, Nason, & Nordqvist,
+2011) and continuity of the firm’s history and tradition can be ensured (Craig &
+Dibrell, 2006).
+On the other hand, altruistic behavior is not homogeneous among members
+of the firm’s owning family, as it can be influenced by specific relationships between
+the incumbent and the successor generations (Eddleston & Kidwell, 2012; Garcia
+et al., 2019). We draw on Chinese yin-yang philosophy (Chen, 2002; Li, 2012,
+2014, 2015) to develop a balancing approach to family firm succession and innov-
+ation. Following this approach, intergenerational succession of family firms is con-
+ceptualized as a process through which family firms seek to achieve the dual goal of
+smooth succession and sustainable growth by balancing the tendencies of change
+and continuity in the firm. More specifically, we specify change and continuity
+as two strategic directions (Zhao et al., 2020) that need to balance in the process
+of intergenerational succession. These two directions present a paradox, as they
+have a partially conflicting (trade-off) and partially complementary (synergy) rela-
+tionship; one gives rise to the other. The change-continuity paradox includes two
+dimensions of the conflicting and complementary tendency. The first is the change
+tendency brought in by the successor as the newcomer and the continuity tendency
+represented by the founder as the old guard of the firm. The second is the negative
+inertia and positive experience possessed by the founder. Incorporating these two
+dimensions, founder and successor co-governance would affect innovation activ-
+ities of the firm. Yin-yang philosophy illuminates the paradox between the two
+overall strategic directions of change and continuity as reflected in intergenera-
+tional succession because the yin-yang perspective has the strength with its capacity
+to simultaneously embrace change and continuity as two conflicting but comple-
+mentary tendencies (Chen, 2002; Li, 2012, 2014). We employ yin-yang philosophy
+363
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+to address the change-continuity paradox in the context of innovation activities
+initiated in intergenerational succession of family firms.
+Following the altruism approach, our study draws on factors that are reflect-
+ive of family relationships and posits that these factors can regulate the contingent
+conditions for direct relationship between co-governance and innovation. The
+three factors of kinship relationship (Schulze, Lubatkin, Dino, & Buchholtz,
+2001; Van den Berghe & Carchon, 2003), age difference between the founder
+and successor (Glauben, Petrick, Tietje, & Weiss, 2009; Kimhi & Nachlieli,
+2001; Zacher, Schmitt, & Gielnik, 2012), and female gender of the successor
+(Akhmedova, Cavallotti, Marimon, & Campopiano, 2020; Kubíček & Machek,
+2019; Mussolino, Cicellin, Iacono, Consiglio, & Martinez, 2019) demonstrate dif-
+ferent dimensions of family relationships in family firms and thus can affect the
+extent or level of altruistic behavior. Based on these previous studies, we
+propose that these three factors moderate the baseline relationship between co-
+governance and innovation.
+Moreover, prior research has suggested that family firms have a tendency of
+risk aversion due to the strong desire to keep the business in the family and to con-
+tinue the family legacy (Kellermanns, Eddleston, Sarathy, & Murphy, 2012; Miller
+& Le Breton-Miller, 2014). While co-governance has a positive effect on resource
+commitment to innovation, the tendency of risk aversion can prevent family firms
+from more inventive but high-risk innovation activities due to concerns over failure
+and loss of assets (Diaz-Moriana et al., 2020). Thus, it is expected that co-govern-
+ance would influence the flow of resource commitment to different types of innov-
+ation in terms of risk level.
+Therefore, following the altruism approach, we developed a conceptual
+framework to investigate how intergenerational succession affects innovation by
+examining the relationship between co-governance and innovation as well as the
+contingent conditions for this direct relationship, which are summarized in
+Figure 1. Our framework depicts the impact of co-governance on innovation as
+the baseline relationship (H1), and further proposes that this baseline relationship
+is contingent on the moderating effects from three factors of kinship relationship
+(H2), age difference (H3), and gender difference (H4), which are drawn from the
+altruism approach. Moreover, the framework proposes that co-governance will
+direct resources to different types of innovation, resulting in a differentiation of
+innovation activities (H5). The rationale for each of the hypothesized relationships
+is developed below.
+Hypotheses Development
+Co-governance and resource allocation for innovation. Initiation of succession is likely to lead
+to an increased level of strategic change (Quigley & Hambrick, 2012), especially for
+intergenerational succession of family firms in emerging economies like China
+(Zhao et al., 2020). Signaling a transitional process of intergenerational succession,
+364
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+co-governance represents a new form of governance structure in the firm, which
+would in turn result in a need to balance change and continuity in the firm’s busi-
+ness strategic direction. The altruistic behavior of the founder generation toward
+future generations facilitates a long-term orientation, which in turn promotes
+risk-taking (Zahra, 2003). Although characterized with a high level of risk, innov-
+ation is crucial for the long-term growth of any firm and particularly important for
+family firms, as it presents a survival mechanism and increases the likelihood of
+long-term growth across generations (Diaz-Moriana et al., 2020; Jaskiewicz,
+Combs, & Rau, 2015; Zellweger et al., 2011).
+From the altruistic perspective, intergenerational co-governance aims to
+achieve smooth intergenerational succession in family firms. With support from
+the founder generation, co-governance would gradually provide the successor
+with decision-making power and authority (Sardeshmukh & Corbett, 2011).
+However, intergenerational succession of family firms tends to lead to a decline
+of competitive advantage and firm performance (Cucculelli & Micucci, 2008),
+especially when the successor is less passionate about the firm than the founder,
+and thus also less likely to have a strong commitment to the firm (Dawson,
+Sharma, Irving, Marcus, & Chirico, 2015; Garcia et al., 2019; Zellweger et al.,
+2011). In order to prevent loss of firm competitiveness after succession, the
+founder generation may take measures in advance during the co-governance
+period to strengthen the innovation of the firm. The New Hope Group in
+China provides a typical example regarding arrangements for intergenerational
+succession. To facilitate a smooth transition of the governing power to the daughter
+successor, the firm founder invested heavily in innovation activities during the co-
+governance period so that the firm was able to upgrade its position from traditional
+pig-farming to eco-agriculture in the value chain. As a result, the fashion-loving
+daughter found that running the firm was attractive enough to make a whole-
+hearted commitment.
+Therefore, to facilitate a successful succession while maintaining competitive-
+ness, the altruistic behavior and the change-continuity balancing approach enable
+family firms to modify their risk aversion tendency by taking the risk of making
+Figure 1. Conceptual framework of the study
+365
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+more resource commitments to innovation for the benefit of the successor. The
+benefits from innovation activities conducted during the co-governance period
+would help the successor create a defense mechanism against the possible turbu-
+lence associated with the departure of the founder generation, so that the successor
+is able to establish authority after taking over the firm (Brown & Lahey, 2015; Gal
+& McShane, 2012; Van Buren & Safferstone, 2009). We propose that co-govern-
+ance provides a mechanism to shed light on the change-continuity paradox of
+innovation. This is because family firms tend to take a long-term orientation
+when
+pursuing
+intergenerational
+succession
+(Diaz-Moriana
+et
+al.,
+2020;
+Lumpkin & Brigham, 2011) and innovation activities represent firm investment
+in future growth, indicating a long-term strategy to establish sustainable competi-
+tive advantage (Coad & Rao, 2011; Jaskiewicz et al., 2015).
+On the other hand, inner family conflicts can occur due to agency problems
+and goal diversity among family members (Eddleston & Kellermanns, 2007;
+Schulze, Lubatkin, & Dino, 2003b), contributing to the change-continuity
+paradox
+with
+regard
+to
+innovation
+of
+family
+firms
+(Chrisman,
+Chua,
+Kellermanns, & Chang, 2007; De Massis et al., 2015; Rondi et al., 2019). More
+specifically, the founder and successor can hold different attitudes regarding the
+firm’s commitments to innovation. For instance, the older generation with an
+inertia tendency could be more conservative and have a trend of risk aversion
+toward innovation, or the older generation may intend to stay in control longer
+and thus not be keen to hand control to the younger generation (Brown,
+Lawrence, & Robinson, 2005; Cadieux, Lorrain, & Hugron, 2002). These conflict-
+ing aspects of family firm co-governance need to be addressed when analyzing the
+impact of co-governance on innovation.
+The extent of negative effects from inner family conflicts is determined by
+whether the conflicts can be constructively managed, mitigated, and resolved
+(Qiu & Freel, 2020). Task, process, and relationship conflicts are identified as
+three types of inner family conflict (De Dreu & Van Vianen, 2001), and among
+the three, relationship conflict is more likely to lead to negative effects (Jehn,
+1997). Altruistic behavior can be helpful to mitigate negative effects of relationship
+conflict. When facing relationship conflict, family firms can effectively utilize the
+talents and opinions of family members because of altruistic behavior, whereas
+nonfamily firms can be full of animosity (Kellermanns & Eddleston, 2004).
+Constructive conflict resolution due to altruistic behavior is more evident for
+family firms with a co-governance structure when the firm is experiencing the suc-
+cession process, which presents a structure of shared leadership. Shared leadership
+is defined as a dynamic and interactive influence process among individuals in
+teams for which the objective is to lead one another to the achievement of organ-
+izational goals (Pearce & Conger, 2002; Serban & Roberts, 2016). Task cohesion
+and internal team environment are identified as two key factors that facilitate the
+emergence and positive consequences of shared leadership (D’Innocenzo,
+Mathieu, & Kukenberger, 2016; Serban & Roberts, 2016). Task cohesion is
+366
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+defined as the commitment to the team’s goals and shared attraction of individuals
+in the leadership team (Carless & De Paola, 2000), while internal team environ-
+ment refers to team members’ efforts at providing emotional and psychological
+support to one another through encouragement and recognition of individual
+and team contributions and accomplishments (Carson, Tesluk, & Marrone, 2007).
+Co-governance of family firms presents an ideal context for the presence of
+these two factors. First, signifying intergenerational succession, co-governance is
+likely to facilitate task cohesion between the founder and successor as a shared lead-
+ership team. With a high level of altruism, family members are more considerate of
+each other and loyal to the family business (De Massis, Kotlar, Mazzola, Minola, &
+Sciascia, 2018; Rondi et al., 2019), although altruistic behavior may also lead to
+agency problems due to its association with limited rationality and cronyism
+(Schulze et al., 2003a). Moreover, co-governance of the intergenerational team
+can produce even stronger cohesion with parental altruistic love toward the off-
+spring for the firm’s strategic succession (Ensley & Pearson, 2005). Second,
+aiming at a smooth completion of intergenerational succession, co-governance pro-
+vides an ideal internal team environment for shared leadership. When team
+members have a similar understanding of their main team objectives and focus
+on accomplishing collective goals, shared purpose arises as the key dimension of
+an internal team environment (Carson et al., 2007). Family firms are heavily
+oriented toward long-term initiatives (Miller & Le Breton-Miller, 2005), as they
+have a strong desire to continue the family legacy and to keep the business in
+the family for generations (Kellermanns et al., 2012). With a high level of altruism
+and aiming to facilitate intergenerational succession, the founder and successor
+generations tend to be willing to tolerate each other and to make sacrifices when
+necessary.
+In sum, we propose that co-governance provides a novel mechanism to
+resolve the paradox (De Massis et al., 2015) by stimulating innovation willingness.
+While risk aversion tendency and inner family conflicts are identified as barriers for
+innovation of family firms, co-governance of the family plays an essential role to
+mitigate and reduce their negative influence on innovation. Thus, we develop
+the following baseline hypothesis:
+Hypothesis 1: Co-governance of the family firm positively affects the firm’s innovation
+activities.
+Moderating effect of kinship relationship. Prior research suggests that kinship relation-
+ship-based altruistic behavior is an essential feature that distinguishes family
+firms from nonfamily firms (Chrisman, Chua, & Zahra, 2003; Karra et al.,
+2006). Based on the altruism principle, it is quite common that configuration of
+assets and authority is more kinship-based rather than merit-based (Chrisman
+et al., 2003). Research has found that altruistic behavior in family firms varies
+according to the level of closeness within kinship relationships (Karra et al.,
+367
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+2006; Lubatkin, Ling, & Schulze, 2007). Based on the level of closeness, kinship
+relationships in family firms are classified as members of three types of family com-
+position: nuclear family, extended family, and composite family (Ensley & Pearson,
+2005; Gersick, Davis, Hampton, & Lansberg, 1997; Karra et al., 2006). Built on
+these previous studies, co-governance can be structured into two major types of
+parent–child co-governance (including father–son, father–daughter, mother–son,
+and mother–daughter relationships) and other intergenerational co-governance
+(including uncle–nephew, uncle–niece, aunt–nephew, and aunt–niece relation-
+ships). The likelihood of agency problems, which arise from the conflict of interests
+between the firm’s management and its shareholders, is much smaller for the
+parent–child relationship than other kinship relationships in the TMT of the
+family firm (Ensley & Pearson, 2005; Schulze et al., 2001; Van den Berghe &
+Carchon, 2003).
+Chinese society has long attached great importance to blood and kinship rela-
+tionships. As proposed by Chinese sociologist Fei (1948), Chinese society is struc-
+tured by following the kinship-based differential sequence. This differential
+sequence is described as similar to the ripple effect – where each person is the
+center of the circles that their social influence has reached, just like ripples expand-
+ing across the water when a pebble is dropped in a pond. Kinship relationships are
+centered on a focal individual, spread outward, and become weaker and more
+distant. This kinship relationship-based differential sequence not only acts as a
+central pattern to structure social relations but also plays an important role in allo-
+cating family-owned resources (Li, 2002).
+Based on the above-discussed linkage with kinship relationship-based altruis-
+tic behavior, we propose that the kinship relationship between the founder and suc-
+cessor affects the strength of altruistic support when paving the way for
+intergenerational succession. The parent–child relationship will lead to a higher
+level of altruistic behavior and stronger parental support from the founder gener-
+ation than other intergenerational relationships (Galperti & Strulovici, 2017; Van
+den Berghe & Carchon, 2003). When the firm is to be succeeded by a direct des-
+cendant, the founder generation would be more concerned about potential diffi-
+culties after the successor’s take-over of the firm, such as lack of authority in
+governing the firm, weak capability for risk-taking, and the need to improve tech-
+nology and position in the value chain. As a result, the founder generation is likely
+to make stronger commitments to innovation. Thus, under the watch of the
+founder generation, the firm will enhance its innovation during the co-governance
+period.
+On the other hand, while parental altruistic behavior can be extended
+through family networks of distant kinship ties, its strength becomes diluted for
+distant kin and ethnic ties (Karra et al., 2006). Thus, when the successor comes
+from a kinship relationship in the extended family, such as nephew or niece,
+rather than from a nuclear family, the altruistic support toward the successor
+will be weaker. Based on this argument, we propose a positive moderating effect
+368
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+of the kinship relationship on the direct link between co-governance and
+innovation.
+Hypothesis 2: The kinship relationship positively moderates the direct relationship between
+co-governance and innovation activities, so that a parent-child co-governance is more likely to
+lead to increase of innovation activities than co-governance in other types of intergenerational
+kinship relationships.
+Moderating effect of age difference. It is common that in the succession process, the foun-
+der’s altruistic behavior derived from altruistic parental support toward offspring is
+coupled with intertemporal decision-making (Diaz-Moriana et al., 2020; Kraiczy
+et al., 2015; Lubatkin et al., 2007; Lumpkin & Brigham, 2011). Prior research
+has suggested that the age difference between the predecessor and successor as
+well as the predecessor’s age are important factors influencing succession of
+family businesses (Cabrera-Suárez, De Saá-Pérez, & García-Almeida, 2001;
+Calabrò, Minichilli, Amore, & Brogi, 2018; Davis & Harveston, 1998; Glauben
+et al., 2009). When the incumbent controller of the family firm gets older, he/
+she tends to be more risk averse and is more likely to increase commitment to
+the family firm (Davis & Harveston, 1998). Moreover, as the predecessor advances
+in age, he/she may use preparation for succession as a mechanism to demonstrate
+his/her commitment to the future of the family firm while simultaneously control-
+ling risk. Thus, strategic changes, such as initiating innovation activities in the
+family firm, tend to occur during the transitional period of succession, rather
+than after the successor takes over the firm (Garcia et al., 2019). This is not only
+due to the need for gradually building up authority for the successor, but also to
+prevent the risk associated with potential turbulence after the successor has
+taken over the firm (Grote, 2003). That is, with increase of the predecessor’s
+age, the consciousness of a need to prepare for the inevitable transition of
+control over the firm will lead to a concomitant increase in succession planning.
+Following a similar line, intertemporal decision-making logic can also apply to
+family firm decision-making regarding commitments to innovation activities
+during the co-governance period. The age difference influences the relationship
+quality between the founder and successor generations (Cabrera-Suárez et al.,
+2001) and thus becomes a factor that would have an impact on the family firm’s
+commitments to innovation activities during the transitional succession period.
+The time frame and timing are central for intergenerational succession of family
+firms (Le Breton-Miller et al., 2004). The bigger the age gap between the two gen-
+erations, the more likely the co-governance would lead to higher commitments to
+innovation activities. The rationale for this relationship is twofold. First, the bigger
+the age difference between the founder and successor generations, the stronger the
+paternalistic love of the founder toward the successor, resulting in a higher level of
+commitment to support the succession, including enhanced innovation activities.
+The old Chinese saying that the ‘older cow loves her calf more’ provides a
+369
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+reflection of the linkage between age gap and parental love. Second, a bigger age
+gap between the founder and successor tends to indicate the more advanced age of
+the founder generation, and this age gap would stimulate a sense of urgency to
+proceed with the succession (Glauben et al., 2009; Kimhi & Nachlieli, 2001;
+Zacher et al., 2012). Thus, the founder generation will feel pressure to prepare
+for handing over control of the firm. In contrast, a smaller age gap between the
+founder and successor indicates the capability of the founder to run the firm,
+and thus the need for succession would not be as strong. Therefore, we propose
+an influence of age difference on the linkage between co-governance and innov-
+ation activities, and expect that:
+Hypothesis 3: Age difference between the founder and successor positively moderates the
+direct relationship between co-governance and innovation activities, so that the bigger the
+age difference is, the more likely co-governance will lead to an increase of innovation activities.
+Moderating effect of gender difference. Research in economics and social psychology has
+long paid attention to the gender difference in altruistic behavior (Andreoni &
+Vesterlund, 2001; Brush, 1992; Schwartz & Rubel, 2005). Prior research has sug-
+gested that by bringing up a daughter, a CEO can alter their own altruistic pref-
+erence (Fiese & Skillman, 2000). Following this line of research, we propose that a
+female successor to the family firm would further stimulate the founder genera-
+tion’s feeling of ‘far-sighted’ parental love toward the successor. In comparison
+to a male successor, a female successor would confront unique challenges when
+taking over a family firm, as she often faces discrimination and stereotyping due
+to both societal stereotypes/prejudices and family hierarchies (Hytti, Alsos,
+Heinonen, & Ljunggren, 2017; Mussolino et al., 2019; Vera & Dean, 2005).
+The preference for males over females as the successor is widely found in the busi-
+ness world (Bennedsen, Nielsen, Pérez-González, & Wolfenzon, 2007; Cabrera-
+Suárez et al., 2001; Cao et al., 2015; Haberman & Danes, 2007). As a result,
+when a female member of the owning family eventually becomes the successor,
+the founder generation would take greater care of the female successor by acting
+as a mentor and protector because the founder is concerned about the female suc-
+cessor’s lack of authority (Deng, 2015; Kubíček & Machek, 2019; Smythe &
+Sardeshmukh, 2013).
+Therefore, in order to prepare for succession to a female descendant, the
+founder generation is more likely to sense a strong need to take control of the suc-
+cession process for taking over by a female successor (Chen, Fang, MacKenzie,
+Carter, Chen, & Wu, 2018; Overbeke, Bilimoria, & Perelli, 2013), and it is espe-
+cially so when the incumbent generation are females (Cadieux et al., 2002; Ferrari,
+2019). When the incumbent and successor have a father–daughter relationship, the
+father tends to see his daughter as a business partner to share decision-making of
+the firm but at the same time as his child who needs protection and support
+(Hollander & Bukowitz, 1990; Vera & Dean, 2005). This parental support is
+370
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+more likely to influence future directions of the firm, such as enhancing innovation
+activities rather than daily operations (Glover, 2014).
+The cultural and social context in different countries can also influence intra-
+family succession in general and a female as the successor in particular (Cao et al.,
+2015; Deng, 2015; Mathew, 2016). In Chinese society, the traditional saying of
+‘raising the daughter with caring love, and raising the son with tough love’ reflects
+the Chinese parenting style toward gender difference of offspring. This saying indi-
+cates that paternalistic love tends to pay special attention to female offspring.
+China has provided some typical examples where the founders of family firms
+took extra care of female successors, such as Yang Guoqiang, Chairman of
+Country Garden Group; Zong Qinghou, Chairman of Wahaha Group; and Liu
+Yonghao, Chairman of the New Hope Group. In these cases, the founders of
+the major Chinese family firms had long prepared their daughters’ succession by
+letting the potential female successors to enter their firms early, and gradually
+take key positions so that the successors could be trained to take over the firms.
+In summary, when a female successor is to take over the firm, the founder
+generation is more likely to pay more attention to planning a smooth succession by
+providing more support to the successor through enhancing innovation activities
+during the co-governance period. Thus, we propose a positive moderating effect
+of the successor’s female gender on the direct link between co-governance and
+innovation activities, and expect that:
+Hypothesis 4: Female gender of the successor positively moderates the direct relationship
+between co-governance and innovation activities. That is: if the successor is a female descend-
+ant of the founder, it is more likely co-governance will lead to an increase of innovation
+activities.
+Co-governance and differentiation of innovation activities. A long-term perspective plays a
+significant role in family firms when exhibiting strategic behavior (Brigham,
+Lumpkin, Payne, & Zachary, 2014; Lumpkin & Brigham, 2011). On the one
+hand, firms with long-term orientations pursue continuity as the strategic goal of
+the firm and thus tend to invest in less risky projects than firms with short-range
+perspectives (Gentry, Dibrell, & Kim, 2016; Zellweger, 2007). On the other
+hand, a long-term orientation promotes intergenerational succession by bringing
+in the successor as a strategic change, which in turn leads to risk-taking tendency
+due to the altruistic behavior of the family firm leaders toward future generations
+(Zahra, 2003), and this tendency can result in a positive effect of co-governance on
+innovation. Following the balancing approach from Chinese yin-yang philosophy,
+co-governance provides a mechanism to incorporate change and continuity as two
+seemingly contrary but actually complementary tendencies (Chen, 2002; Li, 2012,
+2014). While co-governance leads to an increase of resource commitment to innov-
+ation so that change can be facilitated through smooth succession of the firm, co-
+governance can also maintain continuity, resulting in a differentiation of
+371
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+innovation activities, that is, resources tend to be allocated to innovation activities
+that represent a low, rather than high, level of risk. The rationale for this innov-
+ation differentiation is twofold.
+First, due to a risk aversion tendency that is generated from a desire for con-
+tinuity and a concern about losing socio-emotional wealth and weakening control
+over the family firm (Chrisman & Patel, 2012), the more inventive but high-risk
+innovation activities can be suppressed during the succession process. Inventive
+innovation activities tend to require application of specialized technology/man-
+agement know-how, and there is a lack of these requisite skills in family firms
+(Chrisman, Chua, & Sharma, 2005). Furthermore, these activities are usually exe-
+cuted
+by
+technological
+experts
+and
+managed
+by
+professional
+executives
+(McDermott & O’Connor, 2002), who are less likely to be members of the
+owning family. Concern about losing control over the firm to professional execu-
+tives would lead to a decline of resources allocated to radical but high-risk innova-
+tions (Chrisman et al., 2012; Rondi et al., 2019).
+Second, representing the change tendency of co-governance, a smooth inter-
+generational succession would have a higher level of priority for the firm, and
+resource commitment to innovation activities is needed to serve this purpose.
+However, more inventive innovation can be neglected because such innovation
+usually involves a long process with uncertain return on investment inputs.
+Resource inputs into such investment projects could generate a negative effect
+on the performance of the firm in the near future (Gentry et al., 2016;
+Zellweger, 2007), and thus undermine the establishment of authority by the succes-
+sor when she/he takes over control of the firm. As a result, innovation resources are
+more likely to be allocated to the more traditional and incremental areas, rather
+than to expand to the more creative and risky areas. Thus, we have the following
+hypotheses:
+Hypothesis 5: Co-governance of the family firm would have a positive effect on low-risk
+innovation activities.
+Hypothesis 5a: Co-governance of the family firm would not have a positive effect on high-
+risk innovation activities.
+METHODS
+Data and Sample
+The starting point for constructing our sample was the firms listed in the Shanghai
+and Shenzhen Stock Exchanges. We then focused on the family firms. Following
+prior research (Gomez-Mejia, Makri, & Larraza-Kintana, 2010; Gomez-Mejia
+et al., 2014), the criteria for family firms were established as follows: (1) the control-
+ler of the firm can be traced to a person or a family which is linked by blood or
+372
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+marriage relationships and (2) either directly or indirectly, the controller of the firm
+is the largest shareholder of the listed company.
+The period of our study spanned ten years (2006–2015). Data were obtained
+from the two databases of China Securities Market and Accounting Research
+(CSMAR) and Wind Information Technology (WIND). To construct our key
+explanatory variable of co-governance, we identified and confirmed kinship rela-
+tionships through several ways, including: (1) firms’ annual reports, prospectuses,
+and listing announcements; (2) for unknown kinship relationships in a family
+firm, we identified the kinship relationships with the owning family of the firm
+through social media searches for all board directors, board supervisors, and
+members of the TMT; and (3) based on the list of board of directors, board of
+supervisors, and the TMT over the years, we traced the changes of positions for
+the members of the owning family in the family firm in order to determine the
+stage of intergenerational succession of the family firm. We excluded family
+firms from finance and insurance sectors to have a more comparable sample set.
+We also excluded firms for which data for key variables of the study were
+missing. For the firms with partially missing or suspicious data, we cross-checked
+the two databases to complement the missing data.
+Eventually, we had 4,694 firm-year observations in our sample, including 874
+firm-year observations for co-governance (18.72%) and 3,820 firm-year observa-
+tions for non-co-governance family firms. For the industrial distribution, 72.66%
+of our full sample and 78.36% of our sample for co-governance family firms
+come from the manufacturing sector.
+The annual distribution of our sample in terms of co-governance and non-co-
+governance family firms is presented in Table 1.
+Variables and Measurements
+Dependent variable. The dependent variable of innovation can be measured either by
+its input or its output and we adopted both measures. Following prior research
+(Chrisman & Patel, 2012; Devers, McNamara, Wiseman, & Arrfelt, 2008; Miller
+& Le Breton-Miller, 2005), R&D intensity as innovation input was measured as
+the ratio of R&D expenditure to the sales of the firm. As a firm’s commitment
+to innovation is associated with risk and generally does not produce immediate
+pay-offs, R&D intensity is able to indicate a firm’s long-term orientation,
+making it particularly suitable to test our conceptual framework derived from
+the altruism perspective in terms of parental love-based altruistic behavior
+during the intergenerational succession process. For the robust test, we measured
+innovation by output for which the number of patent applications was used. This is
+also a widely used measure for innovation (Piperopoulos, Wu, & Wang, 2018; Ren,
+Eisingerich, & Tsai, 2015; Wu, Wang, Hong, Piperopoulos, & Zhuo, 2016).
+Furthermore, to examine the relationship between co-governance and differenti-
+ation of innovation activities, the focal firm’s application numbers of inventive
+373
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+patents versus non-inventive patents (patents of utility models and designs) were
+adopted to measure high versus low-risk innovation, respectively.
+Independent and moderator variables. On the basis of involvement in governance and
+management by family members from both the founder and successor generations,
+we used a binary measure of co-governance (Anderson & Reeb, 2003; Gomez-
+Mejia et al., 2010; Villalonga & Amit, 2006). The binary co-governance
+measure distinguished co-governance firms (equal to 1) from non-co-governance
+firms (equal to 0). More specifically, we classified a firm as having co-governance
+when it meets the condition that family members (defined as a person related by
+blood or by marriage to the owning family) of both the founder and successor gen-
+erations serve in the TMT of the firm.
+To examine the contingency conditions on which co-governance influences
+innovation activities, we introduced three moderating variables of kinship relation-
+ship, age difference, and gender difference. Kinship relationship is operationalized
+as a binary measure. If the firm founder and the successor have a parent–child rela-
+tionship, it takes a value of 1 and all other intergenerational kinship relationships take
+a value of 0. The age difference is measured as a continuous variable by subtracting
+the successor’s age from the founder’s age. The gender difference is measured as a
+binary variable, taking the value of 1 for a female and 0 for a male successor.
+Control variables. We included a comprehensive set of control variables. In control-
+ling influence from firm characteristics, firm age (Anderson & Reeb, 2003) and
+firm size (Berrone, Cruz, Gomez-Mejia, & Larraza-Kintana, 2010) are included.
+Firm age is measured as the natural logarithm of the number of years since its foun-
+dation, whereas firm size is operationalized as the natural logarithm of the assets.
+Table 1. Sample distribution by year
+Year
+Full sample
+Co-governance firms
+Non-co-governance firms
+N
+N
+%
+N
+%
+2006
+195
+21
+10.76
+174
+89.23
+2007
+265
+30
+11.32
+235
+88.67
+2008
+309
+33
+10.67
+276
+89.32
+2009
+423
+52
+12.29
+371
+87.70
+2010
+678
+84
+12.38
+594
+87.61
+2011
+878
+118
+13.43
+760
+86.56
+2012
+973
+139
+14.28
+834
+85.71
+2013
+982
+135
+13.74
+847
+86.25
+2014
+986
+136
+13.79
+850
+86.20
+2015
+982
+126
+12.83
+856
+87.16
+Total
+4,694
+874
+18.72
+3,820
+81.28
+374
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+The governance structure of the firm can affect the TMT’s decision-making,
+and thus influences the firm’s behavior in innovation investment. In this regard, we
+controlled the three variables of dual role of CEO and board chairman (Dual),
+ratio of independent board directors to the full board members (Indep), and pro-
+portion of the shareholdings by the TMT members (ESH). Succession legitimacy
+was included and captured by the ratio of all family members’ shareholdings to the
+total firm stock (FSH), as a high level of family shareholding tends to lead to under-
+investment in innovation activities (Block, 2012; Chrisman & Patel, 2012). Asset-
+liability ratio (LEV) and return on assets (ROA) were included as they reflect the
+available slack of the firm for R&D investment. In addition, to control influence
+from the macro-economic environment and industrial sectors, we include the
+dummy variables of time (year) and industry.
+The definitions and measurements of the main variables are shown in
+Table 2.
+Descriptive Statistics and Correlation Coefficients
+Table 3 presents descriptive statistics for the main variables included in the study, split
+into two samples of co-governance firms and total family firms. A cross-analysis shows
+that the maximum, minimum, mean, and standard deviation for R&D intensity of co-
+governance firms are 0.198, 0, 0.03, and 0.033, respectively. The corresponding
+values for overall family firms are 0.198, 0, 0.03, and 0.027, respectively, indicating
+a higher level of innovation investment for co-governance family firms.
+Table 4 presents the correlation matrix for the main variables included in the
+study. The correlation between co-governance and R&D intensity is significant and
+positive (r = 0.067, p < 0.01). For the three moderating variables, kinship and
+gender are not significantly correlated with R&D intensity, whereas the age difference
+is significantly correlated with R&D intensity (r = 0.066, p < 0.1). Importantly, no cor-
+relation index between any variables included in the study is larger than 0.3, indicat-
+ing multicollinearity is not a concern for empirical analysis of the study.
+RESULTS
+Hypotheses Testing: Co-Governance, Innovation Activities, and
+Moderating Effects
+We adopted moderated ordinary least squares (OLS) as the modeling method for
+regression analysis. In order to avoid potential multicollinearity caused by adding
+moderating terms, we mean-cenetred the independent and moderating variables.
+Six model estimations were performed. Table 5 reports the results concerning the
+effects of impacting factors on innovation investment.
+Model 1 included the co-governance independent variable and all control
+variables. This variable is significant (β = 0.003, p < 0.05), indicating a positive
+375
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+effect of co-governance on R&D intensity. Thus, Hypothesis 1 is supported. Model
+2 added three moderator variables to Model 1. Co-governance remains significant
+in Model 2 (β = 0.004, p < 0.05), providing further support for Hypothesis 1. For
+the three moderator variables, kinship and gender are not significant, whereas
+the age difference is significant (β =0.024, p < 0.1).
+Models 3–5 added three moderators and their moderating terms respectively to
+Model 1 to test moderating effects on the direct relationship between co-governance
+and R&D intensity. In Model 3, the moderating term of kinship is significant (β
+=0.023, p < 0.1), indicating a positive moderating effect of kinship. Similarly, mod-
+erating terms are significant in Models 4 and 5 by involving the two moderators of
+age difference (β = 0.04, p < 0.01) and gender (β = 0.008, p < 0.05), respectively,
+indicating positive moderating effects of age difference and gender. In summary,
+modeling results from Models 3–5 provide empirical support for Hypotheses 2–4
+regarding moderating effects of the three moderator variables. Model 6 presented
+a full model analysis by including all the independent moderator and control
+Table 2. Variable definition and measurement
+Variable type
+Variable symbol
+Variable measurement
+DV
+R&D intensity
+Ratio of R&D expenditures to the sales of the firm
+Patent
+Number of patent applications
+Patenti
+Application number of inventive patents
+Patentud
+Application number of non-inventive patents (patent of utility
+model and design)
+IV
+Co-governance
+Binary measure. Taking value 1 when both the founder and
+successor generations of the owning family take key positions
+in the governing body; otherwise taking value 0
+Moderator
+variables
+Kinship
+Binary measure with parent–child relationship between the
+firm founder and the successor taking value 1 and all other
+kinship relationships between the founder and the successor
+taking value 0
+Age difference
+Continuous variable measured by subtracting the successor’s
+age from the founder’s age
+Gender
+difference
+A binary variable, taking value of 1 when the successor is female
+and 0 for a male successor
+Control
+variables
+Firm age
+Natural logarithm of the number of years since its foundation
+Firm size
+The natural logarithm of the assets
+Dual
+Binary measure taking value 1 when the same person takes dual
+role of CEO and board chair, otherwise taking value 0
+Indep
+Ratio of the number of independent board directors to the total
+number of board directors
+ESH
+Ratio of TMT shareholding to the total firm stock
+FSH
+Ratio of all family members’ shareholding to the total firm stock
+LEV
+Asset-liability ratio = total liabilities/total assets
+ROA
+Return on assets = net profit/total assets
+Year
+The sample interval is from 2006 to 2015, with a total of nine
+annual dummy variables
+Industry
+According to the CSRC industry code classification, a total of
+18 industry dummy variables
+376
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+Table 3. Descriptive statistics for main variables
+Variables
+Co-governance firms
+Family firms
+N
+Min
+Max
+Mean
+SD
+N
+Min
+Max
+Mean
+SD
+R&D intensity
+874
+0
+0.198
+0.038
+0.033
+4,694
+0
+0.198
+0.034
+0.027
+Patent
+874
+0
+1,073
+19.654
+66.411
+4,694
+0
+1,121
+15.591
+48.274
+Patenti
+874
+0
+503
+5.299
+23.187
+4,694
+0
+550
+5.702
+22.162
+Patentud
+874
+0
+570
+14.354
+46.595
+4,694
+0
+600
+10.645
+34.317
+Kinship
+874
+0
+1
+0.234
+0.424
+1,845
+0
+1
+0.225
+0.418
+Age difference
+874
+2
+49
+23.867
+7.112
+1,845
+1
+49
+23.968
+6.329
+Gender difference
+874
+0
+1
+0.315
+0.465
+1,845
+0
+1
+0.207
+0.406
+Firm age
+874
+0
+3.295
+2.384
+0.513
+4,694
+0
+3.401
+2.341
+0.559
+Firm size
+874
+19.212
+25.290
+21.575
+1.043
+4,694
+16.508
+25.472
+21.434
+0.954
+Dual
+874
+0
+1
+0.335
+0.472
+4,694
+0
+1
+0.350
+0.477
+Indep
+874
+0.250
+0.600
+0.360
+0.042
+4,694
+0.142
+0.666
+0.373
+0.052
+ESH
+874
+0
+0.897
+0.233
+0.240
+4,694
+0
+0.897
+0.243
+0.242
+FSH
+874
+0.053
+0.766
+0.403
+0.171
+4,694
+0.528
+0.765
+0.398
+0.177
+LEV
+874
+0
+2.071
+0.389
+0.454
+4,694
+0
+2.071
+0.342
+0.406
+ROA
+874
+−0.004
+0.132
+0.504
+0.038
+4,694
+−0.004
+0.132
+0.501
+0.037
+377
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+Table 4. Correlation matrix for main variables
+Variables
+R&D
+intensity
+Patent
+Patenti
+Patentud
+Co-governance
+Kinship
+Age
+difference
+Gender
+difference
+Dual
+Indep
+ESH
+FSH
+ROA
+LEV
+R&D intensity
+1
+Patent
+0.067***
+1
+Patenti
+0.105***
+0.879***
+1
+Patentud
+0.053***
+0.951***
+0.690*
+1
+Co-governance
+0.067***
+0.130**
+–0.108*
+0.051**
+1
+Kinship
+0.017
+0.084**
+0.039**
+0.092**
+0.020
+1
+Age difference
+0.066*
+0.141*
+0.125*
+0.138*
+−0.016
+−0.612*
+1
+Gender difference
+0.033
+0.064
+0.017
+0.083*
+0.257*
+−0.113*
+0.049*
+1
+Dual
+0.118*
+0.046*
+0.033
+0.048*
+−0.015
+0.016
+0.013
+0.043
+1
+Indep
+0.094*
+0.051*
+0.029*
+0.045*
+−0.013*
+−0.040
+0.029
+0.018
+0.127**
+1
+ESH
+0.200*** −0.046*
+−0.043*
+−0.042*
+−0.020
+−0.028
+0.061* −0.036
+0.153**
+0.088*
+1
+FSH
+0.096*
+0.011
+−0.021
+0.027
+0.025
+0.009
+0.007
+0.023
+0.019*
+0.066*
+0.481*
+1
+ROA
+0.016***
+0.016**
+0.009*
+0.019*
+−0.017
+−0.025
+0.011
+0.031* 0.012
+−0.004
+0.054*
+0.105*
+1
+LEV
+−0.272*** −0.019*** −0.036*** −0.007***
+−0.055*
+−0.036
+−0.054* −0.001
+0.009*
+−0.032* −0.222* −0.169* −0.226***
+1
+Notes: ***p < 0.01, **p < 0.05, *p < 0.10.
+378
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+Table 5. Regression results for effects of co-governance on R&D intensity
+Variables
+R&D intensity
+Model 1
+Model 2
+Model 3
+Model 4
+Model 5
+Model 6
+Co-governance
+0.003** (2.05)
+0.004** (2.51)
+0.002 (1.48)
+0.000 (0.08)
+0.003* (1.91)
+−0.010 (−1.25)
+Kinship
+0.000 (0.20)
+−0.007 (−0.36)
+−0.003 (−1.05)
+Age difference
+0.024* (1.69)
+0.000 (0.32)
+−0.00 (−0.31)
+Gender difference
+0.001 (0.95)
+0.007 (0.68)
+0.070** (2.14)
+Co-governance × Kinship
+0.023* (1.75)
+0.022* (1.69)
+Co-governance × Age difference
+0.004*** (2.77)
+0.003* (1.78)
+Co-governance × Gender difference
+0.008** (2.03)
+0.007** (1.96)
+Firm age
+−0.005*** (−3.59)
+−0.004*** (−2.85)
+−0.005*** (−3.69)
+−0.005*** (−2.97)
+−0.000*** (−3.18)
+−0.005*** (−3.05)
+Firm size
+−0.001(−1.57)
+−0.003 (−0.36)
+−0.001 (−1.46)
+−0.005 (−0.54)
+−0.006 (−0.67)
+−0.000 (−0.14)
+Dual
+0.002 (1.54)
+0.005 (0.31)
+0.002 (1.44)
+0.006 (0.36)
+0.000 (0.06)
+0.005 (0.34)
+Indep
+0.028** (2.19)
+0.016 (0.98)
+0.014 (1.02)
+0.017 (1.03)
+0.022 (1.42)
+0.018 (1.07)
+ESH
+0.015*** (5.10)
+0.012*** (3.55)
+0.022*** (3.99)
+0.014*** (3.65)
+0.015*** (4.36)
+0.013*** (3.70)
+FSH
+−0.004 (−1.00)
+−0.002 (−0.38)
+−0.002 (−0.55)
+−0.002 (−0.47)
+−0.004 (−0.92)
+−0.003 (−0.58)
+ROA
+0.017 (1.48)
+0.024* (1.79)
+0.019 (1.51)
+0.023* (1.73)
+0.022 (1.63)
+0.022* (1.65)
+LEV
+−0.015*** (−7.54)
+−0.018*** (−6.99)
+−0.016*** (−7.12)
+−0.018*** (−7.42)
+−0.017*** (−7.28)
+−0.019*** (−7.15)
+Constant
+0.016 (0.78)
+−0.001 (−0.04)
+0.021 (0.92)
+0.003 (0.11)
+0.058 (0.21)
+0.000 (0.01)
+Year
+Control
+Control
+Control
+Control
+Control
+Control
+Industry
+Control
+Control
+Control
+Control
+Control
+Control
+Observations
+4,694
+1,845
+874
+874
+874
+874
+Adj. R2
+0.313
+0.319
+0.326
+0.321
+0.323
+0.326
+Notes: ***p < 0.01, **p < 0.05, *p < 0.1; t-value is provided in the bracket.
+379
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+variables, and moderating terms. All three moderating terms remained significant in
+Model 6 (β = 0.022, p < 0.1; β = 0.003, p < 0.1; β = 0.007, p < 0.05, respectively),
+providing further support for Hypotheses 2–4 regarding the moderating effects of
+the study.
+Hypotheses Testing: Co-Governance and Differentiation of Innovation
+Table 6 presents the results for Hypothesis 5a and Hypothesis 5b regarding
+the impact of co-governance on low versus high-risk innovation. We took a lag
+of two years for these two variables, based on the understanding that it takes
+time for the current R&D investment to generate results of innovation outcome in
+terms of patent applications. The results from Model 7 suggest that co-governance
+has a significant effect on patent applications with low risk (β = 0.291, p < 0.01), sup-
+porting H5a. On the other hand, as shown in Model 9, co-governance does not have
+a significant effect on high-risk innovation, providing support to Hypothesis 5b. In
+order to increase the confidence in these results, we performed robust tests by con-
+trolling the family shareholding ratio (FSH) at a level above 20% of the firm stock.
+The results from Models 8 and 10 are qualitatively same as those from Models 7 and
+9, providing further support for Hypothesis 5a and Hypothesis 5b.
+Thus, our modeling results suggest that co-governance leads to a significant
+increase of low-risk innovation but does not have significant influence on high-
+risk innovation. This finding demonstrates that increased innovation activities
+during the co-governance period aim mainly at stabilizing the firm’s operations
+and consolidating its market position in order to have a smooth succession, but
+not at the inventive innovations that are more important for the firm’s future devel-
+opment. The altruistic caring and support of the co-governance is more manifested
+as the ‘far-sighted’, rather than the ‘deep-minded’ effect, which can strength the
+overall innovation activities but the resources are flowing to the low-risk and appli-
+cation-type innovations, with the neglect of deep innovation.
+Robustness Tests
+Using an alternative measure for the dependent variable. We ran additional tests to examine
+the robustness of our findings and to check whether these findings were due to
+potential endogeneity biases. First, we adopted an alternative measure of our
+dependent variable by using patent application numbers of family firms to test
+the influence of co-governance on R&D investment and the moderating effects
+of this influence. Patents are widely used as a measure of firm innovation activities
+(e.g., Acharya & Xu, 2017; Guo, Pérez-Castrillo, & Toldrà-Simats, 2019; He &
+Tian, 2013). Following these empirical studies, we used the logged number of
+patent applications of the firm to measure the firm’s innovation. The rationale
+for using patent application numbers in our study as the alternative measure for
+R&D spending is twofold: (1) the practical difficulty in obtaining accurate data
+380
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+on R&D spending by family firms and (2) the inaccuracy of R&D spending in
+reflecting allocation of the investment resources by a firm to innovation activities
+with different levels of risk. In our regression analysis, we took a lag of two years
+for the dependent variable, as innovation tends to be a long process and there
+would be an interval between R&D spending as the innovation input and the
+patent as the innovation output.
+Table 7 presents the results of the robustness test that adopted logged patent
+applications as the alternative measure of the dependent variable (DV). In Model
+11, the significant effect (β = 0.206, p < 0.05) of co-governance on the DV provides
+further support for Hypothesis 1. Models 13–15 added the three moderator vari-
+ables (kinship, age difference, and female gender) and their moderating terms to
+Model 11, respectively. The results demonstrated that moderating effects are sig-
+nificant for kinship (β = 0.191, p < 0.1), age difference (β = 0.287, p < 0.1), and
+gender (β = 0.747, p < 0.01), respectively. Model 16 included all the explanatory
+variables, and the moderating effects of the three moderator variables remained
+qualitatively the same. These results indicate the robustness of the empirical find-
+ings from our regression analyses.
+Table 6. Co-governance and innovation differentiation
+Variables
+LnPatentud
+LnPatentud
+LnPatenti
+LnPatenti
+Model 7
+Model 8 (FSH ≥20%)
+Model 9
+Model 10 (FSH ≥20%)
+Co-governance
+0.291***
+0.338***
+0.028
+0.022
+(3.13)
+(3.53)
+(0.36)
+(0.27)
+Firm age
+−0.032
+−0.052
+−0.042
+−0.037
+(−0.33)
+(−0.52)
+(−0.50)
+(−0.44)
+Firm size
+0.247***
+0.233***
+0.419***
+0.425***
+(3.68)
+(3.36)
+(7.63)
+(7.58)
+Dual
+−1.812*
+−0.178*
+−0.916
+−0.085
+(−1.73)
+(−1.66)
+(−1.05)
+(−0.96)
+FSH
+0.290
+0.450
+−0.727
+−0.187
+(0.93)
+(1.35)
+(−0.26)
+(−0.65)
+ESH
+−0.203
+−0.197
+−0.020
+-0.015
+(−0.88)
+(−0.84)
+(−0.10)
+(−0.08)
+Indep
+−1.353
+−1.624
+0.760
+0.849
+(−1.33)
+(−1.52)
+(0.85)
+(0.92)
+LEV
+−0.648***
+−0.557***
+−0.526***
+−0.542***
+(−4.19)
+(−3.46)
+(−4.31)
+(−4.35)
+ROA
+0.718
+0.970*
+0.850*
+0.853
+(1.15)
+(1.71)
+(1.94)
+(1.03)
+Constant
+−3.496**
+−3.210**
+−8.408***
+−8.547***
+(−2.22)
+(−1.98)
+(−6.43)
+(−6.41)
+Year
+Control
+Control
+Control
+Control
+Industry
+Control
+Control
+Control
+Control
+Observations
+2,726
+1,391
+2,726
+1,391
+Adj. R2
+0.094
+0.095
+0.140
+0.142
+Notes: ***p < 0.01, **p < 0.05, *p < 0.1; t-value is provided in the bracket.
+381
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+Table 7. Robustness test: Effect of co-governance on innovation activities
+Variables
+LnPatent
+LnPatent
+LnPatent
+LnPatent
+LnPatent
+LnPatent
+Model 11
+Model 12
+Model 13
+Model 14
+Model 15
+Model 16
+Co-governance
+0.206** (2.48)
+0.176* (1.78)
+0.120* (1.95)
+0.453 (1.13)
+0.064 (0.57)
+1.259** (2.22)
+Kinship
+0.856*** (5.52)
+0.539*** (3.68)
+0.581*** (2.79)
+Age difference
+0.033*** (3.28)
+−0.021 (−1.61)
+0.004 (0.28)
+Gender difference
+0.191 (1.44)
+−0.375 (−1.50)
+−0.360 (−1.47)
+Co-governance × Kinship
+0.191* (1.87)
+0.554* (1.79)
+Co-governance × Age difference
+0.287* (1.75)
+0.047** (2.24)
+Co-governance × Gender difference
+0.747*** (2.59)
+0.754*** (2.63)
+Other variables
+Control
+Control
+Control
+Control
+Control
+Control
+Observations
+2,726
+1,327
+612
+612
+612
+612
+Adj. R2
+0.107
+0.173
+0.129
+0.130
+0.131
+0.190
+Notes: ***p < 0.01, **p < 0.05, *p < 0.1; t-value is provided in the bracket; control variables are included, but not reported in the table.
+382
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+Robustness test regarding endogeneity. Given the potential problems of missing explana-
+tory variables and reverse causality between dependent and explanatory variables,
+our empirical analyses might be affected by endogeneity bias. We run propensity
+score matching (PSM) analyses to assess the potential endogeneity bias in our study.
+PSM allows biases in the estimate of the treatment effect to be removed by adjust-
+ing for differences in the set of pretreatment covariates (Schilke & Lumineau,
+2018). Using all control variables as pairing variables and also considering the
+influences from time (year) and industry, we employed three matchings of 1:1
+and 1:3 neighbor matchings as well as core matching to pair every treatment
+firm with a firm from the control group to create a quasi-control group and ran-
+domize the data (Zaefarian, Kadile, Henneberg, & Leischnig, 2017). As shown in
+Table 8, the PSM analyses demonstrate that for the matched group, co-govern-
+ance had a significant and positive effect on R&D intensity with coefficient
+values at 0.91, 0.077, and 0.070, respectively. Following the same procedure, we
+also tested the effects of the three moderator variables of kinship, age difference,
+and gender, and the results were consistent, indicating that endogeneity is not a
+concern for our data.
+Extended robustness test: Co-governance, innovation investment, and firm performance. In order
+to examine the nature of co-governance, we further tested the effects of co-govern-
+ance as well as R&D intensity on firm performance, respectively. We
+employed return on equity (ROE) and Tobin’s Q as two measures of firm perform-
+ance. The results from Models 17 and 19 in Table 9 demonstrate that co-govern-
+ance does not significantly influence firm performance measured either by ROE or
+Tobin’s Q. This result suggests that co-governance does not necessarily lead to
+improvement of firm performance, as it aims to facilitate a smooth succession of
+the firm from the founder generation to the second generation, indicating the sup-
+portive behavior of the founder generation to their succession generation. On the
+other hand, as shown by the results from Models 18 and 20, R&D intensity has a
+significant effect on firm performance measured either by ROE (β = 0.289, p <
+0.05) or Tobin’s Q (β = 5.880, p < 0.01). These results suggest that through facili-
+tating innovation activities, co-governance can indirectly influence firm perform-
+ance, although it does not directly improve firm performance.
+DISCUSSION
+Having emerged during the reform and opening up of the Chinese economy,
+Chinese family firms have experienced rapid development over the past 40
+years, and many are reaching a phase of intergenerational succession. Co-govern-
+ance of Chinese family firms is a common phenomenon in the intergenerational
+succession process. Based on altruistic behavior motivated by ‘far-reaching’ paren-
+tal love, our study examined the innovation activities during the intergenerational
+succession period and identified co-governance as the mechanism to facilitate
+383
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+innovation activities. Initiated by altruistic support from the founder to the succes-
+sor generation, co-governance in the intergenerational succession period positively
+affects innovation in order to facilitate a smooth succession. Moreover, this direct
+link between co-governance and innovation activities is positively moderated by
+three factors associated with parental altruistic behavior: kinship relationship,
+age difference, and gender difference. More specifically, a parent–child kinship
+relationship, a bigger age gap between the founder and successor, and a female
+successor will trigger greater care and support from the founder generation, and
+thus enhance the positive link between co-governance and innovation activities.
+Moreover, a positive link between innovation activities and firm performance
+Table 8. Results of PSM analysis for co-governance and R&D intensity
+R&D intensity
+1:1 matching
+1:3 matching
+Core matching
+ATT
+t-value
+ATT
+t-value
+ATT
+t-value
+Co-governance
+Unmatched
+0.067**
+2.02
+0.067**
+2.02
+0.067**
+2.02
+Matched
+0.091*
+1.73
+0.077**
+2.22
+0.070*
+1.87
+Notes: ***p < 0.01, **p < 0.05, *p < 0.1.
+Table 9. Co-governance, innovation activities, and firm performance
+Variables
+ROE
+ROE
+Tobin’s Q
+Tobin’s Q
+Model 17
+Model 18
+Model 19
+Model 20
+Co-governance
+0.182
+0.022
+(1.16)
+(0.28)
+R&D intensity
+0.289**
+5.880***
+2.17
+2.79
+Firm age
+0.035
+0.012
+0.103
+0.137
+(0.21)
+(0.09)
+(1.24)
+(1.38)
+Firm size
+0.183*
+0.248*
+0.035***
+0.032***
+(1.86)
+(1.90)
+(10.55)
+(9.59)
+Dual
+−0.114
+−0.098
+0.010
+0.060
+(−0.66)
+(−0.46)
+(1.13)
+(0.59)
+FSH
+0.006
+0.005
+0.025
+0.024
+(0.22)
+(0.18)
+(1.40)
+(1.30)
+ESH
+0.026
+0.019
+−0.008
+−0.007
+(0.89)
+(0.78)
+(−0.50)
+(−0.49)
+Indep
+0.026
+0.031
+0.052
+0.051
+(0.27)
+(0.33)
+(0.93)
+(0.92)
+Constant
+0.819***
+0.765***
+17.142***
+17.823***
+(6.68)
+(6.16)
+(15.13)
+(11.36)
+Year
+Control
+Control
+Control
+Control
+Industry
+Control
+Control
+Control
+Control
+Observations
+4,694
+4,694
+4,694
+4,694
+Adj. R2
+0.209
+0.093
+0.136
+0.127
+Notes: ***p < 0.01, **p < 0.05, *p < 0.1; t-value is provided in the bracket.
+384
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+during the co-governance period demonstrates the effectiveness of the founder
+generation’s support in achieving a smooth succession. On the other hand, our
+results demonstrate that altruism-based co-governance leads to innovation differ-
+entiation, resulting in a flow of resources to low-risk innovations, rather than
+high-risk inventive innovations. This finding indicates that the altruistic support
+toward the successor has its limitation in stimulating innovation, as it directs innov-
+ation resources away from a more creative to more conservative innovation area.
+Applying altruism as the theoretical approach to address this research gap,
+our study contributes to the family firm intergenerational succession literature
+by proposing it is the nature of founder–successor relationships underlying the suc-
+cession process that has significant influence on firms’ innovation activities. Based
+on family firms located in mature economies, prior research suggests intergenera-
+tional succession is presented as an opportunity for reaffirmation of a strategic pos-
+ition (Garcia et al., 2019; Gomez-Mejia et al., 2014; Miller & Le Breton-Miller,
+2014). However, the strategic stability of the firm is much less likely to apply in
+an emerging economy like China (Zhao et al., 2020). Our results demonstrate
+that the founder–successor relationship is culture-bounded and more complex
+than previous studies have suggested. In such circumstances, leadership succession
+requires an alignment of the firm’s strategic position with the changes both internal
+and external to the firm (Quigley & Hambrick, 2012).
+Extending this line of research, our study examines the relationship between
+co-governance as a transitional type of governance structure and resource commit-
+ments to innovation of Chinese family firms. By doing so, we are the first to expli-
+citly propose and empirically assess co-governance as a novel mechanism for the
+hidden link between intergenerational succession and innovation activities, and
+are the first to explain why family firms’ intergenerational co-governance is
+more likely to enhance innovation activities than those without co-governance.
+Innovation represents a challenging strategic activity for most family firms.
+Although prior research has identified factors that facilitate or inhabit resource
+commitments of family firms to innovation, research into how intergeneration suc-
+cession as a unique issue of family firms affects innovation activities remains under-
+explored and limited research results are conflicting (De Massis et al., 2015;
+Richards et al., 2019). Given their heterogeneity, family firms can follow different
+patterns of succession which may influence their innovation activities in different
+ways. Our study attempts to address the gap by empirically investigating the inter-
+play between intergenerational succession pattern and the resource commitments
+to innovation activities. In line with the Chinese yin-yang philosophical perspec-
+tive, we identify co-governance as a distinct intergenerational succession pattern
+that provides a mechanism to balance change and continuity as two conflicting
+strategic directions in the intergenerational succession process and thus solve the
+change-continuity paradox. Parental altruistic support suggests a positive relation-
+ship between co-governance and resource commitments to innovation activities for
+the future take-over by the intra-family successor. Our empirical findings
+385
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+contribute to the literature of family firm succession and innovation by suggesting
+that it is the nature of co-governance underlying the founder–successor relation-
+ship, rather than intergenerational succession per se that has a significant effect
+on innovation activities as the strategic direction. As discussed below, the nature
+of intra-family relationships was found to influence the extent to which the
+founder provides parental altruistic support to the successor, which in turn
+affects the strength of the positive link between co-governance and innovation
+activities.
+Prior research suggests that differences in kinship relationship and personal
+experiences would lead to differentiation of interests and preferences among
+members of the owning family, resulting in conflicts of interest and agency pro-
+blems (Eddleston & Kidwell, 2012; Garcia et al., 2019; Schulze et al., 2003b;
+Sharma, Chrisman, & Chua, 2003; Van den Berghe & Carchon, 2003).
+Extending this line of research, empirical evidence from our study regarding the
+moderating effects suggests that parental altruistic support to the next-generation
+successors is contingent on the nature of the intra-family relationships between the
+founder and successor, which include the kinship relationship, age difference, and
+gender difference. That is to say, the alignment of interests among family members
+and the associated altruistic parent support are more likely to occur between
+nuclear family members and between members who share certain specific interper-
+sonal relations. More specifically, conflicts of interest and agency problems are less
+likely within a parent–child relationship, with a large age difference between the
+incumbent and successor, and with female gender of the successor. These empirical
+findings demonstrate that different types of family relationships within the owning
+family can affect the efficiency of family firm governance by influencing strategic
+decision-making regarding resource commitment to innovation activities.
+Previous studies suggest that intergenerational succession affects innovation of
+family firms, either positively (Kraiczy et al., 2015; Laforet, 2013) or negatively
+(Block, 2012; Gomez-Mejia et al., 2019; Miller & Le Breton-Miller, 2014).
+Responding to the recent call to acknowledge potential socio-emotional wealth
+heterogeneity
+within
+family
+firms
+(Vandekerkhof,
+Steijvers,
+Hendriks,
+&
+Voordeckers, 2018), our study proposes that succession pattern with regard to
+whether there is co-governance structure in the succession process is a key deter-
+minant of innovation activities in the succession process. Thus, we identify co-gov-
+ernance as a hidden link between intergenerational succession and innovation in
+Chinese family firms. Our empirical evidence demonstrates that the connection
+between intergenerational succession and innovation is deeper and much more
+complex than prior research has shown. Specifically, the nature of intra-family
+relationships is helpful to achieve a change-continuity balance in terms of innov-
+ation as a strategic direction. The successor may bring in the drive for strategic
+change to strengthen the firm’s competitive advantage in line with an increasingly
+prosperous Chinese economy, whereas the founder can provide continuity given
+his/her experience of reliance on the ability to benefit from the close ties with
+386
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+business partners and governmental officials (Dou & Li, 2013). This insight is the-
+oretically important not only because we are able to demonstrate that family firms
+with co-governance are more heterogeneous in their innovation activities than
+those without co-governance: rather, its theoretical implications include the atten-
+tion this heterogeneity directs toward how parental altruistic support, in addition to
+their overall importance and amount related to the family kinship of blood and
+marriage, influences the behavior pattern of Chinese family firms.
+Our empirical results regarding the effect of co-governance on innovation dif-
+ferentiation have significant implications. These results demonstrate that while
+parental altruistic support and a change-continuity balance lead to increased
+resource commitments toward innovation activities, these resources mainly flow
+to the incremental type of innovations, such as patents of utility models and
+designs, which are useful but not fundamental to establish and improve the
+firm’s competitiveness, rather than the more inventive type of innovations, based
+on a consideration of different levels of risk involved. These results suggest that par-
+ental altruistic support is likely to be emotion based, rather than rationally based,
+reflecting a lack of deep-mindedness of paternalistic love.
+Finally, we provide managerial implications for business practitioners. First,
+our findings and discussion confirm the notion from existing research that the prep-
+aration of intra-family successors for leadership positions is a long process.
+Moreover, rather than being composed of distinct phases, the approach to succes-
+sion planning in China’s family firms is more akin to an apprenticeship with suc-
+cessors undergoing a practical experience by ‘learning on the job’. Our
+conceptualization of co-governance highlights the importance of including a
+next-generation member into the upper echelons or inner circle of the firm
+where the successor is likely to experience significant ‘on the job’ learning oppor-
+tunities and where she/he is likely to exhibit greater influence over strategic deci-
+sion-making such as innovation, albeit under the watchful eye of the founder.
+Thus, family firms should prepare their successors at an early stage to help them
+develop and demonstrate their governing abilities sooner. Second, the moderating
+effects confirmed in our study suggest that family firms should strengthen their stra-
+tegic thinking of the role played by intra-family relationships in intergenerational
+succession. Both the founder and successor should open their mind to building a
+good personal relationship with high mutual respect and smooth flow of commu-
+nication, and be soberly aware of the importance in achieving a change-continuity
+balance with regard to innovation as one of the strategic directions. Early succes-
+sion planning can facilitate the achievement of change-continuity balance, so that
+the family firm can more effectively adapt to the dramatic changes in the business
+environment with inclusion of new initiatives and skills from the successor while
+preserving strategic stability by benefitting from the experience and social relation-
+ship capital from the founder generation. Third, the detrimental effect of emotion-
+based parental altruistic support on long-term sustainable competitiveness of the
+firm warrants managerial attention. Controllers/managers of Chinese family
+387
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+firms need to be aware of the shortcomings of emotion-based paternalistic love and
+be mindful regarding paternalism-motivated parental support of the successor so
+that founder–successor co-governance can result in the ‘co-creation’ of sustainable
+competitiveness of the firm.
+Limitations and Future Research Directions
+Our study also has several limitations, which suggest directions for future research.
+First, co-governance can be a long process and its potential influence on the stra-
+tegic behavior of the firm may not be felt for several years. Given the relatively
+short timeframe of the emergence of family firms in the Chinese economy, a major-
+ity of Chinese family firms have not yet started nor completed the intergenerational
+succession from the founder to the successor. As shown in Table 1, only a small
+proportion of the firms included in our full sample have experienced a co-govern-
+ance period. The influence of co-governance on strategic behavior of the firm may
+take a long time to fully appear. Thus, access to longer-term sample data could be
+helpful. Second, the phased succession that our study has documented may not
+fully capture the lasting impact of founders on strategic behavior of the firm.
+We measured co-governance by the two time points of (1) entry of the successor
+to the TMT and (2) departure of the founder from the position of either chair
+of the board or the CEO. However, a founder could still play an influential role
+in firm governance in terms of its strategic behavior after they leave the top posi-
+tions of the firm, even if they do not have an official title in the firm, especially in
+the context of Chinese society. This lasting impact of the founder needs to be
+included in future studies of intergenerational succession.
+NOTES
+This study is financially supported by grants from the Natural Science Foundation of China
+(No: 71810107002; 71672196; 71602195), the Guangdong Philosophy and Social Science
+Foundation (GD20CGL48), and the Center for Cantonese Merchants Research (21YZB005).
+REFERENCES
+Acharya, V., & Xu, Z. 2017. Financial dependence and innovation: The case of public versus private
+firms. Journal of Financial Economics, 124(2): 223–243.
+Akhmedova, A., Cavallotti, R., Marimon, F., & Campopiano, G. 2020. Daughters’ careers in family
+business: Motivation types and family-specific barriers. Journal of Family Business
+Strategy, 11(3): 100307.
+Anderson, R. C., & Reeb, D. M. 2003. Founding-family ownership and firm performance: Evidence
+from the S&P 500. The Journal of Finance, 58(3): 1301–1328.
+Andreoni, J., & Vesterlund, L. 2001. Which is the fair sex? Gender differences in altruism. The
+Quarterly Journal of Economics, 116(1): 293–312.
+Baron, R. A. 2008. The role of affect in the entrepreneurial process. Academy of Management
+Review, 33(2): 328–340.
+388
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+Bennedsen, M., Nielsen, K. M., Pérez-González, F., & Wolfenzon, D. 2007. Inside the family firm:
+The role of families in succession decisions and performance. The Quarterly Journal of
+Economics, 122(2): 647–691.
+Berrone, P., Cruz, C., & Gomez-Mejia, L. R. 2012. Socioemotional wealth in family firms:
+Theoretical dimensions, assessment approaches, and agenda for future research. Family
+Business Review, 25(3): 258–279.
+Berrone, P., Cruz, C., Gomez-Mejia, L. R., & Larraza-Kintana, M. 2010. Socioemotional wealth
+and corporate responses to institutional pressures: Do family-controlled firms pollute less?
+Administrative Science Quarterly, 55(1): 82–113.
+Block, J. H. 2012. R&D investments in family and founder firms: An agency perspective. Journal of
+Business Venturing, 27(2): 248–265.
+Brigham, K. H., Lumpkin, G. T., Payne, G. T., & Zachary, M. A. 2014. Researching long-term
+orientation: A validation study and recommendations for future research. Family Business
+Review, 27(1): 72–88.
+Brown, A. L., & Lahey, J. N. 2015. Small victories: Creating intrinsic motivation in task completion
+and debt repayment. Journal of Marketing Research, 52(6): 768–783.
+Brown, G., Lawrence, T. B., & Robinson, S. L. 2005. Territoriality in organizations. Academy of
+Management Review, 30(3): 577–594.
+Brush, C. G. 1992. Research on women business owners: Past trends, a new perspective and future
+directions. Entrepreneurship Theory and Practice, 16(4): 5–30.
+Cabrera-Suárez, K., De Saá-Pérez, P., & García-Almeida, D. 2001. The succession process from
+a resource-and knowledge-based view of the family firm. Family Business Review, 14(1):
+37–48.
+Cadieux, L., Lorrain, J., & Hugron, P. 2002. Succession in women-owned family businesses: A case
+study. Family Business Review, 15(1): 17–30.
+Calabrò, A., Minichilli, A., Amore, M. D., & Brogi, M. 2018. The courage to choose! Primogeniture
+and leadership succession in family firms. Strategic Management Journal, 39(7):
+2014–2035.
+Cao, J., Cumming, D., & Wang, X. 2015. One-child policy and family firms in China. Journal of
+Corporate Finance, 33: 317–329.
+Carless, S. A., & De Paola, C. 2000. The measurement of cohesion in work teams. Small Group
+Research, 31(1): 71–88.
+Carson, J. B., Tesluk, P. E., & Marrone, J. A. 2007. Shared leadership in teams: An investigation of
+antecedent conditions and performance. Academy of Management Journal, 50(5): 1217–1234.
+Chen, M. J. 2002. Transcending paradox: The Chinese ‘middle way’ perspective. Asia Pacific
+Journal of Management, 19(2–3): 179–199.
+Chen, S., Fang, H. C., MacKenzie, N. G., Carter, S., Chen, L., & Wu, B. 2018. Female leadership in
+contemporary Chinese family firms. Asia Pacific Journal of Management, 35(1): 181–211.
+Cheng, B. S., Chou, L. F., Wu, T. Y., Huang, M. P., & Farh, J. L. 2004. Paternalistic leadership and
+subordinate responses: Establishing a leadership model in Chinese organizations. Asian
+Journal of Social Psychology, 7(1): 89–117.
+Chrisman, J. J., & Patel, P. C. 2012. Variations in R&D investments of family and non-family firms:
+Behavioral agency and myopic loss aversion perspectives. Academy of Management
+Journal, 55(4): 976–997.
+Chrisman, J. J., Chua, J. H., & Sharma, P. 2005. Trends and directions in the development of a stra-
+tegic management theory of the family firm. Entrepreneurship Theory and Practice, 29(5):
+555–575.
+Chrisman, J. J., Chua, J. H., & Zahra, S. A. 2003. Creating wealth in family firms through managing
+resources: Comments and extensions. Entrepreneurship Theory and Practice, 27(4):
+359–365.
+Chrisman, J. J., Chua, J. H., Kellermanns, F. W., & Chang, E. P. 2007. Are family managers agents
+or stewards? An exploratory study in privately held family firms. Journal of Business
+Research, 60(10): 1030–1038.
+Chung, C. N., & Luo, X. 2008. Human agents, contexts, and institutional change: The decline of
+family in the leadership of business groups. Organization Science, 19(1): 124–142.
+Coad, A., & Rao, R. 2011. The firm-level employment effects of innovations in high-tech US manu-
+facturing industries. Journal of Evolutionary Economics, 21(2): 255–283.
+Craig, J., & Dibrell, C. 2006. The natural environment, innovation, and firm performance: A com-
+parative study. Family Business Review, 19(4): 275–288.
+389
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+Cucculelli, M., & Micucci, G. 2008. Family succession and firm performance: Evidence from Italian
+family firms. Journal of Corporate Finance, 14(1): 17–31.
+Cucculelli, M., Le Breton-Miller, I., & Miller, D. 2016. Product innovation, firm renewal and family
+governance. Journal of Family Business Strategy, 7(2): 90–104.
+Darity, W. A. 2008. International encyclopedia of the social sciences, vol. 8: 7–88. Detroit:
+Macmillan Reference.
+Davis, P. S., & Harveston, P. D. 1998. The influence of family on the family business succession
+process: A multi-generational perspective. Entrepreneurship Theory and Practice, 22(3):
+31–53.
+Dawson, A., Sharma, P., Irving, P. G., Marcus, J., & Chirico, F. 2015. Predictors of later-generation
+family members’ commitment to family enterprises. Entrepreneurship Theory and
+Practice, 39(3): 545–569.
+De Dreu, C. K., & Van Vianen, A. E. 2001. Managing relationship conflict and the effectiveness of
+organizational teams. Journal of Organizational Behavior, 22(3): 309–328.
+De Massis, A., Chua, J. H., & Chrisman, J. J. 2008. Factors preventing intra-family succession.
+Family Business Review, 21(2): 183–199.
+De Massis, A., Di Minin, A., & Frattini, F. 2015. Family-driven innovation: Resolving the paradox in
+family firms. California Management Review, 58(1): 5–19.
+De Massis, A., Kotlar, J., Mazzola, P., Minola, T., & Sciascia, S. 2018. Conflicting selves: Family
+owners’ multiple goals and self-control agency problems in private firms. Entrepreneurship
+Theory and Practice, 42(3): 362–389.
+Deng, X. 2015. Father-daughter succession in China: Facilitators and challenges. Journal of
+Family Business Management, 5(1): 38–54.
+Devers, C. E., McNamara, G., Wiseman, R. M., & Arrfelt, M. 2008. Moving closer to the action:
+Examining compensation design effects on firm risk. Organizational Science, 19(4): 548–566.
+Diaz-Moriana, V., Clinton, E., Kammerlander, N., Lumpkin, G. T., & Craig, J. B. 2020. Innovation
+motives in family firms: A transgenerational view. Entrepreneurship Theory and Practice,
+44(2): 256–278.
+D’Innocenzo, L., Mathieu, J. E., & Kukenberger, M. R. 2016. A meta-analysis of different forms of
+shared leadership–team performance relations. Journal of Management, 42(7): 1964–1991.
+Dou, J., & Li, S. 2013. The succession process in Chinese family firms: A guanxi perspective. Asia
+Pacific Journal of Management, 30(3): 893–917.
+Duran, P., Kammerlander, N., Van Essen, M., & Zellweger, T. 2016. Doing more with less:
+Innovation input and output in family firms. Academy of Management Journal, 59(4):
+1224–1264.
+Dyer, W. G. Jr., & Sánchez, M. 1998. Current state of family business theory and practice as reflected
+in Family Business Review 1988–1997. Family Business Review, 11(4): 287–295.
+Eddleston, K. A., & Kellermanns, F. W. 2007. Destructive and productive family relationships: A
+stewardship theory perspective. Journal of Business Venturing, 22(4): 545–565.
+Eddleston, K. A., & Kidwell, R. E. 2012. Parent–child relationships: Planting the seeds of deviant
+behavior in the family firm. Entrepreneurship Theory and Practice, 36(2): 369–386.
+Ensley, M. D., & Pearson, A. W. 2005. An exploratory comparison of the behavioral dynamics of top
+management teams in family and nonfamily new ventures: Cohesion, conflict, potency, and con-
+sensus. Entrepreneurship Theory and Practice, 29(3): 267–284.
+Fei, X. 1948. The local China. Shanghai: China Observation Press.
+Ferrari, F. 2019. In the mother’s shadow: Exploring power dynamics in family business succession.
+Gender in Management: An International Journal, 34(2): 121–139.
+Fiese, B. H., & Skillman, G. 2000. Gender differences in family stories: Moderating influence of
+parent gender role and child gender. Sex Roles, 43(5–6): 267–283.
+Gal, D., & McShane, B. B. 2012. Can small victories help win the war? Evidence from consumer debt
+management. Journal of Marketing Research, 49(4): 487–501.
+Galperti, S., & Strulovici, B. 2017. A theory of intergenerational altruism. Econometrica, 85(4):
+1175–1218.
+Garcia, P. R. J. M., Sharma, P., De Massis, A., Wright, M., & Scholes, L. 2019. Perceived parental
+behaviors and next-generation engagement in family firms: A social cognitive perspective.
+Entrepreneurship Theory and Practice, 43(2): 224–243.
+Gentry, R., Dibrell, C., & Kim, J. 2016. Long-term orientation in publicly traded family businesses:
+Evidence of a dominant logic. Entrepreneurship Theory and Practice, 40(4): 733–757.
+390
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+Gersick, K. E., Davis, J. A., Hampton, M. M., & Lansberg, I. 1997. Generation to generation:
+Life cycles of the family business. Cambridge, MA: Harvard Business School Press.
+Gilding, M., Gregory, S., & Cosson, B. 2015. Motives and outcomes in family business succession
+planning. Entrepreneurship Theory and Practice, 39(2): 299–312.
+Glauben, T., Petrick, M., Tietje, H., & Weiss, C. 2009. Probability and timing of succession or
+closure in family firms: A switching regression analysis of farm households in Germany.
+Applied Economics, 41(1): 45–54.
+Glover, J. L. 2014. Gender, power and succession in family farm business. International Journal
+of Gender and Entrepreneurship, 6(3): 276–295.
+Gomez-Mejia, L. R., Makri, M., & Larraza-Kintana, M. 2010. Diversification decisions in family
+controlled firms. Journal of Management Studies, 47(2): 223–252.
+Gomez-Mejia, L. R., Neacsu, I., & Martin, G. 2019. CEO risk-taking and socioemotional wealth:
+The behavioral agency model, family control, and CEO option wealth. Journal of
+Management, 45(4): 1713–1738.
+Gómez-Mejía, L. R., Haynes, K. T., Núñez-Nickel, M., Jacobson, K. J., & Moyano-Fuentes, J. 2007.
+Socioemotional wealth and business risks in family-controlled firms: Evidence from Spanish
+olive oil mills. Administrative Science Quarterly, 52(1): 106–137.
+Gomez-Mejia, L. R., Campbell, J. T., Martin, G., Hoskisson, R. E., Makri, M., & Sirmon, D. G.
+2014. Socioemotional wealth as a mixed gamble: Revisiting family firm R&D investments
+with the behavioral agency model. Entrepreneurship Theory and Practice, 38(6):
+1351–1374.
+Grote, J. 2003. Conflicting generations: A new theory of family business rivalry. Family Business
+Review, 16(2): 113–124.
+Guo, B., Pérez-Castrillo, D., & Toldrà-Simats, A. 2019. Firms’ innovation strategy under the shadow
+of analyst coverage. Journal of Financial Economics, 131(2): 456–483.
+Habbershon, T. G., Williams, M., & MacMillan, I. C. 2003. A unified systems perspective of family
+firm performance. Journal of Business Venturing, 18(4): 451–465.
+Haberman, H., & Danes, S. M. 2007. Father-daughter and father-son family business management
+transfer comparison: Family FIRO model application. Family Business Review, 20(2):
+163–184.
+Hauck, J., & Prügl, R. 2015. Innovation activities during intra-family leadership succession in family
+firms: An empirical study from a socioemotional wealth perspective. Journal of Family
+Business Strategy, 6(2): 104–118.
+Hauck, J., Suess-Reyes, J., Beck, S., Prügl, R., & Frank, H. 2016. Measuring socioemotional wealth in
+family-owned and-managed firms: A validation and short form of the FIBER Scale. Journal of
+Family Business Strategy, 7(3): 133–148.
+He, J. J., & Tian, X. 2013. The dark side of analyst coverage: The case of innovation. Journal of
+Financial Economics, 109(3): 856–878.
+Hollander, B. S., & Bukowitz, W. R. 1990. Women, family culture, and family business. Family
+Business Review, 3(2): 139–151.
+Hytti, U., Alsos, G. A., Heinonen, J., & Ljunggren, E. 2017. Navigating the family business: A gen-
+dered analysis of identity construction of daughters. International Small Business Journal,
+35(6): 665–686.
+Jaskiewicz, P., Combs, J. G., & Rau, S. B. 2015. Entrepreneurial legacy: Toward a theory of how
+some family firms nurture transgenerational entrepreneurship. Journal of Business
+Venturing, 30(1): 29–49.
+Jehn, K. A. 1997. A qualitative analysis of conflict types and dimensions in organizational groups.
+Administrative Science Quarterly, 42(3): 530–557.
+Karra, N., Tracey, P., & Phillips, N. 2006. Altruism and agency in the family firm: Exploring the role
+of family, kinship, and ethnicity. Entrepreneurship Theory and Practice, 30(6): 861–877.
+Kellermanns, F. W., & Eddleston, K. A. 2004. Feuding families: When conflict does a family firm
+good. Entrepreneurship Theory and Practice, 28(3): 209–228.
+Kellermanns, F. W., Eddleston, K. A., Sarathy, R., & Murphy, F. 2012. Innovativeness in family
+firms: A family influence perspective. Small Business Economics, 38(1): 85–101.
+Kimhi, A., & Nachlieli, N. 2001. Intergenerational succession on Israeli family farms. Journal of
+Agricultural Economics, 52(2): 42–58.
+Kraiczy, N. D., Hack, A., & Kellermanns, F. W. 2015. What makes a family firm innovative? CEO
+risk-taking propensity and the organizational context of family firms. Journal of Product
+Innovation Management, 32(3): 334–348.
+391
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+Kubíček, A., & Machek, O. 2019. Gender-related factors in family business succession: A systematic
+literature review. Review of Managerial Science, 13: 963–1002.
+Laforet, S. 2013. Innovation characteristics of young and old family-owned businesses. Journal of
+Small Business and Enterprise Development, 20(1): 204–224.
+Lambrecht, J. 2005. Multigenerational transition in family businesses: A new explanatory model.
+Family Business Review, 18(4): 267–282.
+Le Breton-Miller, I., Miller, D., & Steier, L. P. 2004. Toward an integrative model of effective FOB
+succession. Entrepreneurship Theory and Practice, 28(4): 305–328.
+Li, P. P. 2012. Toward an integrative framework of indigenous research: The geocentric implications
+of Yin-Yang balance. Asia Pacific Journal of Management, 29(4): 849–872.
+Li, P. P. 2014. The unique value of Yin-Yang balancing: A critical response. Management and
+Organization Review, 10(2): 321–332.
+Li, P. P. 2015. Both converging toward and diverging from global paradigms: The perspective of Yin-
+Yang balancing for the unity-in-diversity duality. Management and Organization Review,
+11(4): 807–813.
+Li, X. 2002. Trust, loyalty and the predicament that clannishness is in. Management World, 6:
+87–93, +133 (Published in Chinese).
+Lubatkin, M. H., Ling, Y., & Schulze, W. S. 2007. An organizational justice-based view of self-control
+and agency costs in family firms. Journal of Management Studies, 44(6): 955–971.
+Lubatkin, M. H., Schulze, W. S., Ling, Y., & Dino, R. N. 2005. The effects of parental altruism on the
+governance of family-managed firms. Journal of Organizational Behavior, 26(3): 313–330.
+Lumpkin, G. T., & Brigham, K. H. 2011. Long-term orientation and intertemporal choice in family
+firms. Entrepreneurship Theory and Practice, 35(6): 1149–1169.
+Mathew, V. 2016. Women and family business succession in Asia–Characteristics, challenges and
+chauvinism. International Journal of Entrepreneurship and Small Business, 27(2–
+3): 410–424.
+McDermott, C. M., & O’Connor, G. C. 2002. Managing radical innovation: An overview of emer-
+gent strategy issues. Journal of Product Innovation Management, 19(6): 424–438.
+Michel, A., & Kammerlander, N. 2015. Trusted advisors in a family business’s succession-planning
+process: An agency perspective. Journal of Family Business Strategy, 6(1): 45–57.
+Miller, D., & Le Breton-Miller, I. 2005. Management insights from great and struggling family busi-
+nesses. Long Range Planning, 38(6): 517–530.
+Miller, D., & Le Breton-Miller, I. 2006. Family governance and firm performance: Agency, steward-
+ship, and capabilities. Family Business Review, 19(1): 73–87.
+Miller, D., & Le Breton-Miller, I. 2014. Deconstructing socioemotional wealth. Entrepreneurship
+Theory and Practice, 38(4): 713–720.
+Morck, R., & Yeung, B. 2003. Agency problems in large family business groups. Entrepreneurship
+Theory and Practice, 27(4): 367–382.
+Morgan, T. J., & Gomez-Mejia, L. R. 2014. Hooked on a feeling: The affective component of socio-
+emotional wealth in family firms. Journal of Family Business Strategy, 5(3): 280–288.
+Mussolino, D., Cicellin, M., Iacono, M. P., Consiglio, S., & Martinez, M. 2019. Daughters’ self-posi-
+tioning in family business succession: A narrative inquiry. Journal of Family Business
+Strategy, 10(2): 72–86.
+Overbeke, K. K., Bilimoria, D., & Perelli, S. 2013. The dearth of daughter successors in family busi-
+nesses: Gendered norms, blindness to possibility, and invisibility. Journal of Family Business
+Strategy, 4(3): 201–212.
+Pearce, C. L., & Conger, J. A. 2002. Shared leadership: Reframing the hows and whys of
+leadership. Thousand Oaks, CA: Sage Publications.
+Peng, M. W., Sun, W., Vlas, C., Minichilli, A., & Corbetta, G. 2018. An institution-based view of
+large family firms: A recap and overview. Entrepreneurship Theory and Practice, 42(2):
+187–205.
+Piperopoulos, P., Wu, J., & Wang, C. 2018. Outward FDI, location choices and innovation perform-
+ance of emerging market enterprises. Research Policy, 47(1): 232–240.
+Qiu, H., & Freel, M. 2020. Managing family-related conflicts in family businesses: A review and
+research agenda. Family Business Review, 33(1): 90–113.
+Quigley, T. J., & Hambrick, D. C. 2012. When the former CEO stays on as board chair: Effects on
+successor discretion, strategic change, and performance. Strategic Management Journal, 33
+(7): 834–859.
+392
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+Ren, S., Eisingerich, A. B., & Tsai, H. T. 2015. How do marketing, research and development cap-
+abilities, and degree of internationalization synergistically affect the innovation performance of
+small and medium-sized enterprises (SMEs)? A panel data study of Chinese SMEs.
+International Business Review, 24(4): 642–651.
+Richards, M., Kammerlander, N., & Zellweger, T. 2019. Listening to the heart or the head?
+Exploring the ‘willingness versus ability’ succession dilemma. Family Business Review, 32
+(4): 330–353.
+Roed, I. 2016. Disentangling the family firm’s innovation process: A systematic review. Journal of
+Family Business Strategy, 7(3): 185–201.
+Rondi, E., De Massis, A., & Kotlar, J. 2019. Unlocking innovation potential: A typology of family
+business innovation postures and the critical role of the family system. Journal of Family
+Business Strategy, 10(4): 100236.
+Sardeshmukh, S. R., & Corbett, A. C. 2011. The duality of internal and external development
+of successors: Opportunity recognition in family firms. Family Business Review, 24(2):
+111–125.
+Schilke, O., & Lumineau, F. 2018. The double-edged effect of contracts on alliance performance.
+Journal of Management, 44(7): 2827–2858.
+Schulze, W. S., Lubatkin, M. H., & Dino, R. N. 2003a. Toward a theory of agency and altruism in
+family firms. Journal of Business Venturing, 18(4): 473–491.
+Schulze, W. S., Lubatkin, M. H., & Dino, R. N. 2003b. Exploring the agency consequences of own-
+ership dispersion among the directors of private family firms. Academy of Management
+Journal, 46(2): 179–194.
+Schulze, W. S., Lubatkin, M. H., Dino, R. N., & Buchholtz, A. K. 2001. Agency relationships in
+family firms: Theory and evidence. Organization Science, 12(2): 99–116.
+Schwartz, S. H., & Rubel, T. 2005. Sex differences in value priorities: Cross-cultural and multi-
+method studies. Journal of Personality and Social Psychology, 89(6): 1010–1028.
+Serban, A., & Roberts, A. J. 2016. Exploring antecedents and outcomes of shared leadership in a cre-
+ative context: A mixed-methods approach. The Leadership Quarterly, 27(2): 181–199.
+Sharma, P., Chrisman, J. J., & Chua, J. H. 2003. Succession planning as planned behavior: Some
+empirical results. Family Business Review, 16(1): 1–15.
+Shi, H. X., Graves, C., & Barbera, F. 2019. Intergenerational succession and internationalisation
+strategy of family SMEs: Evidence from China. Long Range Planning, 52(4): 101838.
+Smythe, J., & Sardeshmukh, S. R. 2013. Fathers and daughters in family business. Small
+Enterprise Research, 20(2): 98–109.
+Stark, O. 1995. Altruism and beyond: An economic analysis of transfers within families
+and groups. Cambridge, UK: Cambridge University Press.
+van Aaken, D., Rost, K., & Seidl, D. 2017. The substitution of governance mechanisms in the evo-
+lution of family firms. Long Range Planning, 50(6): 826–839.
+Van Buren, B., & Safferstone, T. 2009. The quick wins paradox. Harvard Business Review, 87
+(1): 54–61.
+Vandekerkhof, P., Steijvers, T., Hendriks, W., & Voordeckers, W. 2018. Socio-emotional wealth sep-
+aration and decision-making quality in family firm TMTs: The moderating role of psychological
+safety. Journal of Management Studies, 55(4): 648–676.
+Van den Berghe, L. A., & Carchon, S. 2003. Agency relations within the family business system: An
+exploratory approach. Corporate Governance: An International Review, 11(3): 171–179.
+Vera, C. F., & Dean, M. A. 2005. An examination of the challenges daughters face in family business
+succession. Family Business Review, 18(4): 321–345.
+Villalonga, B., & Amit, R. 2006. How do family ownership, control and management affect firm
+value? Journal of Financial Economics, 80(2): 385–417.
+Wei, C., & Chen, L. 2015. Altruistic behaviour in the CEO succession process of family firms.
+Management World, 3: 137–150 (Published in Chinese).
+Wu, J., Wang, C., Hong, J., Piperopoulos, P., & Zhuo, S. 2016. Internationalization and innovation
+performance of emerging market enterprises: The role of host-country institutional develop-
+ment. Journal of World Business, 51(2): 251–263.
+Zacher, H., Schmitt, A., & Gielnik, M. M. 2012. Stepping into my shoes: Generativity as a mediator
+of the relationship between business owners’ age and family succession. Ageing & Society, 32
+(4): 673–696.
+Zaefarian, G., Kadile, V., Henneberg, S. C., & Leischnig, A. 2017. Endogeneity bias in marketing
+research: Problem, causes and remedies. Industrial Marketing Management, 65: 39–46.
+393
+A Far‐Reaching Parental Love?
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press
+
+Zahra, S. A. 2003. International expansion of U.S. manufacturing family businesses: The effect of
+ownership and involvement. Journal of Business Venturing, 18(4): 495–512.
+Zellweger, T. M. 2007. Time horizon, costs of equity capital, and generic investment strategies of
+firms. Family Business Review, 20(1): 1–15.
+Zellweger, T. M., Kellermanns, F. W., Chrisman, J. J., & Chua, J. H. 2012. Family control and family
+firm valuation by family CEOs: The importance of intentions for transgenerational control.
+Organization Science, 23(3): 851–868.
+Zellweger, T. M., Nason, R. S., & Nordqvist, M. 2011. From longevity of firms to transgenerational
+entrepreneurship
+of
+families:
+Introducing
+family
+entrepreneurial
+orientation.
+Family
+Business Review, 25(2): 136–155.
+Zhao, J., Carney, M., Zhang, S., & Zhu, L. 2020. How does an intra-family succession effect strategic
+change and performance in China’s family firms? Asia Pacific Journal of Management, 37:
+363–389.
+Zhu, Z., Li, X., & Ye, W. 2018. Helping to get onto horseback and escorting for a while: An empirical
+study of intergenerational succession and strategy change from perspective of paternalism.
+Management World, 18: 65–79 (Published in Chinese).
+Zhenduo Zhu (zhuzhenduo2005@163.com) obtained his PhD in manage-
+ment in 2014 and worked as a research associate at Sun Yat-sen University,
+China. He is currently an Associate Professor in the Business School,
+Guangdong University of Foreign Studies, China. His research interests are
+mainly in the field of family business succession and innovation. He has success-
+fully gained competitive research funds from NSFC, Ministry of Education
+Humanities, and Social Sciences Youth Fund Projects, etc. He has published
+more than ten papers in Management World and other major Chinese journals.
+Yuanfei Kang (y.kang@massey.ac.nz) is a Senior Lecturer of International
+Business at Massey University, New Zealand. He holds a PhD from the
+University of Auckland, New Zealand. He held a faculty position for more
+than ten years at School of Economics, Peking University, China. His research
+focuses on international business. He has published in leading international
+journals such as Journal of World Business, International Business Review,
+Management and Organization Review, Industrial Management & Data Systems, and
+Journal of Multinational Financial Management.
+Manuscript received:
+August 16, 2019
+Final version accepted: April 26, 2021 (number of revisions – 4)
+394
+Z. Zhu and Y. Kang
+© The Author(s), 2021. Published by Cambridge University Press on behalf of The International Association for
+Chinese Management Research
+https://doi.org/10.1017/mor.2021.45 Published online by Cambridge University Press

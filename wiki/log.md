@@ -27,3 +27,31 @@
 ## [2026-05-08 03:28] writeback | queries
 - Page: [Test](wiki/queries/2026-05-08-test.md)
 - Type: queries
+
+## [2026-05-08 04:17] writeback | topics
+- Page: [Co-governance of Intergenerational Succession and Innovation in Chinese Family Firms](/mnt/d/pyproject/paper-compass/wiki/topics/2026-05-08-co-governance-of-intergenerational-succession-and-innovation-in-chinese-family-f.md)
+- Type: topics
+
+## [2026-05-08 04:17] writeback | topics
+- Page: [Innovation activities during intra-family leadership succession in family firms: An empirical study from a socioemotional wealth perspective](/mnt/d/pyproject/paper-compass/wiki/topics/2026-05-08-innovation-activities-during-intra-family-leadership-succession-in-family-firms-.md)
+- Type: topics
+
+## [2026-05-08 04:18] writeback | topics
+- Page: [Family involvement in middle management and its impact on the labor productivity of family firms](/mnt/d/pyproject/paper-compass/wiki/topics/2026-05-08-family-involvement-in-middle-management-and-its-impact-on-the-labor-productivity.md)
+- Type: topics
+
+## [2026-05-08 04:29] writeback | queries
+- Page: [E2E Pipeline Test](wiki/queries/2026-05-08-e2e-pipeline-test.md)
+- Type: queries
+
+## [2026-05-08 04:30] writeback | queries
+- Page: [E2E Test Final](wiki/queries/2026-05-08-e2e-test-final.md)
+- Type: queries
+
+## [2026-05-08 04:32] writeback | queries
+- Page: [E2E Final](wiki/queries/2026-05-08-e2e-final.md)
+- Type: queries
+
+## [2026-05-08 04:32] writeback | queries
+- Page: [E2E Final v2](wiki/queries/2026-05-08-e2e-final-v2.md)
+- Type: queries

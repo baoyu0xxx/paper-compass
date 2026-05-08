@@ -1,0 +1,1583 @@
+Management and Organization Review 14:2, June 2018, 249–274
+doi: 10.1017/mor.2018.5
+Family Involvement in Middle Management and Its
+Impact on the Labor Productivity of Family Firms
+Qiongjing Hu,1 Yanlong Zhang,1 and Jingjing Yao2
+1Peking University, China, and 2IÉSEG School of Management (LEM-CNRS 9221), France
+ABSTRACT
+Family business owners and researchers tend to overwhelmingly focus on the
+top-level structure of ﬁrms but ignore the middle-level practice – involving family
+members in the middle-management team. Compared to top managers at the strategic
+apex, middle-level managers are mainly responsible for internal operations and control,
+and the composition of the middle-management team has an immediate and direct
+impact on the overall workforce efﬁciency of family ﬁrms. Integrating agency theory and
+organizational justice perspective, we proposed that family involvement in middle
+management would have a negative impact on the labor productivity of family ﬁrms. We
+further corroborated this effect by identifying three boundary conditions at the individual
+(i.e., familial CEO), organizational (i.e., ﬁrm size), and regional (i.e., labor mobility) levels.
+Using a sample of 1,284 privately owned family ﬁrms in China, we found that family
+involvement in middle management, measured as the percentage of familial middle-level
+managers, was negatively associated with labor productivity. Furthermore, this negative
+relationship existed only when the CEO is a family member rather than a professional
+manager, when the size of the ﬁrm is large rather than small, or when the ﬁrm is located
+in regions with low rather than high labor mobility. These ﬁndings contribute to family
+business literature and provide practical implications for human resource management in
+family ﬁrms.
+KEYWORDS family involvement, labor productivity, middle management, multilevel
+INTRODUCTION
+Family businesses play an active and pivotal role in global economic growth
+(Claessens, Djankov, Fan, & Lang, 2002; Harris, Martinez, & Ward, 1994). In
+emerging economies, family businesses are particularly important because they
+show stronger dynamics and versatilities (Whyte, 1996), perform unique tasks
+such as wealth preservation (Carney, 2007), and account for a higher proportion
+of national economic growth (Claessens, Djankov, & Lang, 2000). For example,
+there are nearly eight million private enterprises in China, and more than eighty
+percent of those are family businesses (Steen & Baldwin, 2015). One of the deﬁning
+Corresponding author: Yanlong Zhang (yanlong.zhang@gsm.pku.edu.cn)
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+250
+Q. Hu et al.
+characteristics of family ﬁrms is a high level of family involvement, which reﬂects
+the family inﬂuence on the ﬁrms’ strategic decision making and daily operation
+management. Scholars have a fueling interest in family involvement because
+this striking nature of family business greatly affects ﬁrm outcomes (Anderson &
+Reeb, 2004; Sciascia & Mazzola, 2008). In emerging markets, due to the market
+volatility and policy instability, family involvement may show some slightly different
+characteristics such as more nepotism (Khwaja & Mian, 2005), so in this study we
+pay particular attention to family involvement in emerging markets.
+The literature has speciﬁed family involvement in three forms: family ownership
+(e.g., Anderson & Reeb, 2004; Chu, 2011; De Massis, Kotlar, Campopiano,
+& Cassia, 2015; Tsao, Chen, Lin, & Hyde, 2009; Yammeesri & Lodh, 2004),
+family control (e.g., Barontini & Caprio, 2006; Silva & Majluf, 2008), and family
+management (e.g., Chang & Shim, 2016; De Massis et al., 2015; Ensley, & Pearson,
+2005). While extant studies have adequately examined the inﬂuence of family
+involvement from an upper-echelon perspective by focusing on the organizations’
+high level such as ﬁrms’ ownership structure, board composition, and top
+management team, our understanding of the inﬂuence of family involvement at
+the middle-level, i.e., family members occupying middle-level managerial positions,
+remains inadequate. Shifting our focus to the middle-level managers is theoretically
+important because they serve as communication channels bridging lower-level
+employees and the top management team. They collect information from the
+bottom of the organization and meanwhile translate strategies deﬁned at higher
+levels into downward actions (Fenton-O’Creevy, 1998; Floyd & Wooldridge, 1994;
+Guth & Macmillan, 1986). Overall, middle-level managers are in charge of
+carrying out ﬁrm polices, supervising frontline employees, taking responsibility of
+internal operations and control, so they are more likely to inﬂuence ﬁrm efﬁciency
+(Bartlett & Ghoshal, 1993).
+Filling middle-level managerial positions with family members is a common
+practice among family ﬁrms in which ﬁrm owners have more discretion regarding
+personnel issues and nepotism (employing family members) is tolerated or
+understood (Birley, 2001). In these ﬁrms, family members’ participation in
+managerial activities has a direct impact on the ﬁrm’s internal management. That
+said, although family involvement at both top- and middle-level management
+has important impacts on a ﬁrm’s operation and performance, the mechanisms
+through which these two management bodies at different levels affect a ﬁrm’s
+managerial outcomes can differ greatly. Therefore, investigating the inﬂuence of
+the degree of family involvement in middle-level management supplements our
+understanding of the inﬂuence of family involvement on ﬁrms’ performance, and
+has important managerial implications for human resource practices in family
+ﬁrms.
+To address this issue, we borrowed insights from agency theory (Jensen &
+Meckling, 1976) and organizational justice perspective (Colquitt, 2001; Colquitt
+et al., 2013) to examine how family involvement in middle management
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+Family Involvement in Middle Management
+251
+(i.e., percentage of family middle managers in the middle management team)
+leads to distinctive agency problems, exerting a negative inﬂuence on a ﬁrm’s
+labor productivity. This is a primary indicator of overall workforce performance
+that has more proximate relation with the functions of middle-level management
+(e.g., carrying out daily operations, monitoring and motivating employees, and so
+on) (Delery & Shaw, 2001). Using a sample of Chinese privately owned family
+ﬁrms, we found that family involvement in middle management was negatively
+related to the labor productivity of family ﬁrms. Moreover, we adopted a multilevel
+approach to understanding the boundary conditions of this effect. In particular,
+we examined the moderation effects of three contextual factors at different levels –
+familial CEO (individual level), ﬁrm size (organizational level), and labor mobility
+(regional level). We found that the negative impact of family involvement in middle
+management on family ﬁrms’ labor productivity existed only when the CEO was a
+family member, or when family ﬁrms were large in size, or when family ﬁrms were
+located in regions with low labor mobility.
+These ﬁndings make several contributions to the literature on family businesses.
+First, we expand the scope of family involvement research by supplementing the
+upper-echelon perspective with a new focus on middle-level management, and
+investigated this important but underexplored form of family involvement. Our
+results indicate that middle managers and top-level decision makers differ in their
+roles in family ﬁrms. By examining the impact of the proportion of family members
+among middle managers, we enrich our understanding of the impacts of family
+involvement. Second, by integrating the organizational justice perspective with
+agency theory, we offer a new angle for understanding the phenomenon of family
+involvement. In this way we contribute to organizational justice by extending a
+micro theory into a more macro phenomenon, which is a meaningful attempt
+at micro-macro integration. Third, we introduce multilevel contextual factors in
+moderating the relationship between family involvement in middle management
+and family ﬁrms’ labor productivity. By taking individual-, organizational-, and
+regional-level characteristics into consideration, we present a more-comprehensive
+understanding of when appointing family members as middle managers will be
+more or less detrimental. In addition, our ﬁndings have important managerial
+implications for human resource practices in privately owned family ﬁrms. We
+reveal that nepotism is harmful overall when selecting middle managers but only
+holds in certain conditions.
+THEORETICAL BACKGROUND AND HYPOTHESES
+Agency Theory, Organizational Justice, and Family Involvement
+Agency theory has been widely quoted in explaining how family involvement
+affects ﬁrm performance (Dyer, 2006; Jensen & Meckling, 1976; Karra, Tracey,
+& Phillips, 2006). Agency theory suggests that when the principals and agents of
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+252
+Q. Hu et al.
+the ﬁrm are different, agents may engage in activities that, if unchecked, will hurt
+the principals’ interests due to information asymmetries and self-interest incentives
+(Jensen & Meckling, 1976). Some scholars suggest that family involvement is an
+effective way to reduce agency cost because it will align the principal-agent goals,
+build high trust and shared values, facilitate communication and cooperation
+among owners and family agents, and hence beneﬁt the performance of family
+business (e.g., Anderson & Reeb, 2003; Daily & Dollinger, 1992; McConaughy,
+Matthews, & Fialko, 2001). However, this is not always the case. Other studies
+have demonstrated that family involvement actually exposes family ﬁrms to unique
+agency problems that are even more difﬁcult to resolve due to family relations
+(Gomez-Mejia, Nunez-Nickel, & Gutierrez, 2001; Schulze, Lubatkin, Dino, &
+Buchholtz, 2001). For example, goal incongruence between owners and family
+agents still exist. Also, adverse selection and shirking are likely to originate from
+altruism towards family members. Overall, these studies indicate that agency
+problems in family ﬁrms may come in a variety of forms, which are detrimental
+to ﬁrm performance. The current research focuses on one particular form of
+family involvement – family involvement in middle management – and suggests
+that distinctive agency threats will occur with an increase in the family middle
+managers.
+In addition, we also integrate the organizational justice perspective (Colquitt,
+2001; Colquitt et al., 2013) to clarify how family involvement in middle
+management impacts labor productivity by inﬂuencing nonfamily employees’
+perception of justice. We integrate this perspective to elaborate on the additional
+performance threat caused by family middle managers for the following reasons.
+First, justice is an important organizational factor that directly inﬂuences
+employees’ behavior. The perception of justice fosters employees’ social exchange
+quality with organizations, and thereby enhances their task performance as
+well as stimulates their organizational citizenship behavior (Colquitt et al.,
+2013). In contrast, a low level of justice perception is likely to incur negative
+consequences, such as low social-exchange quality and negative job attitudes.
+Creating organizational justice may be the key to effective management of
+nonfamily employees, which has been recognized as a critical issue in family
+ﬁrms (Barnett & Kellermanns, 2006; Chua, Chrisman, & Sharma, 2003).
+Second, compared to top managers, middle managers have much more frequent
+interactions with frontline employees through daily supervision, and thus have
+a more-direct inﬂuence on employees’ work attitude, motivation, and behavior.
+As far as justice is concerned, middle managers may be an inﬂuential factor
+in employees’ justice perception. Third, in family ﬁrms, the violation of
+justice may be a ramiﬁcation of family ties (Barnett & Kellermanns, 2006).
+Family involvement in middle management could thus amplify the salience of
+organizational injustice, or in other words increase nonfamily members’ perception
+of injustice. Overall, integrating the organizational justice perspective in order to
+study the middle-level management team is well-founded and offers additional
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+Family Involvement in Middle Management
+253
+explanations for the effect on labor productivity of family involvement in middle
+management.
+The Main Effect of Family Involvement in Middle Management
+A central feature of the middle-level managerial position is that it serves as the
+intermediate level in the ﬁrm, just like ‘the ﬁlling in the sandwich’ (McConville
+& Holden, 1999). Middle managers are responsible for the performance of their
+departments; in doing so, they need to motivate team members to accomplish
+various tasks on a daily basis (Schulze et al., 2001). This suggests that middle
+managers ﬁnd themselves involved in frequent social interactions with both the
+top management team and lower-level employees in the ﬁrm. By analyzing the
+role of middle managers in these two types of social interactions, we argue that
+family involvement in middle management may bring unexpected disadvantages
+to family ﬁrms’ labor productivity.
+The ﬁrst type of social interaction occurs between middle-level managers
+and higher-level managers. Extending agency theory, we anticipate an increase
+of agency cost, because the owners may assign the middle-level positions to
+unqualiﬁed family members due to nepotism (Ewing, 1965). According to social-
+emotional wealth theory, families usually have noneconomic goals in addition to
+economic considerations, such as providing employment for family members and
+enhancing family cohesion (Cennamo, Berrone, Cruz, & Gomez-Mejia, 2012).
+However, family ﬁrms usually have a limited labor pool; this implies that the
+family is unable to provide enough qualiﬁed members to manage key operations
+(Dyer, 2006). Under such circumstances, the more family members that are hired
+as middle managers, the less competent the middle management team will be,
+thus leading to additional coaching and monitoring costs. Besides, compared to
+nonfamily members, family middle managers probably capitalize on family ties to
+gain more leader support and superior organizational resources, but they are less
+vulnerable to criticism or layoffs when they make mistakes, as they are protected
+under the umbrella of family ties. That is, the reward and punishment system is
+biased by family ties and thus will be less effective in holding family managers
+accountable. Therefore, with the increase of family members occupying middle-
+level managerial positions, the accountability of the middle management team
+decreases, thus harming the labor productivity of family ﬁrms.
+The second type of social interaction occurs between middle-level managers and
+lower-level employees. Middle managers have to supervise the frontline employees,
+and their unique family member identity jeopardizes employees’ work motivation.
+In family ﬁrms, the owners usually have the power to inﬂuence crucial personnel
+selection decisions. They may hire family members as managers to create jobs for
+the family, or to perpetuate family control across generations (Chua, Chrisman, &
+Steier, 2003; Jaskiewicz & Uhlenbruck, 2013). In this case, family identity rather
+than competency is the key determinant of entering the management team. This
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+254
+Q. Hu et al.
+evaluation and selection process appears to be unfair to nonfamily employees and
+thus weakens their motivation to seek career advancement within the ﬁrm. Studies
+show that nonfamily employees believe more strongly than family employees that
+a family member will take over the ﬁrm and they will be excluded from senior
+positions (e.g., Poza, Alfred, & Maheshawi, 1997). Poza and colleagues (1997)
+present evidence that nonfamily managers are less satisﬁed than family managers
+with the equity of compensation and how their ﬁrms handle growth. In other
+words, the fact that family members occupy important managerial positions sends
+the negative signal to employees that their promotion will be less likely. This is
+a dangerous signal because it affects how employees perceive justice within the
+organization. A positive perception of justice has been recognized as a critical issue
+to family businesses (Barnett & Kellermanns, 2006; Chua et al., 2003), because
+it fosters employees’ social exchange quality with organizations, and thereby
+enhances their task performance, as well as stimulates organizational citizenship
+behaviors (Colquitt et al., 2013). Therefore, from the organizational justice
+perspective, family members’ involvement in middle management jeopardizes
+nonfamily employees’ perception of justice, and consequently diminishes their
+work efforts.
+In sum, family involvement in middle-level managerial positions contradicts the
+ﬁrm’s economic goal and reduces nonfamily employees’ work motivation. The
+higher the percentage of family managers in the middle management team, the
+less effective the middle management team will be and the more pronounced
+nonfamily employees’ perception of organizational injustice. Thus, we propose
+that:
+Hypothesis 1: Family involvement in middle management will be negatively associated with
+family ﬁrms’ labor productivity.
+Contextual Contingencies
+In emerging markets, organizations are nested in a rapidly changing environment,
+so how organizations’ internal practices inﬂuence ﬁrm outcomes depends
+on various contextual contingencies. Although emerging markets constitute a
+major growth opportunity, they are also experiencing domestic policy instability,
+market orientation conﬂicts, and ﬁnancial volatility (Arnold & Quelch, 1998;
+Bourgeois, 1985). In these unstable and less-predictable situations, it is particularly
+necessary to incorporate a contingency perspective to understand how contextual
+contingencies play a role (Fredrickson & Mitchell, 1984; Lee & Miller, 1996).
+We argue that while family involvement in middle management may endanger
+labor productivity of the family ﬁrms by compromising economic objectives and
+spreading injustice perception, such negative inﬂuence may be especially potent
+or weak across ﬁrms under different contingencies. In the following sections we
+examine contingencies at the individual (familial CEO), organizational (ﬁrm size),
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+Family Involvement in Middle Management
+255
+and regional (labor mobility) levels to add insights into how family involvement
+in middle management plays a role under different circumstances. We focus on
+these three contingencies to adopt a multi-level approach to revealing when family
+involvement in middle management is more problematic and when it is less of an
+issue. More importantly, we aim to strengthen our arguments that the negative
+consequence of family middle managers is based on family ties, becomes salient
+when it disrupts organizational justice, and harms ﬁrm performance by decreasing
+the motivation of nonfamily employees.
+Individual Contingency: Familial CEO
+The type and quality of relations between top management and middle
+management may condition the effectiveness of the middle management. The
+existence of family ties between top and middle management may exert a
+moderating inﬂuence on the relationship between a share of family middle
+managers and family ﬁrms’ labor productivity. In social interactions with the
+CEO, middle managers must follow instructions from the CEO, and report
+to the CEO their daily operation and management. However, when the CEO
+is a family member instead of a professional nonfamily manager, a direct
+supervisor-subordinate relationship between family members is established. Family
+middle managers thus may get a free ride or get away with mistakes due
+to their family ties with the familial CEO (Bruce & Waldman, 1990). In this
+sense, with the family members occupying middle-level managerial positions, the
+familial CEO will not be able to effectively supervise the middle management
+team.
+Moreover, employees tend to consider family management as nepotism and
+perceive injustice when they observe the family relationship between the CEO
+and the middle managers. The ﬁrm’s daily operations and management require
+frequent social interactions between the CEO and the middle managers, increasing
+chances that the familial CEO will demonstrate behaviors that are seemingly
+more favorable to family members than nonfamily employees (Lee, Lim, & Lim,
+2003). For instance, the familial CEO may delegate more-valuable resources
+to family middle managers out of altruism but be reluctant to punish poor
+family middle managers, particularly when such punishment has negative spillover
+effects on their family relationships outside the ﬁrm (Schulze, Lubatkin, &
+Dino, 2003).
+Taken together, we thus expect that the negative impact of family involvement in
+middle management on family ﬁrms’ labor productivity will be more pronounced
+when the CEO is a familial manager rather than a professional manager.
+Hypothesis 2: The relationship between family involvement in middle management and family
+ﬁrms’ labor productivity will be moderated by the CEO’s family membership such that the
+negative relationship will be stronger when the CEO is a family member.
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+256
+Q. Hu et al.
+Organizational Contingency: Firm Size
+Firm size is an important contingency factor that interplays with family
+involvement in middle management in affecting family ﬁrms’ labor productivity.
+First, compared with small ﬁrms, large ﬁrms are more dependent on professional
+management than on family management. Larger ﬁrms are commonly associated
+with more-complex administrative tasks (Zhang & Ma, 2008). As ﬁrm size
+increases, it is likely that middle managers’ span of control tends to increase
+(Urwick, 1922). In this sense, larger family ﬁrms have to rely more on outside
+professional managers because the number of family members who are willing
+to manage and are capable of doing so tend to be limited (Chua et al.,
+2003). Thus, when family ﬁrms continue to rely on relatively incompetent
+family members to serve as middle managers even though increased ﬁrm size
+may require more external talents, then a high degree of family involvement
+in middle management may jeopardize ﬁrms’ performance to a greater
+extent.
+In addition, a key difference between small and large ﬁrms is the level
+of regularity and normality (Chu, 2011; Li, Zhou, & Zajac, 2009). Small
+ﬁrms are generally more ﬂexible in management and implement fewer norms
+and regulations, so managers in small ﬁrms are endowed with greater
+discretion over managerial decisions. In contrast, large ﬁrms are more likely
+to establish formal protocols and standard operating procedures to regulate
+employees’ behaviors (Kimberly, 1976). For example, Chu (2011) suggests
+that the association between family ownership and ﬁrm performance is
+more signiﬁcant in small- and medium-sized ﬁrms than in large ﬁrms. This
+means that managers in large ﬁrms are commonly granted relatively less
+discretion over managerial decisions. We therefore anticipate an interaction
+between family involvement in middle management and ﬁrm size. Speciﬁcally,
+employing family members may be seen as more legitimate in family
+ﬁrms of small size as in these ﬁrm owners have more discretion or even
+absolute control over managerial issues. Thus, employing family members
+as middle managers is less likely to trigger nonfamily employees’ perception
+of injustice and hence their negative consequential reactions. However, in
+large ﬁrms, more-comprehensive norms and procedures are often in place to
+regulate employees’ behavior and standardize management practices. In these
+organizations, people act according to formal regulations, and the pursuit of
+procedural justice may become a salient concern for employees. Therefore, family
+involvement in middle management in larger ﬁrms is more likely to invoke the
+perception of injustice among nonfamily employees and negatively affect labor
+productivity.
+Taken together, we expect that family involvement in middle management
+diminishes family ﬁrms’ labor productivity to a larger extent among ﬁrms of greater
+size.
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+Family Involvement in Middle Management
+257
+Hypothesis 3: The relationship between family involvement in middle management and family
+ﬁrms’ labor productivity will be moderated by ﬁrm size such that the negative relationship is
+stronger in larger ﬁrms.
+Regional Contingency: Labor Mobility
+Local labor market conditions play a key role in shaping people’s interpretations
+and reactions to their current working situations (Mitchell, Holtom, Lee, Sablynski,
+& Erez, 2001). Labor mobility reﬂects the ease with which people are able to
+move to different organizations (Gerhart, 1990). We argue that when a region’s
+labor mobility is low, adverse selection will be more likely to occur. In a region
+with low labor mobility, it may be difﬁcult for family members to ﬁnd a job
+as good as a middle manager in a family ﬁrm. In this case family members
+will make more efforts to get into the family business, and because of kinship
+family owners are more likely to hire these family members even when they
+are not sufﬁciently competent. In addition, when family middle managers make
+mistakes or perform poorly they are less likely to be laid off because there are
+fewer job opportunities outside the ﬁrm. That is, when family ﬁrms are located
+in regions with low labor mobility, the agency problem is ampliﬁed due to family
+owners’ altruism in taking care of their family members and maintaining their job
+security.
+People may also attach more importance to internal career development when
+regional labor mobility is low. Due to insufﬁcient job opportunities outside,
+internal promotion becomes the key means for low-level employees to achieve
+career development (Gerhart, 1990). In other words, employees are more likely
+to implement a long-term career plan in the current ﬁrm instead of searching
+for alternatives in the job market. Under such circumstance, employees may pay
+particular attention to information related to internal career development and
+any signal that reveals unfair procedure of appointment or promotion decisions
+may invoke stronger negative reactions from employees. Traditional models of
+turnover (e.g., Hom & Griffeth, 1994) predict that employees tend to exit the
+organization when they have low job satisfaction. However, they may get stuck
+in their current position if job market conditions are not favorable, e.g., low labor
+mobility (Gerhart, 1990). In this case, employees may act passively and even engage
+in counterproductive workplace behavior in order to achieve a balanced exchange
+with the organization (Cropanzano & Mitchell, 2005). Therefore, in regions with
+lower labor mobility, family involvement in middle management is more likely to
+induce employees’ perception of injustice as well as their stronger negative response
+to unfair treatment caused by family management.
+Taken together, we expect that family involvement in middle management will
+have a stronger negative effect on labor productivity in family ﬁrms located in
+regions with lower labor mobility than those located in regions with higher labor
+mobility.
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+258
+Q. Hu et al.
+Hypothesis 4: The relationship between family involvement in middle management and family
+ﬁrms’ labor productivity will be moderated by the regional labor mobility such that the negative
+relationship is stronger when the labor mobility is lower.
+METHODS
+Data and Sample
+Data used in this study were drawn from the ninth survey of Chinese privately
+owned enterprises conducted by the Privately Owned Enterprises Research
+Project Team (POERPT) in 2010. This survey is conducted every two years
+nationwide. Its purpose is to detect problems in the development of the private
+economy and provide policy recommendations to authorities. The 2010 survey
+contained information about family ﬁrms, including business structure, corporate
+governance, succession, labor protection, and other basic statistical facts. Using
+a multistage stratiﬁed sampling procedure, the research team ﬁrst generated a
+national representative sample of POEs and then sent questionnaires to the
+entrepreneurs of the POEs included in the sample. A POE’s ﬁnancial manager
+was asked to provide basic information about the ﬁrm, and ﬁrm owners reported
+other data such as family membership of department administrators and the source
+of the CEO.
+Following previous research on family businesses, we chose observations in which
+families maintain over 50 percent of the ﬁrms’ ownership as our sample (He, Song,
+Zhu, & Li, 2014). After eliminating responses with obvious mistakes or missing
+values, we ended up with a valid sample of 1,284 private family ﬁrms. These
+ﬁrms were distributed throughout nineteen industries, among which 45.25 percent
+belonged to the manufacturing industry. Regarding business structure, 9.11 percent
+of the enterprises were sole proprietorship, 6.54 percent were partnership, 72.20
+percent were limited liability companies (LLC), and 12.15 percent were joint stock
+companies (JSC). The average ﬁrm age was 9 years.
+Variables
+Labor productivity. Labor productivity is one of the most suitable indicators of
+workforce performance (Delery & Shaw, 2001). In this study, we followed
+convention in using the logarithm of sales per employee to measure labor
+productivity (Datta, Wright, & Guthrie, 2005; Huselid, 1995; Iverson & Zatzick,
+2011). Speciﬁcally, we divided a ﬁrm’s sales revenue in 2010 by the total number of
+employees in the ﬁrm (Huselid, 1995). We used the logarithm forms of this index
+as the dependent variable to correct for the skewed distribution.
+Family
+involvement
+in
+middle
+management. Our
+independent
+variable,
+family
+management, was measured by the percentage of department managers who were
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+Family Involvement in Middle Management
+259
+related to the entrepreneur’s family (Sciascia & Mazzola, 2008). In the survey
+questionnaire, entrepreneurs were asked to indicate their relationship with the
+seven department administrators respectively. The relationships were grouped into
+ﬁve categories: (1) spouses, parents, or children, (2) other lineal relatives, (3) in-laws,
+(4) friends or schoolmates, (5) no special relationship. We regarded a department
+manager as a family member if the entrepreneur chose 1, 2 or 3; otherwise the
+manager was labeled as a nonfamily employee. We then calculated the percentage
+of family members in middle-level management by dividing the number of familial
+managers by the total number of department managers.
+Familial CEO. To capture whether the supervisor-subordinate relationship between
+CEOs and department managers overlapped with family ties we created a dummy
+variable. The value one indicated that the CEO was a family member, and zero
+otherwise.
+Firm size. Consistent with previous research (Li et al., 2009; Maury, 2006), we used
+the logarithm of total assets in 2010 as a measure of ﬁrm size.
+Labor mobility. This regional indicator was not measured in the questionnaire.
+Instead, we used a third-party source data National Economic Research Institute’s
+(NERI) Index of Chinese Provinces to measure regional labor mobility (Fan, Wang,
+& Zhu, 2011). We chose provincial labor mobility from the many subindicators
+of the maturity of the elements market. Consistent with the extant literature
+(Li & Zhang, 2010), we averaged the labor mobility of the previous three
+years (2007-2009) and used it to measure the level of labor mobility in a
+province.
+Control variables. We incorporated several control variables in our study. First, we
+controlled for industry. Speciﬁcally, we generated eighteen dummy variables based
+on NBSC (National Bureau of Statistics of China) classiﬁcations. At the ﬁrm level,
+we controlled for business structure and ﬁrm age. We recoded the categorical
+business structure variable into three dummy variables indicating whether a ﬁrm
+is a partnership, a limited liability company, or a joint stock company. Firm age
+refers to the number of years that the ﬁrm had operated in China by the end of
+2010. In addition, since unions may have an impact on labor productivity (Datta
+et al., 2005), we added a dummy variable to control for the existence of unions.
+Lastly, we controlled for the maturity of a ﬁrm’s governance structure. We coded
+governance structure as one if a family ﬁrm had a board of directors, shareholders’
+meetings, and a board of supervisors, and otherwise coded zero (Liang, Chen, &
+Ge, 2010). We expected that labor productivity would be higher when family ﬁrms
+had a more-mature governance structure.
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+260
+Q. Hu et al.
+RESULTS
+Family management at the middle level is by nature related to nepotism (i.e.,
+recruiting family members). Prior studies have not provided any speciﬁc statistics
+about this phenomenon. We therefore decided to ﬁrst conduct a descriptive
+analysis before the hypothesis testing to determine whether appointing family
+members as middle managers is a widely adopted practice in family ﬁrms. In
+our sample (1,284 privately owned family ﬁrms), 57.09 percent of family ﬁrms
+had as least one family member as a department manager. Table 1 presents the
+frequency of using family or nonfamily managers for each type of department
+among the sample. For all types of department, a certain percentage (at least
+9.89 percent) of family ﬁrms had at least one family member as department
+manager. It is interesting to observe the difference among the seven departments.
+Speciﬁcally, family ﬁrms are most likely to have family members supervising the
+ﬁnancial department (33.02 percent) and purchasing department (36.52 percent),
+but least likely to appoint family members as the R&D department manager (9.89
+percent). Since the ﬁnancial department and purchasing department deal with a
+ﬁrm’s cash ﬂow, family owners may consider a family member more trustworthy in
+these positions compared to nonfamily members, whereas, the R&D department
+requires expertise that family members may lack. Family ﬁrms are thus more likely
+to recruit nonfamily professionals as the R&D manager.
+Table 2 presents the correlation matrix and descriptive statistics for the major
+variables. Family involvement in middle management was negatively associated
+with labor productivity (r = −0.13, p < 0.001), providing basic evidence
+supporting H1.
+We used ordinary least square (OLS) regression to test our hypotheses. Because
+the ﬁrms we studied were nested in provinces, we used clustered robust standard
+errors to estimate the effects of the covariates. Table 3 presents the results of the
+main effect and the three moderation effects. We ﬁrst added all the control variables
+in Model 1. The results showed that a region’s labor mobility was positively
+related to labor productivity of family ﬁrms, and larger family ﬁrms had higher
+labor productivity. H1 predicts that family involvement in middle management
+will be negatively associated with labor productivity. To test H1, we added the
+independent variable in Model 2. The results showed that family involvement in
+middle management was negatively related to labor productivity (β = −0.06, p =
+0.028). It indicated that with family involvement in middle management increasing
+by one standard deviation, labor productivity would decrease by 0.02 (equivalent to
+loss of 10200 yuan per employee). H1 was therefore supported. Comparing Model
+2 to Model 1, the R2 was 0.01, indicating that family involvement in middle
+management explained 1 percent of the variance of labor productivity. In our
+sample a 1 percent change of productivity means an approximately 1.98 million
+yuan increment or decrement of sales on average. This indicates that although the
+additional variance explained by family involvement in management is relatively
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+Family Involvement in Middle Management
+261
+Table 1. Summary on the family owners’ relationships with middle-level managers in our sample
+Relationship with owner
+Financial
+Purchasing
+Sales
+Human Resources
+R&D
+Manufacturing
+Administration
+Family managers
+424 (33.02%)
+469 (36.52%)
+314 (24.45%)
+226 (17.60%)
+127 (9.89%)
+210 (16.36%)
+211 (16.43%)
+Spouses, parents, or children
+255
+150
+112
+98
+49
+51
+80
+Other linear relatives
+140
+249
+153
+96
+61
+120
+105
+In-laws
+29
+70
+49
+32
+17
+39
+26
+Non-family managers
+860 (66.98%)
+815 (63.48%)
+970 (75.55%)
+1058 (82.40%)
+1157 (90.11%)
+1074 (83.64%)
+1073 (83.57%)
+Friends or schoolmates
+63
+81
+97
+84
+86
+88
+78
+No special relationship
+797
+734
+873
+974
+1071
+986
+995
+Note: n = 1284.
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+262
+Q. Hu et al.
+Table 2. Correlation matrix and descriptive statistics
+Variable
+Mean
+S.D.
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+1
+Partnership (1=Yes, 0=No)
+0.07
+0.25
+2
+LLC (1=Yes, 0=No)
+0.72
+0.45
+−0.43∗∗∗
+3
+JSC (1=Yes, 0=No)
+0.12
+0.33
+−0.10∗∗∗
+−0.60∗∗∗
+4
+Firm age
+9.00
+4.47
+0.01
+−0.04
+0.03
+5
+Firm size
+6.53
+1.99
+−0.10∗∗∗
+0.01
+0.15∗∗∗
+0.25∗∗∗
+6
+Unionization
+0.57
+0.50
+0.02
+−0.05∗
+0.02
+0.25∗∗∗
+0.38∗∗∗
+7
+Governance structure
+0.21
+0.40
+−0.06∗∗
+−0.01
+0.16∗∗∗
+0.03
+0.25∗∗∗
+0.21∗∗∗
+8
+Familial CEO
+0.90
+0.30
+0.02
+0.04
+−0.07∗∗
+−0.01
+−0.14∗∗∗
+−0.02
+−0.07∗∗
+9
+Labor mobility
+6.68
+2.91
+0.05∗
+−0.06∗∗
+0.07∗∗
+0.05∗
+0.08∗∗
+0.14∗∗∗
+0.07∗∗
+−0.01
+10 Family involvement in middle
+management
+0.22
+0.28
+−0.05∗
+0.03
+−0.07∗∗
+−0.03
+−0.18∗∗∗
+−0.13∗∗∗
+−0.10∗∗∗
+0.12∗∗∗
+0.01
+11 Labor productivity
+3.04
+1.28
+−0.02
+0.03
+0.03
+0.10∗∗∗
+0.38∗∗∗
+0.09∗∗
+0.07∗∗
+−0.03
+0.09∗∗
+−0.13∗∗∗
+Notes: n = 1,284; ∗p < 0.1, ∗∗p < 0.05, ∗∗∗p < 0.01.
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+Family Involvement in Middle Management
+263
+Table 3. OLS models predicting the main effect of family involvement in middle management and the moderating effects
+Variables
+Model 1
+Model 2
+Model 3
+Model 4
+Model 5
+Model 6
+β
+se
+p
+β
+se
+p
+β
+se
+p
+β
+se
+p
+β
+se
+p
+β
+se
+p
+Family involvement in middle
+management
+–
+–
+–
+–0.06
+0.13
+0.028
+–0.05
+0.13
+0.070
+–0.07
+0.13
+0.013
+–0.05
+0.13
+0.064
+–0.05
+0.14
+0.086
+Familial CEO × Family
+involvement in middle
+management
+–
+–
+–
+–
+–
+–
+–0.03
+0.63
+0.311
+–
+–
+–
+–
+–
+–
+–0.04
+0.66
+0.270
+Firm size × Family
+involvement in middle
+management
+–
+–
+–
+–
+–
+–
+–
+–
+–
+–0.07
+0.06
+0.015
+–
+–
+–
+–0.08
+0.06
+0.003
+Labor mobility × Family
+involvement in middle
+management
+–
+–
+–
+–
+–
+–
+–
+–
+–
+–
+–
+–
+0.07
+0.04
+0.013
+0.08
+0.04
+0.004
+Familial CEO
+0.01
+0.11
+0.590
+0.02
+0.12
+0.461
+0.01
+0.13
+0.764
+0.03
+0.12
+0.362
+0.02
+0.12
+0.495
+0.01
+0.13
+0.695
+Firm size
+0.41
+0.02
+0.000
+0.40
+0.02
+0.000
+0.40
+0.02
+0.000
+0.40
+0.02
+0.000
+0.39
+0.02
+0.000
+0.40
+0.02
+0.000
+Labor mobility
+0.08
+0.01
+0.002
+0.09
+0.01
+0.002
+0.09
+0.01
+0.002
+0.09
+0.01
+0.001
+0.08
+0.01
+0.006
+0.08
+0.01
+0.004
+Partnership
+0.02
+0.16
+0.460
+0.02
+0.16
+0.609
+0.02
+0.16
+0.608
+0.02
+0.16
+0.607
+0.02
+0.16
+0.595
+0.02
+0.16
+0.590
+LLC
+0.03
+0.11
+0.488
+0.02
+0.11
+0.589
+0.02
+0.11
+0.593
+0.02
+0.11
+0.598
+0.02
+0.11
+0.568
+0.02
+0.11
+0.579
+JSC
+–0.02
+0.14
+0.636
+–0.02
+0.14
+0.514
+–0.02
+0.14
+0.496
+–0.02
+0.14
+0.526
+–0.02
+0.14
+0.534
+–0.02
+0.14
+0.532
+Firm age
+0.02
+0.01
+0.513
+0.02
+0.01
+0.494
+0.02
+0.01
+0.491
+0.02
+0.01
+0.453
+0.02
+0.01
+0.510
+0.02
+0.01
+0.458
+Unionization
+–0.04
+0.08
+0.169
+–0.05
+0.07
+0.110
+–0.05
+0.07
+0.104
+–0.05
+0.07
+0.103
+–0.04
+0.08
+0.132
+–0.05
+0.07
+0.118
+Governance structure
+–0.01
+0.09
+0.780
+–0.01
+0.09
+0.703
+–0.01
+0.09
+0.685
+–0.02
+0.09
+0.572
+–0.01
+0.09
+0.705
+–0.02
+0.09
+0.528
+Industry controls
+included
+included
+included
+included
+included
+included
+Observations
+1284
+1284
+1284
+1284
+1284
+1284
+R2
+0.21
+0.22
+0.22
+0.22
+0.22
+0.23
+F
+54.88∗∗∗
+22.87∗∗∗
+21.10∗∗∗
+54.77∗∗∗
+119.02∗∗∗
+52.14∗∗∗
+Notes: ∗p < 0.1, ∗∗p < 0.05, ∗∗∗p < 0.01; Standardized beta coefﬁcients; Standard errors in parentheses.
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+264
+Q. Hu et al.
+2.80
+2.85
+2.90
+2.95
+3.00
+3.05
+3.10
+3.15
+3.20
+3.25
+Low Family Involvement
+in Middle Management
+High Family Involvement
+in Middle Management
+Labor Productivity
+Non-Familial CEO
+Familial CEO
+Figure 1. The moderation effect of familial CEO on the relationship between family involvement in
+middle management and labor productivity.
+small, this small variance will still have a dramatic effect on these off-the-list family
+ﬁrms.
+H2 predicts that the negative relationship between family involvement in middle
+management and labor productivity will be stronger when the CEO is a family
+member instead of a professional manager. As shown in Model 3, the interaction
+term of family involvement in middle management and familial CEO was not
+signiﬁcantly related to labor productivity (β = −0.03, p = 0.311). Thus, H2 was
+not supported. However, considering that familial CEO is a dummy variable, we
+further split the full sample and tested the relationship between family involvement
+in middle management and labor productivity respectively in two subsamples.
+The results showed that when family members occupied the position of CEO
+(n = 1151), family involvement in middle management was negatively related to
+labor productivity (β = −0.11, p < 0.001), whereas when a professional manager
+was the CEO (n =133), family involvement in middle management was not
+related to labor productivity (β = −0.04, p = 0.761) (illustrated in Figure 1).
+It indicated that when the CEO was a professional manager, the CEO would
+monitor family middle managers more effectively and thus the possible negative
+consequence caused by family involvement in middle management would be
+avoided. Notwithstanding that the moderation hypothesis was not supported, in
+doing so, we found differential effects of family involvement in middle management
+on labor productivity between ﬁrms with a familial CEO and ﬁrms with a
+professional CEO.
+H3 predicts that the negative relationship between family involvement in middle
+management and labor productivity will be stronger for larger family ﬁrms.
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+Family Involvement in Middle Management
+265
+2.50
+2.60
+2.70
+2.80
+2.90
+3.00
+3.10
+3.20
+3.30
+3.40
+Low Family Involvement
+in Middle Management
+High Family Involvement
+in Middle Management
+Labor Productivity
+Small Firm
+Large Firm
+Figure 2. The moderation effect of ﬁrm size on the relationship between family involvement in middle
+management and labor productivity.
+As shown in Model 4, the interaction term of family involvement in middle
+management and ﬁrm size was negatively related to labor productivity (β =
+−0.07, p = 0.015), indicating that ﬁrm size strengthens the relationship between
+family involvement in middle management and labor productivity. Furthermore,
+for large family ﬁrms (one SD above mean; n = 357) family involvement in
+middle management was negatively related to labor productivity (β = −0.13, p =
+0.006), whereas for small family ﬁrms (one SD below mean; n =389) there was
+no signiﬁcant relationship between family involvement in middle management
+and labor productivity (β = 0.02, p = 0.731) (illustrated in Figure 2). H3 was
+therefore supported. The nonsigniﬁcant relationship found in small family ﬁrms
+shows that when the ﬁrm size is small, the practice of appointing family members
+as middle managers will not hurt the overall workforce efﬁciency of the ﬁrm. Our
+explanation is that in small family ﬁrms, family middle managers may be capable
+for administrative tasks, and meanwhile family involvement may be viewed as
+legitimate by nonfamily employees.
+H4 predicts that the negative relationship between family involvement in middle
+management and labor productivity will be stronger when regional labor mobility
+is lower. As shown in Model 5, the interaction term of family involvement in
+management and labor mobility was positively related to labor productivity (β =
+0.07, p = 0.013), indicating that regional labor mobility weakens the relationship
+between family involvement in middle management and labor productivity.
+Furthermore, for family ﬁrms located in regions with high labor mobility (one SD
+above mean; n = 202) there was no relationship between family involvement in
+middle management and labor productivity (β = 0.10, p = 0.139), whereas for
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+266
+Q. Hu et al.
+2.50
+2.60
+2.70
+2.80
+2.90
+3.00
+3.10
+Low Family Involvement
+in Middle Management
+High Family Involvement
+in Middle Management
+Labor Productivity
+Low Labor Mobility
+High Labor Mobility
+Figure 3. The moderation effect of labor mobility on the relationship between family involvement in
+middle management and labor productivity.
+family ﬁrms located in regions with low labor mobility (one SD below mean; n =
+256) family involvement in middle management was negatively related to labor
+productivity (β = −0.26, p < 0.001) (illustrated in Figure 3). H4 was therefore
+supported. It is worth noting that the detrimental effect of family involvement
+in middle management does not exist for family ﬁrms located in regions with
+high labor mobility because on one hand, family owners will be less likely to hire
+incompetent family members as there are many other job opportunities outside the
+family ﬁrm, and on the other hand, nonfamily employees will react less negatively
+to unfair treatment as they can exit the current ﬁrm and ﬁnd an alternative job.
+In Model 6 we added the three interaction terms. The results showed that
+the interaction of family involvement in middle management and ﬁrm size was
+negatively related to productivity (β = −0.08, p = 0.003), and the interaction
+of family involvement in middle management and labor mobility was positively
+related to labor productivity (β = 0.08, p = 0.004). This provides further evidence
+for H3 and H4 in the full model.
+Robustness Check
+Although our research focus is on family involvement in middle management, it is
+valuable to explore whether its effect is differentiated from family involvement in
+top management. Since our sample was comprised of private family ﬁrms, many
+of these ﬁrms’ governance structures were relatively underdeveloped. Among our
+ﬁnal sample, 53.50 percent established a board of directors. Using this subsample
+(n = 683), we controlled for family involvement in top management (i.e., measured
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+Family Involvement in Middle Management
+267
+as percentage of family members in the board of directors), and reran the main
+effect model. The results showed that family involvement in top management
+had no signiﬁcant relationship with labor productivity (β = 0.06, p = 0.113),
+while family involvement in middle management still had a signiﬁcantly negative
+relationship with labor productivity (β = −0.11, p = 0.003). We are therefore
+conﬁdent that family involvement in middle management will negatively impact
+family ﬁrms’ labor productivity despite family involvement in top management.
+Second, since family ﬁrms are nested in different provinces, labor mobility is
+a province-level variable. As such, the moderating effect of labor mobility on
+the relationship between family involvement in middle management and labor
+productivity is a cross-level interaction. We therefore constructed a hierarchical
+linear model to test this interaction effect. Speciﬁcally, we chose labor mobility
+as the group-level variable. We followed Hofmann and Gavin’s (1998) method
+and centered the individual-level predictor using the grand mean. This approach
+made it easier to interpret the results as well as control for individual-level
+effects when testing the incremental effects of group-level variables. The results
+of the hierarchical regression showed that labor mobility weakened the negative
+relationship between family involvement in middle management and labor
+productivity (b = 0.06, p = 0.024). This ﬁnding was consistent with previous results
+regarding H4.
+Furthermore, we generated a dummy variable to indicate a region’s labor
+mobility. Business competition is stronger in highly developed regions than it
+is in less-developed regions. Correspondingly, the labor market is also more
+mature. In China, the division of coastal provinces and inland provinces is a
+typical demarcation line of economic development. We therefore predicted that
+the negative relationship between family involvement in middle management and
+labor productivity would be stronger in family ﬁrms located in inland regions
+than those located in coastal regions. We coded inland regions as a dummy
+variable. Inland regions were coded as zero if the location of a family ﬁrm was
+in Liaoning, Beijing, Tianjin, Shandong, Jiangsu, Shanghai, Zhejiang, Fujian,
+Guangzhou, or Hainan, and one otherwise (Li et al., 2009). In the subsample of
+inland ﬁrms (n = 640), the regression result showed that family involvement in
+middle management was negatively related to labor productivity (β = −0.10, p =
+0.011). However, in the subsample of coastal ﬁrms (n = 644), family involvement in
+middle management had no signiﬁcant relationship with labor productivity (β =
+−0.002, p = 0.955). This result was consistent with our prediction, providing
+further evidence for the region effect.
+DISCUSSION
+This research expands studies on the relationship between family involvement and
+ﬁrm performance by directing scholarly attention from upper-echelon to middle
+management. We borrowed insights from agency theory and the organizational
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+268
+Q. Hu et al.
+justice perspective and theorized that family involvement in middle management,
+indicated as percentage of family members among middle managers, would incur
+alternative forms of agency costs and perceptions of injustice among employees and
+would thus adversely affect family ﬁrms’ labor productivity. Moreover, we further
+embedded this relationship into organizational and regional economic contexts
+and examined how ﬁrms’ leaders, organizational characteristics, and the features
+of the local labor market could exacerbate or alleviate the negative impact of
+family involvement in middle management on labor productivity. We found that
+the negative effect of family involvement in middle management existed only when
+the CEO was a family member, or when the size of the ﬁrm was large, or when the
+ﬁrm was located in a region with low labor mobility.
+Theoretical Contributions
+The present study contributes to the existing literature in the following aspects.
+First, our study draws attention to the role of family involvement in middle
+management. To the best of our knowledge, this study is the ﬁrst to focus
+on family managers at the middle level and provide empirical evidence on
+its role on family ﬁrms’ labor productivity. Family involvement is one of the
+most salient characteristics of family businesses. Researchers have devoted much
+effort to investigating the effects of family involvement in ownership, control,
+and management on ﬁrm outcomes. Although these efforts have yielded rich
+evidence that highlights the importance of family involvement, most prior studies
+focus on positions at the strategic apex of organizations such as family owners,
+family board members, and family CEO. Family members in these positions
+play a critical role because they have great inﬂuence on family ﬁrms’ strategic
+decisions, which determine the sustainment as well as the development of a
+family business. However, compared with top-level ‘big names’ at the strategic
+apex, middle managers usually play a more-important role in carrying out the
+policies and decisions made by corporate leaders (Floyd & Wooldridge, 1994,
+1997). They are mainly responsible for internal daily operations and control, and
+the composition of the middle management team has an immediate and direct
+impact on the efﬁciency of family ﬁrms. Adopting the perspectives of agency theory
+and organizational justice, this study reveals that family involvement in middle
+management is detrimental to family ﬁrms’ labor productivity.
+Second, we incorporated the organizational justice perspective into our
+theorizing, providing a micro foundation for the effect of family involvement.
+Most previous studies on family involvement do not explicitly consider the
+role of nonfamily employees. In fact, family involvement may inﬂuence ﬁrm
+performance by affecting nonfamily members’ motivation, attitude, and behavior.
+This is particularly important when we look at family middle managers because
+they are responsible for supervising and motivating frontline employees. By
+integrating the organizational justice perspective into this study, we offer a new
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+Family Involvement in Middle Management
+269
+angle for understanding the phenomenon of family involvement. In this way,
+the study also contributes to organizational justice by extending a micro theory
+into a more macro phenomenon, which is a meaningful attempt at micro-macro
+integration.
+Third, we explore the boundary conditions of familial CEO, ﬁrm size, and
+regional labor mobility. Our study shifts the focus from the higher level to the
+middle level, proposing three important contingencies for understanding how this
+internal practice at the middle level interplay with other factors, which can even
+be factors outside of the organization, to jointly affect the performance of the
+family business. We argue that these contingencies affect the quality of middle-
+level managers’ social interactions with other members within the organization and
+hence affect the family ﬁrms’ labor productivity. In doing so, we paid particular
+attention to the role of middle managers facing different social actors in the
+organization. Habbershon, Williams, and MacMillan (2003) propose a uniﬁed
+systems model of family business to highlight the importance of social interactions
+among different members in the family organization. In line with this perspective,
+we found that such negative impact existed only when the CEO has a familial
+identity, the ﬁrm is large in size, or the external labor market has low mobility.
+These ﬁndings reveal the situations in which the negative consequence of family
+involvement in middle management is more pronounced, and they extend our
+understanding of the interactions among different shareholders related to family
+businesses.
+Fourth, we adopted a multilevel approach to exploring the boundary conditions
+of the main effect in this research. The cross-level interaction effect between family
+involvement in middle management and a region’s labor mobility clearly shows
+how family businesses, just like other economic organizations, are nested in broad
+social institutions. The association between the ﬁrm and the region implies that
+this internal practice may generate distinct effects on labor productivity given the
+different situations of the external labor market. Although a family business has
+a unique way of dealing with external institutional constraints and focus on its
+noneconomic goals (e.g., Berrone, Cruz, & Gomez-Mejia, 2012), our study implies
+that regional inﬂuence still penetrates into the family business. What is more,
+adopting a multilevel approach does not simply refer to our investigation of the
+cross-level interactions, but also means efforts in bridging perspectives at different
+levels to address the same research question.
+Limitations and Future Research Directions
+This study inevitably has several limitations. First, we cannot safely draw a casual
+inference from our ﬁndings based on the cross-sectional data used. One major
+problem of using cross-sectional data is reversed causality, which means that
+reduced labor productivity may lead to a higher level of family involvement in
+middle management but not the vice versa. However, we suggest that this is
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+270
+Q. Hu et al.
+unlikely. First, when the ﬁnancial manager in each ﬁrm reported their performance
+information as a ‘snapshot’, middle-level managers had usually been working in
+their positions over a period of time. This reasonable inference of the reality
+suggests that it is more likely that our independent variable precedes the dependent
+variable in time. Second, a rationale to explain the reversed causality is that family
+businesses hire family members in order to cut costs or improve revenue in response
+to reduced labor productivity. However, previous research has implied that hiring
+family members is commonly not an attempt to achieve economic objectives
+(Cennamo et al., 2012). Thus, in spite of the challenges from using cross-sectional
+data, we suggest that this secondhand large dataset is the best we can currently
+utilize to answer the research question, and it is more likely that our proposed
+relationship instead of the reversed causality remains.
+Second, we tested our hypotheses only based on a sample of Chinese
+private family ﬁrms, and scholars could examine the generalizability of our
+ﬁndings in other emerging markets such as the BRIC (Brazil, Russia, India,
+and China) countries or SIVETS (Colombia, Indonesia, Vietnam, Egypt,
+Turkey, and South Africa). Although the theoretical pillars that support our
+arguments are relatively context free, it is possible that family involvement in
+these countries may demonstrate different characteristics, so its effect on labor
+productivity varies. In addition, we only focused on private family ﬁrms whose
+governance structures are relatively underdeveloped and in which nepotism is
+more likely to be a severe management problem. However, in public family
+ﬁrms, where the ﬁrm’s governance structure is well developed, the possible
+negative inﬂuences of family involvement in middle management may be
+weakened.
+Third, we must acknowledge the limitation that we did not directly measure
+employees’ perception of injustice although we used it as one of the major
+underlying arguments in the study. Without the measure we cannot completely rule
+out alternative explanations of the negative effect we found, although empirical
+evidence of the three interactions effects are consistent with the injustice reasoning.
+This limitation is due to the use of the secondhand data, because it does not provide
+any justice-relevant information that we can use to test the underlying mechanism.
+We strongly encourage scholars who are interested in family management to
+include the measure of justice perception in future research to further examine
+this important argument.
+Fourth, future research could explore how family members working in different
+functions may bring about different impacts on ﬁrm performance. For example,
+although approximately one-third of the private family ﬁrms tend to hire a family
+member as the manager of their ﬁnancial department, it may not be a wise decision
+because the ﬁnancial department requires high expertise and the ﬁnancial manager
+ought to be independent and objective in dealing with ﬁnancial issues. Due to the
+existence of family ties the ﬁnancial manager may be biased in his/her decision
+making, which may endanger a ﬁrm’s long term economic performance.
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+Family Involvement in Middle Management
+271
+NOTE
+This research was partially supported by a grant from the National Natural Science Foundation of
+China (#71632002).
+REFERENCES
+Anderson, R. C., & Reeb, D. M. 2003. Founding-family ownership and ﬁrm performance: Evidence
+from the S&P 500. The Journal of Finance, 58(3): 1301–1327.
+Anderson, R. C., & Reeb, D. M. 2004. Board composition: Balancing family inﬂuence in S&P 500
+ﬁrms. Administrative Science Quarterly, 49(2): 209–237.
+Arnold, D. J., & Quelch, J. A. 1998. New strategies in emerging markets. MIT Sloan Management
+Review, 40(1): 7–20.
+Barnett, T., & Kellermanns, F. W. 2006. Are we family and are we treated as family? Nonfamily
+employees’ perception of justice in the family ﬁrm. Entrepreneurship Theory and Practice,
+30(6): 837–854.
+Barontini, R., & Caprio, L. 2006. The effect of family control on ﬁrm value and performance:
+Evidence from continental Europe. European Financial Management, 12(5): 689–723.
+Bartlett, C. A., & Ghoshal, S. 1993. Beyond the M-form: Toward a managerial theory of the ﬁrm.
+Strategic Management Journal, 14(52): 23–46.
+Bergstrom, T. C. 1989. A fresh look at the rotten kid theorem and other household mysteries.
+Journal of Political Economy, 97(5): 1138–1159.
+Berrone, P., Cruz, C., & Gomez-Mejia, L. R. 2012. Socioemotional wealth in family ﬁrms:
+Theoretical dimensions, assessment approaches, and agenda for future research. Family
+Business Review, 25(3): 258–279.
+Birley, S. 2001. Owner-manager attitudes to family and business issues: A 16 country study.
+Entrepreneurship: Theory and Practice, 26(2): 63–76.
+Bourgeois, L. J. 1985. Strategic goals, perceived uncertainty, and economic performance in volatile
+environments. Academy of Management Journal, 28(3): 548–573.
+Bruce, N., & Waldman, M. 1990. The rotten kid theorem meets the Samaritan’s dilemma. The
+Quarterly Journal of Economics, 105(1): 155–165.
+Carney, M. 2007. Minority family business in emerging markets: Organization forms and
+competitive advantage. Family Business Review, 20(4): 289–300.
+Cennamo, C., Berrone, P., Cruz, C., & Gomez-Mejia, L. R. 2012. Socioemotional wealth
+and proactive stakeholder engagement: Why family-controlled ﬁrms care more about their
+stakeholders. Entrepreneurship Theory and Practice, 36(6): 1153–1173.
+Chang, S.-J., & Shim, J. 2016. When does transitioning from family to professional management
+improve ﬁrm performance? Strategic Management Journal, 36(9): 1297–1316.
+Chu, W. 2011. Family ownership and ﬁrm performance: Inﬂuence of family management, family
+control, and ﬁrm size. Asia Paciﬁc Journal of Management, 28(4): 833–851.
+Chua, J. H., Chrisman, J. J., & Sharma, P. 2003. Succession and nonsuccession concerns of family
+ﬁrms and agency relationship with nonfamily managers. Family Business Review, 16(2):
+89–107.
+Chua, J. H., Chrisman, J. J., & Steier, L. P. 2003. Extending the theoretical horizons of family business
+research. Entrepreneurship Theory and Practice, 27(4): 331–338.
+Claessens, S., Djankov, S., Fan, J. P. H., & Lang, L. H. P. 2002. Disentangling the incentive and
+entrenchment effects of large shareholdings. Journal of Finance, 57(6): 2741–2772.
+Claessens, S., Djankov, S., & Lang, L. H. P. 2000. The separation of ownership and control in East
+Asian corporations. Journal of Financial Economics, 58(1–2): 81–112.
+Colquitt, J. A. 2001. On the dimensionality of organizational justice: A construct validation of a
+measure. Journal of Applied Psychology, 86(3): 386–400.
+Colquitt, J. A., Scott, B. A., Rodell, J. B., Long, D. M., Zapata, C. P., Conlon, D. E., & Wesson, M. J.
+2013. Justice at the millennium, a decade later: A meta-analytic test of social exchange and
+affect-based perspectives. Journal of Applied Psychology, 98(2): 199–236.
+Cropanzano, R., & Mitchell, M. S. 2005. Social exchange theory: An interdisciplinary review.
+Journal of Management, 31(6): 847–900.
+Daily, C. M., & Dollinger, M. J. 1992. An empirical examination of ownership structure in family
+and professionally managed ﬁrms. Family Business Review, 5(2): 117–136.
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+272
+Q. Hu et al.
+Datta, D. K., Guthrie, J. P., & Wright, P. M. 2005. Human resource management and labor
+productivity: Does industry matter? Academy of Management Journal, 48(1): 135–145.
+De Massis, A., Kotlar, J., Campopiano, G., & Cassia, L. 2015. The impact of family involvement
+on SMEs’ performance: Theory and evidence. Journal of Small Business Management,
+53(4): 924–948.
+Delery, J. E., & Shaw, J. D. 2001. The strategic management of people in work organizations: Review,
+synthesis and extension. Research in Personnel and Human Resource Management,
+20: 165–197.
+Dyer, W. G. 2006. Examining the ‘family effect’ on ﬁrm performance. Family Business Review,
+19(4): 253–273.
+Ensley, M. D., & Pearson, A. W. 2005. An exploratory comparison of the behavioral dynamics of
+top management teams in family and nonfamily new ventures: Cohesion, conﬂict, potency, and
+consensus. Entrepreneurship: Theory and Practice, 29(3): 267–284.
+Ewing, D. W. 1965. Is nepotism so bad? Harvard Business Review, 43: 23–32.
+Fan, G., Wang, X. L., & Zhu, H. P. 2011. NERI INDEX of marketization of China’s provinces 2011 report.
+Beijing: Economics Science Press.
+Fenton-O’Creevy, M. 1998. Employee involvement and the middle manager: Evidence from a survey
+of organizations. Journal of Organizational Behavior, 19(1): 67–84.
+Floyd, S. W., & Wooldridge, B. 1994. Dinosaurs or dynamos? Recognizing middle management’s
+strategic role. Academy of Management Journal, 8(4): 47–57.
+Floyd, S. W., & Wooldridge, B. 1997. Middle management’s strategic inﬂuence and organizational
+performance. Journal of Management Studies, 34(3): 465–485.
+Fredrickson, J. W., & Mitchell, T. R. 1984. Strategic decision processes: Comprehensiveness and
+performance in an industry with an unstable environment. Academy of Management
+Journal, 27(2): 399–423.
+Gerhart, B. 1990. Voluntary turnover and alternative job opportunities. Journal of Applied
+Psychology, 75(5): 467–476.
+Gomez-Mejia, L. R., Nunez-Nickel, M., & Gutierrez, I. 2001. The role of family ties in agency
+contracts. Academy of Management Journal, 44(1): 81–95.
+Guth, W. D., & Macmillan, I. C. 1986. Strategy implementation versus middle management self-
+interest. Strategic Management Journal, 7(4): 313–327.
+Habbershon, T. G., Williams, M., & MacMillan, I. C. 2003. A uniﬁed systems perspective of family
+ﬁrm performance. Journal of Business Venturing, 18(4): 451–465.
+Harris, D., Martinez, J. I., & Ward, J. L. 1994. Is strategy different for the family-owned business?
+Family Business Review, 7(2): 159–174.
+He, X., Song, L., Zhu, H., & Li, X. 2014. Why does the family ﬁrm want to let go? The perception
+of the system environment, the political status, and the succession intention of China’s family
+ﬁrms’ entrepreneurs. Management World, 2: 90–101.
+Hofmann, D. A., & Gavin, M. B. 1998. Centering decisions in hierarchical linear models:
+Implications for research in organizations. Journal of Management, 24(5): 623–641.
+Hom, P. W., & Griffeth, R. W. 1995. Employee turnover. Cincinnati, OH: South-Western Pub.
+Huselid, M. A. 1995. The impact of human resource management practices on turnover,
+productivity, and corporate ﬁnancial performance. Academy of Management Journal,
+38(3): 635–672.
+Iverson, R. D., & Zatzick, C. D. 2011. The effect of downsizing labor on productivity: The value of
+showing consideration for employees’ morale and welfare in high-performance work systems.
+Human Resource Management, 50(1): 29–44.
+Jaskiewicz, P., & Uhlenbruck, K. 2013. Is nepotism good or bad? Types of nepotism and implications
+for knowledge management. Family Business Review, 26(2): 121–139.
+Jensen, M. C., & Meckling, W. H. 1976. Theory of the ﬁrm: Managerial behavior, agency cost, and
+ownership structure. Journal of Financial Economics, 3(4): 305–360.
+Karra, N., Tracey, P., & Phillips, N. 2006. Altruism and agency in the family ﬁrm: Exploring the role
+of family, kinship, and ethnicity. Entrepreneurship Theory and Practice, 30(6): 861–877.
+Khwaja, A. I., & Mian, A. 2005. Do lenders favor politically connected ﬁrms? Rent provision in an
+emerging ﬁnancial market. The Quarterly Journal of Economics, 120(4): 1371–1411.
+Kimberly, J. R. 1976. Organizational size and the structural perspective: A review, critique, and
+proposal. Administrative Science Quarterly, 21(4): 517–597.
+Lee, J., & Miller, D. 1996. Strategy, environment and performance in two technological contexts:
+Contingency theory in Korea. Organization Studies, 17(5): 729–750.
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+Family Involvement in Middle Management
+273
+Lee, K. S., Lim, G. H., & Lim, W. S. 2003. Family business succession: Appropriation risk and choice
+of successor. Academy of Management Review, 28(4): 657–666.
+Lee, T. H., Gerhart, B., Weller, I., & Trevor, C. O. 2008. Understanding voluntary turnover: Path-
+speciﬁc job satisfaction effects and the importance of unsolicited job offers. Academy of
+Management Journal, 51(4): 651–671.
+Li, J., Zhou, C., & Zajac, E. J. 2009. Control, collaboration, and productivity in international joint
+ventures: Theory and evidence. Strategic Management Journal, 30(8): 865–884.
+Li, Q., & Zhang, J. 2010. Institutional antecedent and characteristics of top executives: An empirical
+study. Management World, 10: 110–121.
+Liang, J., Chen, S., & Ge, Q. 2010. Political participation, governance structure and corporate
+philanthropy in Chinese private sector. Management World, 7: 109–118.
+Maury, B. 2006. Family ownership and ﬁrm performance: Empirical evidence from Western
+European corporations. Journal of Corporate Finance, 12(2): 321–341.
+McConaughy, D. L., Matthews, C. H., & Fialko, A. S. 2001. Founding family controlled ﬁrms:
+Performance, risk, and value. Journal of Small Business Management, 39(1): 31–49.
+McConville, T., & Holden, L. 1999. The ﬁlling in the sandwich: HRM and middle managers in the
+health sector. Personnel Review, 28(5/6): 406–424.
+Mitchell, T. R., Holtom, B. C., Lee, T. W., Sablynski, C. J., & Erez, M. 2001. Why people stay: Using
+job embeddedness to predict voluntary turnover. Academy of Management Journal, 44(6):
+1102–1122.
+Peiser, R. B., & Wooten, L. M. 1991. Lite-cycle changes in small familv businesses. In C. E. Aronoff
+& I. L. Ward (Eds.), Family business sourcebook: 430–441. Detroit: Omnigraphics.
+Poza, E. F., Alfred, T., & Maheshawi, A. 1997. Stakeholder perceptions of culture and management
+practices in family and family ﬁrms-A preliminary report. Family Business Review, 10(2):
+135–155.
+Schulze, W. S., Lubatkin, M. H., & Dino, R. N. 2003. Toward a theory of agency and altruism in
+family ﬁrms. Journal of Business Venturing, 18(4): 473–490.
+Schulze, W. S., Lubatkin, M. H., Dino, R. N., & Buchholtz, A. K. 2001. Agency relationships in
+family ﬁrms: Theory and evidence. Organization Science, 12(2): 99–166.
+Sciascia, S., & Mazzola, P. 2008. Family involvement in owners and management: Exploring
+nonlinear effects on performance. Family Business Review, 21(4): 331–345.
+Silva, F., & Majluf, N. 2008. Does family ownership shape performance outcomes. Journal of
+Business Research, 61(6): 609–614.
+Songini, L., & Gnan, L. 2015. Family involvement and agency cost control mechanisms in family
+small and medium-sized enterprises. Journal of Small Business Management, 53(3): 748–
+779.
+Steen, A., & Baldwin, K. 2015, October 27. Family business in China – Is there a succession
+crisis? Social Media Today RSS. [Cited 9 November 2016]. Available from URL: http://www.
+familyownedbusinessadvisors.com/2015/10/family-business-in-china/
+Tsao, C. W., Chen, S. J., Lin, C. S., & Hyde, W. 2009. Founding-family ownership and ﬁrm
+performance: The role of high-performance work systems. Family Business Review, 22(4):
+319–332.
+Urwick, L. F. 1922. The manager’s span of control. Harvard Business Review, 34: 39–47.
+Villalonga, B., & Amit, R. 2006. How do family ownership, control and management affect ﬁrm
+value? Journal of Financial Economics, 80(2): 385–417.
+Whyte, M. K. 1996. The Chinese family and economic development: Obstacle or engine?
+Economic Development and Cultural Change, 45(1): 1–30.
+Yammeesri, J., & Lodh, S. C. 2004. Is family ownership a pain or gain to ﬁrm performance? Journal
+of Financial Economics, 80: 385–417.
+Zhang, J., & Ma, H. 2008. Adoption of professional management in Chinese family business: A
+multilevel analysis of impetuses. Asia Paciﬁc Journal of Management, 26(1): 119–139.
+Qiongjing Hu (huqiongjing@pku.edu.cn) is a PhD candidate at Guanghua
+School of Management, Peking University. Currently, his research focuses
+on leadership, team, and creativity. His research has appeared in Academy of
+Management Journal, Human Relations, and Journal of Vocational Behavior.
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press
+
+274
+Q. Hu et al.
+Yanlong Zhang (yanlong.zhang@gsm.pku.edu.cn) is an Associate Professor
+at Guanghua School of Management at Peking University. He received his BA
+and MA in sociology from Peking University in 2002 and 2005, and received
+his PhD in sociology from Duke University in 2012. His research interests
+include organization theory, social networks and social capital, corporate social
+responsibility, entrepreneurship, and policy diffusion. He published over twenty
+articles in leading sociology and management journals such as Academy of
+Management Annals, Journal of Business Venturing, Social Networks, Human Resource
+Management, and Management and Organization Review.
+Jingjing Yao (j.yao@ieseg.fr) is an assistant professor of International
+Negotiations at IÉSEG School of Management (LEM-CNRS 9221). He
+received a PhD in Organization Management from Peking University. His
+research interests include negotiation, trust, and cross-cultural studies. His
+research has appeared in Organizational Behavior and Human Decision Processes,
+Journal of Organizational Behavior, and Management and Organization Review.
+Manuscript received:
+November 9, 2016
+Final version accepted: December 8, 2017 (number of revisions – 2)
+Accepted by:
+Senior Editor Xiaowei Rose Luo
+© 2018 The International Association for Chinese Management Research
+https://doi.org/10.1017/mor.2018.5 Published online by Cambridge University Press

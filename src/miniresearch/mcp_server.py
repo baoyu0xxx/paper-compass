@@ -11,6 +11,7 @@ Tools (unchanged API, new backends):
 
 from __future__ import annotations
 
+import os
 from typing import Any, Dict, List, Optional
 
 from miniresearch.models import UnifiedResponse
@@ -25,31 +26,54 @@ def _tool_search_wiki(
     db_path: str = "data/vectordb",
 ) -> Dict[str, Any]:
     try:
-        results = vector_search(query, collection="wiki", k=limit, db_path=db_path)
+        from miniresearch.embedder import Embedder
+        import chromadb as _cdb
+        from chromadb.config import Settings as _CSet
+
+        _client = _cdb.PersistentClient(path=db_path, settings=_CSet(anonymized_telemetry=False))
+        cols = _client.list_collections()
+        wiki_col = next((c for c in cols if c.name.startswith("wiki_")), None)
+        if not wiki_col:
+            return UnifiedResponse.success(
+                tool="search_wiki", data={"matches": [], "query_interpretation": "no wiki index found"},
+                mode_used="wiki", confidence="low", next_action="Run build_index --wiki first"
+            ).to_dict()
+        
+        model_meta = wiki_col.metadata.get("embedding_model", "volcengine:unknown")
+        _sample = wiki_col.get(limit=1, include=["embeddings"])
+        dim = 2048
+        if _sample and _sample.get("embeddings") is not None and len(_sample["embeddings"]) > 0:
+            dim = len(_sample["embeddings"][0])
+
+        embedder = Embedder()
+        embedder.configure_cloud("volcengine",
+            os.environ.get("VOLC_EMBED_BASE_URL", ""),
+            os.environ.get("VOLC_EMBED_API_KEY", ""),
+            os.environ.get("VOLC_EMBED_MODEL", ""), dim)
+        q_emb = embedder.embed_single(query)
+
+        # Use the same client for search (don't create a second one)
+        results = wiki_col.query(query_embeddings=[q_emb], n_results=limit,
+                                 include=["documents", "metadatas", "distances"])
+
+        matches = [
+            {
+                "page_path": (results["metadatas"][0][i] or {}).get("page_path", results["ids"][0][i]),
+                "title": (results["metadatas"][0][i] or {}).get("title", results["ids"][0][i]),
+                "snippet": results["documents"][0][i][:200],
+                "score": round(1.0 / (1.0 + results["distances"][0][i]), 4),
+            }
+            for i in range(len(results["ids"][0]))
+        ]
+
+        confidence = "high" if matches and matches[0]["score"] > 0.5 else "medium" if matches else "low"
+        return UnifiedResponse.success(
+            tool="search_wiki", data={"matches": matches, "query_interpretation": "semantic wiki search"},
+            mode_used="wiki", confidence=confidence,
+            sources=[{"source_type":"wiki_page","id":m["page_path"],"title":m["title"]} for m in matches],
+        ).to_dict()
     except Exception as e:
-        return UnifiedResponse.error("search_wiki", [f"Vector search failed: {e}"]).to_dict()
-
-    matches = [
-        {
-            "page_path": r.get("metadata", {}).get("page_path", r["id"]),
-            "title": r.get("metadata", {}).get("title", ""),
-            "snippet": r["document"][:200],
-            "score": r["score"],
-        }
-        for r in results
-    ]
-
-    confidence = "high" if matches and matches[0]["score"] > 0.6 else "medium" if matches else "low"
-    next_action = "" if matches else "Try ask_research for deeper retrieval"
-
-    return UnifiedResponse.success(
-        tool="search_wiki",
-        data={"matches": matches, "query_interpretation": "semantic wiki search"},
-        mode_used="wiki",
-        confidence=confidence,
-        sources=[{"source_type": "wiki_page", "id": m["page_path"], "title": m["title"]} for m in matches],
-        next_action=next_action,
-    ).to_dict()
+        return UnifiedResponse.error("search_wiki", [str(e)]).to_dict()
 
 
 def _tool_search_library(
