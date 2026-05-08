@@ -165,12 +165,20 @@ class Embedder:
         cfg = self._cloud_config
         all_vectors: List[List[float]] = []
 
-        # Volcengine multimodal only supports 1 text per request
+        # Volcengine multimodal only supports 1 text per request — parallelize
         is_multimodal = "volces" in cfg.get("base_url", "") or "multimodal" in cfg.get("base_url", "")
         if is_multimodal:
-            for text in texts:
-                vectors = self._call_cloud_api([text], cfg)
-                all_vectors.extend(vectors)
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
+                futures = {pool.submit(self._call_cloud_api, [t], cfg): i for i, t in enumerate(texts)}
+                results = [None] * len(texts)
+                for f in concurrent.futures.as_completed(futures):
+                    idx = futures[f]
+                    results[idx] = f.result()
+                # Flatten: each result is list of 1 vector
+                for vecs in results:
+                    if vecs:
+                        all_vectors.extend(vecs)
         else:
             for i in range(0, len(texts), batch_size):
                 batch = texts[i : i + batch_size]

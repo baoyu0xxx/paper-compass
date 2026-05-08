@@ -40,38 +40,22 @@ def _load_env():
 
 
 def _init_embedder() -> Embedder:
-    """Initialize embedder from project config + env. Auto-detects dimension."""
+    """Initialize embedder from project config + env."""
     _load_env()
     configs = load_all_configs("configs")
 
     embedder = Embedder()
 
-    # Try cloud embedding provider first
     try:
         provider = get_provider_config("embedding_main", configs)
-        # Auto-detect dimension: make a test call with a tiny string
-        dim = 0
-        try:
-            embedder.configure_cloud(
-                provider="volcengine",
-                base_url=provider.get("base_url", ""),
-                api_key=provider.get("api_key", ""),
-                model=provider.get("model", ""),
-                dimension=0,  # auto-detect
-            )
-            test_vec = embedder.embed_single("test")
-            dim = len(test_vec)
-        except Exception:
-            dim = 2048  # fallback for doubao-vision
-
         embedder.configure_cloud(
             provider="volcengine",
             base_url=provider.get("base_url", ""),
             api_key=provider.get("api_key", ""),
             model=provider.get("model", ""),
-            dimension=dim,
+            dimension=2048,  # doubao-embedding-vision-250615
         )
-        print(f"  Embedding: cloud (volcengine, dim={dim})")
+        print(f"  Embedding: cloud (volcengine, dim={embedder.dimension})")
     except Exception as e:
         print(f"  Cloud embedding unavailable ({e}), falling back to local bge-base")
         embedder.configure_local("bge-base")
