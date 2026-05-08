@@ -40,7 +40,7 @@ def _load_env():
 
 
 def _init_embedder() -> Embedder:
-    """Initialize embedder from project config + env."""
+    """Initialize embedder from project config + env. Auto-detects dimension."""
     _load_env()
     configs = load_all_configs("configs")
 
@@ -49,14 +49,29 @@ def _init_embedder() -> Embedder:
     # Try cloud embedding provider first
     try:
         provider = get_provider_config("embedding_main", configs)
+        # Auto-detect dimension: make a test call with a tiny string
+        dim = 0
+        try:
+            embedder.configure_cloud(
+                provider="volcengine",
+                base_url=provider.get("base_url", ""),
+                api_key=provider.get("api_key", ""),
+                model=provider.get("model", ""),
+                dimension=0,  # auto-detect
+            )
+            test_vec = embedder.embed_single("test")
+            dim = len(test_vec)
+        except Exception:
+            dim = 2048  # fallback for doubao-vision
+
         embedder.configure_cloud(
             provider="volcengine",
             base_url=provider.get("base_url", ""),
             api_key=provider.get("api_key", ""),
             model=provider.get("model", ""),
-            dimension=1024,
+            dimension=dim,
         )
-        print(f"  Embedding: cloud (volcengine, dim={embedder.dimension})")
+        print(f"  Embedding: cloud (volcengine, dim={dim})")
     except Exception as e:
         print(f"  Cloud embedding unavailable ({e}), falling back to local bge-base")
         embedder.configure_local("bge-base")
@@ -83,8 +98,6 @@ def index_papers(args):
         embedding_model_id=embedder.model_id,
     )
 
-    from miniresearch.pdf_extract import PDFExtractor
-
     chunks_added = 0
     batch_texts = []
     batch_ids = []
@@ -92,41 +105,45 @@ def index_papers(args):
 
     for item in items:
         pdf_path = item.get("pdf_path", "")
+        key = item.get("key", "")
+
         if not pdf_path or not Path(pdf_path).exists():
             continue
 
-        # Extract text
+        # Load text from cache (or extract on-the-fly)
         text_file = item.get("text_file", "")
+        full_text = ""
         if text_file and Path(text_file).exists():
             full_text = Path(text_file).read_text(encoding="utf-8")
         elif args.extract_text:
             try:
-                extractor = PDFExtractor(pdf_path)
-                full_text = extractor.extract_all_text()
+                from miniresearch.pdf_extract import PDFExtractor
+                full_text = PDFExtractor(pdf_path).extract_all_text()
             except Exception:
                 continue
         else:
-            continue  # no text available
+            continue
 
         if not full_text.strip():
             continue
 
-        # Chunk
-        extractor = PDFExtractor(pdf_path)
-        chunks = extractor.extract_chunks(max_chars_per_chunk=1500)
-
-        for chunk in chunks:
-            batch_texts.append(chunk["text"])
-            batch_ids.append(chunk["chunk_id"])
+        # In-memory sliding window chunking (avoid re-opening PDF)
+        cs, ol, ci = 1500, 200, 0
+        for pos in range(0, len(full_text), cs - ol):
+            chunk_text = full_text[pos:pos + cs].strip()
+            if len(chunk_text) < 50:
+                continue
+            batch_texts.append(chunk_text[:2000])
+            batch_ids.append(f"{key}_c{ci}")
             batch_metas.append({
-                "item_key": item.get("key", ""),
+                "item_key": key,
                 "title": item.get("title", ""),
                 "year": item.get("year"),
                 "authors": ", ".join(item.get("authors", [])),
-                "page_num": chunk["page_num"],
                 "collections": ", ".join(item.get("collections", [])),
                 "tags": ", ".join(item.get("tags", [])),
             })
+            ci += 1
 
             # Embed and store in batches
             if len(batch_texts) >= 32:
