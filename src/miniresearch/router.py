@@ -60,8 +60,9 @@ def ask_research(
     """
 
     # Step 1: Wiki search
-    from miniresearch.filters import vector_search
-    wiki_results = vector_search(query, collection="wiki", k=5, db_path=db_path)
+    from miniresearch.filters import vector_search, _postprocess_wiki_results, _dedupe_pdf_chunks_by_item
+    wiki_results_raw = vector_search(query, collection="wiki", k=5, db_path=db_path)
+    wiki_results = _postprocess_wiki_results(wiki_results_raw)
     wiki_top_score = wiki_results[0]["score"] if wiki_results else 0.0
 
     # Step 2: Decide mode
@@ -73,12 +74,14 @@ def ask_research(
 
     # Step 3: Library metadata search
     from miniresearch.filters import search_library
-    lib_results = search_library(query, library_path=library_path, filters=filters, limit=max_sources)
+    lib_results_raw = search_library(query, library_path=library_path, filters=filters, limit=max_sources * 2)
+    lib_results = [m for m in lib_results_raw if m.get("score", 0) >= 1.0][:max_sources]
 
     # Step 4: PDF chunk search if escalation
-    pdf_chunks = []
+    pdf_chunks_raw = []
     if mode.actual in ("pdf", "hybrid"):
-        pdf_chunks = vector_search(query, collection="papers", k=max_sources, db_path=db_path)
+        pdf_chunks_raw = vector_search(query, collection="papers", k=max_sources * 2, db_path=db_path)
+    pdf_chunks = _dedupe_pdf_chunks_by_item(pdf_chunks_raw, max_per_item=2)
 
     # Step 5: Assemble answer
     parts = []
@@ -107,6 +110,16 @@ def ask_research(
 
     answer = "\n".join(parts) if parts else "No relevant information found."
 
+    # de-duplicate sources by (type,id)
+    seen = set()
+    unique_sources: List[Dict[str, str]] = []
+    for s in sources:
+        key = (s.get("source_type", ""), s.get("id", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique_sources.append(s)
+
     confidence = "low"
     if mode.actual == "wiki" and wiki_top_score > 0.5:
         confidence = "medium"
@@ -122,7 +135,9 @@ def ask_research(
         },
         "wiki_context": {
             "pages_used": [{"title": w.get("metadata", {}).get("title", ""),
-                           "page_path": w["id"]} for w in wiki_results[:3]],
+                           "page_path": w.get("metadata", {}).get("page_path", w["id"]),
+                           "page_type": w.get("metadata", {}).get("page_type", ""),
+                           "section": w.get("metadata", {}).get("section", "")} for w in wiki_results[:3]],
         },
         "pdf_context": {
             "docs_used": [{"doc_id": m["doc_id"], "title": m["title"],
@@ -135,4 +150,5 @@ def ask_research(
             "recommended": confidence != "low" and len(lib_results) > 1,
             "target_type": "queries",
         },
+        "sources": unique_sources,
     }

@@ -47,8 +47,15 @@ class WikiGenerator:
         return p.read_text(encoding="utf-8") if p.exists() else ""
 
     def _call(self, system_prompt: str, user_prompt: str,
-              max_tokens: int = 2500, temperature: float = 0.1) -> str:
-        """Call LLM API and return content string."""
+              max_tokens: int = 2500, temperature: float = 0.1,
+              max_retries: int = 3) -> str:
+        """Call LLM API and return content string.
+
+        Retries on 429 (rate limit) and 5xx (server error) with
+        exponential backoff: 1s, 2s, 4s.
+        """
+        import time
+
         base_url = self._provider.get("base_url", "").rstrip("/")
         api_key = self._provider.get("api_key", "")
         model = self._provider.get("model", "mimo-v2.5-pro")
@@ -74,9 +81,27 @@ class WikiGenerator:
             },
             method="POST",
         )
-        with urllib.request.urlopen(req, timeout=180) as resp:
-            result = json.loads(resp.read().decode("utf-8"))
-            return result["choices"][0]["message"]["content"]
+
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                with urllib.request.urlopen(req, timeout=180) as resp:
+                    result = json.loads(resp.read().decode("utf-8"))
+                    return result["choices"][0]["message"]["content"]
+            except urllib.error.HTTPError as e:
+                last_error = e
+                code = getattr(e, "code", 0)
+                if code in (429, 500, 502, 503, 504) and attempt < max_retries - 1:
+                    delay = 2 ** attempt  # 1s, 2s, 4s
+                    logger.warning(
+                        "API %d on attempt %d/%d — retrying in %ds",
+                        code, attempt + 1, max_retries, delay,
+                    )
+                    time.sleep(delay)
+                    continue
+                raise
+
+        raise last_error  # type: ignore[misc]
 
     # ── Pass 1: classification ────────────────────────────────────────────
 

@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 
 class VectorStore:
@@ -70,6 +70,7 @@ class VectorStore:
         documents: List[str],
         metadatas: Optional[List[Dict[str, Any]]] = None,
         embeddings: Optional[List[List[float]]] = None,
+        mode: str = "add",
     ) -> None:
         """Add document chunks with pre-computed embeddings.
 
@@ -78,12 +79,30 @@ class VectorStore:
             documents: Text content of each chunk.
             metadatas: Optional metadata dicts (year, tags, collections, etc.).
             embeddings: Pre-computed embedding vectors. Required.
+            mode: 'add' for strict append, 'upsert' for idempotent update-or-insert.
         """
-        self.collection.add(
+        method = self.collection.upsert if mode == "upsert" else self.collection.add
+        method(
             ids=ids,
             documents=documents,
             metadatas=metadatas,
             embeddings=embeddings,
+        )
+
+    def upsert_chunks(
+        self,
+        ids: List[str],
+        documents: List[str],
+        metadatas: Optional[List[Dict[str, Any]]] = None,
+        embeddings: Optional[List[List[float]]] = None,
+    ) -> None:
+        """Insert new chunks or update existing chunks in-place."""
+        self.add_chunks(
+            ids=ids,
+            documents=documents,
+            metadatas=metadatas,
+            embeddings=embeddings,
+            mode="upsert",
         )
 
     # ── search ────────────────────────────────────────────────────────────
@@ -172,15 +191,111 @@ class VectorStore:
         """Return total number of chunks in the collection."""
         return self.collection.count()
 
+    def _invalidate_bm25(self) -> None:
+        """Drop cached BM25 state after any collection mutation."""
+        self._bm25_index = None
+        self._bm25_corpus = []
+        self._bm25_ids = []
+
     def clear(self) -> None:
         """Delete all chunks in the collection."""
         if self.count() > 0:
             all_ids = self.collection.get()["ids"]
             if all_ids:
                 self.collection.delete(ids=all_ids)
-        self._bm25_index = None
-        self._bm25_corpus = []
-        self._bm25_ids = []
+        self._invalidate_bm25()
+
+    def get_indexed_item_keys(self) -> Set[str]:
+        """Return all unique paper item keys present in the collection metadata."""
+        total_count = self.count()
+        if total_count == 0:
+            return set()
+
+        all_data = self.collection.get(limit=total_count, include=["metadatas"])
+        item_keys: Set[str] = set()
+        for metadata in all_data.get("metadatas", []) or []:
+            if metadata and metadata.get("item_key"):
+                item_keys.add(str(metadata["item_key"]))
+        return item_keys
+
+    def get_chunk_ids_for_item(self, item_key: str) -> List[str]:
+        """Return all chunk IDs belonging to one paper item."""
+        total_count = self.count()
+        if total_count == 0:
+            return []
+
+        results = self.collection.get(
+            where={"item_key": str(item_key)},
+            limit=total_count,
+        )
+        return results.get("ids", []) or []
+
+    def delete_item(self, item_key: str) -> int:
+        """Delete all chunks belonging to one paper item key."""
+        chunk_ids = self.get_chunk_ids_for_item(item_key)
+        if not chunk_ids:
+            return 0
+        self.collection.delete(ids=chunk_ids)
+        self._invalidate_bm25()
+        return len(chunk_ids)
+
+    # ── wiki page deletion ────────────────────────────────────────────────────
+
+    def delete_by_page_path(self, page_path: str) -> int:
+        """Delete all chunks whose metadata 'page_path' matches exactly.
+
+        Returns the number of chunks deleted. Invalidates the BM25 index
+        so the next search rebuilds it from scratch.
+        """
+        chunk_ids = self.get_chunk_ids_by_metadata_where({"page_path": page_path})
+        if not chunk_ids:
+            return 0
+        self.collection.delete(ids=chunk_ids)
+        self._invalidate_bm25()
+        return len(chunk_ids)
+
+    def delete_by_page_path_prefix(self, prefix: str) -> int:
+        """Delete all chunks whose metadata 'page_path' starts with a given prefix.
+
+        Useful for directory-level cleanup, e.g. delete_by_page_path_prefix('wiki/queries/').
+        Returns the number of chunks deleted.
+        """
+        total_count = self.count()
+        if total_count == 0:
+            return 0
+
+        all_data = self.collection.get(limit=total_count, include=["metadatas"])
+        to_delete: List[str] = []
+        for i, _id in enumerate(all_data.get("ids", []) or []):
+            meta = (all_data.get("metadatas", []) or [])[i] if i < len(all_data.get("metadatas", []) or []) else {}
+            page_path = (meta or {}).get("page_path", "")
+            if page_path.startswith(prefix):
+                to_delete.append(_id)
+
+        if not to_delete:
+            return 0
+        self.collection.delete(ids=to_delete)
+        self._invalidate_bm25()
+        return len(to_delete)
+
+    def get_chunk_ids_by_metadata_where(self, where: Dict[str, str]) -> List[str]:
+        """Collect all chunk IDs matching an exact metadata filter.
+
+        Useful for inspection or deletion by metadata fields like page_path.
+        """
+        total_count = self.count()
+        if total_count == 0:
+            return []
+
+        # ChromaDB $contains filter works for substring — but for exact match
+        # we iterate and filter. Limit to total to get all.
+        all_data = self.collection.get(limit=total_count, include=["metadatas"])
+        matched: List[str] = []
+        for i, _id in enumerate(all_data.get("ids", []) or []):
+            meta = (all_data.get("metadatas", []) or [])[i] if i < len(all_data.get("metadatas", []) or []) else {}
+            if all(meta.get(k) == v for k, v in where.items()):
+                matched.append(_id)
+        return matched
 
     def build_bm25(self, force: bool = False) -> None:
         """Build or rebuild the BM25 keyword index from current collection."""

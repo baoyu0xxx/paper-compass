@@ -6,9 +6,15 @@ and updating index.md / log.md.
 """
 
 import re
+import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+# Thread-safe guards for index.md and log.md (multiple workers
+# may call save_query_to_wiki() concurrently).
+_index_lock = threading.Lock()
+_log_lock = threading.Lock()
 
 
 def _slugify(title: str) -> str:
@@ -18,7 +24,7 @@ def _slugify(title: str) -> str:
     return slug[:80]
 
 
-def _generate_filename(title: str, target_type: str) -> str:
+def _generate_filename(title: str) -> str:
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     slug = _slugify(title)
     return f"{date_str}-{slug}.md"
@@ -62,7 +68,7 @@ def save_query_to_wiki(
         tags = []
 
     now = datetime.now(timezone.utc).isoformat()
-    filename = _generate_filename(title, target_type)
+    filename = _generate_filename(title)
     page_path = type_dir / filename
 
     frontmatter = _format_frontmatter({
@@ -79,8 +85,13 @@ def save_query_to_wiki(
     page_path.write_text(full_content, encoding="utf-8")
 
     linked_pages = [ref for ref in source_refs if ref.startswith("wiki/")]
-    index_updated = _update_index(root / "index.md", title, target_type, filename)
-    log_updated = _update_log(root / "log.md", title, target_type, str(page_path))
+
+    # index.md / log.md updates are serialised to avoid races
+    # under concurrent workers.
+    with _index_lock:
+        index_updated = _update_index(root / "index.md", title, target_type, filename)
+    with _log_lock:
+        log_updated = _update_log(root / "log.md", title, target_type, str(page_path))
 
     return {
         "page_path": str(page_path),

@@ -35,6 +35,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from miniresearch.mcp_server import handle_tool
+from miniresearch.mcp_contracts import list_tools, tool_names
 
 
 def _parse_filters(args) -> dict:
@@ -146,75 +147,7 @@ def mcp_stdio_mode():
         req_id = request.get("id")
 
         if method == "tools/list":
-            tools = [
-                {
-                    "name": "search_wiki",
-                    "description": "Search the local markdown research wiki",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "query": {"type": "string", "description": "Search query"},
-                            "limit": {"type": "integer", "default": 5},
-                            "page_types": {"type": "array", "items": {"type": "string"}},
-                            "return_snippets": {"type": "boolean", "default": True},
-                        },
-                        "required": ["query"],
-                    },
-                },
-                {
-                    "name": "search_library",
-                    "description": "Search the paper library metadata",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "query": {"type": "string"},
-                            "filters": {"type": "object"},
-                            "limit": {"type": "integer", "default": 10},
-                        },
-                        "required": ["query"],
-                    },
-                },
-                {
-                    "name": "ask_research",
-                    "description": "Answer a research question using wiki + PDF retrieval",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "query": {"type": "string"},
-                            "force_mode": {"type": "string", "enum": ["auto", "wiki", "pdf", "hybrid"]},
-                            "filters": {"type": "object"},
-                            "max_sources": {"type": "integer", "default": 5},
-                        },
-                        "required": ["query"],
-                    },
-                },
-                {
-                    "name": "get_paper_metadata",
-                    "description": "Get structured metadata for a single paper",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "id_or_doi": {"type": "string"},
-                        },
-                        "required": ["id_or_doi"],
-                    },
-                },
-                {
-                    "name": "save_to_wiki",
-                    "description": "Save curated results to the research wiki",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "title": {"type": "string"},
-                            "content": {"type": "string"},
-                            "target_type": {"type": "string", "enum": ["queries", "topics", "methods", "comparisons"]},
-                            "confidence": {"type": "string", "enum": ["high", "medium", "low"]},
-                        },
-                        "required": ["title", "content"],
-                    },
-                },
-            ]
-            response = {"jsonrpc": "2.0", "id": req_id, "result": {"tools": tools}}
+            response = {"jsonrpc": "2.0", "id": req_id, "result": {"tools": list_tools()}}
 
         elif method == "tools/call":
             tool_name = request.get("params", {}).get("name", "")
@@ -242,7 +175,7 @@ def main():
     )
     parser.add_argument(
         "--tool",
-        choices=["search_wiki", "search_library", "ask_research", "get_paper_metadata", "save_to_wiki"],
+        choices=tool_names(),
         help="Run a single tool call",
     )
     parser.add_argument("--query", help="Search query")

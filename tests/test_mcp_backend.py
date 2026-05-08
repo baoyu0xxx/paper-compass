@@ -58,10 +58,9 @@ class TestHandleTool:
             "confidence": "medium",
             "wiki_root": wiki_root,
         })
-        # Currently wiki_root is not passed through handle_tool's param filtering
-        # because it's not in the handler signature. The default "./wiki" is used.
-        # This test validates the tool doesn't crash.
         assert result["tool"] == "save_to_wiki"
+        assert result["ok"] is True
+        assert result["data"]["page_path"].startswith(wiki_root)
 
     def test_ask_research_no_library(self):
         result = handle_tool("ask_research", {"query": "test", "force_mode": "wiki"})

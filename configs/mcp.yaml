@@ -30,3 +30,9 @@ mcp:
   safety:
     allow_writeback_tool: true
     require_nonempty_title_for_writeback: true
+
+  trace:
+    enabled: false
+    path: data/traces/mcp_traces.jsonl
+    include_query_text: true
+    include_source_ids: true

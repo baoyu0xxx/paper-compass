@@ -37,3 +37,14 @@
 - 项目骨架已建立
 - 规划文档已整理入仓库
 - GitHub 远程仓库创建待认证后完成
+
+v1.5 已完成的关键优化（进行中迭代）：
+- MCP 工具契约集中到 `src/miniresearch/mcp_contracts.py`，`tools/list` 与 handler 参数统一
+- `save_to_wiki` 支持显式 `wiki_root` 参数
+- MCP 错误响应统一为 `ok/tool/trace_id/warnings/next_suggested_action`
+- 新增轻量 trace 日志（JSONL）：`src/miniresearch/logging.py` + `configs/mcp.yaml` 的 `mcp.trace`
+- `search_library` 增加 exact-match tier（key/doi/title）与加权排序，降低弱匹配噪声
+
+相关文档：
+- `docs/mcp/tool-contracts.md`
+- `docs/workflows/trace-inspection.md`

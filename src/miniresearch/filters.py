@@ -9,10 +9,11 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
-from miniresearch.models import LibraryMatch, PaperDetail
+from miniresearch.env_utils import load_project_env
 
 
 # ── library.json access ──────────────────────────────────────────────────────
@@ -25,18 +26,14 @@ def _load_library(library_path: str = "data/zotero-export/library.json") -> List
         return json.load(f)
 
 
-def _load_env():
-    env_path = Path(__file__).resolve().parent.parent.parent / ".env"
-    if env_path.exists():
-        for line in env_path.read_text().splitlines():
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                key, _, val = line.partition("=")
-                if val and not os.environ.get(key.strip()):
-                    os.environ[key.strip()] = val.strip()
-
-
 # ── search_library ───────────────────────────────────────────────────────────
+
+def _normalize_text(text: str) -> str:
+    text = (text or "").lower().strip()
+    text = re.sub(r"[^\w\s]", " ", text)
+    text = re.sub(r"\s+", " ", text)
+    return text
+
 
 def search_library(
     query: str,
@@ -44,10 +41,7 @@ def search_library(
     filters: Optional[Dict[str, Any]] = None,
     limit: int = 10,
 ) -> List[Dict[str, Any]]:
-    """Search the paper library by keyword + metadata filters.
-
-    Falls back to in-memory text matching if vector store is unavailable.
-    """
+    """Search the paper library by exact-match tiers + weighted metadata matching."""
     records = _load_library(library_path)
     if not records:
         return []
@@ -55,25 +49,42 @@ def search_library(
     if filters is None:
         filters = {}
 
-    # Text scoring
-    scored: List[tuple] = []
+    ql = query.lower().strip()
+    q_norm = _normalize_text(query)
 
+    scored: List[tuple] = []
     for rec in records:
         if not _passes_filters(rec, filters):
             continue
 
-        score = 0.0
-        ql = query.lower()
-        score += _score(ql, rec.get("title", "")) * 3
-        score += _score(ql, ", ".join(rec.get("authors", [])))
-        score += _score(ql, rec.get("journal", ""))
-        score += _score(ql, ", ".join(rec.get("collections", []))) * 2
-        score += _score(ql, ", ".join(rec.get("tags", []))) * 2
-        scored.append((score, rec))
+        title = rec.get("title", "")
+        title_norm = _normalize_text(title)
+        doi = (rec.get("doi", "") or "").lower().strip()
+        key = (rec.get("key", "") or "").lower().strip()
+
+        tier_bonus = 0.0
+        if ql and ql == key:
+            tier_bonus += 200.0
+        if ql and doi and ql == doi:
+            tier_bonus += 180.0
+        if q_norm and q_norm == title_norm:
+            tier_bonus += 120.0
+        elif q_norm and q_norm in title_norm:
+            tier_bonus += 50.0
+
+        weighted = 0.0
+        weighted += _score(ql, title) * 6
+        weighted += _score(ql, ", ".join(rec.get("authors", []))) * 2
+        weighted += _score(ql, rec.get("journal", "")) * 2
+        weighted += _score(ql, ", ".join(rec.get("collections", []))) * 1.5
+        weighted += _score(ql, ", ".join(rec.get("tags", []))) * 1.5
+
+        score = tier_bonus + weighted
+        if score > 0:
+            scored.append((score, rec))
 
     scored.sort(key=lambda x: x[0], reverse=True)
-    positive = [(s, r) for s, r in scored if s > 0]
-    results = positive[:limit] if positive else []
+    results = scored[:limit]
 
     return [
         {
@@ -172,7 +183,7 @@ def vector_search(
     import chromadb as _cdb
     from chromadb.config import Settings as _CSet
 
-    _load_env()
+    load_project_env()
 
     db_dir = Path(db_path)
     if not db_dir.exists():
@@ -193,8 +204,9 @@ def vector_search(
         # Detect vector dimension
         _sample = matching[0].get(limit=1, include=["embeddings"])
         actual_dim = 2048
-        if _sample and _sample.get("embeddings") and _sample["embeddings"]:
-            actual_dim = len(_sample["embeddings"][0])
+        embeddings = _sample.get("embeddings") if _sample is not None else None
+        if embeddings is not None and len(embeddings) > 0 and embeddings[0] is not None:
+            actual_dim = len(embeddings[0])
     finally:
         _client.clear_system_cache()
 
@@ -212,11 +224,94 @@ def vector_search(
 
     formatted = []
     for i, chunk_id in enumerate(results["ids"]):
+        meta = results["metadatas"][i] if results["metadatas"] else {}
         formatted.append({
             "id": chunk_id,
             "document": results["documents"][i],
-            "metadata": results["metadatas"][i] if results["metadatas"] else {},
+            "metadata": meta,
             "distance": results["distances"][i],
             "score": round(1.0 / (1.0 + results["distances"][i]), 4),
         })
     return formatted
+
+
+def _cap_results_per_group(
+    results: List[Dict[str, Any]],
+    max_per_group: int,
+    group_key_fn: Callable[[Dict[str, Any]], Optional[str]],
+) -> List[Dict[str, Any]]:
+    """Keep top-scoring results while capping entries per logical group."""
+    group_count: Dict[str, int] = {}
+    deduped: List[Dict[str, Any]] = []
+    for result in sorted(results, key=lambda x: x["score"], reverse=True):
+        group_key = group_key_fn(result)
+        if not group_key:
+            deduped.append(result)
+            continue
+        if group_count.get(group_key, 0) >= max_per_group:
+            continue
+        group_count[group_key] = group_count.get(group_key, 0) + 1
+        deduped.append(result)
+
+    deduped.sort(key=lambda x: x["score"], reverse=True)
+    return deduped
+
+
+def _postprocess_wiki_results(results: List[Dict[str, Any]], max_per_page: int = 2,
+                               section_0_penalty: float = 0.92) -> List[Dict[str, Any]]:
+    """Post-process wiki search results to reduce noise.
+
+    Applies:
+    1. Drop chunks from excluded pages (log.md, index.md) — safety net
+       even if the vector DB still contains old data.
+    2. Light penalty for section 0 (frontmatter contamination).
+    3. Page-level dedup: at most max_per_page sections per page.
+
+    Args:
+        results: Raw results from vector_search().
+        max_per_page: Max chunk count per wiki page.
+        section_0_penalty: Score multiplier for section == 0.
+
+    Returns:
+        Filtered and re-ranked results.
+    """
+    # 1. Drop known-noise pages
+    filtered = [
+        r for r in results
+        if r.get("metadata", {}).get("page_path", "").split("/")[-1] not in {"log.md", "index.md"}
+    ]
+
+    # 2. Apply section 0 penalty
+    for r in filtered:
+        section = r.get("metadata", {}).get("section")
+        if section == 0 or section == "0":
+            r["score"] = r["score"] * section_0_penalty
+
+    # 3. Page-level dedup: limit sections per page
+    return _cap_results_per_group(
+        filtered,
+        max_per_group=max_per_page,
+        group_key_fn=lambda r: r.get("metadata", {}).get("page_path", r["id"]),
+    )
+
+
+def _dedupe_pdf_chunks_by_item(results: List[Dict[str, Any]],
+                                max_per_item: int = 2) -> List[Dict[str, Any]]:
+    """Deduplicate PDF chunk results by item_key.
+
+    At most max_per_item chunks per paper item are retained, keeping
+    the highest-scoring ones. This prevents a single paper from flooding
+    the result list.
+
+    Args:
+        results: Raw results from vector_search() on papers collection.
+        max_per_item: Max chunk count per paper item.
+
+    Returns:
+        Deduplicated, score-sorted results.
+    """
+    return _cap_results_per_group(
+        results,
+        max_per_group=max_per_item,
+        group_key_fn=lambda r: r.get("metadata", {}).get("item_key") or None,
+    )
