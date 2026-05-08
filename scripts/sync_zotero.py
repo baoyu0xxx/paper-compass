@@ -1,132 +1,109 @@
 #!/usr/bin/env python3
 """
-Zotero sync CLI for paper-compass.
-
-Scans PDFs from a fixed directory, optionally merges external metadata,
-and outputs manifest.csv + library.json.
+Zotero sync for paper-compass — reads SQLite, extracts PDF text, outputs library.json.
 
 Usage:
-    python scripts/sync_zotero.py --pdf-root /mnt/d/zotero_backup \\
-        [--metadata ./data/input/zotero_metadata.csv] \\
-        [--out-dir ./data/zotero-export] \\
-        [--no-sha]
+    python scripts/sync_zotero.py
+        [--db-path /mnt/d/zotero_backup/zotero_readonly.sqlite]
+        [--out-dir ./data/zotero-export]
+        [--extract-text]          # also extract and cache PDF text
+        [--text-dir ./data/texts]
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
-# Ensure src/ is on path when running from project root
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from miniresearch.zotero import (
-    scan_pdf_root,
-    build_base_record,
-    load_external_metadata,
-    merge_records,
-    write_manifest_csv,
-    write_library_json,
-    generate_sync_report,
-)
+from miniresearch.zotero_sqlite import ZoteroLibrary
+from miniresearch.pdf_extract import PDFExtractor
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Sync Zotero PDFs and metadata for paper-compass"
-    )
-    parser.add_argument(
-        "--pdf-root",
-        required=True,
-        help="Root directory containing Zotero PDFs (e.g. /mnt/d/zotero_backup)",
-    )
-    parser.add_argument(
-        "--metadata",
-        default=None,
-        help="Optional metadata file (CSV or JSON) for enriching PDF records",
-    )
-    parser.add_argument(
-        "--out-dir",
-        default="./data/zotero-export",
-        help="Output directory for manifest.csv and library.json (default: ./data/zotero-export)",
-    )
-    parser.add_argument(
-        "--no-sha",
-        action="store_true",
-        help="Skip SHA-256 computation (faster on large directories)",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Print report only, do not write output files",
-    )
-
+    parser = argparse.ArgumentParser(description="Sync Zotero metadata and PDFs for paper-compass")
+    parser.add_argument("--db-path", default="/mnt/d/zotero_backup/zotero_readonly.sqlite")
+    parser.add_argument("--out-dir", default="./data/zotero-export")
+    parser.add_argument("--extract-text", action="store_true", help="Extract and cache PDF full text")
+    parser.add_argument("--text-dir", default="./data/texts")
     args = parser.parse_args()
 
-    # Validate inputs
-    pdf_root = args.pdf_root
-    if not Path(pdf_root).exists():
-        print(f"ERROR: PDF root directory not found: {pdf_root}", file=sys.stderr)
+    db_path = Path(args.db_path)
+    if not db_path.exists():
+        print(f"ERROR: Zotero database not found: {db_path}", file=sys.stderr)
         sys.exit(1)
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Step 1: Scan PDFs
-    print(f"Scanning PDFs from: {pdf_root} ...")
-    try:
-        pdfs = scan_pdf_root(pdf_root)
-    except FileNotFoundError as e:
-        print(f"ERROR: {e}", file=sys.stderr)
-        sys.exit(1)
+    text_dir = Path(args.text_dir)
+    if args.extract_text:
+        text_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"  Found {len(pdfs)} PDFs")
+    # ── Read from Zotero SQLite ──
+    print(f"Reading Zotero database: {db_path}")
+    lib = ZoteroLibrary(str(db_path))
+    items = lib.get_all_items_with_pdfs()
+    lib.close()
 
-    if not pdfs:
-        print("WARNING: No PDFs found. Nothing to do.")
+    print(f"  Found {len(items)} items with PDFs")
+
+    if not items:
+        print("WARNING: No items with PDFs found.")
         sys.exit(0)
 
-    # Step 2: Build base records
-    base_records = [build_base_record(p, pdf_root) for p in pdfs]
+    # ── Enrich: extract text if requested ──
+    missing_pdf = 0
+    extracted = 0
 
-    # Step 3: Load optional metadata
-    meta_records = None
-    if args.metadata:
-        try:
-            meta_records = load_external_metadata(args.metadata)
-            print(f"  Loaded {len(meta_records)} metadata records")
-        except (FileNotFoundError, ValueError) as e:
-            print(f"WARNING: Could not load metadata: {e}")
+    for item in items:
+        pdf_path = item.get("pdf_path", "")
+        if not pdf_path or not Path(pdf_path).exists():
+            missing_pdf += 1
+            continue
 
-    # Step 4: Merge
-    records = merge_records(
-        base_records, meta_records, compute_sha=not args.no_sha
-    )
+        if args.extract_text:
+            try:
+                extractor = PDFExtractor(pdf_path)
+                full_text = extractor.extract_all_text()
+                if full_text.strip():
+                    text_file = text_dir / f"{item['key']}.txt"
+                    text_file.write_text(full_text, encoding="utf-8")
+                    item["text_file"] = str(text_file)
+                    extracted += 1
+            except Exception as e:
+                print(f"  WARNING: text extraction failed for {item['key']}: {e}", file=sys.stderr)
 
-    # Step 5: Generate report
-    report = generate_sync_report(records)
+        # Add derived fields
+        date_str = item.get("date", "")
+        item["year"] = int(date_str[:4]) if date_str and date_str[:4].isdigit() else None
+
+    # ── Output library.json ──
+    library_path = out_dir / "library.json"
+    with open(library_path, "w", encoding="utf-8") as f:
+        json.dump(items, f, ensure_ascii=False, indent=2)
+
+    # ── Report ──
+    tags_set = set()
+    collections_set = set()
+    for item in items:
+        for t in item.get("tags", []):
+            if t:
+                tags_set.add(t)
+        for c in item.get("collections", []):
+            if c:
+                collections_set.add(c)
+
     print()
     print("── Sync Report ──")
-    print(f"  Total PDFs:           {report['total_pdfs']}")
-    print(f"  With metadata:        {report['with_metadata']}")
-    print(f"  Scan only:            {report['scan_only']}")
-    print(f"  Missing title:        {report['missing_title']}")
-    print(f"  Missing DOI:          {report['missing_doi']}")
-    print(f"  Missing authors:      {report['missing_authors']}")
-    print(f"  Duplicate filenames:  {report['duplicate_filenames']}")
-
-    if args.dry_run:
-        print("\n[Dry run — no files written]")
-        sys.exit(0)
-
-    # Step 6: Write outputs
-    manifest_path = out_dir / "manifest.csv"
-    library_path = out_dir / "library.json"
-
-    n_manifest = write_manifest_csv(records, str(manifest_path))
-    n_library = write_library_json(records, str(library_path))
-
-    print(f"\n  Wrote {n_manifest} records to {manifest_path}")
-    print(f"  Wrote {n_library} records to {library_path}")
+    print(f"  Total items:           {len(items)}")
+    print(f"  Missing PDF files:     {missing_pdf}")
+    print(f"  Unique tags:           {len(tags_set)}")
+    print(f"  Unique collections:    {len(collections_set)}")
+    if args.extract_text:
+        print(f"  Texts extracted:       {extracted}")
+    print(f"  Output:                {library_path}")
     print("Sync complete.")
 
 
