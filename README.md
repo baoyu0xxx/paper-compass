@@ -21,7 +21,7 @@
    - PaperQA 负责 PDF 级索引与检索
 
 3. Hermes 专用 profile
-   - Profile 名称：`zoteroragmcp`
+   - Profile 名称：`papercompass`（原名 `zoteroragmcp`，2026-05-08 重命名）
    - 已设置项目 cwd 到本仓库
 
 目录说明：

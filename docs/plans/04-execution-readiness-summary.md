@@ -3,7 +3,7 @@
 Current status:
 - project directory created locally
 - local git repo initialized on branch main
-- Hermes profile zoteroragmcp created
+- Hermes profile papercompass created (renamed from zoteroragmcp on 2026-05-08)
 - profile cwd set to project root
 - config sample files written
 - planning docs moved into project docs/plans
