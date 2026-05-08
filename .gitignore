@@ -4,8 +4,19 @@ __pycache__/
 .pytest_cache/
 .pqa/
 tmp/
+
+# Generated data (large, generated from processing)
 data/logs/*.jsonl
+data/logs/*.log
+data/texts/
+data/vectordb/
 data/zotero-export/*.csv
 data/zotero-export/*.json
+
+# Wiki cache
 wiki/.cache/
+wiki/queries/
+wiki/topics/
+wiki/papers/
+
 *.pyc
