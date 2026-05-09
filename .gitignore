@@ -4,6 +4,7 @@ __pycache__/
 .pytest_cache/
 .pqa/
 tmp/
+*.egg-info/
 
 # Generated data (large, generated from processing)
 data/logs/*.jsonl

@@ -122,7 +122,7 @@ def get_provider_config(
                 "base_url_env": "base_url",
                 "model_env": "model",
             }[key]
-            value = os.environ.get(env_name, "")
+            value = _resolve_env_value(os.environ.get(env_name, ""))
             if value:
             # If env var is empty/falsy, keep the existing default value
             # (provider.yaml's "model" field serves as the default)
@@ -131,10 +131,29 @@ def get_provider_config(
     # Resolve api_key_env
     if "api_key_env" in provider:
         env_name = provider.pop("api_key_env")
-        value = os.environ.get(env_name, "")
+        value = _resolve_env_value(os.environ.get(env_name, ""))
         if value:
             # If env var is empty/falsy, keep the existing default value
             # (provider.yaml's "model" field serves as the default)
             provider["api_key"] = value
 
     return provider
+
+
+def _resolve_env_value(value: str) -> str:
+    """Resolve a value that may be an $ENV_VAR reference.
+
+    If the value starts with '$', treat the rest as an environment variable name
+    and look it up. Otherwise return the value as-is.
+
+    This enables users to store $OPENAI_API_KEY in .env instead of a literal key.
+    """
+    import os
+    if value.startswith("$"):
+        inner_name = value[1:]  # strip the $
+        resolved = os.environ.get(inner_name, "")
+        if resolved:
+            return resolved
+        # If the inner env var is not set, return the original $VAR as fallback
+        return value
+    return value

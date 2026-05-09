@@ -186,3 +186,84 @@ providers:
             provider = get_provider_config("main", configs)
             assert provider.get("provider") == "openai"
             assert provider["model"] == "test-model"
+
+
+class TestResolveEnvValue:
+    """Tests for _resolve_env_value (added in v1.2.0 for $ENV_VAR support)."""
+
+    def test_no_dollar(self, monkeypatch):
+        """Plain string values pass through unchanged."""
+        from paper_compass.config import _resolve_env_value
+        assert _resolve_env_value("sk-12345") == "sk-12345"
+        assert _resolve_env_value("https://example.com") == "https://example.com"
+        assert _resolve_env_value("gpt-4o") == "gpt-4o"
+
+    def test_dollar_var_resolved(self, monkeypatch):
+        """$ENV_VAR references are resolved from os.environ."""
+        from paper_compass.config import _resolve_env_value
+        monkeypatch.setenv("OPENAI_API_KEY", "sk-real-key-abc")
+        result = _resolve_env_value("$OPENAI_API_KEY")
+        assert result == "sk-real-key-abc"
+
+    def test_dollar_var_not_set(self, monkeypatch):
+        """When the referenced env var is not set, return the $VAR string as-is."""
+        from paper_compass.config import _resolve_env_value
+        monkeypatch.delenv("NONEXISTENT_KEY", raising=False)
+        result = _resolve_env_value("$NONEXISTENT_KEY")
+        assert result == "$NONEXISTENT_KEY"
+
+    def test_empty_string(self, monkeypatch):
+        """Empty string returns empty string."""
+        from paper_compass.config import _resolve_env_value
+        assert _resolve_env_value("") == ""
+
+    def test_integration_with_api_key_env(self, monkeypatch):
+        """Full integration: provider config resolves $ENV_VAR api_key via api_key_env."""
+        import tempfile
+        monkeypatch.setenv("TEST_PROVIDER_KEY", "sk-resolved-key")
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                Path(tmpdir, "providers.yaml").write_text(
+                    "version: 1\n"
+                    "providers:\n"
+                    "  main:\n"
+                    "    api_style: openai-compatible\n"
+                    "    base_url: https://example.com/v1\n"
+                    "    model: test-model\n"
+                    "    api_key_env: TEST_PROVIDER_KEY\n"
+                )
+                configs = load_all_configs(tmpdir)
+                provider = get_provider_config("main", configs)
+                assert provider["api_key"] == "sk-resolved-key"
+        finally:
+            monkeypatch.delenv("TEST_PROVIDER_KEY", raising=False)
+
+    def test_integration_dollar_var_in_env_file(self, monkeypatch):
+        """Simulate what happens when .env contains LLM_API_KEY=$OPENAI_API_KEY
+        and get_provider_config resolves it through api_key_env -> env lookup."""
+
+        # Simulate: env var LLM_API_KEY literally contains "$OPENAI_API_KEY"
+        monkeypatch.setenv("LLM_API_KEY", "$OPENAI_API_KEY")
+        # And OPENAI_API_KEY is the real key
+        monkeypatch.setenv("OPENAI_API_KEY", "sk-real-deal")
+
+        import tempfile
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                Path(tmpdir, "providers.yaml").write_text(
+                    "version: 1\n"
+                    "providers:\n"
+                    "  main:\n"
+                    "    api_style: openai-compatible\n"
+                    "    base_url: https://example.com/v1\n"
+                    "    model: test-model\n"
+                    "    api_key_env: LLM_API_KEY\n"
+                )
+                configs = load_all_configs(tmpdir)
+                provider = get_provider_config("main", configs)
+                # _resolve_env_value reads LLM_API_KEY, sees "$OPENAI_API_KEY",
+                # strips '$', looks up 'OPENAI_API_KEY' → returns "sk-real-deal"
+                assert provider["api_key"] == "sk-real-deal"
+        finally:
+            monkeypatch.delenv("LLM_API_KEY", raising=False)
+            monkeypatch.delenv("OPENAI_API_KEY", raising=False)
