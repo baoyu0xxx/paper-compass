@@ -1,87 +1,152 @@
 # paper-compass
 
-Personal academic paper retrieval and knowledge navigation infrastructure.
+<div align="center">
 
-## What is it?
+**Personal academic paper retrieval & knowledge navigation infrastructure**
 
-paper-compass is a personal research knowledge system that:
-- Reads your Zotero library (SQLite + PDF attachments)
-- Generates structured markdown wiki pages from each paper (via LLM)
-- Creates vector embeddings for semantic search (via Volcengine or any OpenAI-compatible API)
-- Exposes 6 MCP (Model Context Protocol) tools for AI agents to query your research library
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-66%2F66%20passing-brightgreen.svg)](tests/)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/baoyu0xxx/paper-compass)
 
-It bridges the gap between "I have 400+ papers in Zotero" and "I can ask my AI agent to find relevant passages and evidence."
+</div>
+
+---
+
+## What is paper-compass?
+
+paper-compass turns your Zotero library into a **queryable knowledge infrastructure** for AI agents. It bridges the gap between "I have 400+ papers in Zotero" and "my AI agent can find relevant passages and evidence by asking in natural language."
+
+The pipeline: Zotero PDFs → structured wiki pages (LLM-generated) → vector embeddings → 6 MCP tools for AI integration.
+
+## Key Features
+
+- **6 MCP tools** — `search_wiki`, `search_library`, `search_passages`, `ask_research`, `get_paper_metadata`, `save_to_wiki` — standard MCP protocol (`2024-11-05`) with proper initialize handshake
+- **LLM-powered wiki generation** — auto-generates structured knowledge pages from PDFs (two-pass classifier + empirical-economics-aware prompts)
+- **Dual-mode passage search** — semantic vector + BM25 keyword full-text search over original paper chunks
+- **Incremental indexing** — manifest-based change detection avoids re-embedding unchanged papers
+- **Chinese bigram-aware retrieval** — improved CJK recall for Chinese-language academic literature
+- **Multi-provider embedding** — Volcengine (2048-dim multimodal), OpenAI-compatible, or local SentenceTransformers
+- **66 pytest tests + eval benchmark + healthcheck** — full validation suite for production readiness
 
 ## Quick Start
 
-### 1. Install
-
 ```bash
-git clone <repo-url> paper-compass
+# 1. Clone
+git clone https://github.com/baoyu0xxx/paper-compass.git
 cd paper-compass
 pip install -e .
-# With optional PaperQA support:
-# pip install -e ".[paperqa]"
-# With dev tools:
-# pip install -e ".[dev]"
-```
 
-### 2. Configure
-
-```bash
+# 2. Configure
 cp .env.example .env
-# Edit .env with your API keys:
-#   XIAOMI_API_KEY  — for wiki generation (Mimo LLM)
-#   VOLC_EMBED_*    — for embedding (Volcengine)
-```
+# Edit .env — fill in your API keys (Mimo LLM + Volcengine embedding)
 
-### 3. Prepare data
+# 3. Prepare data
+python scripts/sync_zotero.py --extract-text
+# → data/zotero-export/library.json + data/texts/*.txt
 
-```bash
-# Option A: If you have Zotero data already exported
-# (library.json + data/texts/*.txt already exist)
+# 4. Build search index
+python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
 
-# Option B: From Zotero SQLite
-python scripts/sync_zotero.py   # → data/zotero-export/library.json + data/texts/
-```
-
-### 4. Build search index
-
-```bash
-python scripts/build_index.py              # build ChromaDB index for paper PDFs
-python scripts/build_index.py --wiki       # build ChromaDB index for wiki pages
-```
-
-### 5. Generate wiki pages (optional, ~5h for 400 papers)
-
-```bash
+# 5. Generate wiki pages (optional, ~5h for 400 papers)
 nohup python scripts/ingest_to_wiki.py --skip-existing > data/logs/wiki_gen.log 2>&1 &
+# After completion:
+python scripts/build_index.py --wiki
+
+# 6. Verify
+python scripts/healthcheck.py --smoke
+python eval/run_eval.py -v
 ```
 
-### 6. Verify
+## Installation
+
+### Prerequisites
+
+| Requirement | Notes |
+|-------------|-------|
+| Python ≥ 3.11 | Check with `python3 --version` |
+| Zotero library | Optional — works with pre-extracted text files |
+| LLM API key | Wiki generation: Mimo (`MIMO_BASE_URL` + `XIAOMI_API_KEY`) or any OpenAI-compatible endpoint |
+| Embedding API key | Volcengine multimodal (`VOLC_EMBED_BASE_URL` + `VOLC_EMBED_API_KEY` + `VOLC_EMBED_MODEL`) or local models |
+
+### From Source
 
 ```bash
-python scripts/healthcheck.py              # basic checks
-python scripts/healthcheck.py --smoke      # + API connectivity
-python eval/run_eval.py -v                 # run evaluation benchmark
+git clone https://github.com/baoyu0xxx/paper-compass.git
+cd paper-compass
+pip install -e .          # core dependencies
+pip install -e ".[dev]"   # + pytest for testing
+pip install -e ".[paperqa]"  # + PaperQA5 integration (optional)
 ```
 
-## MCP Tools
+## Configuration
 
-paper-compass exposes 6 tools via MCP stdio transport:
+### Environment Variables
 
-| Tool | Description |
-|------|-------------|
-| `search_wiki` | Semantic search over markdown wiki knowledge pages |
-| `search_library` | Keyword + exact-match search over paper metadata (title, author, doi, collections, tags) |
-| `search_passages` | ***New in v2*** — Search original text paragraphs with paper metadata. Dual-mode: semantic (vector) + keyword (full-text) |
-| `ask_research` | Multi-layer router: wiki → escalate to PDF evidence → assembled answer |
-| `get_paper_metadata` | Look up a single paper by Zotero key, DOI, or title |
-| `save_to_wiki` | Write LLM-generated content back to the wiki |
+Copy `.env.example` to `.env` and fill in your values:
 
-### Using with Hermes Agent
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MIMO_BASE_URL` | Yes | LLM API base URL (default: `https://token-plan-cn.xiaomimimo.com/v1`) |
+| `XIAOMI_API_KEY` | Yes | Mimo API key for wiki generation |
+| `VOLC_EMBED_BASE_URL` | Yes | Volcengine multimodal embedding endpoint |
+| `VOLC_EMBED_API_KEY` | Yes | Volcengine API key |
+| `VOLC_EMBED_MODEL` | Yes | Embedding model endpoint ID (e.g., `ep-20260420154519-xxxxx`) |
+| `PAPERQA_BASE_URL` | Optional | PaperQA5 endpoint for full PDF RAG |
+| `PAPERQA_API_KEY` | Optional | PaperQA5 API key |
+| `PAPERQA_MODEL` | Optional | PaperQA5 model name |
 
-Add to your Hermes `config.yaml`:
+### Provider Configuration
+
+Advanced settings (LLM model, collection naming, MCP tracing) are in YAML configs under `configs/`:
+
+- `configs/providers.yaml` — LLM + embedding provider settings
+- `configs/paths.yaml` — storage paths
+- `configs/mcp.yaml` — MCP server behavior + tracing
+
+## Usage
+
+### CLI Tools
+
+| Script | Purpose | Key Flags |
+|--------|---------|-----------|
+| `scripts/sync_zotero.py` | Zotero SQLite → library.json + text extraction | `--extract-text` |
+| `scripts/build_index.py` | Build ChromaDB vector index (papers + wiki) | `--full-rebuild`, `--incremental`, `--prune-deleted`, `--wiki` |
+| `scripts/ingest_to_wiki.py` | Batch wiki generation via LLM | `--skip-existing`, `--workers 10`, `--limit N` |
+| `scripts/run_mcp_server.py` | MCP server (stdio + tool-call + interactive) | `--mcp`, `--tool <name> --query "..."` |
+| `scripts/healthcheck.py` | Subsystem health verification | `--smoke` (API connectivity) |
+
+#### Build Index
+
+```bash
+# Full rebuild (clear and re-embed all papers)
+python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
+
+# Incremental (only changed/new papers)
+python scripts/build_index.py --library data/zotero-export/library.json --incremental
+
+# Index wiki pages
+python scripts/build_index.py --wiki --wiki-root ./wiki
+```
+
+#### Generate Wiki Pages
+
+```bash
+# Process all ungenerated pages (10 concurrent workers)
+python scripts/ingest_to_wiki.py --skip-existing --workers 10
+
+# Test with 3 papers
+python scripts/ingest_to_wiki.py --limit 3 --workers 1
+
+# Resume interrupted run
+python scripts/ingest_to_wiki.py --skip-existing --workers 10
+```
+
+### MCP Integration
+
+#### With Hermes Agent
+
+Add to `config.yaml`:
 
 ```yaml
 mcp:
@@ -92,7 +157,7 @@ mcp:
       cwd: "/path/to/paper-compass"
 ```
 
-### Using with Claude Desktop
+#### With Claude Desktop
 
 ```json
 {
@@ -106,64 +171,104 @@ mcp:
 }
 ```
 
-## Project Structure
+#### CLI Tool Mode
+
+```bash
+python scripts/run_mcp_server.py --tool search_wiki --query "家族企业代际传承"
+python scripts/run_mcp_server.py --tool search_library --query "author name"
+python scripts/run_mcp_server.py --tool search_passages --query "specific passage"
+python scripts/run_mcp_server.py --tool ask_research --query "research question"
+python scripts/run_mcp_server.py --tool get_paper_metadata --key YOUR_ZOTERO_KEY
+```
+
+## Architecture
+
+### Pipeline
+
+```
+Zotero SQLite + PDFs
+  → sync_zotero.py → library.json + data/texts/*.txt
+  → build_index.py → ChromaDB vector collections (papers + wiki)
+  → ingest_to_wiki.py → Mimo LLM → wiki/papers/*.md
+  → build_index.py --wiki → ChromaDB wiki collection
+  → run_mcp_server.py → 6 MCP tools exposed to AI agents
+```
+
+### MCP Tools
+
+| Tool | Description | Search Mode |
+|------|-------------|-------------|
+| `search_wiki` | Semantic search over LLM-generated wiki knowledge pages | Vector |
+| `search_library` | Keyword + Chinese bigram + fuzzy metadata search | Text |
+| `search_passages` | Dual-mode search over original paper text blocks | Vector + BM25 |
+| `ask_research` | Multi-layer router: wiki → escalate to PDF evidence | Hybrid |
+| `get_paper_metadata` | Look up a single paper by key, DOI, or title | Exact |
+| `save_to_wiki` | Write LLM-generated content back to the wiki | — |
+
+### Project Structure
 
 ```
 paper-compass/
-├── src/miniresearch/       # Core library
+├── src/miniresearch/       # Core library (11 modules)
 │   ├── filters.py          # search_library, search_passages, vector_search
 │   ├── router.py           # ask_research multi-layer routing
 │   ├── mcp_server.py       # MCP tool handlers + dispatch
-│   ├── mcp_contracts.py    # Single source of truth for tool schemas
-│   ├── vector_store.py     # ChromaDB wrapper with BM25 hybrid
-│   ├── embedder.py         # Embedding providers (Volcengine, local)
-│   ├── wiki_gen.py         # LLM wiki page generation
-│   ├── wiki_store.py       # Wiki writeback management
+│   ├── mcp_contracts.py    # Tool schema definitions (single source of truth)
+│   ├── vector_store.py     # ChromaDB wrapper + BM25 hybrid search
+│   ├── embedder.py         # Multi-provider embedding (Volcengine, local)
+│   ├── wiki_gen.py         # Two-pass LLM wiki generation
+│   ├── wiki_store.py       # Thread-safe wiki writeback
+│   ├── env_utils.py        # .env loader (always overwrites stale values)
+│   ├── config.py           # YAML config loader with env var resolution
+│   ├── models.py           # Dataclasses for responses
+│   ├── index_manifest.py   # Fingerprint-based incremental indexing
 │   ├── logging.py          # JSONL trace logging
-│   ├── env_utils.py        # .env loader (always overwrites)
-│   └── models.py           # Dataclasses: UnifiedResponse, ModeDecision
-├── scripts/                # CLI entry points
-│   ├── sync_zotero.py      # Zotero SQLite → library.json + text extraction
-│   ├── build_index.py      # Build ChromaDB vector index (papers + wiki)
-│   ├── ingest_to_wiki.py   # Batch wiki generation (LLM-powered)
-│   ├── run_mcp_server.py   # MCP server (stdio + CLI tool mode + interactive)
-│   └── healthcheck.py      # Subsystem health verification
+│   ├── pdf_extract.py      # PyMuPDF + pdfplumber text extraction
+│   └── zotero_sqlite.py    # Zotero SQLite reader
+├── scripts/                # CLI entry points (5 scripts)
 ├── configs/                # YAML configuration templates
-├── eval/                   # Evaluation benchmark suite
-├── wiki/                   # Markdown knowledge base (406+ papers, topics, methods)
-├── data/                   # Generated data (zotero-export, vectordb, texts, traces)
-├── tests/                  # 66 tests (pytest)
-├── .env.example            # Environment variable template
-└── pyproject.toml          # Python project metadata + dependencies
+├── eval/                   # 12-query evaluation benchmark
+├── wiki/                   # LLM-generated knowledge base (406+ papers)
+├── data/                   # Generated data (vectordb, texts, zotero-export)
+├── tests/                  # 66 pytest tests
+└── pyproject.toml          # Project metadata + dependencies
 ```
 
-## Requirements
+## Development
 
-- Python ≥ 3.11
-- Zotero library with PDF attachments
-- API keys for:
-  - LLM (wiki generation): Mimo API or any OpenAI-compatible endpoint
-  - Embedding: Volcengine multimodal embedding or any OpenAI-compatible endpoint
+### Running Tests
 
-## Current Status
+```bash
+pip install -e ".[dev]"
+python3 -m pytest tests/ -v         # 66 tests
+python3 -m pytest tests/ -x         # stop on first failure
+python3 -m pytest tests/test_incremental_index.py -v  # incremental indexing tests
+```
 
-**v2.0.0** — Quality-hardened, publicly deployable release.
+### Running Evaluation
 
-- 66 pytest tests (all green)
-- 6 MCP tools with proper protocol initialization handshake
-- Full evaluation benchmark (12/12 queries passing)
-- Healthcheck script for subsystem verification
-- Chinese bigram-aware search for improved CJK retrieval
-- Fuzzy title matching for near-exact queries
-- Dual-mode passage search (semantic vector + keyword full-text)
+```bash
+python eval/run_eval.py             # all 12 queries
+python eval/run_eval.py -v          # verbose output
+python eval/run_eval.py --mode strict  # strict key matching
+```
 
-## Prior Art & Architecture
+## Prior Art
 
 paper-compass adapts proven modules from [RAG-Assistant-for-Zotero](https://github.com/aahepburn/RAG-Assistant-for-Zotero):
-- PDF extraction (PyMuPDF + pdfplumber fallback)
-- Zotero SQLite reader with attachment path resolution
-- ChromaDB vector storage with BM25 hybrid search
-- Multi-provider embedding (local models + cloud APIs)
+
+| Source Module | Adapted As | Purpose |
+|---------------|------------|---------|
+| `backend/pdf.py` | `pdf_extract.py` | PyMuPDF text extraction with pdfplumber fallback |
+| `backend/zotero_dbase.py` | `zotero_sqlite.py` | Zotero SQLite reader with path resolution |
+| `backend/embed_utils.py` | `embedder.py` | Multi-provider embedding (local + cloud) |
+| `backend/vector_db.py` | `vector_store.py` | ChromaDB wrapper with BM25 hybrid search |
+
+Key differences: paper-compass adds LLM-powered wiki generation, MCP protocol integration, manifest-based incremental indexing, Chinese bigram-aware search, and a formal evaluation benchmark.
+
+## Contributing
+
+Contributions are welcome. Please open an issue to discuss significant changes before submitting a pull request.
 
 ## License
 

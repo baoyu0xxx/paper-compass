@@ -274,12 +274,19 @@ def _prepare_index_inputs(items: List[Dict[str, Any]], args, embedder_model_id: 
 
     for item in items:
         key = item.get("key", "")
-        pdf_path = item.get("pdf_path", "")
         if not key:
             skipped.append("missing key")
             continue
-        if not pdf_path or not Path(pdf_path).exists():
-            skipped.append(f"{key}: missing PDF")
+
+        # Allow indexing from text_file alone (no PDF required).
+        # PDF is only needed for on-the-fly extraction when text_file is missing.
+        text_file = item.get("text_file", "")
+        pdf_path = item.get("pdf_path", "")
+        has_text = text_file and Path(text_file).exists()
+        has_pdf = pdf_path and Path(pdf_path).exists()
+
+        if not has_text and not has_pdf:
+            skipped.append(f"{key}: missing text file and PDF")
             continue
 
         full_text = _load_paper_text(item, extract_text=args.extract_text)
