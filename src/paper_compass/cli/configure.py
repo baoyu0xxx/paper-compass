@@ -35,6 +35,21 @@ DEFAULT_VOLC_EMBED_MODEL = "ep-20260420154519-9w64q"  # doubao-embedding-vision-
 # ── Interactive prompts ────────────────────────────────────────────────────
 
 
+def _available_disciplines() -> list[str]:
+    """Discover installed discipline presets under prompts/disciplines/."""
+    disciplines_dir = Path("prompts/disciplines")
+    if not disciplines_dir.exists() or not disciplines_dir.is_dir():
+        return []
+    result = []
+    try:
+        for d in sorted(disciplines_dir.iterdir()):
+            if d.is_dir() and (d / "wiki_overview.md").exists():
+                result.append(d.name)
+    except OSError:
+        pass
+    return result
+
+
 def _prompt(
     label: str, default: str = "", env_hint: str = ""
 ) -> str:
@@ -132,6 +147,53 @@ def _interactive_volcengine_embedding() -> dict[str, str]:
     }
 
 
+def _interactive_wiki_prompt() -> str:
+    """Interactive step: configure wiki prompt style."""
+    disciplines = _available_disciplines()
+    print("  ┌─ Step 3: Wiki Prompt Style ────────────────────────────────────┐")
+    print()
+    print("  Wiki prompts control how LLMs generate structured knowledge")
+    print("  pages from your papers. Choose a prompt style:")
+    print()
+    print("    1) Default (通用) — General-purpose academic prompts,")
+    print("       suitable for any discipline")
+    if disciplines:
+        for i, d in enumerate(disciplines, 2):
+            label = _DISCIPLINE_LABELS.get(d, d.capitalize())
+            print(f"    {i}) Preset: {label} — Specialized prompts for {d}")
+    print(f"    {len(disciplines) + 2}) Custom path — Use your own prompt files")
+    print()
+
+    max_opt = len(disciplines) + 2
+    choice = _prompt(f"Choose [1]", "1")
+
+    try:
+        idx = int(choice)
+    except ValueError:
+        # Treat as custom path
+        return choice.strip()
+
+    if idx == 1:
+        return "default"
+    elif 2 <= idx <= len(disciplines) + 1:
+        return disciplines[idx - 2]
+    elif idx == len(disciplines) + 2:
+        custom = input("  Custom prompt directory path: ").strip()
+        if not custom:
+            print("  No path entered — using default.")
+            return "default"
+        return custom
+    else:
+        print(f"  Invalid choice '{choice}' — using default.")
+        return "default"
+
+
+# Human-readable labels for discipline presets
+_DISCIPLINE_LABELS: dict[str, str] = {
+    "economics": "经济学",
+}
+
+
 # ── .env writer ────────────────────────────────────────────────────────────
 
 
@@ -147,6 +209,7 @@ def _write_dotenv(
     env_path: str,
     llm_config: dict[str, str],
     embed_config: dict[str, str],
+    wiki_prompt: str = "",
     force: bool = False,
 ) -> None:
     """Write the .env file with the given configuration.
@@ -203,9 +266,18 @@ def _write_dotenv(
                     _fmt("EMBED_API_KEY", embed_config.get("EMBED_API_KEY", "")),
                     _fmt("EMBED_MODEL", embed_config.get("EMBED_MODEL", "")),
                 ])
+        if wiki_prompt:
+            lines.extend([
+                "#",
+                "# ── Wiki prompt style ───────────────────────────────────────────",
+                "# default = general academic; economics = economics preset;",
+                "# or a custom path to your own prompt directory",
+                _fmt("WIKI_PROMPT", wiki_prompt),
+            ])
     else:
         # Merge into existing file
         lines = list(existing_lines)
+        all_config["WIKI_PROMPT"] = wiki_prompt
         for key, value in all_config.items():
             if key in existing_keys:
                 # Update existing line
@@ -360,6 +432,15 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
         default=str(DEFAULT_ENV_PATH),
         help=f"Path to .env file (default: {DEFAULT_ENV_PATH})",
     )
+    parser.add_argument(
+        "--wiki-prompt",
+        default=None,
+        metavar="<style>",
+        help=(
+            "Wiki prompt style: 'default' (general academic), "
+            "'economics' (economics preset), or a path to custom prompts"
+        ),
+    )
 
     parser.set_defaults(func=execute_init)
 
@@ -369,14 +450,16 @@ def execute_init(args: argparse.Namespace) -> int:
     env_path = args.env_path
     has_env_file = Path(env_path).exists()
 
-    # Non-interactive mode: --llm-args or --embed-args provided
+    # Non-interactive mode: --llm-args or --embed-args or --wiki-prompt provided
     has_llm_args = bool(args.llm_args)
     has_embed_args = bool(args.embed_args)
+    has_wiki_prompt = args.wiki_prompt is not None
 
-    if has_llm_args or has_embed_args:
+    if has_llm_args or has_embed_args or has_wiki_prompt:
         llm_config = _llm_args_to_env(args.llm_args or {})
         embed_config = _embed_args_to_env(args.embed_args or {})
-        _write_dotenv(env_path, llm_config, embed_config, force=args.force)
+        wiki_prompt = args.wiki_prompt or ""
+        _write_dotenv(env_path, llm_config, embed_config, wiki_prompt, force=args.force)
         print()
         print("  ✓ paper-compass configured (non-interactive mode)")
         return 0
@@ -396,6 +479,23 @@ def execute_init(args: argparse.Namespace) -> int:
                 print("  Aborted.")
                 return 0
 
+    # Check if env vars are already set in shell (e.g. from .bashrc / .zshrc / CI)
+    if not args.force:
+        llm_from_env, embed_from_env = _build_config_from_env()
+        has_llm_env = bool(llm_from_env.get("LLM_BASE_URL") and llm_from_env.get("LLM_API_KEY"))
+        has_embed_env = bool(
+            (embed_from_env.get("EMBED_BASE_URL") and embed_from_env.get("EMBED_API_KEY"))
+            or (embed_from_env.get("VOLC_EMBED_BASE_URL") and embed_from_env.get("VOLC_EMBED_API_KEY"))
+        )
+        if has_llm_env and has_embed_env:
+            wiki_from_env = os.environ.get("WIKI_PROMPT", "")
+            print("  ✓ Detected LLM and embedding configuration from shell environment variables")
+            _write_dotenv(env_path, llm_from_env, embed_from_env, wiki_from_env, force=True)
+            print("  ✓ paper-compass configured from environment variables")
+            print("  Run `paper-compass validate` to test connectivity.")
+            print()
+            return 0
+
     # Interactive mode
     print()
     print("  ╔═══════════════════════════════════════════════════════════╗")
@@ -405,8 +505,9 @@ def execute_init(args: argparse.Namespace) -> int:
 
     llm_config = _interactive_llm()
     embed_config = _interactive_embedding()
+    wiki_prompt = _interactive_wiki_prompt()
 
-    _write_dotenv(env_path, llm_config, embed_config, force=True)
+    _write_dotenv(env_path, llm_config, embed_config, wiki_prompt, force=True)
     print()
     print("  ✓ paper-compass configured!")
     print("  Run `paper-compass validate` to test connectivity.")
@@ -423,5 +524,6 @@ if __name__ == "__main__":
     parser.add_argument("--embed-args", default=None, nargs="+", action=MergeDictAction, metavar="<arg>")
     parser.add_argument("--force", "-f", action="store_true", default=False)
     parser.add_argument("--env-path", default=str(DEFAULT_ENV_PATH))
+    parser.add_argument("--wiki-prompt", default=None, metavar="<style>")
     args = parser.parse_args(args_list if args_list is not None else sys.argv[1:])
     sys.exit(execute_init(args))

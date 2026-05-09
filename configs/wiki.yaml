@@ -41,9 +41,26 @@ wiki:
       - confidence
 
   prompt_files:
+    router: prompts/wiki_router.md
     ingest: prompts/wiki_ingest.md
     query: prompts/wiki_query.md
     merge: prompts/wiki_merge.md
+    # wiki_overview.md and wiki_empirical.md are resolved dynamically
+    # based on WIKI_PROMPT env var (default, economics, or custom path).
+
+  wiki_prompt:
+    mode: env
+    env_var: WIKI_PROMPT
+    presets:
+      - default
+      - economics
+    custom: true
+    description: |
+      Controls which prompt set is used for wiki page generation.
+      Set WIKI_PROMPT in .env or pass --wiki-prompt to `paper-compass init`.
+      default   → prompts/wiki_overview.md + wiki_empirical.md (general academic)
+      economics → prompts/disciplines/economics/wiki_overview.md + wiki_empirical.md
+      <path>    → <path>/wiki_overview.md + <path>/wiki_empirical.md
 
   confidence_defaults:
     query_writeback: medium

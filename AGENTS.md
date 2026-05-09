@@ -29,7 +29,12 @@ Once installed, the `paper-compass` CLI is available (see step 2).
 paper-compass init
 ```
 
-Step through prompts to configure LLM and embedding endpoints. API keys support `$ENV_VAR` syntax (e.g. enter `$OPENAI_API_KEY` to reference an existing env var).
+Step through prompts to configure LLM, embedding endpoints, and wiki prompt style. API keys support `$ENV_VAR` syntax (e.g. enter `$OPENAI_API_KEY` to reference an existing env var).
+
+Wiki prompt selection (Step 3) offers:
+- Default (通用): general-purpose academic prompts for any discipline
+- Economics (经济学): specialized prompts for empirical economics
+- Custom path: your own prompt files
 
 **Option B — Manual `.env` edit:**
 

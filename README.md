@@ -1,12 +1,14 @@
-# paper-compass
+# paper-compass · 论文罗盘
 
 <div align="center">
 
-**个人学术论文检索与知识导航基础设施**
+**将你的 Zotero 论文库变成 AI Agent 可直接检索的知识库**
 
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.2.1-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)](LICENSE)
+[![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
+[![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)](https://spec.modelcontextprotocol.io/)
+[![tests](https://img.shields.io/badge/tests-118_passed-d4785c?style=flat-square&labelColor=3a3026&color=d4785c)](https://github.com/baoyu0xxx/paper-compass/actions)
 
 </div>
 
@@ -14,22 +16,60 @@
 
 > 📖 **English version**: [README.en.md](README.en.md)
 
-## 项目简介
+## 为什么选择 paper-compass
 
-paper-compass 将你的 Zotero 论文库转变为 AI Agent **可查询的知识基础设施**。它连接了"Zotero 里有几百篇论文"和"AI Agent 能用自然语言查找相关段落和证据"之间的空白。
+### 已有工具做不到的事情
 
-**工作流**: Zotero PDF → LLM 自动生成结构化知识页面（wiki）→ 向量嵌入 → 6 个 MCP 工具供 AI 集成。
+学术研究者每天都在用 Zotero 管理论文，但两个核心痛点始终没有解决：
 
-paper-compass 特别针对中国学术研究者的需求进行了优化：支持中文学术文献的检索（含中文分词匹配），提供实证经济学方向的领域化 wiki 生成提示词，并适配了火山引擎等多模态嵌入服务。
+- **正文不可检索**——Zotero 可以搜标题、作者、关键词，但 PDF 正文里的研究问题、数据、方法、发现仍然散落在成百上千个文件中。写文献综述时找不到"我好像读过某篇论文说了某个观点"——只能靠记忆，或者一篇篇重新翻。
+- **知识无法沉淀**——每篇论文读完后，理解和笔记留在脑子里。下次问同一个问题时，还得从原始 PDF 重新推导。
+
+近两年出现了两个优秀的开源项目试图解决其中一部分：
+
+| | [RAG-Assistant-for-Zotero](https://github.com/aahepburn/RAG-Assistant-for-Zotero) | [llm-wiki-skill](https://github.com/sdyckjq-lab/llm-wiki-skill) | **paper-compass** |
+|---|---|---|---|
+| 面向用户 | 人类（桌面 GUI 应用） | Agent（技能安装） | **Agent（MCP 标准协议）** |
+| 核心能力 | RAG 对话式论文问答 | LLM wiki 知识编译 | **RAG 检索 + LLM wiki 双引擎** |
+| 检索方式 | 语义 + BM25 + 重排序 | 向量搜索 | 语义 + BM25 + 中文分词 + 元数据 |
+| 知识持久化 | 无（每次查询时动态关联） | wiki markdown 页面 | **wiki markdown + ChromaDB 向量索引** |
+| 协议标准 | 独立应用（无标准接口） | 技能文件（平台特定） | **MCP 2024-11-05（跨 Agent 框架）** |
+| 增量索引 | ❌ | N/A | ✅ 指纹清单变更检测 |
+| CLI 配置 | GUI 设置 | bash install.sh | **`paper-compass init` + `validate`** |
+| 中文学术优化 | ❌ | 部分 | ✅ 分词检索 + 经济学预设 + 火山引擎嵌入 |
+
+### paper-compass 做了什么不同的事情
+
+**它是唯一一个将 RAG 原文检索和 LLM wiki 知识编译结合起来、并通过 MCP 标准协议专为 AI Agent 设计的个人学术知识库系统。**
+
+三个设计原则：
+
+- **Agent-first**：所有能力通过 6 个 MCP 工具暴露，你的 Hermes Agent 或 Claude Desktop 可以直接调用——不需要打开一个 GUI 应用、不需要复制粘贴、不需要离开你的 Agent 对话窗口。
+- **双引擎**：RAG 引擎负责"我记不清那篇论文具体说了什么，帮我找原文"；Wiki 引擎负责"这篇论文的核心发现和方法是什么"——两套检索体系互补，而不是互斥。
+- **继承最优**：PDF 提取、Zotero SQLite 读取、嵌入、向量存储 4 个核心模块继承自 RAG-Assistant-for-Zotero 的经过验证的实现；LLM wiki 方法论借鉴 Karpathy llm-wiki 的"编译一次、持续维护"理念。在这之上，paper-compass 增加了 MCP 协议集成、增量索引、中文分词检索、学科预设提示词、CLI 配置命令、形式化评估基准等独有的能力。
+
+### 典型场景
+
+你可以直接在 Agent 对话中问：
+
+> "我之前收集过哪些关于家族企业代际传承对劳动力雇佣结构影响的文献？核心发现是什么？用了什么数据和识别策略？"
+
+Agent 会在你的论文库中定位相关段落，返回带来源和页码的引用——而不是依赖互联网上不相关或质量不明的搜索结果。
+
+**项目对中文学术研究做了专门优化**：中文分词感知的检索与评分、经济学学科预设的 wiki 生成提示词、以及对火山引擎多模态嵌入服务的适配，确保中文学术文献也能获得较好的检索效果。
 
 ## 核心能力
 
-- **6 个 MCP 工具** — `search_wiki`、`search_library`、`search_passages`、`ask_research`、`get_paper_metadata`、`save_to_wiki` — 遵循 MCP 协议标准（`2024-11-05`），具备完整的 `initialize` 握手
-- **LLM 驱动的 wiki 生成** — 从 PDF 中自动生成结构化知识页面，采用两阶段分类器 + 实证经济学专用提示词
-- **双模式段落检索** — 语义向量 + BM25 关键词全文搜索，覆盖原始论文分块
-- **增量索引** — 基于指纹清单的变更检测，避免对未修改论文重复嵌入
-- **中文检索优化** — 支持中文分词匹配，改善中文学术文献的召回效果
-- **多提供方嵌入** — 火山引擎（2048 维多模态）、OpenAI 兼容端点、或本地 SentenceTransformers，支持级联回退
+| 能力 | 说明 |
+|------|------|
+| 🔌 **6 个 MCP 工具** | `search_wiki`、`search_library`、`search_passages`、`ask_research`、`get_paper_metadata`、`save_to_wiki`——遵循 MCP 2024-11-05 协议，零配置接入 Hermes Agent 和 Claude Desktop |
+| 📝 **LLM 知识页面生成** | 每篇论文自动生成结构化 wiki 页面（研究问题、核心发现、方法与数据、理论框架），两阶段分类器 + 可定制提示词（通用学术默认 / 经济学学科预设 / 自定义路径） |
+| 🔍 **双模式段落检索** | 语义向量（dense）和 BM25 关键词（sparse）双路径并行，兼顾概念相似性和精确术语匹配 |
+| 📊 **增量索引** | 基于指纹清单（manifest）的变更检测，新增或修改论文后只更新变化的部分，无需全量重建 |
+| 🇨🇳 **中文学术检索增强** | 中文分词感知的检索与评分，经济学专属 wiki 提示词，改善中文学术文献的召回效果 |
+| 🔄 **多提供方嵌入级联** | 火山引擎（2048 维多模态）、OpenAI 兼容端点、本地 bge-base 三级自动回退，任一层级故障或限流自动降级 |
+| ⚙️ **CLI 配置命令** | `paper-compass init` 交互式配置 LLM 和嵌入服务，`paper-compass validate` 一键验证连通性，支持 `$ENV_VAR` 引用语法 |
+| 🎯 **Wiki 提示词定制** | `WIKI_PROMPT` 环境变量一键切换：通用学术默认 (`default`)、经济学预设 (`economics`)、或自定义提示词路径——支持按学科定制 wiki 页面生成风格 |
 
 ## 快速开始
 
@@ -97,13 +137,14 @@ pip install -e ".[paperqa]" # 含 PaperQA5 集成（可选）
 paper-compass init
 ```
 
-按提示逐步填写 LLM（Wiki 生成）和 Embedding 服务的 Base URL、API Key 和模型名称。API Key 支持 `$ENV_VAR` 语法，可直接引用已有环境变量（如 `$OPENAI_API_KEY`）。
+按提示逐步填写 LLM（Wiki 生成）和 Embedding 服务的 Base URL、API Key 和模型名称，最后选择 wiki 提示词风格。API Key 支持 `$ENV_VAR` 语法，可直接引用已有环境变量（如 `$OPENAI_API_KEY`）。
 
 ```bash
 # 非交互式模式（用于脚本化部署）
 paper-compass init \
   --llm-args base_url=https://api.openai.com/v1,model=gpt-4o \
-  --embed-args api_style=volcengine,model=ep-20260420154519-9w64q
+  --embed-args api_style=volcengine,model=ep-20260420154519-9w64q \
+  --wiki-prompt economics
 
 # 覆盖已有 .env
 paper-compass init --force
@@ -124,6 +165,7 @@ paper-compass init --force
 | `VOLC_EMBED_BASE_URL` | 否 | 火山引擎多模态嵌入端点（备选方案） |
 | `VOLC_EMBED_API_KEY` | 否 | 火山引擎 API 密钥 |
 | `VOLC_EMBED_MODEL` | 否 | 火山引擎嵌入模型端点 ID |
+| `WIKI_PROMPT` | 否 | Wiki 提示词风格：`default`（通用学术）、`economics`（经济学预设）、或自定义路径 |
 | `PAPERQA_BASE_URL` | 可选 | PaperQA5 全文 RAG 端点 |
 | `PAPERQA_API_KEY` | 可选 | PaperQA5 API 密钥 |
 | `PAPERQA_MODEL` | 可选 | PaperQA5 模型名称 |
@@ -156,6 +198,39 @@ paper-compass validate
   ✓ embed: OK (model: text-embedding-3-small, dim=1536, 0.8s)
 ```
 
+### Wiki 提示词选择
+
+`paper-compass init` 会在配置完 LLM 和嵌入服务后，引导你选择 wiki 页面生成的提示词风格。
+
+**三种模式：**
+
+| 模式 | WIKI_PROMPT | 说明 |
+|------|-------------|------|
+| 默认（通用学术） | `default` | 适用于各学科的通用学术提示词（v1.2.1 新增） |
+| 学科预设 | `economics` 等 | 针对特定学科优化的提示词（当前内置：经济学） |
+| 自定义路径 | `/path/to/prompts` | 使用自己编写的提示词文件 |
+
+**切换提示词：** 编辑 `.env` 中的 `WIKI_PROMPT` 变量即可：
+
+```env
+# 使用默认通用学术提示词（适用于各学科）
+WIKI_PROMPT=default
+
+# 使用经济学学科提示词
+WIKI_PROMPT=economics
+
+# 使用自定义提示词
+WIKI_PROMPT=/home/user/my-prompts
+```
+
+**两阶段生成架构：** wiki 生成采用「分类 → 生成」两阶段架构：
+1. **Pass 1（分类）**：LLM 将论文分类为 empirical / theoretical / review / descriptive
+2. **Pass 2（生成）**：根据分类结果，组合 `wiki_overview.md` + `wiki_empirical.md`（实证论文）或仅 `wiki_overview.md`（非实证论文）
+
+**贡献学科预设：** 欢迎通过 pull request 贡献其他学科的提示词。在 `prompts/disciplines/<学科名>/` 下创建 `wiki_overview.md` 和 `wiki_empirical.md` 即可。提示词设计可参考经济学预设的两阶段分类 + 定性评估方案。
+
+**设计自定义提示词：** 如需完全自定义提示词逻辑（包括分类器），建议使用 AI Agent 辅助设计。确保自定义目录下包含 `wiki_overview.md`，可选 `wiki_empirical.md`。分类器 `wiki_router.md` 对所有模式统一使用 `prompts/` 下的版本。
+
 ### 嵌入提供方切换与级联回退
 
 嵌入服务支持 **级联回退** 机制：
@@ -180,6 +255,7 @@ LLM 模型、Chroma 集合命名、MCP 跟踪等高级配置位于 `configs/` �
 - `configs/providers.yaml` — LLM 和嵌入提供方设置
 - `configs/paths.yaml` — 存储路径
 - `configs/mcp.yaml` — MCP 服务行为与日志
+- `configs/wiki.yaml` — Wiki 生成参数
 
 ## 使用方法
 
@@ -317,7 +393,7 @@ paper-compass/
 │   ├── mcp_contracts.py     # 工具 schema 定义（唯一数据源）
 │   ├── vector_store.py      # ChromaDB 封装 + BM25 混合搜索
 │   ├── embedder.py          # 多提供方嵌入（OpenAI、火山引擎、本地模型，级联回退）
-│   ├── wiki_gen.py          # 两阶段 LLM wiki 生成
+│   ├── wiki_gen.py          # 两阶段 LLM wiki 生成 + 提示词解析
 │   ├── wiki_store.py        # 线程安全的 wiki 写回
 │   ├── env_utils.py         # .env 加载（始终覆盖过期值）
 │   ├── config.py            # YAML 配置加载与 $ENV_VAR 解析
@@ -328,10 +404,18 @@ paper-compass/
 │   └── zotero_sqlite.py     # Zotero SQLite 读取
 ├── scripts/                # CLI 入口（5 个脚本）
 ├── configs/                # YAML 配置模板
+├── prompts/                # Wiki 生成提示词
+│   ├── wiki_overview.md    # 通用学术默认提示词（v1.2.1）
+│   ├── wiki_empirical.md   # 通用学术默认提示词 - 实证设计（v1.2.1）
+│   ├── wiki_router.md      # 论文类型分类器
+│   ├── wiki_econ_overview.md   # [迁移存根] → disciplines/economics/
+│   ├── wiki_econ_empirical.md  # [迁移存根] → disciplines/economics/
+│   └── disciplines/        # 学科预设提示词
+│       └── economics/      # 经济学专属提示词
 ├── eval/                   # 12 查询评估基准
 ├── wiki/                   # LLM 生成的知识库
 ├── data/                   # 生成数据（vectordb、texts、zotero-export）
-├── tests/                  # pytest 测试套件（102 个测试，全部通过）
+├── tests/                  # pytest 测试套件（118 个测试，全部通过）
 └── pyproject.toml          # 项目元数据与依赖
 ```
 
@@ -341,11 +425,12 @@ paper-compass/
 
 ```bash
 pip install -e ".[dev]"
-python3 -m pytest tests/ -v         # 运行所有测试（102 个）
+python3 -m pytest tests/ -v         # 运行所有测试（118 个）
 python3 -m pytest tests/ -x         # 遇错即停
 python3 -m pytest tests/test_cli_arg_utils.py -v  # CLI 参数解析测试
 python3 -m pytest tests/test_cli_configure.py -v  # 配置命令测试
 python3 -m pytest tests/test_incremental_index.py -v  # 增量索引测试
+python3 -m pytest tests/test_wiki_prompt_resolution.py -v  # Wiki 提示词解析测试
 ```
 
 ### 运行评估
@@ -356,9 +441,13 @@ python eval/run_eval.py -v          # 详细输出
 python eval/run_eval.py --mode strict  # 严格键匹配模式
 ```
 
-## 参考来源
+## 继承与创新
 
-paper-compass 从 [RAG-Assistant-for-Zotero](https://github.com/aahepburn/RAG-Assistant-for-Zotero) 中适配了经过验证的模块：
+paper-compass 不是一个从零开始的项目。它站在两个优秀开源项目的肩膀上：
+
+### 继承自 [RAG-Assistant-for-Zotero](https://github.com/aahepburn/RAG-Assistant-for-Zotero)
+
+以下 4 个核心模块适配自 RAG-Assistant-for-Zotero 的经过验证的实现：
 
 | 源模块 | 适配为 | 用途 |
 |--------|--------|------|
@@ -367,7 +456,22 @@ paper-compass 从 [RAG-Assistant-for-Zotero](https://github.com/aahepburn/RAG-As
 | `backend/embed_utils.py` | `embedder.py` | 多提供方嵌入（本地 + 云端） |
 | `backend/vector_db.py` | `vector_store.py` | ChromaDB 封装 + BM25 混合搜索 |
 
-主要差异：paper-compass 增加了 LLM 驱动的 wiki 生成、MCP 协议集成、基于指纹的增量索引、CLI 配置命令（`init`/`validate`）、`$ENV_VAR` 引用语法、嵌入提供方级联回退、中文分词感知搜索，以及形式化的评估基准。
+### 借鉴自 [llm-wiki-skill](https://github.com/sdyckjq-lab/llm-wiki-skill)
+
+LLM wiki 的知识"编译一次、持续维护"理念借鉴了 Karpathy llm-wiki 方法论。`save_to_wiki` MCP 工具的设计也参考了其"对话结晶化"思路——将有价值的 Agent 对话内容沉淀为知识库页面。
+
+### paper-compass 独有的能力
+
+在继承的基础上，paper-compass 增加了以下原创设计：
+
+- **MCP 协议集成**：6 个标准 MCP 工具，遵循 MCP 2024-11-05 协议，可接入任意支持 MCP 的 Agent 框架
+- **增量索引**：基于指纹清单（text_sha1 + chunking_version + embedding_model_id）的变更检测，比上游的"只检测新论文"更精确
+- **中文学术检索**：中文分词感知的检索算法、经济学学科专属 wiki 提示词
+- **CLI 配置命令**：`paper-compass init` + `validate`，采用 lm-eval-harness 的 `key=value` 参数风格
+- **Wiki 提示词定制系统**：`WIKI_PROMPT` 环境变量 + 学科预设目录，支持按学科定制 wiki 页面生成风格
+- **多提供方嵌入级联**：三级自动回退（OpenAI → 火山引擎 → 本地 bge-base），无需修改代码
+- **形式化评估基准**：12 查询检索质量评估，含 recall@K 评分和严格/宽松模式
+- **$ENV_VAR 引用语法**：API 密钥支持引用已有环境变量，无需明文存储
 
 ## 参与贡献
 

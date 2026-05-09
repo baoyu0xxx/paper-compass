@@ -2,11 +2,13 @@
 
 <div align="center">
 
-**Personal academic paper retrieval & knowledge navigation infrastructure**
+**Turn your Zotero library into a knowledge base AI agents can query directly**
 
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.2.1-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)](LICENSE)
+[![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
+[![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)](https://spec.modelcontextprotocol.io/)
+[![tests](https://img.shields.io/badge/tests-118_passed-d4785c?style=flat-square&labelColor=3a3026&color=d4785c)](https://github.com/baoyu0xxx/paper-compass/actions)
 
 </div>
 
@@ -14,20 +16,60 @@
 
 > 📖 **中文版**: [README.md](README.md)
 
-## What is paper-compass?
+## Why paper-compass
 
-paper-compass turns your Zotero library into a **queryable knowledge infrastructure** for AI agents. It bridges the gap between "I have hundreds of papers in Zotero" and "my AI agent can find relevant passages and evidence by asking in natural language."
+### What existing tools can't do
 
-**The pipeline**: Zotero PDFs → LLM-generated structured wiki pages → vector embeddings → 6 MCP tools for AI integration.
+Academic researchers manage their papers with Zotero every day, but two core pain points remain unsolved:
+
+- **Full-text is not searchable** — Zotero can search titles, authors, and keywords, but the actual content — research questions, data, methods, findings — is scattered across hundreds of PDFs. Writing a literature review becomes "I think I read a paper that said something about this" — relying on memory, or re-reading papers one by one.
+- **Knowledge doesn't accumulate** — Understanding and notes from each paper stay in your head. Next time you ask the same question, you have to re-derive everything from the original PDF.
+
+Two excellent open-source projects have emerged recently, each addressing part of this problem:
+
+| | [RAG-Assistant-for-Zotero](https://github.com/aahepburn/RAG-Assistant-for-Zotero) | [llm-wiki-skill](https://github.com/sdyckjq-lab/llm-wiki-skill) | **paper-compass** |
+|---|---|---|---|
+| Target user | Humans (desktop GUI app) | Agents (skill installation) | **Agents (MCP standard protocol)** |
+| Core capability | RAG conversational paper Q&A | LLM wiki knowledge compilation | **RAG retrieval + LLM wiki dual-engine** |
+| Search method | Semantic + BM25 + reranking | Vector search | Semantic + BM25 + Chinese bigram + metadata |
+| Knowledge persistence | None (dynamically retrieved per query) | Wiki markdown pages | **Wiki markdown + ChromaDB vector index** |
+| Protocol standard | Standalone app (no standard API) | Skill files (platform-specific) | **MCP 2024-11-05 (cross-framework)** |
+| Incremental indexing | ❌ | N/A | ✅ Manifest-based change detection |
+| CLI config | GUI settings | bash install.sh | **`paper-compass init` + `validate`** |
+| Chinese optimization | ❌ | Partial | ✅ Word segmentation + economics preset + Volcengine embedding |
+
+### What paper-compass does differently
+
+**It is the only system that combines RAG full-text retrieval with LLM wiki knowledge compilation, designed specifically for AI agents through the MCP standard protocol.**
+
+Three design principles:
+
+- **Agent-first**: All capabilities are exposed through 6 standard MCP tools. Your Hermes Agent or Claude Desktop can call them directly — no need to open a separate GUI application, no copy-pasting, no leaving your agent conversation.
+- **Dual-engine**: The RAG engine handles "I can't quite remember what that paper said, find the original text." The Wiki engine handles "What are this paper's core findings and methods?" Two complementary retrieval systems, not mutually exclusive.
+- **Inherit the best**: Four core modules — PDF extraction, Zotero SQLite reading, embedding, and vector storage — are adapted from RAG-Assistant-for-Zotero's proven implementations. The LLM wiki methodology draws on Karpathy's llm-wiki philosophy of "compile once, maintain continuously." On top of this, paper-compass adds MCP protocol integration, incremental indexing, Chinese bigram retrieval, discipline-specific wiki prompts, CLI configuration commands, and a formal evaluation benchmark.
+
+### Example use case
+
+Ask your agent directly:
+
+> "What papers have I collected about how family business succession affects labor structure? What are the key findings? What data and identification strategies did they use?"
+
+Your agent searches your own paper library and returns relevant passages with source citations and page numbers — no reliance on generic, unverified web search results.
+
+**The project is specifically optimized for Chinese-language academic research**: Chinese word-segmentation-aware retrieval and scoring, economics discipline preset for wiki generation prompts, and Volcengine multimodal embedding support for better CJK recall.
 
 ## Key Features
 
-- **6 MCP tools** — `search_wiki`, `search_library`, `search_passages`, `ask_research`, `get_paper_metadata`, `save_to_wiki` — standard MCP protocol (`2024-11-05`) with proper initialize handshake
-- **LLM-powered wiki generation** — auto-generates structured knowledge pages from PDFs (two-pass classifier + empirical-economics-aware prompts)
-- **Dual-mode passage search** — semantic vector + BM25 keyword full-text search over original paper chunks
-- **Incremental indexing** — manifest-based change detection avoids re-embedding unchanged papers
-- **Chinese bigram-aware retrieval** — improved CJK recall for Chinese-language academic literature
-- **Multi-provider embedding** — Volcengine (2048-dim multimodal), OpenAI-compatible, or local SentenceTransformers — with cascade fallback
+| Feature | Description |
+|---------|-------------|
+| 🔌 **6 MCP tools** | `search_wiki`, `search_library`, `search_passages`, `ask_research`, `get_paper_metadata`, `save_to_wiki` — MCP 2024-11-05 protocol, zero-config integration with Hermes Agent and Claude Desktop |
+| 📝 **LLM-powered wiki generation** | Each paper auto-generates a structured wiki page (research question, core findings, methods & data, theoretical framework) via a two-pass classifier with customizable prompts (general academic default / economics discipline preset / custom path) |
+| 🔍 **Dual-mode passage search** | Dense (semantic vectors) and sparse (BM25 keywords) dual-path retrieval, balancing conceptual relevance and exact term matching |
+| 📊 **Incremental indexing** | Manifest-based change detection — only re-index papers that changed, no full rebuilds needed |
+| 🇨🇳 **Chinese academic retrieval** | Chinese word-segmentation-aware retrieval and scoring, plus economics-specific wiki prompts for better CJK recall |
+| 🔄 **Multi-provider embedding cascade** | Volcengine (2048-dim multimodal), OpenAI-compatible endpoints, local bge-base — three-tier automatic fallback on failure or rate-limiting |
+| ⚙️ **CLI configuration commands** | `paper-compass init` for interactive LLM + embedding setup, `paper-compass validate` for one-click connectivity check, with `$ENV_VAR` reference syntax |
+| 🎯 **Wiki prompt customization** | `WIKI_PROMPT` env var to switch between general academic default (`default`), economics preset (`economics`), or a custom prompt directory — discipline-tailored wiki generation |
 
 ## Quick Start
 
@@ -85,7 +127,7 @@ pip install -e ".[dev]"   # + pytest for testing
 pip install -e ".[paperqa]"  # + PaperQA5 integration (optional)
 ```
 
-Once installed, the `paper-compass` CLI command is available (see CLI Commands section below).
+Once installed, the `paper-compass` CLI command is available (see CLI Commands section).
 
 ## Configuration
 
@@ -95,13 +137,14 @@ Once installed, the `paper-compass` CLI command is available (see CLI Commands s
 paper-compass init
 ```
 
-Step through the prompts to configure your LLM (wiki generation) and Embedding service's Base URL, API Key, and model name. API keys support `$ENV_VAR` syntax to reference existing environment variables (e.g. `$OPENAI_API_KEY`).
+Step through prompts to configure your LLM (wiki generation) and Embedding provider's Base URL, API Key, and model name, followed by wiki prompt style selection. API keys support `$ENV_VAR` syntax to reference existing environment variables (e.g. `$OPENAI_API_KEY`).
 
 ```bash
 # Non-interactive mode (for scripted deployment)
 paper-compass init \
   --llm-args base_url=https://api.openai.com/v1,model=gpt-4o \
-  --embed-args api_style=volcengine,model=ep-20260420154519-9w64q
+  --embed-args api_style=volcengine,model=ep-20260420154519-9w64q \
+  --wiki-prompt economics
 
 # Overwrite existing .env
 paper-compass init --force
@@ -122,6 +165,7 @@ Copy `.env.example` to `.env` and fill in your values, or use `paper-compass ini
 | `VOLC_EMBED_BASE_URL` | No | Volcengine multimodal embedding endpoint (alternative) |
 | `VOLC_EMBED_API_KEY` | No | Volcengine API key |
 | `VOLC_EMBED_MODEL` | No | Volcengine embedding model endpoint ID |
+| `WIKI_PROMPT` | No | Wiki prompt style: `default` (general academic), `economics` (economics preset), or custom path |
 | `PAPERQA_BASE_URL` | Optional | PaperQA5 endpoint for full PDF RAG |
 | `PAPERQA_API_KEY` | Optional | PaperQA5 API key |
 | `PAPERQA_MODEL` | Optional | PaperQA5 model name |
@@ -154,6 +198,39 @@ Example output:
   ✓ embed: OK (model: text-embedding-3-small, dim=1536, 0.8s)
 ```
 
+### Wiki Prompt Selection
+
+During `paper-compass init`, after configuring LLM and embedding providers, you'll be prompted to choose a wiki prompt style.
+
+**Three modes:**
+
+| Mode | WIKI_PROMPT | Description |
+|------|-------------|-------------|
+| Default (General Academic) | `default` | General-purpose academic prompts for all disciplines (new in v1.2.1) |
+| Discipline Preset | `economics` etc. | Prompts optimized for specific disciplines (currently built-in: economics) |
+| Custom Path | `/path/to/prompts` | Use your own prompt files |
+
+**Switching prompts:** Edit the `WIKI_PROMPT` variable in `.env`:
+
+```env
+# Use general academic prompts (all disciplines)
+WIKI_PROMPT=default
+
+# Use economics discipline preset
+WIKI_PROMPT=economics
+
+# Use custom prompts
+WIKI_PROMPT=/home/user/my-prompts
+```
+
+**Two-pass generation architecture:** Wiki generation uses a "classify → generate" two-pass architecture:
+1. **Pass 1 (Classification)**: LLM classifies the paper as empirical / theoretical / review / descriptive
+2. **Pass 2 (Generation)**: Based on classification, combines `wiki_overview.md` + `wiki_empirical.md` (empirical papers) or `wiki_overview.md` only (non-empirical)
+
+**Contributing discipline presets:** Pull requests for additional discipline presets are welcome. Create `wiki_overview.md` and `wiki_empirical.md` under `prompts/disciplines/<discipline>/`. See the economics preset for reference on the two-pass classification + qualitative assessment design.
+
+**Designing custom prompts:** For fully custom prompt logic (including classifiers), using an AI agent is recommended. Ensure your custom directory includes `wiki_overview.md`; `wiki_empirical.md` is optional. The classifier `wiki_router.md` is shared across all modes from `prompts/`.
+
 ### Embedding Provider Switching & Cascade Fallback
 
 Embedding supports a **cascade fallback** mechanism:
@@ -178,6 +255,7 @@ Advanced settings (LLM model, Chroma collection naming, MCP tracing) are in YAML
 - `configs/providers.yaml` — LLM + embedding provider settings
 - `configs/paths.yaml` — storage paths
 - `configs/mcp.yaml` — MCP server behavior + tracing
+- `configs/wiki.yaml` — Wiki generation parameters
 
 ## Usage
 
@@ -315,7 +393,7 @@ paper-compass/
 │   ├── mcp_contracts.py     # Tool schema definitions (single source of truth)
 │   ├── vector_store.py      # ChromaDB wrapper + BM25 hybrid search
 │   ├── embedder.py          # Multi-provider embedding with cascade fallback
-│   ├── wiki_gen.py          # Two-pass LLM wiki generation
+│   ├── wiki_gen.py          # Two-pass LLM wiki generation + prompt resolution
 │   ├── wiki_store.py        # Thread-safe wiki writeback
 │   ├── env_utils.py         # .env loader (always overwrites stale values)
 │   ├── config.py            # YAML config loader with $ENV_VAR resolution
@@ -326,10 +404,18 @@ paper-compass/
 │   └── zotero_sqlite.py     # Zotero SQLite reader
 ├── scripts/                # CLI entry points (5 scripts)
 ├── configs/                # YAML configuration templates
+├── prompts/                # Wiki generation prompts
+│   ├── wiki_overview.md    # General academic default prompt (v1.2.1)
+│   ├── wiki_empirical.md   # General academic default prompt — empirical design (v1.2.1)
+│   ├── wiki_router.md      # Paper type classifier
+│   ├── wiki_econ_overview.md   # [Migration stub] → disciplines/economics/
+│   ├── wiki_econ_empirical.md  # [Migration stub] → disciplines/economics/
+│   └── disciplines/        # Discipline-specific prompt presets
+│       └── economics/      # Economics-specific prompts
 ├── eval/                   # 12-query evaluation benchmark
 ├── wiki/                   # LLM-generated knowledge base
 ├── data/                   # Generated data (vectordb, texts, zotero-export)
-├── tests/                  # pytest test suite (102 tests, all passing)
+├── tests/                  # pytest test suite (118 tests, all passing)
 └── pyproject.toml          # Project metadata + dependencies
 ```
 
@@ -339,11 +425,12 @@ paper-compass/
 
 ```bash
 pip install -e ".[dev]"
-python3 -m pytest tests/ -v         # run all tests (102)
+python3 -m pytest tests/ -v         # run all tests (118)
 python3 -m pytest tests/ -x         # stop on first failure
 python3 -m pytest tests/test_cli_arg_utils.py -v  # CLI argument parsing tests
 python3 -m pytest tests/test_cli_configure.py -v  # Configuration command tests
 python3 -m pytest tests/test_incremental_index.py -v  # incremental indexing tests
+python3 -m pytest tests/test_wiki_prompt_resolution.py -v  # Wiki prompt resolution tests
 ```
 
 ### Running Evaluation
@@ -354,9 +441,13 @@ python eval/run_eval.py -v          # verbose output
 python eval/run_eval.py --mode strict  # strict key matching
 ```
 
-## Prior Art
+## Inheritance & Innovation
 
-paper-compass adapts proven modules from [RAG-Assistant-for-Zotero](https://github.com/aahepburn/RAG-Assistant-for-Zotero):
+paper-compass is not built from scratch. It stands on the shoulders of two excellent open-source projects:
+
+### Inherited from [RAG-Assistant-for-Zotero](https://github.com/aahepburn/RAG-Assistant-for-Zotero)
+
+Four core modules are adapted from RAG-Assistant-for-Zotero's proven implementations:
 
 | Source Module | Adapted As | Purpose |
 |---------------|------------|---------|
@@ -365,7 +456,22 @@ paper-compass adapts proven modules from [RAG-Assistant-for-Zotero](https://gith
 | `backend/embed_utils.py` | `embedder.py` | Multi-provider embedding (local + cloud) |
 | `backend/vector_db.py` | `vector_store.py` | ChromaDB wrapper with BM25 hybrid search |
 
-Key differences: paper-compass adds LLM-powered wiki generation, MCP protocol integration, CLI configuration commands (`init`/`validate`), `$ENV_VAR` reference syntax, embedding provider cascade fallback, manifest-based incremental indexing, Chinese bigram-aware search, and a formal evaluation benchmark.
+### Inspired by [llm-wiki-skill](https://github.com/sdyckjq-lab/llm-wiki-skill)
+
+The LLM wiki philosophy of "compile once, maintain continuously" draws on Karpathy's llm-wiki methodology. The `save_to_wiki` MCP tool design also references its "conversation crystallization" concept — turning valuable agent conversations into permanent knowledge base pages.
+
+### paper-compass original capabilities
+
+Built on top of these foundations, paper-compass adds the following original designs:
+
+- **MCP protocol integration**: 6 standard MCP tools following MCP 2024-11-05, compatible with any MCP-enabled agent framework
+- **Incremental indexing**: Manifest-based change detection (text_sha1 + chunking_version + embedding_model_id), more precise than upstream's "new papers only" approach
+- **Chinese academic retrieval**: Chinese word-segmentation-aware retrieval, economics discipline-specific wiki prompts
+- **CLI configuration commands**: `paper-compass init` + `validate`, using lm-eval-harness `key=value` argument style
+- **Wiki prompt customization system**: `WIKI_PROMPT` env var + discipline preset directories for discipline-tailored wiki generation
+- **Multi-provider embedding cascade**: Three-tier automatic fallback (OpenAI → Volcengine → local bge-base), no code changes required
+- **Formal evaluation benchmark**: 12-query retrieval quality evaluation with recall@K scoring and strict/relaxed modes
+- **$ENV_VAR reference syntax**: API keys can reference existing environment variables, no plain-text secrets in `.env`
 
 ## Contributing
 

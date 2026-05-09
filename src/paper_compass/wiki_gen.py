@@ -1,13 +1,18 @@
 """
-LLM-driven wiki page generator for paper-compass — empirical economics edition.
+LLM-driven wiki page generator for paper-compass.
 
 Two-pass architecture:
   Pass 1 (classify):  wiki_router.md      → paper_type (empirical|theoretical|review|descriptive)
-  Pass 2 (generate):  If empirical: wiki_econ_overview.md + wiki_econ_empirical.md
-                      If non-empirical: wiki_econ_overview.md only
+  Pass 2 (generate):  If empirical: wiki_overview.md + wiki_empirical.md
+                      If non-empirical: wiki_overview.md only
                       Fallback: wiki_ingest.md (generic)
 
-Uses the wiki_generation provider from configs/providers.yaml (Mimo by default).
+Prompt files are resolved from WIKI_PROMPT env var:
+  - default (or unset): prompts/wiki_overview.md + prompts/wiki_empirical.md
+  - economics: prompts/disciplines/economics/
+  - custom path: {path}/wiki_overview.md + {path}/wiki_empirical.md
+
+Uses the wiki_generation provider from configs/providers.yaml.
 """
 
 from __future__ import annotations
@@ -25,20 +30,72 @@ logger = logging.getLogger(__name__)
 
 
 class WikiGenerator:
-    """Generate structured economics wiki pages from paper text using an LLM.
+    """Generate structured wiki pages from paper text using an LLM.
 
     Automatic two-pass: (1) classify paper type, (2) generate tailored wiki content.
+
+    Prompts are resolved from WIKI_PROMPT env var:
+      - "default" (or unset): uses prompts/wiki_overview.md + wiki_empirical.md
+      - "economics": uses prompts/disciplines/economics/
+      - any path: uses {path}/wiki_overview.md + {path}/wiki_empirical.md
     """
 
     def __init__(self, config_dir: str = "configs"):
         self._configs = load_all_configs(config_dir)
         self._provider = get_provider_config("wiki_generation", self._configs)
 
+        # Resolve prompt directory from WIKI_PROMPT env var
+        prompt_dir = self._resolve_prompt_dir()
+
         # Prompt files
         self._router_prompt = self._load("prompts/wiki_router.md")
-        self._overview_prompt = self._load("prompts/wiki_econ_overview.md")
-        self._empirical_prompt = self._load("prompts/wiki_econ_empirical.md")
+        self._overview_prompt = self._load(f"{prompt_dir}/wiki_overview.md")
+        self._empirical_prompt = self._load(f"{prompt_dir}/wiki_empirical.md")
         self._fallback_prompt = self._load("prompts/wiki_ingest.md")
+
+        # Warn if fallback prompts are being used (default prompts missing)
+        if not self._overview_prompt and not self._empirical_prompt:
+            logger.warning(
+                "No prompts found at %s/ — falling back to wiki_ingest.md for all papers. "
+                "Run `paper-compass init` to configure wiki prompts, or set WIKI_PROMPT "
+                "to a valid prompt directory (default, economics, or a custom path).",
+                prompt_dir,
+            )
+
+    # ── prompt resolution ─────────────────────────────────────────────────
+
+    def _resolve_prompt_dir(self) -> str:
+        """Resolve the prompt directory from WIKI_PROMPT env var.
+
+        Returns a relative or absolute path to the directory containing
+        wiki_overview.md and wiki_empirical.md.
+        """
+        wiki_prompt = os.environ.get("WIKI_PROMPT", "default").strip()
+        if not wiki_prompt or wiki_prompt == "default":
+            return "prompts"
+        elif wiki_prompt in self._available_disciplines():
+            return f"prompts/disciplines/{wiki_prompt}"
+        else:
+            # Custom path — use as-is
+            return wiki_prompt
+
+    @staticmethod
+    def _available_disciplines() -> list[str]:
+        """Discover installed discipline presets under prompts/disciplines/.
+
+        A valid discipline directory must contain wiki_overview.md.
+        """
+        disciplines_dir = Path("prompts/disciplines")
+        if not disciplines_dir.exists() or not disciplines_dir.is_dir():
+            return []
+        result = []
+        try:
+            for d in sorted(disciplines_dir.iterdir()):
+                if d.is_dir() and (d / "wiki_overview.md").exists():
+                    result.append(d.name)
+        except OSError:
+            pass
+        return result
 
     # ── helpers ───────────────────────────────────────────────────────────
 
@@ -220,15 +277,15 @@ class WikiGenerator:
 
         if paper_type == "empirical":
             user_prompt += (
-                "\nGenerate a complete wiki page with ALL four sections "
-                "(Core Elements, Economic Story, Preliminary Assessment, "
-                "Empirical Design). Use the full combined system prompt.\n"
+                "\nGenerate a complete wiki page with ALL sections "
+                "specified in the combined system prompt (including "
+                "the Empirical Design section).\n"
             )
         else:
             user_prompt += (
-                "\nGenerate a wiki page with the first three sections "
-                "(Core Elements, Economic Story, Preliminary Assessment). "
-                "Do NOT include Empirical Design since this is not an empirical paper.\n"
+                "\nGenerate a wiki page following the system prompt. "
+                "Do NOT include the Empirical Design section since "
+                "this is not an empirical paper.\n"
             )
 
         content = self._call(system_prompt, user_prompt, max_tokens=max_tok)
