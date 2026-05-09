@@ -78,6 +78,11 @@ def search_library(
         weighted += _score(ql, rec.get("journal", "")) * 2
         weighted += _score(ql, ", ".join(rec.get("collections", []))) * 1.5
         weighted += _score(ql, ", ".join(rec.get("tags", []))) * 1.5
+        weighted += _score(ql, rec.get("abstract", "")) * 2  # abstract scoring
+
+        # Fuzzy title match bonus
+        fuzzy_bonus = _fuzzy_title_match(q_norm, title_norm)
+        weighted += fuzzy_bonus
 
         score = tier_bonus + weighted
         if score > 0:
@@ -107,7 +112,54 @@ def search_library(
 def _score(query: str, text: str) -> float:
     if not query or not text:
         return 0.0
-    return sum(text.lower().count(t) for t in query.lower().split())
+    text_lower = text.lower()
+    ql = query.lower()
+    # Standard word-based scoring
+    word_score = sum(text_lower.count(t) for t in ql.split())
+    # Chinese: also try bigram matching for multi-char Chinese queries
+    cjk_score = _score_chinese_bigrams(ql, text_lower)
+    return max(word_score, cjk_score)
+
+
+def _score_chinese_bigrams(query_lower: str, text_lower: str) -> float:
+    """Score Chinese text by matching overlapping bigrams.
+
+    For a Chinese query like "代际收入流动", generates:
+        ["代际", "际收", "收入", "入流", "流动"]
+    and counts how many appear in the target text.
+    """
+    # Detect if query has significant CJK content
+    cjk_chars = sum(1 for c in query_lower if '\u4e00' <= c <= '\u9fff')
+    if cjk_chars < 2:
+        return 0.0
+    # Build bigrams
+    bigrams = []
+    for i in range(len(query_lower) - 1):
+        c1, c2 = query_lower[i], query_lower[i + 1]
+        if '\u4e00' <= c1 <= '\u9fff' and '\u4e00' <= c2 <= '\u9fff':
+            bigrams.append(c1 + c2)
+    if not bigrams:
+        return 0.0
+    hits = sum(1 for bg in bigrams if bg in text_lower)
+    return hits * 1.5  # weight per bigram hit
+
+
+def _fuzzy_title_match(query_norm: str, title_norm: str) -> float:
+    """Compute fuzzy match score between query and title.
+
+    Returns a bonus (0–30) for near-exact matches.
+    """
+    if len(query_norm) < 4 or len(title_norm) < 4:
+        return 0.0
+    from difflib import SequenceMatcher
+    ratio = SequenceMatcher(None, query_norm, title_norm).ratio()
+    if ratio >= 0.95:
+        return 30.0
+    if ratio >= 0.85:
+        return 15.0
+    if ratio >= 0.70:
+        return 5.0
+    return 0.0
 
 
 def _passes_filters(rec: Dict[str, Any], filters: Dict[str, Any]) -> bool:

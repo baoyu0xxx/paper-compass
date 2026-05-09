@@ -1,0 +1,86 @@
+# paper-compass evaluation benchmark queries
+# Each query specifies:
+#   query: the search text
+#   expected_keys: list of Zotero keys that SHOULD be returned
+#   min_expected: minimum number of expected papers in top-10
+#   mode: search_library | search_wiki | ask_research | search_passages
+#   tolerance: strict (all expected must appear) | relaxed (≥ min_expected)
+
+queries:
+  # ── Exact key / DOI matches ──
+  - query: "MWWFY69B"
+    expected_keys: ["MWWFY69B"]
+    min_expected: 1
+    mode: search_library
+    tolerance: strict
+
+  - query: "V5MD3AYW"
+    expected_keys: ["V5MD3AYW"]
+    min_expected: 1
+    mode: search_library
+    tolerance: strict
+
+  # ── English title matches ──
+  - query: "competition in two sided markets"
+    expected_keys: ["SF2GL3IM"]
+    min_expected: 1
+    mode: search_library
+    tolerance: strict
+
+  - query: "platform economy literature review"
+    expected_keys: ["MWWFY69B"]
+    min_expected: 1
+    mode: search_library
+    tolerance: strict
+
+  # ── Chinese title / topic matches ──
+  - query: "代际收入流动"
+    expected_keys: ["DDB85DWJ", "SNTCWEDU", "XQUGZTCJ", "V5MD3AYW"]
+    min_expected: 2
+    mode: search_library
+    tolerance: relaxed
+
+  - query: "家族企业"
+    expected_keys: []
+    min_expected: 3
+    mode: search_library
+    tolerance: relaxed
+
+  - query: "延迟退休 代际收入"
+    expected_keys: ["SNTCWEDU"]
+    min_expected: 1
+    mode: search_library
+    tolerance: strict
+
+  - query: "社会保险 代际"
+    expected_keys: ["XQUGZTCJ"]
+    min_expected: 1
+    mode: search_library
+    tolerance: strict
+
+  - query: "劳动力结构"
+    expected_keys: []
+    min_expected: 2
+    mode: search_library
+    tolerance: relaxed
+
+  # ── Author matches ──
+  - query: "chetty"
+    expected_keys: ["V5MD3AYW"]
+    min_expected: 1
+    mode: search_library
+    tolerance: strict
+
+  # ── Collection tag matches ──
+  - query: "家族企业 继承"
+    expected_keys: []
+    min_expected: 2
+    mode: search_library
+    tolerance: relaxed
+
+  # ── search_passages keyword mode ──
+  - query: "代际收入流动 机制"
+    expected_keys: []
+    min_expected: 1
+    mode: search_passages
+    tolerance: relaxed
