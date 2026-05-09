@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from paper_compass.cli.arg_utils import MergeDictAction
-from paper_compass.env_utils import PROJECT_ROOT, DEFAULT_ENV_PATH
+from paper_compass.env_utils import PROJECT_ROOT, DEFAULT_ENV_PATH, load_project_env
 
 # ── Default values ──────────────────────────────────────────────────────────
 
@@ -448,7 +448,12 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
 def execute_init(args: argparse.Namespace) -> int:
     """Execute the init/configure subcommand."""
     env_path = args.env_path
-    has_env_file = Path(env_path).exists()
+    path = Path(env_path)
+    has_env_file = path.exists()
+
+    # Always load existing .env into os.environ first, so config detection works
+    if has_env_file:
+        load_project_env(path)
 
     # Non-interactive mode: --llm-args or --embed-args or --wiki-prompt provided
     has_llm_args = bool(args.llm_args)
@@ -464,39 +469,31 @@ def execute_init(args: argparse.Namespace) -> int:
         print("  ✓ paper-compass configured (non-interactive mode)")
         return 0
 
-    # Check if already configured
+    # Check if already configured (from .env file content)
     if has_env_file and not args.force:
-        content = Path(env_path).read_text(encoding="utf-8")
-        has_llm = "LLM_BASE_URL" in content and "LLM_API_KEY" in content
-        has_embed = (
-            ("EMBED_BASE_URL" in content and "EMBED_API_KEY" in content)
-            or ("VOLC_EMBED_BASE_URL" in content and "VOLC_EMBED_API_KEY" in content)
-        )
-        if has_llm and has_embed:
-            print(f"  .env already configured at {env_path}")
-            resp = input("  Overwrite? [y/N] ").strip().lower()
-            if resp != "y" and resp != "yes":
-                print("  Aborted.")
-                return 0
+        _already_configured_guard(path)
+        # If guard returned without exiting, it means user chose to overwrite
 
-    # Check if env vars are already set in shell (e.g. from .bashrc / .zshrc / CI)
-    if not args.force:
-        llm_from_env, embed_from_env = _build_config_from_env()
-        has_llm_env = bool(llm_from_env.get("LLM_BASE_URL") and llm_from_env.get("LLM_API_KEY"))
-        has_embed_env = bool(
-            (embed_from_env.get("EMBED_BASE_URL") and embed_from_env.get("EMBED_API_KEY"))
-            or (embed_from_env.get("VOLC_EMBED_BASE_URL") and embed_from_env.get("VOLC_EMBED_API_KEY"))
-        )
-        if has_llm_env and has_embed_env:
-            wiki_from_env = os.environ.get("WIKI_PROMPT", "")
+    # Check if env vars are already set in shell / .env (after load_project_env above)
+    llm_from_env, embed_from_env = _build_config_from_env()
+    has_llm_env = bool(llm_from_env.get("LLM_BASE_URL") and llm_from_env.get("LLM_API_KEY"))
+    has_embed_env = bool(
+        (embed_from_env.get("EMBED_BASE_URL") and embed_from_env.get("EMBED_API_KEY"))
+        or (embed_from_env.get("VOLC_EMBED_BASE_URL") and embed_from_env.get("VOLC_EMBED_API_KEY"))
+    )
+    if has_llm_env and has_embed_env:
+        wiki_from_env = os.environ.get("WIKI_PROMPT", "")
+        if args.force:
+            print("  ✓ Configuration detected from .env / environment")
+        else:
             print("  ✓ Detected LLM and embedding configuration from shell environment variables")
-            _write_dotenv(env_path, llm_from_env, embed_from_env, wiki_from_env, force=True)
-            print("  ✓ paper-compass configured from environment variables")
-            print("  Run `paper-compass validate` to test connectivity.")
-            print()
-            return 0
+        _write_dotenv(env_path, llm_from_env, embed_from_env, wiki_from_env, force=True)
+        print("  ✓ paper-compass configured")
+        print("  Run `paper-compass validate` to test connectivity.")
+        print()
+        return 0
 
-    # Interactive mode
+    # Interactive mode — only reached when no config is found anywhere
     print()
     print("  ╔═══════════════════════════════════════════════════════════╗")
     print("  ║   paper-compass initial configuration                     ║")
@@ -514,6 +511,25 @@ def execute_init(args: argparse.Namespace) -> int:
     print()
 
     return 0
+
+
+def _already_configured_guard(env_path: Path) -> None:
+    """Check if .env already has all required keys; prompt to overwrite or abort.
+
+    Returns (does not exit) only if the user confirms overwrite.
+    """
+    content = env_path.read_text(encoding="utf-8")
+    has_llm = "LLM_BASE_URL" in content and "LLM_API_KEY" in content
+    has_embed = (
+        ("EMBED_BASE_URL" in content and "EMBED_API_KEY" in content)
+        or ("VOLC_EMBED_BASE_URL" in content and "VOLC_EMBED_API_KEY" in content)
+    )
+    if has_llm and has_embed:
+        print(f"  .env already configured at {env_path}")
+        resp = input("  Overwrite? [y/N] ").strip().lower()
+        if resp != "y" and resp != "yes":
+            print("  Aborted.")
+            sys.exit(0)
 
 
 if __name__ == "__main__":
