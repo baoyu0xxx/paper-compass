@@ -224,6 +224,12 @@ class Embedder:
                 with urllib.request.urlopen(req, timeout=120) as resp:
                     result = json.loads(resp.read().decode("utf-8"))
                     return self._parse_embedding_response(result)
+            except urllib.error.HTTPError as e:
+                body = e.read().decode("utf-8", errors="replace")[:300]
+                last_error = f"HTTP {e.code}: {body}"
+                if attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)
+                continue
             except Exception as e:
                 last_error = e
                 if attempt < max_retries - 1:

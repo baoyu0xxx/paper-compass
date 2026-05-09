@@ -200,9 +200,10 @@ mcp:
 | Volcengine format error | 400 on embedding | Must use `{"input": [{"type": "text", "text": "..."}]}` format |
 | Wiki chunk ID collision | Fewer vectors than sections | Same-stem pages in different wiki subdirs |
 | `build_index.py` skips papers | "missing PDF" | Ensure text file paths are correct |
-| ChromaDB dual-client | Weird errors | Never create 2 PersistentClient for same path |
-| Shell env var pollution | API call uses wrong URL | `unset MIMO_BASE_URL` etc. before running |
-| $ENV_VAR not resolved | "unauthorized" errors | Ensure the referenced env var is actually set in your shell |
+|| ChromaDB dual-client | Weird errors | Never create 2 PersistentClient for same path |
+|| Mac: multiple Python installs | `pip3 show pkg` says "not found" but `python3` can import it | Always use `python3 -m pip install ...` and `python3 -m pip show ...` instead of bare `pip` / `pip3` |
+|| Shell env var pollution | API call uses wrong URL | `unset MIMO_BASE_URL` etc. before running |
+|| $ENV_VAR not resolved | "unauthorized" errors | Ensure the referenced env var is actually set in your shell |
 
 ## Running Tests
 
