@@ -5,9 +5,20 @@ description = "Personal academic paper retrieval and knowledge navigation infras
 requires-python = ">=3.11"
 dependencies = [
   "pyyaml>=6.0",
-  "pydantic>=2.7",
-  "paper-qa>=5",
+  "chromadb>=0.4.0",
+  "pymupdf>=1.22.0",
+  "pdfplumber>=0.7.0",
+  "rank-bm25>=0.2.0",
+  "sentence-transformers>=2.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
   "pytest>=8.0",
+]
+paperqa = [
+  "paper-qa>=5",
+  "pydantic>=2.7",
 ]
 
 [tool.pytest.ini_options]

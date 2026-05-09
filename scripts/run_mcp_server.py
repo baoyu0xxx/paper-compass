@@ -57,7 +57,7 @@ def _parse_filters(args) -> dict:
 def interactive_mode():
     """Simple interactive prompt for manual tool testing."""
     print("paper-compass MCP — interactive mode")
-    print("Available tools: search_wiki, search_library, ask_research, get_paper_metadata, save_to_wiki")
+    print("Available tools: search_wiki, search_library, ask_research, get_paper_metadata, save_to_wiki, search_passages")
     print("Type 'help' for usage, 'quit' to exit.\n")
 
     while True:
@@ -114,26 +114,18 @@ def interactive_mode():
 
 
 def mcp_stdio_mode():
-    """Minimal MCP JSON-RPC stdio server (stub — expand as needed)."""
+    """MCP JSON-RPC stdio server with proper initialize handshake.
+
+    Follows the MCP spec lifecycle:
+    1. Client sends ``initialize`` → server responds with capabilities.
+    2. Client sends ``notifications/initialized`` → server is ready for requests.
+    3. Server handles ``tools/list``, ``tools/call`` with proper error codes.
+    """
     import json
 
-    # Send initialization response
-    init_response = {
-        "jsonrpc": "2.0",
-        "id": 0,
-        "result": {
-            "serverInfo": {
-                "name": "paper-compass",
-                "version": "0.1.0",
-            },
-            "capabilities": {
-                "tools": {},
-            },
-        },
-    }
-    print(json.dumps(init_response), flush=True)
+    # Server starts — wait for initialize request from client
+    initialized = False
 
-    # Simple request loop
     for line in sys.stdin:
         line = line.strip()
         if not line:
@@ -146,13 +138,54 @@ def mcp_stdio_mode():
         method = request.get("method", "")
         req_id = request.get("id")
 
+        if method == "initialize":
+            response = {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "result": {
+                    "protocolVersion": "2024-11-05",
+                    "serverInfo": {
+                        "name": "paper-compass",
+                        "version": "2.0.0",
+                    },
+                    "capabilities": {
+                        "tools": {},
+                    },
+                },
+            }
+            print(json.dumps(response), flush=True)
+            continue
+
+        if method == "notifications/initialized":
+            initialized = True
+            # No response for notifications
+            continue
+
+        if not initialized:
+            response = {
+                "jsonrpc": "2.0",
+                "id": req_id,
+                "error": {"code": -32002, "message": "Server not initialized"},
+            }
+            print(json.dumps(response), flush=True)
+            continue
+
         if method == "tools/list":
             response = {"jsonrpc": "2.0", "id": req_id, "result": {"tools": list_tools()}}
 
         elif method == "tools/call":
             tool_name = request.get("params", {}).get("name", "")
             arguments = request.get("params", {}).get("arguments", {})
-            result = handle_tool(tool_name, arguments)
+            try:
+                result = handle_tool(tool_name, arguments)
+            except Exception as e:
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": req_id,
+                    "error": {"code": -32000, "message": f"Tool error: {e}"},
+                }
+                print(json.dumps(response), flush=True)
+                continue
             response = {
                 "jsonrpc": "2.0",
                 "id": req_id,
