@@ -142,28 +142,39 @@ def _iter_wiki_sections(md_file: Path, wiki_root: Path) -> Iterable[Tuple[str, s
 
 
 def _init_embedder() -> Embedder:
-    """Initialize embedder from project config + env."""
+    """Initialize embedder from project config + env.
+
+    Tries providers in cascade: embedding_main → embedding_volcengine → local.
+    """
     load_project_env()
     configs = load_all_configs("configs")
 
     embedder = Embedder()
 
-    try:
-        provider_cfg = get_provider_config("embedding_main", configs)
-        provider_name = provider_cfg.get("provider", "openai")
-        embedder.configure_cloud(
-            provider=provider_name,
-            base_url=provider_cfg.get("base_url", ""),
-            api_key=provider_cfg.get("api_key", ""),
-            model=provider_cfg.get("model", ""),
-            dimension=2048,
-        )
-        print(f"  Embedding: cloud ({provider_name}, dim={embedder.dimension})")
-    except Exception as e:
-        print(f"  Cloud embedding unavailable ({e}), falling back to local bge-base")
-        embedder.configure_local("bge-base")
-        print(f"  Embedding: local (bge-base, dim={embedder.dimension})")
+    # Try configured providers in order
+    for provider_key in ["embedding_main", "embedding_volcengine"]:
+        try:
+            provider_cfg = get_provider_config(provider_key, configs)
+            base_url = provider_cfg.get("base_url", "")
+            api_key = provider_cfg.get("api_key", "")
+            if not base_url or not api_key:
+                continue
+            provider_name = provider_cfg.get("provider", "openai")
+            embedder.configure_cloud(
+                provider=provider_name,
+                base_url=base_url,
+                api_key=api_key,
+                model=provider_cfg.get("model", ""),
+                dimension=2048,
+            )
+            print(f"  Embedding: cloud ({provider_name}, dim={embedder.dimension})")
+            return embedder
+        except Exception:
+            continue
 
+    # Fallback to local
+    embedder.configure_local("bge-base")
+    print(f"  Embedding: local (bge-base, dim={embedder.dimension})")
     return embedder
 
 

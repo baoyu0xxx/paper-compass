@@ -265,8 +265,20 @@ def vector_search(
 
     embedder = Embedder()
     load_project_env()
-    provider_cfg = get_provider_config("embedding_main")
-    provider_name = provider_cfg.get("provider", "openai")
+    # Cascade: try main first, fall back to volcengine, then fail
+    provider_cfg = None
+    provider_name = "openai"
+    for pkey in ["embedding_main", "embedding_volcengine"]:
+        try:
+            cfg = get_provider_config(pkey)
+            if cfg.get("base_url") and cfg.get("api_key"):
+                provider_cfg = cfg
+                provider_name = cfg.get("provider", "openai")
+                break
+        except Exception:
+            continue
+    if provider_cfg is None:
+        raise RuntimeError("No embedding provider configured")
     embedder.configure_cloud(
         provider_name,
         provider_cfg.get("base_url", ""),
