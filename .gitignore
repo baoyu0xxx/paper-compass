@@ -20,4 +20,7 @@ wiki/queries/
 wiki/topics/
 wiki/papers/
 
+# Hermes planning artifacts
+.hermes/plans/
+
 *.pyc
