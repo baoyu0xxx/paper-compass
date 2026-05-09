@@ -6,7 +6,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/baoyu0xxx/paper-compass)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/baoyu0xxx/paper-compass)
 
 </div>
 
@@ -27,7 +27,7 @@ paper-compass turns your Zotero library into a **queryable knowledge infrastruct
 - **Dual-mode passage search** — semantic vector + BM25 keyword full-text search over original paper chunks
 - **Incremental indexing** — manifest-based change detection avoids re-embedding unchanged papers
 - **Chinese bigram-aware retrieval** — improved CJK recall for Chinese-language academic literature
-- **Multi-provider embedding** — Volcengine (2048-dim multimodal), OpenAI-compatible, or local SentenceTransformers
+- **Multi-provider embedding** — Volcengine (2048-dim multimodal), OpenAI-compatible, or local SentenceTransformers — with cascade fallback
 
 ## Quick Start
 
@@ -37,23 +37,29 @@ git clone https://github.com/baoyu0xxx/paper-compass.git
 cd paper-compass
 pip install -e .
 
-# 2. Configure
-cp .env.example .env
-# Edit .env — fill in your API keys (LLM + Volcengine embedding)
+# 2. Configure — interactive (recommended)
+paper-compass init
 
-# 3. Prepare data
+#    Or manually:
+#    cp .env.example .env
+#    Edit .env — fill in your API keys (LLM + embedding)
+
+# 3. Verify configuration connectivity
+paper-compass validate
+
+# 4. Prepare data
 python scripts/sync_zotero.py --extract-text
 # → data/zotero-export/library.json + data/texts/*.txt
 
-# 4. Build search index
+# 5. Build search index
 python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
 
-# 5. Generate wiki pages (optional, ~5h for 400 papers)
+# 6. Generate wiki pages (optional, ~5h for 400 papers)
 nohup python scripts/ingest_to_wiki.py --skip-existing > data/logs/wiki_gen.log 2>&1 &
 # After completion:
 python scripts/build_index.py --wiki
 
-# 6. Verify
+# 7. Verify
 python scripts/healthcheck.py --smoke
 python eval/run_eval.py -v
 ```
@@ -79,18 +85,39 @@ pip install -e ".[dev]"   # + pytest for testing
 pip install -e ".[paperqa]"  # + PaperQA5 integration (optional)
 ```
 
+Once installed, the `paper-compass` CLI command is available (see CLI Commands section below).
+
 ## Configuration
+
+### Interactive Setup (Recommended)
+
+```bash
+paper-compass init
+```
+
+Step through the prompts to configure your LLM (wiki generation) and Embedding service's Base URL, API Key, and model name. API keys support `$ENV_VAR` syntax to reference existing environment variables (e.g. `$OPENAI_API_KEY`).
+
+```bash
+# Non-interactive mode (for scripted deployment)
+paper-compass init \
+  --llm-args base_url=https://api.openai.com/v1,model=gpt-4o \
+  --embed-args api_style=volcengine,model=ep-20260420154519-9w64q
+
+# Overwrite existing .env
+paper-compass init --force
+```
 
 ### Environment Variables
 
-Copy `.env.example` to `.env` and fill in your values:
+Copy `.env.example` to `.env` and fill in your values, or use `paper-compass init` to generate automatically:
 
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `LLM_BASE_URL` | Yes | LLM API base URL for wiki generation |
-| `LLM_API_KEY` | Yes | LLM API key |
-| `EMBED_BASE_URL` | Yes | Embedding API base URL (OpenAI-compatible) |
-| `EMBED_API_KEY` | Yes | Embedding API key |
+| `LLM_API_KEY` | Yes | LLM API key (supports `$ENV_VAR` reference) |
+| `LLM_MODEL` | No | Model name (optional, defaults in `providers.yaml`) |
+| `EMBED_BASE_URL` | Yes* | Embedding API base URL (OpenAI-compatible) |
+| `EMBED_API_KEY` | Yes* | Embedding API key |
 | `EMBED_MODEL` | No | Embedding model name (optional, defaults in `providers.yaml`) |
 | `VOLC_EMBED_BASE_URL` | No | Volcengine multimodal embedding endpoint (alternative) |
 | `VOLC_EMBED_API_KEY` | No | Volcengine API key |
@@ -99,9 +126,54 @@ Copy `.env.example` to `.env` and fill in your values:
 | `PAPERQA_API_KEY` | Optional | PaperQA5 API key |
 | `PAPERQA_MODEL` | Optional | PaperQA5 model name |
 
+> \* At least one of EMBED or VOLC_EMBED must be configured.
+
+### $ENV_VAR Reference Syntax
+
+API keys support `$ENV_VAR` syntax, so you never need to store plain-text secrets in `.env`:
+
+```env
+# Reference existing environment variables directly
+LLM_API_KEY=$OPENAI_API_KEY
+EMBED_API_KEY=$MY_EMBED_KEY
+VOLC_EMBED_API_KEY=$VOLC_API_KEY
+```
+
+Resolved at runtime by `config.py`'s `_resolve_env_value()`. If the referenced env var is unset, the `$VAR` literal is preserved.
+
+### Verify Configuration Connectivity
+
+```bash
+paper-compass validate
+```
+
+Example output:
+```
+  ✓ dotenv: OK
+  ✓ llm: OK (model: gpt-4o, 1.2s, response: 15 chars)
+  ✓ embed: OK (model: text-embedding-3-small, dim=1536, 0.8s)
+```
+
+### Embedding Provider Switching & Cascade Fallback
+
+Embedding supports a **cascade fallback** mechanism:
+1. **Primary:** `embedding_main` (OpenAI-compatible, `EMBED_BASE_URL` + `EMBED_API_KEY`)
+2. **Fallback:** `embedding_volcengine` (Volcengine multimodal, `VOLC_EMBED_*` variables)
+3. **Final fallback:** Local `bge-base` model (no API key needed)
+
+Just configure the corresponding environment variables to enable each fallback level — no YAML editing required.
+
+To pin a specific provider, modify `roles.pdf_embedding` and `roles.wiki_embedding` in `configs/providers.yaml`:
+
+```yaml
+roles:
+  pdf_embedding: embedding_volcengine   # pin to Volcengine
+  wiki_embedding: embedding_volcengine
+```
+
 ### Provider Configuration
 
-Advanced settings (LLM model, collection naming, MCP tracing) are in YAML configs under `configs/`:
+Advanced settings (LLM model, Chroma collection naming, MCP tracing) are in YAML configs under `configs/`:
 
 - `configs/providers.yaml` — LLM + embedding provider settings
 - `configs/paths.yaml` — storage paths
@@ -109,7 +181,26 @@ Advanced settings (LLM model, collection naming, MCP tracing) are in YAML config
 
 ## Usage
 
-### CLI Tools
+### CLI Commands
+
+After installation, use the `paper-compass` command directly:
+
+```bash
+# Interactive setup for LLM and embedding providers
+paper-compass init
+
+# Validate configuration and API connectivity
+paper-compass validate
+```
+
+Detailed help:
+
+```bash
+paper-compass init --help
+paper-compass validate --help
+```
+
+### CLI Scripts
 
 | Script | Purpose | Key Flags |
 |--------|---------|-----------|
@@ -177,7 +268,7 @@ mcp:
 #### CLI Tool Mode
 
 ```bash
-python scripts/run_mcp_server.py --tool search_wiki --query "家族企业代际传承"
+python scripts/run_mcp_server.py --tool search_wiki --query "family firm succession"
 python scripts/run_mcp_server.py --tool search_library --query "author name"
 python scripts/run_mcp_server.py --tool search_passages --query "specific passage"
 python scripts/run_mcp_server.py --tool ask_research --query "research question"
@@ -213,27 +304,32 @@ Zotero SQLite + PDFs
 ```
 paper-compass/
 ├── src/paper_compass/       # Core library (15 modules)
-│   ├── filters.py          # search_library, search_passages, vector_search
-│   ├── router.py           # ask_research multi-layer routing
-│   ├── mcp_server.py       # MCP tool handlers + dispatch
-│   ├── mcp_contracts.py    # Tool schema definitions (single source of truth)
-│   ├── vector_store.py     # ChromaDB wrapper + BM25 hybrid search
-│   ├── embedder.py         # Multi-provider embedding (Volcengine, local)
-│   ├── wiki_gen.py         # Two-pass LLM wiki generation
-│   ├── wiki_store.py       # Thread-safe wiki writeback
-│   ├── env_utils.py        # .env loader (always overwrites stale values)
-│   ├── config.py           # YAML config loader with env var resolution
-│   ├── models.py           # Dataclasses for responses
-│   ├── index_manifest.py   # Fingerprint-based incremental indexing
-│   ├── logging.py          # JSONL trace logging
-│   ├── pdf_extract.py      # PyMuPDF + pdfplumber text extraction
-│   └── zotero_sqlite.py    # Zotero SQLite reader
+│   ├── cli/                 # CLI commands (init, validate)
+│   │   ├── __init__.py      # Main entry: paper-compass
+│   │   ├── arg_utils.py     # key=value argument parsing (from lm-eval-harness)
+│   │   ├── configure.py     # paper-compass init command
+│   │   └── validate.py      # paper-compass validate command
+│   ├── search.py            # search_library, search_passages, vector search
+│   ├── router.py            # ask_research multi-layer routing
+│   ├── mcp_server.py        # MCP tool handlers + dispatch
+│   ├── mcp_contracts.py     # Tool schema definitions (single source of truth)
+│   ├── vector_store.py      # ChromaDB wrapper + BM25 hybrid search
+│   ├── embedder.py          # Multi-provider embedding with cascade fallback
+│   ├── wiki_gen.py          # Two-pass LLM wiki generation
+│   ├── wiki_store.py        # Thread-safe wiki writeback
+│   ├── env_utils.py         # .env loader (always overwrites stale values)
+│   ├── config.py            # YAML config loader with $ENV_VAR resolution
+│   ├── types.py             # Dataclasses for responses
+│   ├── index_manifest.py    # Fingerprint-based incremental indexing
+│   ├── logging.py           # JSONL trace logging
+│   ├── pdf_extract.py       # PyMuPDF + pdfplumber text extraction
+│   └── zotero_sqlite.py     # Zotero SQLite reader
 ├── scripts/                # CLI entry points (5 scripts)
 ├── configs/                # YAML configuration templates
 ├── eval/                   # 12-query evaluation benchmark
 ├── wiki/                   # LLM-generated knowledge base
 ├── data/                   # Generated data (vectordb, texts, zotero-export)
-├── tests/                  # pytest test suite
+├── tests/                  # pytest test suite (102 tests, all passing)
 └── pyproject.toml          # Project metadata + dependencies
 ```
 
@@ -243,8 +339,10 @@ paper-compass/
 
 ```bash
 pip install -e ".[dev]"
-python3 -m pytest tests/ -v         # run all tests
+python3 -m pytest tests/ -v         # run all tests (102)
 python3 -m pytest tests/ -x         # stop on first failure
+python3 -m pytest tests/test_cli_arg_utils.py -v  # CLI argument parsing tests
+python3 -m pytest tests/test_cli_configure.py -v  # Configuration command tests
 python3 -m pytest tests/test_incremental_index.py -v  # incremental indexing tests
 ```
 
@@ -267,7 +365,7 @@ paper-compass adapts proven modules from [RAG-Assistant-for-Zotero](https://gith
 | `backend/embed_utils.py` | `embedder.py` | Multi-provider embedding (local + cloud) |
 | `backend/vector_db.py` | `vector_store.py` | ChromaDB wrapper with BM25 hybrid search |
 
-Key differences: paper-compass adds LLM-powered wiki generation, MCP protocol integration, manifest-based incremental indexing, Chinese bigram-aware search, and a formal evaluation benchmark.
+Key differences: paper-compass adds LLM-powered wiki generation, MCP protocol integration, CLI configuration commands (`init`/`validate`), `$ENV_VAR` reference syntax, embedding provider cascade fallback, manifest-based incremental indexing, Chinese bigram-aware search, and a formal evaluation benchmark.
 
 ## Contributing
 

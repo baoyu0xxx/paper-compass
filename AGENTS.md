@@ -19,7 +19,19 @@ pip install -e .
 pip install -e ".[dev]"   # for tests
 ```
 
+Once installed, the `paper-compass` CLI is available (see step 2).
+
 ### 2. Configure environment
+
+**Option A — Interactive (recommended):**
+
+```bash
+paper-compass init
+```
+
+Step through prompts to configure LLM and embedding endpoints. API keys support `$ENV_VAR` syntax (e.g. enter `$OPENAI_API_KEY` to reference an existing env var).
+
+**Option B — Manual `.env` edit:**
 
 ```bash
 cp .env.example .env
@@ -27,19 +39,36 @@ cp .env.example .env
 
 Edit `.env` and fill in:
 
-```
+```env
 LLM_BASE_URL=<your LLM endpoint>
-LLM_API_KEY=<your API key>
+LLM_API_KEY=<your API key>           # or $OPENAI_API_KEY
+# LLM_MODEL=gpt-4o                   # optional, overrides providers.yaml default
 EMBED_BASE_URL=<your embedding endpoint>
-EMBED_API_KEY=<your embedding API key>
-# EMBED_MODEL=<optional — overrides providers.yaml default>
+EMBED_API_KEY=<your embedding API key>  # or $MY_EMBED_KEY
+# EMBED_MODEL=text-embedding-3-small  # optional
 ```
 
 The LLM endpoint must be OpenAI-compatible (chat/completions format). Model defaults to `mimo-v2.5-pro` (configurable in `configs/providers.yaml`).
 
-Embedding defaults to standard OpenAI-compatible format (`text-embedding-3-small`). To use Volcengine, uncomment the `VOLC_EMBED_*` variables in `.env` and point `roles.pdf_embedding`/`roles.wiki_embedding` to `embedding_volcengine` in `providers.yaml`.
+Embedding defaults to standard OpenAI-compatible format (`text-embedding-3-small`). To use Volcengine, set `VOLC_EMBED_*` variables instead (the system cascades automatically: main → volcengine → local `bge-base`).
 
-### 3. Prepare data
+**Option C — Non-interactive (scripted):**
+
+```bash
+paper-compass init \
+  --llm-args base_url=https://api.openai.com/v1,model=gpt-4o \
+  --embed-args api_style=volcengine,model=ep-20260420154519-9w64q
+```
+
+### 3. Verify configuration
+
+```bash
+paper-compass validate
+```
+
+Should show all green (✓) for dotenv, llm, and embed checks.
+
+### 4. Prepare data
 
 **Option A — from Zotero SQLite:**
 
@@ -75,7 +104,7 @@ The `library.json` format: a JSON array of objects with at minimum:
 }
 ```
 
-### 4. Build search index
+### 5. Build search index
 
 ```bash
 python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
@@ -87,7 +116,7 @@ This creates ChromaDB collections under `data/vectordb/`.
 1. `text_file` paths in `library.json` are valid
 2. You have the latest code (v1.0.1+ fixed the PDF-first check)
 
-### 5. Generate wiki pages (optional but recommended)
+### 6. Generate wiki pages (optional but recommended)
 
 ```bash
 # Test with 3 papers first
@@ -108,7 +137,7 @@ After generation completes, index the wiki:
 python scripts/build_index.py --wiki --wiki-root ./wiki
 ```
 
-### 6. Verify deployment
+### 7. Verify deployment
 
 ```bash
 python scripts/healthcheck.py --smoke
@@ -117,7 +146,7 @@ python eval/run_eval.py -v
 
 All 12 evaluation queries should pass. Healthcheck should show green across all subsystems (deps, env, library, vectordb, wiki, MCP contracts).
 
-### 7. Run the MCP server
+### 8. Run the MCP server
 
 **As a standalone MCP server (stdio mode):**
 ```bash
@@ -131,7 +160,7 @@ python scripts/run_mcp_server.py --tool search_library --query "succession"
 python scripts/run_mcp_server.py --tool ask_research --query "家族企业代际传承对劳动力结构的影响"
 ```
 
-### 8. Configure AI agent clients
+### 9. Configure AI agent clients
 
 **Hermes Agent** (`config.yaml`):
 ```yaml
@@ -167,6 +196,8 @@ mcp:
 | Wiki chunk ID collision | Fewer vectors than sections | Same-stem pages in different wiki subdirs |
 | `build_index.py` skips papers | "missing PDF" | Ensure text file paths are correct |
 | ChromaDB dual-client | Weird errors | Never create 2 PersistentClient for same path |
+| Shell env var pollution | API call uses wrong URL | `unset MIMO_BASE_URL` etc. before running |
+| $ENV_VAR not resolved | "unauthorized" errors | Ensure the referenced env var is actually set in your shell |
 
 ## Running Tests
 
@@ -174,7 +205,12 @@ mcp:
 python3 -m pytest tests/ -v
 ```
 
-All tests must pass. If `test_env_utils.py` fails, check that the `.env` file has `LLM_BASE_URL` and `LLM_API_KEY` (not the old `MIMO_BASE_URL`/`XIAOMI_API_KEY`).
+All 102 tests must pass. If `test_env_utils.py` fails, check that the `.env` file has `LLM_BASE_URL` and `LLM_API_KEY` (not the old `MIMO_BASE_URL`/`XIAOMI_API_KEY`).
+
+New test files:
+- `tests/test_cli_arg_utils.py` — key=value parsing
+- `tests/test_cli_configure.py` — interactive + non-interactive init
+- `tests/test_config.py` — $ENV_VAR resolution
 
 ## Dependencies
 
@@ -191,6 +227,11 @@ All declared in `pyproject.toml`:
 | `configs/providers.yaml` | LLM + embedding provider settings |
 | `configs/mcp.yaml` | MCP server configuration |
 | `pyproject.toml` | Project metadata, version, dependencies |
+| `src/paper_compass/cli/__init__.py` | CLI entry point (`paper-compass`) |
+| `src/paper_compass/cli/configure.py` | `paper-compass init` command |
+| `src/paper_compass/cli/validate.py` | `paper-compass validate` command |
+| `src/paper_compass/config.py` | Config loader with `$ENV_VAR` resolution |
+| `src/paper_compass/env_utils.py` | `.env` loader (always overwrites stale values) |
 | `scripts/sync_zotero.py` | Zotero → library.json + text extraction |
 | `scripts/build_index.py` | ChromaDB index builder |
 | `scripts/ingest_to_wiki.py` | Batch wiki generator |
