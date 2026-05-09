@@ -35,7 +35,7 @@ def _check_env() -> Status:
 
     import os
     missing = []
-    for var in ("MIMO_BASE_URL", "XIAOMI_API_KEY", "VOLC_EMBED_BASE_URL",
+    for var in ("LLM_BASE_URL", "LLM_API_KEY", "VOLC_EMBED_BASE_URL",
                  "VOLC_EMBED_API_KEY", "VOLC_EMBED_MODEL"):
         val = os.environ.get(var, "")
         if not val or val in ("your_key_here", "your_endpoint_id"):

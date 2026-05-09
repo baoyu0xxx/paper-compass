@@ -2,151 +2,153 @@
 
 <div align="center">
 
-**Personal academic paper retrieval & knowledge navigation infrastructure**
+**个人学术论文检索与知识导航基础设施**
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-66%2F66%20passing-brightgreen.svg)](tests/)
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/baoyu0xxx/paper-compass)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://github.com/baoyu0xxx/paper-compass)
 
 </div>
 
 ---
 
-## What is paper-compass?
+> 📖 **English version**: [README.en.md](README.en.md)
 
-paper-compass turns your Zotero library into a **queryable knowledge infrastructure** for AI agents. It bridges the gap between "I have 400+ papers in Zotero" and "my AI agent can find relevant passages and evidence by asking in natural language."
+## 项目简介
 
-The pipeline: Zotero PDFs → structured wiki pages (LLM-generated) → vector embeddings → 6 MCP tools for AI integration.
+paper-compass 将你的 Zotero 论文库转变为 AI Agent **可查询的知识基础设施**。它连接了"Zotero 里有几百篇论文"和"AI Agent 能用自然语言查找相关段落和证据"之间的空白。
 
-## Key Features
+**工作流**: Zotero PDF → LLM 自动生成结构化知识页面（wiki）→ 向量嵌入 → 6 个 MCP 工具供 AI 集成。
 
-- **6 MCP tools** — `search_wiki`, `search_library`, `search_passages`, `ask_research`, `get_paper_metadata`, `save_to_wiki` — standard MCP protocol (`2024-11-05`) with proper initialize handshake
-- **LLM-powered wiki generation** — auto-generates structured knowledge pages from PDFs (two-pass classifier + empirical-economics-aware prompts)
-- **Dual-mode passage search** — semantic vector + BM25 keyword full-text search over original paper chunks
-- **Incremental indexing** — manifest-based change detection avoids re-embedding unchanged papers
-- **Chinese bigram-aware retrieval** — improved CJK recall for Chinese-language academic literature
-- **Multi-provider embedding** — Volcengine (2048-dim multimodal), OpenAI-compatible, or local SentenceTransformers
-- **66 pytest tests + eval benchmark + healthcheck** — full validation suite for production readiness
+paper-compass 特别针对中国学术研究者的需求进行了优化：支持中文学术文献的检索（含中文分词匹配），提供实证经济学方向的领域化 wiki 生成提示词，并适配了火山引擎等多模态嵌入服务。
 
-## Quick Start
+## 核心能力
+
+- **6 个 MCP 工具** — `search_wiki`、`search_library`、`search_passages`、`ask_research`、`get_paper_metadata`、`save_to_wiki` — 遵循 MCP 协议标准（`2024-11-05`），具备完整的 `initialize` 握手
+- **LLM 驱动的 wiki 生成** — 从 PDF 中自动生成结构化知识页面，采用两阶段分类器 + 实证经济学专用提示词
+- **双模式段落检索** — 语义向量 + BM25 关键词全文搜索，覆盖原始论文分块
+- **增量索引** — 基于指纹清单的变更检测，避免对未修改论文重复嵌入
+- **中文检索优化** — 支持中文分词匹配，改善中文学术文献的召回效果
+- **多提供方嵌入** — 火山引擎（2048 维多模态）、OpenAI 兼容端点、或本地 SentenceTransformers
+
+## 快速开始
 
 ```bash
-# 1. Clone
+# 1. 克隆仓库
 git clone https://github.com/baoyu0xxx/paper-compass.git
 cd paper-compass
 pip install -e .
 
-# 2. Configure
+# 2. 配置环境变量
 cp .env.example .env
-# Edit .env — fill in your API keys (Mimo LLM + Volcengine embedding)
+# 编辑 .env — 填写 LLM 和火山引擎嵌入的 API 密钥
 
-# 3. Prepare data
+# 3. 准备数据
 python scripts/sync_zotero.py --extract-text
 # → data/zotero-export/library.json + data/texts/*.txt
 
-# 4. Build search index
+# 4. 构建检索索引
 python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
 
-# 5. Generate wiki pages (optional, ~5h for 400 papers)
+# 5. 生成 wiki 页面（可选，约 400 篇论文需 5 小时）
 nohup python scripts/ingest_to_wiki.py --skip-existing > data/logs/wiki_gen.log 2>&1 &
-# After completion:
+# 完成后：
 python scripts/build_index.py --wiki
 
-# 6. Verify
+# 6. 验证
 python scripts/healthcheck.py --smoke
 python eval/run_eval.py -v
 ```
 
-## Installation
+## 安装
 
-### Prerequisites
+### 环境依赖
 
-| Requirement | Notes |
-|-------------|-------|
-| Python ≥ 3.11 | Check with `python3 --version` |
-| Zotero library | Optional — works with pre-extracted text files |
-| LLM API key | Wiki generation: Mimo (`MIMO_BASE_URL` + `XIAOMI_API_KEY`) or any OpenAI-compatible endpoint |
-| Embedding API key | Volcengine multimodal (`VOLC_EMBED_BASE_URL` + `VOLC_EMBED_API_KEY` + `VOLC_EMBED_MODEL`) or local models |
+| 要求 | 说明 |
+|------|------|
+| Python ≥ 3.11 | 使用 `python3 --version` 检查 |
+| Zotero 论文库 | 可选 — 支持使用预提取的文本文件 |
+| LLM API 密钥 | Wiki 生成需要 OpenAI 兼容端点（`LLM_BASE_URL` + `LLM_API_KEY`） |
+| 嵌入服务 API 密钥 | 火山引擎多模态嵌入（`VOLC_EMBED_*` 系列变量），或本地模型 |
 
-### From Source
+### 从源码安装
 
 ```bash
 git clone https://github.com/baoyu0xxx/paper-compass.git
 cd paper-compass
-pip install -e .          # core dependencies
-pip install -e ".[dev]"   # + pytest for testing
-pip install -e ".[paperqa]"  # + PaperQA5 integration (optional)
+pip install -e .           # 核心依赖
+pip install -e ".[dev]"    # 含 pytest，用于测试
+pip install -e ".[paperqa]" # 含 PaperQA5 集成（可选）
 ```
 
-## Configuration
+## 配置
 
-### Environment Variables
+### 环境变量
 
-Copy `.env.example` to `.env` and fill in your values:
+将 `.env.example` 复制为 `.env` 并填写：
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `MIMO_BASE_URL` | Yes | LLM API base URL (default: `https://token-plan-cn.xiaomimimo.com/v1`) |
-| `XIAOMI_API_KEY` | Yes | Mimo API key for wiki generation |
-| `VOLC_EMBED_BASE_URL` | Yes | Volcengine multimodal embedding endpoint |
-| `VOLC_EMBED_API_KEY` | Yes | Volcengine API key |
-| `VOLC_EMBED_MODEL` | Yes | Embedding model endpoint ID (e.g., `ep-20260420154519-xxxxx`) |
-| `PAPERQA_BASE_URL` | Optional | PaperQA5 endpoint for full PDF RAG |
-| `PAPERQA_API_KEY` | Optional | PaperQA5 API key |
-| `PAPERQA_MODEL` | Optional | PaperQA5 model name |
+| 变量 | 是否必须 | 说明 |
+|------|----------|------|
+| `LLM_BASE_URL` | 是 | LLM API 基础 URL |
+| `LLM_API_KEY` | 是 | LLM API 密钥 |
+| `VOLC_EMBED_BASE_URL` | 是 | 火山引擎多模态嵌入端点 |
+| `VOLC_EMBED_API_KEY` | 是 | 火山引擎 API 密钥 |
+| `VOLC_EMBED_MODEL` | 是 | 嵌入模型端点 ID（如 `ep-20260420154519-xxxxx`） |
+| `PAPERQA_BASE_URL` | 可选 | PaperQA5 全文 RAG 端点 |
+| `PAPERQA_API_KEY` | 可选 | PaperQA5 API 密钥 |
+| `PAPERQA_MODEL` | 可选 | PaperQA5 模型名称 |
 
-### Provider Configuration
+### 提供方配置
 
-Advanced settings (LLM model, collection naming, MCP tracing) are in YAML configs under `configs/`:
+LLM 模型、chroma 集合命名、MCP 跟踪等高级配置位于 `configs/` 目录下：
 
-- `configs/providers.yaml` — LLM + embedding provider settings
-- `configs/paths.yaml` — storage paths
-- `configs/mcp.yaml` — MCP server behavior + tracing
+- `configs/providers.yaml` — LLM 和嵌入提供方设置
+- `configs/paths.yaml` — 存储路径
+- `configs/mcp.yaml` — MCP 服务行为与日志
 
-## Usage
+## 使用方法
 
-### CLI Tools
+### CLI 工具
 
-| Script | Purpose | Key Flags |
-|--------|---------|-----------|
-| `scripts/sync_zotero.py` | Zotero SQLite → library.json + text extraction | `--extract-text` |
-| `scripts/build_index.py` | Build ChromaDB vector index (papers + wiki) | `--full-rebuild`, `--incremental`, `--prune-deleted`, `--wiki` |
-| `scripts/ingest_to_wiki.py` | Batch wiki generation via LLM | `--skip-existing`, `--workers 10`, `--limit N` |
-| `scripts/run_mcp_server.py` | MCP server (stdio + tool-call + interactive) | `--mcp`, `--tool <name> --query "..."` |
-| `scripts/healthcheck.py` | Subsystem health verification | `--smoke` (API connectivity) |
+| 脚本 | 用途 | 关键参数 |
+|------|------|----------|
+| `scripts/sync_zotero.py` | Zotero SQLite → library.json + 文本提取 | `--extract-text` |
+| `scripts/build_index.py` | 构建 ChromaDB 向量索引（论文 + wiki） | `--full-rebuild`、`--incremental`、`--prune-deleted`、`--wiki` |
+| `scripts/ingest_to_wiki.py` | 批量 LLM wiki 生成 | `--skip-existing`、`--workers 10`、`--limit N` |
+| `scripts/run_mcp_server.py` | MCP 服务（stdio / 工具调用 / 交互模式） | `--mcp`、`--tool <name> --query "..."` |
+| `scripts/healthcheck.py` | 子系统健康检查 | `--smoke`（含 API 连通性探测） |
 
-#### Build Index
+#### 构建索引
 
 ```bash
-# Full rebuild (clear and re-embed all papers)
+# 全量重建（清空并重新嵌入所有论文）
 python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
 
-# Incremental (only changed/new papers)
+# 增量更新（仅更新有变化的论文）
 python scripts/build_index.py --library data/zotero-export/library.json --incremental
 
-# Index wiki pages
+# 索引 wiki 页面
 python scripts/build_index.py --wiki --wiki-root ./wiki
 ```
 
-#### Generate Wiki Pages
+#### 生成 Wiki 页面
 
 ```bash
-# Process all ungenerated pages (10 concurrent workers)
+# 处理所有未生成的页面（10 个并发 worker）
 python scripts/ingest_to_wiki.py --skip-existing --workers 10
 
-# Test with 3 papers
+# 先试 3 篇
 python scripts/ingest_to_wiki.py --limit 3 --workers 1
 
-# Resume interrupted run
+# 中断后继续运行
 python scripts/ingest_to_wiki.py --skip-existing --workers 10
 ```
 
-### MCP Integration
+### MCP 集成
 
-#### With Hermes Agent
+#### 配置 Hermes Agent
 
-Add to `config.yaml`:
+在 `config.yaml` 中添加：
 
 ```yaml
 mcp:
@@ -157,7 +159,7 @@ mcp:
       cwd: "/path/to/paper-compass"
 ```
 
-#### With Claude Desktop
+#### 配置 Claude Desktop
 
 ```json
 {
@@ -171,105 +173,105 @@ mcp:
 }
 ```
 
-#### CLI Tool Mode
+#### CLI 工具模式
 
 ```bash
 python scripts/run_mcp_server.py --tool search_wiki --query "家族企业代际传承"
-python scripts/run_mcp_server.py --tool search_library --query "author name"
-python scripts/run_mcp_server.py --tool search_passages --query "specific passage"
-python scripts/run_mcp_server.py --tool ask_research --query "research question"
-python scripts/run_mcp_server.py --tool get_paper_metadata --key YOUR_ZOTERO_KEY
+python scripts/run_mcp_server.py --tool search_library --query "作者姓名"
+python scripts/run_mcp_server.py --tool search_passages --query "具体段落内容"
+python scripts/run_mcp_server.py --tool ask_research --query "研究问题"
+python scripts/run_mcp_server.py --tool get_paper_metadata --key ZOTERO_KEY
 ```
 
-## Architecture
+## 架构
 
-### Pipeline
+### 流水线
 
 ```
-Zotero SQLite + PDFs
+Zotero SQLite + PDF
   → sync_zotero.py → library.json + data/texts/*.txt
-  → build_index.py → ChromaDB vector collections (papers + wiki)
-  → ingest_to_wiki.py → Mimo LLM → wiki/papers/*.md
-  → build_index.py --wiki → ChromaDB wiki collection
-  → run_mcp_server.py → 6 MCP tools exposed to AI agents
+  → build_index.py → ChromaDB 向量集合（论文 + wiki）
+  → ingest_to_wiki.py → LLM → wiki/papers/*.md
+  → build_index.py --wiki → ChromaDB wiki 集合
+  → run_mcp_server.py → 6 个 MCP 工具暴露给 AI Agent
 ```
 
-### MCP Tools
+### MCP 工具
 
-| Tool | Description | Search Mode |
-|------|-------------|-------------|
-| `search_wiki` | Semantic search over LLM-generated wiki knowledge pages | Vector |
-| `search_library` | Keyword + Chinese bigram + fuzzy metadata search | Text |
-| `search_passages` | Dual-mode search over original paper text blocks | Vector + BM25 |
-| `ask_research` | Multi-layer router: wiki → escalate to PDF evidence | Hybrid |
-| `get_paper_metadata` | Look up a single paper by key, DOI, or title | Exact |
-| `save_to_wiki` | Write LLM-generated content back to the wiki | — |
+| 工具 | 描述 | 检索模式 |
+|------|------|----------|
+| `search_wiki` | 在 LLM 生成的 wiki 知识页面中进行语义搜索 | 向量 |
+| `search_library` | 关键词 + 中文分词 + 模糊匹配，搜索论文元数据 | 文本 |
+| `search_passages` | 双模式搜索原始论文文本块 | 向量 + BM25 |
+| `ask_research` | 多层路由：wiki → 传递到 PDF 证据 | 混合 |
+| `get_paper_metadata` | 按 key、DOI 或标题查找单篇论文 | 精确 |
+| `save_to_wiki` | 将 LLM 生成的内容写回 wiki | — |
 
-### Project Structure
+### 项目结构
 
 ```
 paper-compass/
-├── src/miniresearch/       # Core library (11 modules)
-│   ├── filters.py          # search_library, search_passages, vector_search
-│   ├── router.py           # ask_research multi-layer routing
-│   ├── mcp_server.py       # MCP tool handlers + dispatch
-│   ├── mcp_contracts.py    # Tool schema definitions (single source of truth)
-│   ├── vector_store.py     # ChromaDB wrapper + BM25 hybrid search
-│   ├── embedder.py         # Multi-provider embedding (Volcengine, local)
-│   ├── wiki_gen.py         # Two-pass LLM wiki generation
-│   ├── wiki_store.py       # Thread-safe wiki writeback
-│   ├── env_utils.py        # .env loader (always overwrites stale values)
-│   ├── config.py           # YAML config loader with env var resolution
-│   ├── models.py           # Dataclasses for responses
-│   ├── index_manifest.py   # Fingerprint-based incremental indexing
-│   ├── logging.py          # JSONL trace logging
-│   ├── pdf_extract.py      # PyMuPDF + pdfplumber text extraction
-│   └── zotero_sqlite.py    # Zotero SQLite reader
-├── scripts/                # CLI entry points (5 scripts)
-├── configs/                # YAML configuration templates
-├── eval/                   # 12-query evaluation benchmark
-├── wiki/                   # LLM-generated knowledge base (406+ papers)
-├── data/                   # Generated data (vectordb, texts, zotero-export)
-├── tests/                  # 66 pytest tests
-└── pyproject.toml          # Project metadata + dependencies
+├── src/miniresearch/       # 核心库（13 个模块）
+│   ├── filters.py          # search_library、search_passages、向量搜索
+│   ├── router.py           # ask_research 多层路由
+│   ├── mcp_server.py       # MCP 工具处理与分发
+│   ├── mcp_contracts.py    # 工具 schema 定义（唯一数据源）
+│   ├── vector_store.py     # ChromaDB 封装 + BM25 混合搜索
+│   ├── embedder.py         # 多提供方嵌入（火山引擎、本地模型）
+│   ├── wiki_gen.py         # 两阶段 LLM wiki 生成
+│   ├── wiki_store.py       # 线程安全的 wiki 写回
+│   ├── env_utils.py        # .env 加载（始终覆盖过期值）
+│   ├── config.py           # YAML 配置加载与 env 变量解析
+│   ├── models.py           # 响应数据类
+│   ├── index_manifest.py   # 基于指纹的增量索引
+│   ├── logging.py          # JSONL 跟踪日志
+│   ├── pdf_extract.py      # PyMuPDF + pdfplumber 文本提取
+│   └── zotero_sqlite.py    # Zotero SQLite 读取
+├── scripts/                # CLI 入口（5 个脚本）
+├── configs/                # YAML 配置模板
+├── eval/                   # 12 查询评估基准
+├── wiki/                   # LLM 生成的知识库
+├── data/                   # 生成数据（vectordb、texts、zotero-export）
+├── tests/                  # pytest 测试套件
+└── pyproject.toml          # 项目元数据与依赖
 ```
 
-## Development
+## 开发
 
-### Running Tests
+### 运行测试
 
 ```bash
 pip install -e ".[dev]"
-python3 -m pytest tests/ -v         # 66 tests
-python3 -m pytest tests/ -x         # stop on first failure
-python3 -m pytest tests/test_incremental_index.py -v  # incremental indexing tests
+python3 -m pytest tests/ -v         # 运行所有测试
+python3 -m pytest tests/ -x         # 遇错即停
+python3 -m pytest tests/test_incremental_index.py -v  # 增量索引测试
 ```
 
-### Running Evaluation
+### 运行评估
 
 ```bash
-python eval/run_eval.py             # all 12 queries
-python eval/run_eval.py -v          # verbose output
-python eval/run_eval.py --mode strict  # strict key matching
+python eval/run_eval.py             # 全部 12 个查询
+python eval/run_eval.py -v          # 详细输出
+python eval/run_eval.py --mode strict  # 严格键匹配模式
 ```
 
-## Prior Art
+## 参考来源
 
-paper-compass adapts proven modules from [RAG-Assistant-for-Zotero](https://github.com/aahepburn/RAG-Assistant-for-Zotero):
+paper-compass 从 [RAG-Assistant-for-Zotero](https://github.com/aahepburn/RAG-Assistant-for-Zotero) 中适配了经过验证的模块：
 
-| Source Module | Adapted As | Purpose |
-|---------------|------------|---------|
-| `backend/pdf.py` | `pdf_extract.py` | PyMuPDF text extraction with pdfplumber fallback |
-| `backend/zotero_dbase.py` | `zotero_sqlite.py` | Zotero SQLite reader with path resolution |
-| `backend/embed_utils.py` | `embedder.py` | Multi-provider embedding (local + cloud) |
-| `backend/vector_db.py` | `vector_store.py` | ChromaDB wrapper with BM25 hybrid search |
+| 源模块 | 适配为 | 用途 |
+|--------|--------|------|
+| `backend/pdf.py` | `pdf_extract.py` | PyMuPDF 文本提取（pdfplumber 备用） |
+| `backend/zotero_dbase.py` | `zotero_sqlite.py` | Zotero SQLite 读取与路径解析 |
+| `backend/embed_utils.py` | `embedder.py` | 多提供方嵌入（本地 + 云端） |
+| `backend/vector_db.py` | `vector_store.py` | ChromaDB 封装 + BM25 混合搜索 |
 
-Key differences: paper-compass adds LLM-powered wiki generation, MCP protocol integration, manifest-based incremental indexing, Chinese bigram-aware search, and a formal evaluation benchmark.
+主要差异：paper-compass 增加了 LLM 驱动的 wiki 生成、MCP 协议集成、基于指纹的增量索引、中文分词感知搜索，以及形式化的评估基准。
 
-## Contributing
+## 参与贡献
 
-Contributions are welcome. Please open an issue to discuss significant changes before submitting a pull request.
+欢迎贡献。如有重大修改，请先提 issue 讨论，再提交 pull request。
 
-## License
+## 许可证
 
 MIT
