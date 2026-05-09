@@ -1,6 +1,6 @@
 [project]
 name = "paper-compass"
-version = "0.1.0"
+version = "2.0.0"
 description = "Personal academic paper retrieval and knowledge navigation infrastructure"
 requires-python = ">=3.11"
 dependencies = [
@@ -11,6 +11,10 @@ dependencies = [
   "rank-bm25>=0.2.0",
   "sentence-transformers>=2.2.0",
 ]
+
+[project.scripts]
+paper-compass-healthcheck = "scripts.healthcheck:main"
+paper-compass-mcp = "scripts.run_mcp_server:main"
 
 [project.optional-dependencies]
 dev = [
