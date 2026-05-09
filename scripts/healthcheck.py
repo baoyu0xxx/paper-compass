@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
-# Ensure project root is on sys.path so we can import miniresearch
+# Ensure project root is on sys.path so we can import paper_compass
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
@@ -30,7 +30,7 @@ def _check_env() -> Status:
     if not env_path.exists():
         return ("env_file", "WARN: .env not found (copy from .env.example)")
 
-    from miniresearch.env_utils import load_project_env
+    from paper_compass.env_utils import load_project_env
     load_project_env()
 
     import os
@@ -116,8 +116,8 @@ def _check_deps() -> Status:
 def _check_mcp_contracts() -> Status:
     """Verify MCP contracts and handlers are aligned."""
     try:
-        from miniresearch.mcp_contracts import list_tools, accepted_params, required_params
-        from miniresearch.mcp_server import _HANDLERS  # noqa: F401
+        from paper_compass.mcp_contracts import list_tools, accepted_params, required_params
+        from paper_compass.mcp_server import _HANDLERS  # noqa: F401
         tools = list_tools()
         names = [t["name"] for t in tools]
         expected_count = 6  # search_wiki, search_library, ask_research, get_paper_metadata, save_to_wiki, search_passages
@@ -136,7 +136,7 @@ def _check_mcp_contracts() -> Status:
 def _smoke_embedding() -> Status:
     """Probe Volcengine embedding API (one short text)."""
     import os
-    from miniresearch.env_utils import load_project_env
+    from paper_compass.env_utils import load_project_env
     load_project_env()
 
     base_url = os.environ.get("VOLC_EMBED_BASE_URL", "")

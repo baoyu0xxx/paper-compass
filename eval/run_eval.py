@@ -20,8 +20,8 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-# Pre-load .env before importing miniresearch modules
-from miniresearch.env_utils import load_project_env
+# Pre-load .env before importing paper_compass modules
+from paper_compass.env_utils import load_project_env
 load_project_env()
 
 
@@ -32,13 +32,13 @@ def load_queries(path: str = "eval/queries.yaml") -> List[Dict[str, Any]]:
 
 
 def run_search_library(query: str, limit: int = 10) -> List[str]:
-    from miniresearch.filters import search_library
+    from paper_compass.search import search_library
     results = search_library(query, limit=limit)
     return [r["doc_id"] for r in results]
 
 
 def run_search_passages(query: str, limit: int = 10) -> List[str]:
-    from miniresearch.filters import search_passages
+    from paper_compass.search import search_passages
     results = search_passages(query, search_mode="keyword", limit=limit)
     seen = set()
     unique = []

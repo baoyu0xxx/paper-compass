@@ -19,7 +19,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from miniresearch.config import get_provider_config, load_all_configs
+from paper_compass.config import get_provider_config, load_all_configs
 
 logger = logging.getLogger(__name__)
 

@@ -24,16 +24,16 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from miniresearch.config import get_provider_config, load_all_configs
-from miniresearch.embedder import Embedder
-from miniresearch.env_utils import load_project_env
-from miniresearch.index_manifest import (
+from paper_compass.config import get_provider_config, load_all_configs
+from paper_compass.embedder import Embedder
+from paper_compass.env_utils import load_project_env
+from paper_compass.index_manifest import (
     build_paper_fingerprint,
     diff_manifest,
     load_manifest,
     save_manifest,
 )
-from miniresearch.vector_store import VectorStore
+from paper_compass.vector_store import VectorStore
 
 
 PAPER_CHUNK_SIZE = 1500
@@ -149,15 +149,16 @@ def _init_embedder() -> Embedder:
     embedder = Embedder()
 
     try:
-        provider = get_provider_config("embedding_main", configs)
+        provider_cfg = get_provider_config("embedding_main", configs)
+        provider_name = provider_cfg.get("provider", "openai")
         embedder.configure_cloud(
-            provider="volcengine",
-            base_url=provider.get("base_url", ""),
-            api_key=provider.get("api_key", ""),
-            model=provider.get("model", ""),
+            provider=provider_name,
+            base_url=provider_cfg.get("base_url", ""),
+            api_key=provider_cfg.get("api_key", ""),
+            model=provider_cfg.get("model", ""),
             dimension=2048,
         )
-        print(f"  Embedding: cloud (volcengine, dim={embedder.dimension})")
+        print(f"  Embedding: cloud ({provider_name}, dim={embedder.dimension})")
     except Exception as e:
         print(f"  Cloud embedding unavailable ({e}), falling back to local bge-base")
         embedder.configure_local("bge-base")
@@ -182,7 +183,7 @@ def _load_paper_text(item: Dict[str, Any], extract_text: bool = False) -> str:
         return Path(text_file).read_text(encoding="utf-8")
 
     if extract_text:
-        from miniresearch.pdf_extract import PDFExtractor
+        from paper_compass.pdf_extract import PDFExtractor
 
         pdf_path = item.get("pdf_path", "")
         if pdf_path and Path(pdf_path).exists():

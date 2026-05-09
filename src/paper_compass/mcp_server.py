@@ -6,17 +6,19 @@ import os
 import time
 from typing import Any, Dict, List, Optional
 
-from miniresearch.filters import get_paper_metadata, search_library, search_passages
-from miniresearch.logging import emit_trace
-from miniresearch.mcp_contracts import accepted_params, required_params
-from miniresearch.models import UnifiedResponse
-from miniresearch.router import ask_research
-from miniresearch.wiki_store import save_query_to_wiki
+from paper_compass.search import get_paper_metadata, search_library, search_passages
+from paper_compass.logging import emit_trace
+from paper_compass.mcp_contracts import accepted_params, required_params
+from paper_compass.types import UnifiedResponse
+from paper_compass.router import ask_research
+from paper_compass.wiki_store import save_query_to_wiki
+from paper_compass.env_utils import load_project_env
+from paper_compass.config import get_provider_config
 
 
 def _tool_search_wiki(query: str, limit: int = 5, db_path: str = "data/vectordb") -> Dict[str, Any]:
     try:
-        from miniresearch.embedder import Embedder
+        from paper_compass.embedder import Embedder
         import chromadb as _cdb
         from chromadb.config import Settings as _CSet
 
@@ -39,11 +41,14 @@ def _tool_search_wiki(query: str, limit: int = 5, db_path: str = "data/vectordb"
             dim = len(embeddings[0])
 
         embedder = Embedder()
+        load_project_env()
+        provider_cfg = get_provider_config("embedding_main")
+        provider_name = provider_cfg.get("provider", "openai")
         embedder.configure_cloud(
-            "volcengine",
-            os.environ.get("VOLC_EMBED_BASE_URL", ""),
-            os.environ.get("VOLC_EMBED_API_KEY", ""),
-            os.environ.get("VOLC_EMBED_MODEL", ""),
+            provider_name,
+            provider_cfg.get("base_url", ""),
+            provider_cfg.get("api_key", ""),
+            provider_cfg.get("model", ""),
             dim,
         )
         q_emb = embedder.embed_single(query)

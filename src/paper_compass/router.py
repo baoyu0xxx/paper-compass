@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from miniresearch.models import ModeDecision
+from paper_compass.types import ModeDecision
 
 
 # Keywords that trigger PDF escalation
@@ -60,7 +60,7 @@ def ask_research(
     """
 
     # Step 1: Wiki search
-    from miniresearch.filters import vector_search, _postprocess_wiki_results, _dedupe_pdf_chunks_by_item
+    from paper_compass.search import vector_search, _postprocess_wiki_results, _dedupe_pdf_chunks_by_item
     wiki_results_raw = vector_search(query, collection="wiki", k=5, db_path=db_path)
     wiki_results = _postprocess_wiki_results(wiki_results_raw)
     wiki_top_score = wiki_results[0]["score"] if wiki_results else 0.0
@@ -73,7 +73,7 @@ def ask_research(
         mode = _should_escalate(query, len(wiki_results), wiki_top_score)
 
     # Step 3: Library metadata search
-    from miniresearch.filters import search_library
+    from paper_compass.search import search_library
     lib_results_raw = search_library(query, library_path=library_path, filters=filters, limit=max_sources * 2)
     lib_results = [m for m in lib_results_raw if m.get("score", 0) >= 1.0][:max_sources]
 

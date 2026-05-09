@@ -30,12 +30,14 @@ Edit `.env` and fill in:
 ```
 LLM_BASE_URL=<your LLM endpoint>
 LLM_API_KEY=<your API key>
-VOLC_EMBED_BASE_URL=<your embedding endpoint>
-VOLC_EMBED_API_KEY=<your embedding API key>
-VOLC_EMBED_MODEL=<your embedding model ID>
+EMBED_BASE_URL=<your embedding endpoint>
+EMBED_API_KEY=<your embedding API key>
+# EMBED_MODEL=<optional — overrides providers.yaml default>
 ```
 
 The LLM endpoint must be OpenAI-compatible (chat/completions format). Model defaults to `mimo-v2.5-pro` (configurable in `configs/providers.yaml`).
+
+Embedding defaults to standard OpenAI-compatible format (`text-embedding-3-small`). To use Volcengine, uncomment the `VOLC_EMBED_*` variables in `.env` and point `roles.pdf_embedding`/`roles.wiki_embedding` to `embedding_volcengine` in `providers.yaml`.
 
 ### 3. Prepare data
 
@@ -159,7 +161,7 @@ mcp:
 | Pitfall | Symptom | Fix |
 |---------|---------|-----|
 | `.env` not loaded | API calls fail with "unknown URL" | Ensure `.env` exists in project root |
-| Stale env vars | LLM API gets garbage URL | `unset LLM_BASE_URL LLM_API_KEY` and re-run |
+| Stale env vars | LLM API gets garbage URL | `unset LLM_BASE_URL LLM_API_KEY EMBED_BASE_URL EMBED_API_KEY` and re-run |
 | WSL + BM25 | `multiprocessing` error | Graceful degradation — vector search still works |
 | Volcengine format error | 400 on embedding | Must use `{"input": [{"type": "text", "text": "..."}]}` format |
 | Wiki chunk ID collision | Fewer vectors than sections | Same-stem pages in different wiki subdirs |

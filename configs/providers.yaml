@@ -13,6 +13,16 @@ providers:
     timeout_seconds: 120
 
   embedding_main:
+    provider: openai
+    api_style: openai-compatible
+    base_url_env: EMBED_BASE_URL
+    api_key_env: EMBED_API_KEY
+    model: text-embedding-3-small
+    model_env: EMBED_MODEL
+    timeout_seconds: 120
+
+  embedding_volcengine:
+    provider: volcengine
     api_style: openai-compatible
     base_url_env: VOLC_EMBED_BASE_URL
     api_key_env: VOLC_EMBED_API_KEY

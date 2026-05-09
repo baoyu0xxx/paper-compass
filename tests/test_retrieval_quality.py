@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from miniresearch.filters import search_library
+from paper_compass.search import search_library
 
 
 def _write_library(path: Path):

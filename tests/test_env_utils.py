@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from miniresearch.env_utils import load_project_env
+from paper_compass.env_utils import load_project_env
 
 
 def test_load_project_env_overwrites_existing_values(tmp_path, monkeypatch):

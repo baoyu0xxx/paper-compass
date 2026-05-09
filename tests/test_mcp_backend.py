@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from miniresearch.models import UnifiedResponse
-from miniresearch.mcp_server import handle_tool
+from paper_compass.types import UnifiedResponse
+from paper_compass.mcp_server import handle_tool
 
 
 class TestUnifiedResponse:
@@ -70,11 +70,11 @@ class TestHandleTool:
 
 class TestFiltersModule:
     def test_search_library_empty(self):
-        from miniresearch.filters import search_library
+        from paper_compass.search import search_library
         results = search_library("test", library_path="/nonexistent/library.json")
         assert results == []
 
     def test_get_paper_metadata_empty(self):
-        from miniresearch.filters import get_paper_metadata
+        from paper_compass.search import get_paper_metadata
         result = get_paper_metadata("abc", library_path="/nonexistent/library.json")
         assert result is None

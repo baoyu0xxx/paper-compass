@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from miniresearch.logging import emit_trace
+from paper_compass.logging import emit_trace
 
 
 def test_emit_trace_writes_when_enabled(tmp_path, monkeypatch):
@@ -23,7 +23,7 @@ def test_emit_trace_writes_when_enabled(tmp_path, monkeypatch):
             }
         }
 
-    monkeypatch.setattr("miniresearch.logging.load_all_configs", _fake_load_all_configs)
+    monkeypatch.setattr("paper_compass.logging.load_all_configs", _fake_load_all_configs)
 
     emit_trace({"tool": "search_library", "ok": True, "query": "family firm", "source_ids": ["A"]})
 
@@ -52,7 +52,7 @@ def test_emit_trace_respects_exclusion_flags(tmp_path, monkeypatch):
             }
         }
 
-    monkeypatch.setattr("miniresearch.logging.load_all_configs", _fake_load_all_configs)
+    monkeypatch.setattr("paper_compass.logging.load_all_configs", _fake_load_all_configs)
 
     emit_trace({"tool": "ask_research", "ok": True, "query": "q", "source_ids": ["X"]})
 

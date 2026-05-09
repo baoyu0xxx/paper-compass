@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
-from miniresearch.index_manifest import compute_text_sha1, diff_manifest
+from paper_compass.index_manifest import compute_text_sha1, diff_manifest
 
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "build_index.py"

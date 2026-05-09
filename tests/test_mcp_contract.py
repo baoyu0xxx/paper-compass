@@ -1,7 +1,7 @@
 """Contract tests for MCP tool schemas and handler behavior."""
 
-from miniresearch.mcp_contracts import accepted_params, list_tools, required_params
-from miniresearch.mcp_server import handle_tool
+from paper_compass.mcp_contracts import accepted_params, list_tools, required_params
+from paper_compass.mcp_server import handle_tool
 
 
 def test_tools_list_contains_expected_tools():

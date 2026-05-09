@@ -17,8 +17,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from miniresearch.zotero_sqlite import ZoteroLibrary
-from miniresearch.pdf_extract import PDFExtractor
+from paper_compass.zotero_sqlite import ZoteroLibrary
+from paper_compass.pdf_extract import PDFExtractor
 
 
 def main():

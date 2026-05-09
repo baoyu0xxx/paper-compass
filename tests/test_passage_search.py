@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from miniresearch.filters import search_passages, _keyword_search_passages
+from paper_compass.search import search_passages, _keyword_search_passages
 
 
 def _write_library(path: Path):

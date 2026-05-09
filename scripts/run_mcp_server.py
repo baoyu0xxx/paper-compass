@@ -34,8 +34,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from miniresearch.mcp_server import handle_tool
-from miniresearch.mcp_contracts import list_tools, tool_names
+from paper_compass.mcp_server import handle_tool
+from paper_compass.mcp_contracts import list_tools, tool_names
 
 
 def _parse_filters(args) -> dict:

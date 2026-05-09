@@ -69,7 +69,7 @@ python eval/run_eval.py -v
 | Python ≥ 3.11 | 使用 `python3 --version` 检查 |
 | Zotero 论文库 | 可选 — 支持使用预提取的文本文件 |
 | LLM API 密钥 | Wiki 生成需要 OpenAI 兼容端点（`LLM_BASE_URL` + `LLM_API_KEY`） |
-| 嵌入服务 API 密钥 | 火山引擎多模态嵌入（`VOLC_EMBED_*` 系列变量），或本地模型 |
+| 嵌入服务 API 密钥 | 支持 OpenAI-compatible 及火山引擎多模态嵌入 |
 
 ### 从源码安装
 
@@ -91,12 +91,23 @@ pip install -e ".[paperqa]" # 含 PaperQA5 集成（可选）
 |------|----------|------|
 | `LLM_BASE_URL` | 是 | LLM API 基础 URL |
 | `LLM_API_KEY` | 是 | LLM API 密钥 |
-| `VOLC_EMBED_BASE_URL` | 是 | 火山引擎多模态嵌入端点 |
-| `VOLC_EMBED_API_KEY` | 是 | 火山引擎 API 密钥 |
-| `VOLC_EMBED_MODEL` | 是 | 嵌入模型端点 ID（如 `ep-20260420154519-xxxxx`） |
+| `EMBED_BASE_URL` | 是 | 嵌入 API 基础 URL（OpenAI-compatible） |
+| `EMBED_API_KEY` | 是 | 嵌入 API 密钥 |
+| `EMBED_MODEL` | 否 | 嵌入模型名称（可选，默认见 `providers.yaml`） |
+| `VOLC_EMBED_BASE_URL` | 否 | 火山引擎多模态嵌入端点（备选方案） |
+| `VOLC_EMBED_API_KEY` | 否 | 火山引擎 API 密钥 |
+| `VOLC_EMBED_MODEL` | 否 | 火山引擎嵌入模型端点 ID |
 | `PAPERQA_BASE_URL` | 可选 | PaperQA5 全文 RAG 端点 |
 | `PAPERQA_API_KEY` | 可选 | PaperQA5 API 密钥 |
 | `PAPERQA_MODEL` | 可选 | PaperQA5 模型名称 |
+
+### 嵌入提供方切换
+
+默认使用标准 OpenAI-compatible 嵌入 API（`EMBED_BASE_URL` + `EMBED_API_KEY`）。如需切换提供方：
+
+- **OpenAI**: 在 `.env` 中设置 `EMBED_BASE_URL` 和 `EMBED_API_KEY`，模型通过 `EMBED_MODEL` 覆盖或使用 `providers.yaml` 中的默认值
+- **火山引擎**: 在 `.env` 中设置 `VOLC_EMBED_*` 系列变量，然后修改 `configs/providers.yaml` 中 `roles.pdf_embedding` 和 `roles.wiki_embedding` 指向 `embedding_volcengine`
+- **本地模型**: 无需 API，`build_index.py` 在云端不可用时自动回退到 `bge-base`
 
 ### 提供方配置
 
@@ -211,22 +222,22 @@ Zotero SQLite + PDF
 
 ```
 paper-compass/
-├── src/miniresearch/       # 核心库（13 个模块）
-│   ├── filters.py          # search_library、search_passages、向量搜索
-│   ├── router.py           # ask_research 多层路由
-│   ├── mcp_server.py       # MCP 工具处理与分发
-│   ├── mcp_contracts.py    # 工具 schema 定义（唯一数据源）
-│   ├── vector_store.py     # ChromaDB 封装 + BM25 混合搜索
-│   ├── embedder.py         # 多提供方嵌入（火山引擎、本地模型）
-│   ├── wiki_gen.py         # 两阶段 LLM wiki 生成
-│   ├── wiki_store.py       # 线程安全的 wiki 写回
-│   ├── env_utils.py        # .env 加载（始终覆盖过期值）
-│   ├── config.py           # YAML 配置加载与 env 变量解析
-│   ├── models.py           # 响应数据类
-│   ├── index_manifest.py   # 基于指纹的增量索引
-│   ├── logging.py          # JSONL 跟踪日志
-│   ├── pdf_extract.py      # PyMuPDF + pdfplumber 文本提取
-│   └── zotero_sqlite.py    # Zotero SQLite 读取
+├── src/paper_compass/       # 核心库（15 个模块）
+│   ├── search.py            # search_library、search_passages、向量搜索
+│   ├── router.py            # ask_research 多层路由
+│   ├── mcp_server.py        # MCP 工具处理与分发
+│   ├── mcp_contracts.py     # 工具 schema 定义（唯一数据源）
+│   ├── vector_store.py      # ChromaDB 封装 + BM25 混合搜索
+│   ├── embedder.py          # 多提供方嵌入（OpenAI、火山引擎、本地模型）
+│   ├── wiki_gen.py          # 两阶段 LLM wiki 生成
+│   ├── wiki_store.py        # 线程安全的 wiki 写回
+│   ├── env_utils.py         # .env 加载（始终覆盖过期值）
+│   ├── config.py            # YAML 配置加载与 env 变量解析
+│   ├── types.py             # 响应数据类
+│   ├── index_manifest.py    # 基于指纹的增量索引
+│   ├── logging.py           # JSONL 跟踪日志
+│   ├── pdf_extract.py       # PyMuPDF + pdfplumber 文本提取
+│   └── zotero_sqlite.py     # Zotero SQLite 读取
 ├── scripts/                # CLI 入口（5 个脚本）
 ├── configs/                # YAML 配置模板
 ├── eval/                   # 12 查询评估基准

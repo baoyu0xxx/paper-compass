@@ -13,7 +13,8 @@ import re
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-from miniresearch.env_utils import load_project_env
+from paper_compass.env_utils import load_project_env
+from paper_compass.config import load_all_configs, get_provider_config
 
 
 # ── library.json access ──────────────────────────────────────────────────────
@@ -230,8 +231,8 @@ def vector_search(
 
     Auto-detects embedding model and dimension from existing collections.
     """
-    from miniresearch.embedder import Embedder
-    from miniresearch.vector_store import VectorStore
+    from paper_compass.embedder import Embedder
+    from paper_compass.vector_store import VectorStore
     import chromadb as _cdb
     from chromadb.config import Settings as _CSet
 
@@ -263,10 +264,14 @@ def vector_search(
         _client.clear_system_cache()
 
     embedder = Embedder()
-    embedder.configure_cloud("volcengine",
-        os.environ.get("VOLC_EMBED_BASE_URL", ""),
-        os.environ.get("VOLC_EMBED_API_KEY", ""),
-        os.environ.get("VOLC_EMBED_MODEL", ""),
+    load_project_env()
+    provider_cfg = get_provider_config("embedding_main")
+    provider_name = provider_cfg.get("provider", "openai")
+    embedder.configure_cloud(
+        provider_name,
+        provider_cfg.get("base_url", ""),
+        provider_cfg.get("api_key", ""),
+        provider_cfg.get("model", ""),
         actual_dim)
 
     store = VectorStore(db_path=db_path, collection_name=collection,

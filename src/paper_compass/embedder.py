@@ -166,7 +166,7 @@ class Embedder:
         all_vectors: List[List[float]] = []
 
         # Volcengine multimodal only supports 1 text per request — parallelize
-        is_multimodal = "volces" in cfg.get("base_url", "") or "multimodal" in cfg.get("base_url", "")
+        is_multimodal = cfg.get("provider") == "volcengine"
         if is_multimodal:
             import concurrent.futures
             with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
@@ -198,7 +198,7 @@ class Embedder:
         api_key = cfg["api_key"]
 
         # Volcengine multimodal format
-        if "volces" in url or "multimodal" in url:
+        if cfg.get("provider") == "volcengine":
             payload = json.dumps({
                 "model": model,
                 "input": [{"type": "text", "text": t} for t in texts],

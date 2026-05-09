@@ -124,6 +124,8 @@ def get_provider_config(
             }[key]
             value = os.environ.get(env_name, "")
             if value:
+            # If env var is empty/falsy, keep the existing default value
+            # (provider.yaml's "model" field serves as the default)
                 provider[target_field] = value
 
     # Resolve api_key_env
@@ -131,6 +133,8 @@ def get_provider_config(
         env_name = provider.pop("api_key_env")
         value = os.environ.get(env_name, "")
         if value:
+            # If env var is empty/falsy, keep the existing default value
+            # (provider.yaml's "model" field serves as the default)
             provider["api_key"] = value
 
     return provider

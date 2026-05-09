@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict
 
-from miniresearch.config import load_all_configs
+from paper_compass.config import load_all_configs
 
 
 DEFAULT_TRACE_CONFIG = {

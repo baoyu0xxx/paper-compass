@@ -67,7 +67,7 @@ python eval/run_eval.py -v
 | Python ≥ 3.11 | Check with `python3 --version` |
 | Zotero library | Optional — works with pre-extracted text files |
 | LLM API key | Wiki generation via OpenAI-compatible endpoint (`LLM_BASE_URL` + `LLM_API_KEY`) |
-| Embedding API key | Volcengine multimodal (`VOLC_EMBED_BASE_URL` + `VOLC_EMBED_API_KEY` + `VOLC_EMBED_MODEL`) or local models |
+| Embedding API key | OpenAI-compatible or Volcengine multimodal, or local models |
 
 ### From Source
 
@@ -89,9 +89,12 @@ Copy `.env.example` to `.env` and fill in your values:
 |----------|----------|-------------|
 | `LLM_BASE_URL` | Yes | LLM API base URL for wiki generation |
 | `LLM_API_KEY` | Yes | LLM API key |
-| `VOLC_EMBED_BASE_URL` | Yes | Volcengine multimodal embedding endpoint |
-| `VOLC_EMBED_API_KEY` | Yes | Volcengine API key |
-| `VOLC_EMBED_MODEL` | Yes | Embedding model endpoint ID (e.g., `ep-20260420154519-xxxxx`) |
+| `EMBED_BASE_URL` | Yes | Embedding API base URL (OpenAI-compatible) |
+| `EMBED_API_KEY` | Yes | Embedding API key |
+| `EMBED_MODEL` | No | Embedding model name (optional, defaults in `providers.yaml`) |
+| `VOLC_EMBED_BASE_URL` | No | Volcengine multimodal embedding endpoint (alternative) |
+| `VOLC_EMBED_API_KEY` | No | Volcengine API key |
+| `VOLC_EMBED_MODEL` | No | Volcengine embedding model endpoint ID |
 | `PAPERQA_BASE_URL` | Optional | PaperQA5 endpoint for full PDF RAG |
 | `PAPERQA_API_KEY` | Optional | PaperQA5 API key |
 | `PAPERQA_MODEL` | Optional | PaperQA5 model name |
@@ -209,7 +212,7 @@ Zotero SQLite + PDFs
 
 ```
 paper-compass/
-├── src/miniresearch/       # Core library (13 modules)
+├── src/paper_compass/       # Core library (15 modules)
 │   ├── filters.py          # search_library, search_passages, vector_search
 │   ├── router.py           # ask_research multi-layer routing
 │   ├── mcp_server.py       # MCP tool handlers + dispatch

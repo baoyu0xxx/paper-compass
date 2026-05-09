@@ -8,11 +8,11 @@ from types import SimpleNamespace
 
 import pytest
 
-from miniresearch.filters import (
+from paper_compass.search import (
     _postprocess_wiki_results,
     _dedupe_pdf_chunks_by_item,
 )
-from miniresearch.vector_store import VectorStore
+from paper_compass.vector_store import VectorStore
 
 SCRIPT_PATH = Path(__file__).resolve().parents[1] / "scripts" / "build_index.py"
 
@@ -200,7 +200,7 @@ class TestFrontmatterStripping:
 class TestPagePathInRouter:
     def test_ask_research_returns_real_page_path_not_chunk_id(self):
         """Simulate vector_search returning metadata; verify page_path is correct."""
-        from miniresearch.router import ask_research
+        from paper_compass.router import ask_research
 
         # We can't easily mock vector_search here, but we can verify that
         # the wiki_context construction uses metadata.page_path.
@@ -214,7 +214,7 @@ class TestPagePathInRouter:
 
     def test_mcp_search_wiki_returns_page_type_and_section(self):
         """Smoke test: search_wiki should include page_type and section in results."""
-        from miniresearch.mcp_server import handle_tool
+        from paper_compass.mcp_server import handle_tool
 
         result = handle_tool("search_wiki", {
             "query": "test",

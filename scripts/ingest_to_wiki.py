@@ -34,9 +34,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from miniresearch.env_utils import load_project_env
-from miniresearch.wiki_gen import WikiGenerator
-from miniresearch.wiki_store import save_query_to_wiki
+from paper_compass.env_utils import load_project_env
+from paper_compass.wiki_gen import WikiGenerator
+from paper_compass.wiki_store import save_query_to_wiki
 
 
 # ── pre-filtering ───────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ def _process_one(
         paper_text = text_file.read_text(encoding="utf-8")
     else:
         try:
-            from miniresearch.pdf_extract import PDFExtractor
+            from paper_compass.pdf_extract import PDFExtractor
             extractor = PDFExtractor(pdf_path)
             paper_text = extractor.extract_all_text()
         except Exception as e:

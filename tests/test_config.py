@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from miniresearch.config import (
+from paper_compass.config import (
     load_yaml_config,
     load_all_configs,
     get_provider_config,
@@ -126,3 +126,63 @@ providers:
             configs = load_all_configs(tmpdir)
             with pytest.raises(KeyError, match="nonexistent"):
                 get_provider_config("nonexistent", configs)
+
+    def test_model_env_overrides_default(self, monkeypatch):
+        """model_env should override the default 'model' field when env var is set."""
+        import tempfile
+        monkeypatch.setenv("TEST_MODEL_OVERRIDE", "custom-model-v2")
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                Path(tmpdir, "providers.yaml").write_text(
+                    "version: 1\n"
+                    "providers:\n"
+                    "  main:\n"
+                    "    api_style: openai-compatible\n"
+                    "    base_url: https://example.com/v1\n"
+                    "    model: text-embedding-3-small\n"
+                    "    model_env: TEST_MODEL_OVERRIDE\n"
+                )
+                configs = load_all_configs(tmpdir)
+                provider = get_provider_config("main", configs)
+                assert provider["model"] == "custom-model-v2"
+        finally:
+            monkeypatch.delenv("TEST_MODEL_OVERRIDE", raising=False)
+
+    def test_model_env_empty_falls_back_to_default(self, monkeypatch):
+        """When model_env is set but env var is empty, default model is kept."""
+        import tempfile
+        monkeypatch.setenv("TEST_MODEL_OVERRIDE", "")
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                Path(tmpdir, "providers.yaml").write_text(
+                    "version: 1\n"
+                    "providers:\n"
+                    "  main:\n"
+                    "    api_style: openai-compatible\n"
+                    "    base_url: https://example.com/v1\n"
+                    "    model: text-embedding-3-small\n"
+                    "    model_env: TEST_MODEL_OVERRIDE\n"
+                )
+                configs = load_all_configs(tmpdir)
+                provider = get_provider_config("main", configs)
+                assert provider["model"] == "text-embedding-3-small"
+        finally:
+            monkeypatch.delenv("TEST_MODEL_OVERRIDE", raising=False)
+
+    def test_provider_field_preserved(self):
+        """New 'provider' field should be accessible from config."""
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, "providers.yaml").write_text(
+                "version: 1\n"
+                "providers:\n"
+                "  main:\n"
+                "    provider: openai\n"
+                "    api_style: openai-compatible\n"
+                "    base_url: https://api.example.com/v1\n"
+                "    model: test-model\n"
+            )
+            configs = load_all_configs(tmpdir)
+            provider = get_provider_config("main", configs)
+            assert provider.get("provider") == "openai"
+            assert provider["model"] == "test-model"
