@@ -59,6 +59,23 @@ TOOL_CONTRACTS: List[Dict[str, Any]] = [
         },
     },
     {
+        "name": "search_passages",
+        "description": "Search for original text passages matching a keyword or brief expression, enriched with paper metadata",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Keyword or short phrase to search for"},
+                "search_mode": {"type": "string", "enum": ["semantic", "keyword", "hybrid"], "default": "semantic"},
+                "limit": {"type": "integer", "default": 10},
+                "filters": {"type": "object"},
+                "db_path": {"type": "string", "default": "data/vectordb"},
+                "text_dir": {"type": "string", "default": "data/texts"},
+                "library_path": {"type": "string", "default": "data/zotero-export/library.json"},
+            },
+            "required": ["query"],
+        },
+    },
+    {
         "name": "save_to_wiki",
         "description": "Save curated results to the research wiki",
         "inputSchema": {

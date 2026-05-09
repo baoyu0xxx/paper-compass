@@ -104,7 +104,8 @@ def ask_research(
         parts.append("\n[PDF evidence]")
         for p in pdf_chunks[:5]:
             meta = p.get("metadata", {})
-            parts.append(f"- [{meta.get('title', '?')}] p.{meta.get('page_num', '?')}: {p['document'][:200]}...")
+            passage_text = p['document']
+            parts.append(f"- [{meta.get('title', '?')}] p.{meta.get('page_num', '?')}: {passage_text[:300]}...")
             sources.append({"source_type": "pdf_doc", "id": meta.get("item_key", p["id"]),
                           "title": meta.get("title", "")})
 
@@ -143,7 +144,9 @@ def ask_research(
             "docs_used": [{"doc_id": m["doc_id"], "title": m["title"],
                           "year": m.get("year")} for m in lib_results[:5]],
             "evidence_snippets": [{"doc_id": p.get("metadata", {}).get("item_key", ""),
-                                  "snippet": p["document"][:300]}
+                                  "title": p.get("metadata", {}).get("title", ""),
+                                  "page_num": p.get("metadata", {}).get("page_num"),
+                                  "passage": p["document"]}
                                  for p in pdf_chunks[:5]],
         },
         "suggested_writeback": {

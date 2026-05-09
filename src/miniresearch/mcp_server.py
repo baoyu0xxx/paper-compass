@@ -6,7 +6,7 @@ import os
 import time
 from typing import Any, Dict, List, Optional
 
-from miniresearch.filters import get_paper_metadata, search_library
+from miniresearch.filters import get_paper_metadata, search_library, search_passages
 from miniresearch.logging import emit_trace
 from miniresearch.mcp_contracts import accepted_params, required_params
 from miniresearch.models import UnifiedResponse
@@ -188,12 +188,50 @@ def _tool_save_to_wiki(
     ).to_dict()
 
 
+def _tool_search_passages(
+    query: str,
+    search_mode: str = "semantic",
+    limit: int = 10,
+    filters: Optional[Dict[str, Any]] = None,
+    db_path: str = "data/vectordb",
+    text_dir: str = "data/texts",
+    library_path: str = "data/zotero-export/library.json",
+) -> Dict[str, Any]:
+    try:
+        results = search_passages(
+            query=query,
+            search_mode=search_mode,
+            limit=limit,
+            filters=filters,
+            db_path=db_path,
+            text_dir=text_dir,
+            library_path=library_path,
+        )
+    except Exception as e:
+        return UnifiedResponse.error("search_passages", [str(e)]).to_dict()
+
+    confidence = "high" if results and results[0]["score"] > 0.5 else "medium" if results else "low"
+    return UnifiedResponse.success(
+        tool="search_passages",
+        data={
+            "matches": results,
+            "search_mode_used": search_mode,
+            "query_interpretation": f"{search_mode} passage search",
+        },
+        mode_used=search_mode,
+        confidence=confidence,
+        sources=[{"source_type": "pdf_doc", "id": m["doc_id"], "title": m["title"]} for m in results],
+        next_action="Use ask_research for deeper analysis" if results else "Try broadening keywords or switch to hybrid mode",
+    ).to_dict()
+
+
 _HANDLERS = {
     "search_wiki": _tool_search_wiki,
     "search_library": _tool_search_library,
     "ask_research": _tool_ask_research,
     "get_paper_metadata": _tool_get_paper_metadata,
     "save_to_wiki": _tool_save_to_wiki,
+    "search_passages": _tool_search_passages,
 }
 
 

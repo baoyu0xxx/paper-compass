@@ -11,6 +11,7 @@ def test_tools_list_contains_expected_tools():
         "search_library",
         "ask_research",
         "get_paper_metadata",
+        "search_passages",
         "save_to_wiki",
     ]
 

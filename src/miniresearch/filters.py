@@ -257,6 +257,208 @@ def _cap_results_per_group(
     return deduped
 
 
+# ── search_passages ──────────────────────────────────────────────────────────
+
+def search_passages(
+    query: str,
+    search_mode: str = "semantic",
+    limit: int = 10,
+    filters: Optional[Dict[str, Any]] = None,
+    db_path: str = "data/vectordb",
+    text_dir: str = "data/texts",
+    library_path: str = "data/zotero-export/library.json",
+) -> List[Dict[str, Any]]:
+    """Search for original passages matching a keyword or brief expression.
+
+    Returns matched **original text paragraphs** enriched with paper metadata
+    (title, authors, year, etc.).
+
+    Two search modes:
+    - ``"semantic"`` (default): vector search over ChromaDB papers collection.
+    - ``"keyword"``: full-text keyword search over data/texts/*.txt.
+    - ``"hybrid"``: both, merged and deduplicated.
+
+    Args:
+        query: Keyword or short phrase to search for.
+        search_mode: ``"semantic"`` | ``"keyword"`` | ``"hybrid"``.
+        limit: Maximum number of results.
+        filters: Optional metadata filters (collections, tags, authors, year_from,
+                 year_to).  Only ``"semantic"`` / ``"hybrid"`` honours ChromaDB-side
+                 filters; ``"keyword"`` does client-side post-filtering.
+        db_path: Path to ChromaDB directory (semantic mode).
+        text_dir: Directory containing extracted .txt files (keyword mode).
+        library_path: Path to library.json for metadata enrichment.
+
+    Returns:
+        List of passage results, each containing:
+          - doc_id, title, authors, year, doi
+          - passage (original text paragraph)
+          - score, search_mode, match_type
+    """
+    results: List[Dict[str, Any]] = []
+
+    if search_mode in ("semantic", "hybrid"):
+        pdf_chunks = vector_search(query, collection="papers", k=limit * 2, db_path=db_path)
+        deduped = _dedupe_pdf_chunks_by_item(pdf_chunks, max_per_item=2)
+        for chunk in deduped:
+            results.append({
+                "doc_id": chunk.get("metadata", {}).get("item_key", ""),
+                "title": chunk.get("metadata", {}).get("title", ""),
+                "passage": chunk.get("document", ""),
+                "score": chunk.get("score", 0.0),
+                "page_num": chunk.get("metadata", {}).get("page_num"),
+                "search_mode": "semantic",
+                "match_type": "vector",
+            })
+
+    if search_mode in ("keyword", "hybrid"):
+        kw_results = _keyword_search_passages(query, text_dir, limit * 2)
+        for kw in kw_results:
+            kw["search_mode"] = "keyword"
+            kw["match_type"] = "fulltext"
+            # Avoid exact duplicates already in results
+            dup = False
+            for r in results:
+                if r.get("doc_id") == kw.get("doc_id") and r.get("passage", "")[:80] == kw.get("passage", "")[:80]:
+                    dup = True
+                    break
+            if not dup:
+                results.append(kw)
+
+    # Enrich with library metadata and apply filters
+    library = _load_library(library_path)
+    lib_by_key = {rec.get("key", ""): rec for rec in library}
+
+    enriched: List[Dict[str, Any]] = []
+    for r in results:
+        rec = lib_by_key.get(r.get("doc_id", ""), {})
+        enriched.append({
+            "doc_id": r.get("doc_id", "") or rec.get("key", ""),
+            "title": r.get("title") or rec.get("title", ""),
+            "authors": rec.get("authors", []),
+            "year": rec.get("year"),
+            "doi": rec.get("doi", ""),
+            "passage": r["passage"],
+            "page_num": r.get("page_num"),
+            "score": r.get("score", 0.0),
+            "search_mode": r.get("search_mode", ""),
+            "match_type": r.get("match_type", ""),
+            "collections": rec.get("collections", []),
+            "tags": rec.get("tags", []),
+        })
+
+    # Client-side filtering
+    if filters:
+        enriched = [e for e in enriched if _passes_enriched_filters(e, filters)]
+
+    # Sort by score descending, take top limit
+    enriched.sort(key=lambda x: x["score"], reverse=True)
+    enriched = enriched[:limit]
+
+    return enriched
+
+
+def _keyword_search_passages(
+    query: str,
+    text_dir: str = "data/texts",
+    limit: int = 20,
+) -> List[Dict[str, Any]]:
+    """Full-text keyword search over extracted .txt files.
+
+    Splits each file into paragraphs (blank-line-separated blocks), scores
+    them by keyword occurrence density, and returns the top matches.
+    """
+    from pathlib import Path
+    import re
+
+    txt_root = Path(text_dir)
+    if not txt_root.exists():
+        return []
+
+    keywords = [kw.lower() for kw in re.split(r"\s+", query.strip()) if kw]
+    if not keywords:
+        return []
+
+    scored: List[tuple] = []
+
+    for txt_path in txt_root.glob("*.txt"):
+        try:
+            text = txt_path.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            continue
+
+        # Derive a rough doc_id from filename (e.g. "ABC123.txt" -> "ABC123")
+        doc_id = txt_path.stem
+
+        # Split into paragraphs (blank line boundaries)
+        paragraphs = re.split(r"\n\s*\n", text)
+        for para in paragraphs:
+            para = para.strip()
+            if len(para) < 30:  # skip very short fragments
+                continue
+            para_lower = para.lower()
+            # Count distinct keywords found
+            hits = sum(1 for kw in keywords if kw in para_lower)
+            if hits == 0:
+                continue
+            # Density score: hits per 100 chars
+            density = hits / max(len(para), 1) * 100
+            scored.append((density + hits, doc_id, para[:800]))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    results = []
+    seen = set()
+    for _, doc_id, passage in scored:
+        # Dedupe by (doc_id, passage_prefix)
+        dedup_key = (doc_id, passage[:120])
+        if dedup_key in seen:
+            continue
+        seen.add(dedup_key)
+        results.append({
+            "doc_id": doc_id,
+            "title": "",
+            "passage": passage,
+            "score": round(_, 4),
+            "page_num": None,
+        })
+        if len(results) >= limit:
+            break
+
+    return results
+
+
+def _passes_enriched_filters(result: Dict[str, Any], filters: Dict[str, Any]) -> bool:
+    """Check metadata filters against an already-enriched passage result."""
+    if "collections" in filters and filters["collections"]:
+        rec_cols = set(c.lower() for c in result.get("collections", []))
+        filt_cols = set(c.lower() for c in filters["collections"])
+        if not rec_cols & filt_cols:
+            return False
+
+    if "tags" in filters and filters["tags"]:
+        rec_tags = set(t.lower() for t in result.get("tags", []))
+        filt_tags = set(t.lower() for t in filters["tags"])
+        if not rec_tags & filt_tags:
+            return False
+
+    if "authors" in filters and filters["authors"]:
+        rec_auth = set(a.lower() for a in result.get("authors", []))
+        filt_auth = set(a.lower() for a in filters["authors"])
+        if not rec_auth & filt_auth:
+            return False
+
+    year = result.get("year")
+    if year is not None:
+        if "year_from" in filters and filters["year_from"] is not None:
+            if year < filters["year_from"]:
+                return False
+        if "year_to" in filters and filters["year_to"] is not None:
+            if year > filters["year_to"]:
+                return False
+
+    return True
+
+
 def _postprocess_wiki_results(results: List[Dict[str, Any]], max_per_page: int = 2,
                                section_0_penalty: float = 0.92) -> List[Dict[str, Any]]:
     """Post-process wiki search results to reduce noise.
