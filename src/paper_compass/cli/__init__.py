@@ -2,6 +2,7 @@
 
 Usage:
     paper-compass init       Configure LLM and embedding providers
+    paper-compass update     Update to the latest version
     paper-compass validate   Test connectivity and configuration
 
 See `paper-compass <command> --help` for details.
@@ -12,7 +13,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from paper_compass.cli import configure, validate
+from paper_compass.cli import configure, update, validate
 
 
 def main() -> int:
@@ -28,6 +29,7 @@ def main() -> int:
     )
 
     configure.add_subcommand_parser(subparsers)
+    update.add_subcommand_parser(subparsers)
     validate.add_subcommand_parser(subparsers)
 
     if len(sys.argv) < 2:

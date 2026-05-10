@@ -219,11 +219,12 @@ mcp:
 python3 -m pytest tests/ -v
 ```
 
-All 102 tests must pass. If `test_env_utils.py` fails, check that the `.env` file has `LLM_BASE_URL` and `LLM_API_KEY` (not the old `MIMO_BASE_URL`/`XIAOMI_API_KEY`).
+All 159 tests must pass.
 
 New test files:
 - `tests/test_cli_arg_utils.py` — key=value parsing
 - `tests/test_cli_configure.py` — interactive + non-interactive init
+- `tests/test_cli_update.py` — update command tests
 - `tests/test_config.py` — $ENV_VAR resolution
 
 ## Dependencies
@@ -243,6 +244,7 @@ All declared in `pyproject.toml`:
 | `pyproject.toml` | Project metadata, version, dependencies |
 | `src/paper_compass/cli/__init__.py` | CLI entry point (`paper-compass`) |
 | `src/paper_compass/cli/configure.py` | `paper-compass init` command |
+| `src/paper_compass/cli/update.py` | `paper-compass update` command |
 | `src/paper_compass/cli/validate.py` | `paper-compass validate` command |
 | `src/paper_compass/config.py` | Config loader with `$ENV_VAR` resolution |
 | `src/paper_compass/env_utils.py` | `.env` loader (always overwrites stale values) |

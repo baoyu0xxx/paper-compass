@@ -4,11 +4,11 @@
 
 **Turn your Zotero library into a knowledge base AI agents can query directly**
 
-[![version](https://img.shields.io/badge/version-1.2.1-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.2.4-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 [![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)](LICENSE)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)](https://spec.modelcontextprotocol.io/)
-[![tests](https://img.shields.io/badge/tests-118_passed-d4785c?style=flat-square&labelColor=3a3026&color=d4785c)](https://github.com/baoyu0xxx/paper-compass/actions)
+[![tests](https://img.shields.io/badge/tests-159_passed-d4785c?style=flat-square&labelColor=3a3026&color=d4785c)](https://github.com/baoyu0xxx/paper-compass/actions)
 
 </div>
 
@@ -108,6 +108,67 @@ python scripts/build_index.py --wiki
 # 7. Verify
 python scripts/healthcheck.py --smoke
 python eval/run_eval.py -v
+```
+
+## Updating
+
+### Automatic Update (Recommended)
+
+```bash
+# Check for available updates
+paper-compass update --check
+
+# Update to the latest version
+paper-compass update
+
+# Update to a specific version
+paper-compass update --version v1.2.4
+
+# Simulate an update (preview changes only)
+paper-compass update --dry-run
+```
+
+`paper-compass update` automatically:
+- Fetches the latest code and switches to the target version
+- Reinstalls Python dependencies
+- Detects breaking changes (new required env vars, config format changes) and warns you
+- Runs `paper-compass validate` to verify API connectivity
+- Runs a quick test smoke check
+
+### Manual Update
+
+If automatic update is unavailable (offline, no git, etc.):
+
+```bash
+git fetch origin --tags
+git checkout v1.2.4          # or git pull origin main
+pip install -e .
+paper-compass validate        # verify config still works
+python3 -m pytest tests/ -x   # ensure tests pass
+```
+
+### Upgrade Notes
+
+> ⚠️ **Cross-version upgrades** (e.g. v1.1.x → v1.2.x) may involve config format changes and new env vars.
+>
+> - `.env` is gitignored — upgrades will never overwrite your private config
+> - Watch for ⚠ warnings in terminal output after upgrade — you may need to add new env vars
+> - If `validate` fails after upgrade, run `paper-compass init --force` to regenerate `.env`
+> - Backup before upgrading: `cp .env .env.backup`
+
+### Version Pinning
+
+Pin to a specific tag for production stability:
+
+```bash
+paper-compass update --version v1.2.4
+```
+
+To resume tracking the latest version:
+
+```bash
+git checkout main
+paper-compass update
 ```
 
 ## Installation
@@ -271,6 +332,9 @@ After installation, use the `paper-compass` command directly:
 # Interactive setup for LLM and embedding providers
 paper-compass init
 
+# Check for and apply updates
+paper-compass update
+
 # Validate configuration and API connectivity
 paper-compass validate
 ```
@@ -279,6 +343,7 @@ Detailed help:
 
 ```bash
 paper-compass init --help
+paper-compass update --help
 paper-compass validate --help
 ```
 
@@ -419,7 +484,7 @@ paper-compass/
 ├── eval/                   # 12-query evaluation benchmark
 ├── wiki/                   # LLM-generated knowledge base
 ├── data/                   # Generated data (vectordb, texts, zotero-export)
-├── tests/                  # pytest test suite (118 tests, all passing)
+├── tests/                  # pytest test suite (159 tests, all passing)
 └── pyproject.toml          # Project metadata + dependencies
 ```
 
@@ -429,7 +494,7 @@ paper-compass/
 
 ```bash
 pip install -e ".[dev]"
-python3 -m pytest tests/ -v         # run all tests (118)
+python3 -m pytest tests/ -v         # run all tests (159)
 python3 -m pytest tests/ -x         # stop on first failure
 python3 -m pytest tests/test_cli_arg_utils.py -v  # CLI argument parsing tests
 python3 -m pytest tests/test_cli_configure.py -v  # Configuration command tests

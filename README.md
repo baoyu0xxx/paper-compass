@@ -4,11 +4,11 @@
 
 **将你的 Zotero 论文库变成 AI Agent 可直接检索的知识库**
 
-[![version](https://img.shields.io/badge/version-1.2.1-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.2.4-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 [![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)](LICENSE)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)](https://spec.modelcontextprotocol.io/)
-[![tests](https://img.shields.io/badge/tests-118_passed-d4785c?style=flat-square&labelColor=3a3026&color=d4785c)](https://github.com/baoyu0xxx/paper-compass/actions)
+[![tests](https://img.shields.io/badge/tests-159_passed-d4785c?style=flat-square&labelColor=3a3026&color=d4785c)](https://github.com/baoyu0xxx/paper-compass/actions)
 
 </div>
 
@@ -108,6 +108,67 @@ python scripts/build_index.py --wiki
 # 7. 验证
 python scripts/healthcheck.py --smoke
 python eval/run_eval.py -v
+```
+
+## 更新
+
+### 自动更新（推荐）
+
+```bash
+# 检查是否有新版本可用
+paper-compass update --check
+
+# 更新到最新版本
+paper-compass update
+
+# 更新到指定版本
+paper-compass update --version v1.2.4
+
+# 模拟更新（查看变更但不执行）
+paper-compass update --dry-run
+```
+
+`paper-compass update` 会自动：
+- 拉取最新代码并切换到目标版本
+- 重新安装 Python 依赖
+- 检测断点变更（新增的必填环境变量、配置格式变化等）并给出提示
+- 运行 `paper-compass validate` 验证配置连通性
+- 运行测试冒烟检查
+
+### 手动更新
+
+如果你无法使用自动更新（离线、git 不可用等），可以手动操作：
+
+```bash
+git fetch origin --tags
+git checkout v1.2.4          # 或 git pull origin main
+pip install -e .
+paper-compass validate        # 验证配置仍然有效
+python3 -m pytest tests/ -x   # 确保测试通过
+```
+
+### 升级注意事项
+
+> ⚠️ **跨版本升级**（如 v1.1.x → v1.2.x）可能涉及配置格式变更和环境变量调整。
+>
+> - `.env` 文件不会被自动修改——它是 gitignored 的，升级不会覆盖你的私有配置
+> - 升级后请注意终端输出的 ⚠ 提示，检查是否需要添加新的环境变量
+> - 如果升级后 `validate` 失败，运行 `paper-compass init --force` 重新生成 `.env`
+> - 建议升级前备份：`cp .env .env.backup`
+
+### 版本锁定
+
+生产环境建议锁定到特定 tag 以确保稳定性：
+
+```bash
+paper-compass update --version v1.2.4
+```
+
+锁定后 `paper-compass update` 不会自动升级。要恢复跟随最新版本：
+
+```bash
+git checkout main
+paper-compass update
 ```
 
 ## 安装
@@ -419,7 +480,7 @@ paper-compass/
 ├── eval/                   # 12 查询评估基准
 ├── wiki/                   # LLM 生成的知识库
 ├── data/                   # 生成数据（vectordb、texts、zotero-export）
-├── tests/                  # pytest 测试套件（118 个测试，全部通过）
+├── tests/                  # pytest 测试套件（159 个测试，全部通过）
 └── pyproject.toml          # 项目元数据与依赖
 ```
 
@@ -429,7 +490,7 @@ paper-compass/
 
 ```bash
 pip install -e ".[dev]"
-python3 -m pytest tests/ -v         # 运行所有测试（118 个）
+python3 -m pytest tests/ -v         # 运行所有测试（159 个）
 python3 -m pytest tests/ -x         # 遇错即停
 python3 -m pytest tests/test_cli_arg_utils.py -v  # CLI 参数解析测试
 python3 -m pytest tests/test_cli_configure.py -v  # 配置命令测试
