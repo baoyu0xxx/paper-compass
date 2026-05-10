@@ -29,7 +29,7 @@ DEFAULT_EMBED_MODEL = "text-embedding-3-small"
 DEFAULT_VOLC_EMBED_BASE_URL = (
     "https://ark.cn-beijing.volces.com/api/v3/embeddings/multimodal"
 )
-DEFAULT_VOLC_EMBED_MODEL = "ep-20260420154519-9w64q"  # doubao-embedding-vision-250615
+DEFAULT_VOLC_EMBED_MODEL = "doubao-embedding-vision-250615"  # example — replace with your own endpoint ID
 
 
 # ── Interactive prompts ────────────────────────────────────────────────────

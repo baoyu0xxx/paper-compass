@@ -3,8 +3,6 @@
 Tests the lm-eval-harness-adapted key=value parsing logic.
 """
 
-from __future__ import annotations
-
 import argparse
 import tempfile
 from pathlib import Path

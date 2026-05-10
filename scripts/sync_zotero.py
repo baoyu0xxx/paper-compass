@@ -4,7 +4,8 @@ Zotero sync for paper-compass — reads SQLite, extracts PDF text, outputs libra
 
 Usage:
     python scripts/sync_zotero.py
-        [--db-path /mnt/d/zotero_backup/zotero_readonly.sqlite]
+        [--db-path /path/to/zotero.sqlite]
+        [--storage-path /path/to/storage]
         [--out-dir ./data/zotero-export]
         [--extract-text]          # also extract and cache PDF text
         [--text-dir ./data/texts]
@@ -17,21 +18,35 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from paper_compass.zotero_sqlite import ZoteroLibrary
 from paper_compass.pdf_extract import PDFExtractor
+from paper_compass.zotero_paths import ZoteroSourceNotFoundError, resolve_zotero_source
+from paper_compass.zotero_sqlite import ZoteroLibrary
 
 
 def main():
     parser = argparse.ArgumentParser(description="Sync Zotero metadata and PDFs for paper-compass")
-    parser.add_argument("--db-path", default="/mnt/d/zotero_backup/zotero_readonly.sqlite")
+    parser.add_argument(
+        "--db-path",
+        default=None,
+        help="Explicit path to zotero.sqlite or zotero_readonly.sqlite. Overrides auto-discovery.",
+    )
+    parser.add_argument(
+        "--storage-path",
+        default=None,
+        help="Explicit path to Zotero storage/ directory. Overrides the default sibling storage path.",
+    )
     parser.add_argument("--out-dir", default="./data/zotero-export")
     parser.add_argument("--extract-text", action="store_true", help="Extract and cache PDF full text")
     parser.add_argument("--text-dir", default="./data/texts")
     args = parser.parse_args()
 
-    db_path = Path(args.db_path)
-    if not db_path.exists():
-        print(f"ERROR: Zotero database not found: {db_path}", file=sys.stderr)
+    try:
+        source = resolve_zotero_source(
+            db_path=args.db_path,
+            storage_path=args.storage_path,
+        )
+    except ZoteroSourceNotFoundError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
 
     out_dir = Path(args.out_dir)
@@ -42,8 +57,10 @@ def main():
         text_dir.mkdir(parents=True, exist_ok=True)
 
     # ── Read from Zotero SQLite ──
-    print(f"Reading Zotero database: {db_path}")
-    lib = ZoteroLibrary(str(db_path))
+    print(f"Reading Zotero database: {source.db_path}")
+    print(f"  Storage directory: {source.storage_path}")
+    print(f"  Discovery source:  {source.source_kind}")
+    lib = ZoteroLibrary(str(source.db_path), storage_path=str(source.storage_path))
     items = lib.get_all_items_with_pdfs()
     lib.close()
 

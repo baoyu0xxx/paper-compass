@@ -3,8 +3,6 @@
 Tests WikiGenerator prompt resolution and CLI --wiki-prompt flag.
 """
 
-from __future__ import annotations
-
 import os
 import tempfile
 from pathlib import Path

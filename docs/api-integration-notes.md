@@ -9,10 +9,10 @@ paper-compass init       # interactive setup
 paper-compass validate   # test connectivity
 ```
 
-## Mimo LLM (Wiki Generation)
+## LLM (Wiki Generation)
 
-- Base URL: `https://token-plan-cn.xiaomimimo.com/v1`
-- Model: `mimo-v2.5-pro` (default in `providers.yaml`; override via `LLM_MODEL` env var)
+- Base URL: configured via `LLM_BASE_URL` (any OpenAI-compatible endpoint)
+- Model: `deepseek-v4-flash` (default in `providers.yaml`; override via `LLM_MODEL` env var)
 - API style: OpenAI-compatible chat completions
 - Endpoint: `{base_url}/chat/completions`
 - Auth: Bearer token (env: `LLM_API_KEY`, supports `$ENV_VAR` syntax e.g. `$OPENAI_API_KEY`)
@@ -21,7 +21,7 @@ paper-compass validate   # test connectivity
 ## Volcengine Embedding (Doubao)
 
 - Base URL: `https://ark.cn-beijing.volces.com/api/v3/embeddings/multimodal`
-- Model: `ep-20260420154519-9w64q` → `doubao-embedding-vision-250615`
+- Model: `doubao-embedding-vision-250615` (or your custom endpoint ID)
 - API style: Multimodal embedding (text + image)
 - **Required input format**: `{"model": "...", "input": [{"type": "text", "text": "..."}]}`
 - Auth: Bearer token (env: `VOLC_EMBED_API_KEY`, supports `$ENV_VAR` syntax e.g. `$VOLC_API_KEY`)
@@ -33,9 +33,9 @@ paper-compass validate   # test connectivity
 
 ## PaperQA Answer Provider
 
-- Uses same Mimo endpoint as wiki generation
-- Base URL: `https://token-plan-cn.xiaomimimo.com/v1`
-- Model: configurable via `PAPERQA_MODEL` env
+- Uses the same LLM endpoint as wiki generation
+- Base URL: configured via `PAPERQA_BASE_URL`
+- Model: configurable via `PAPERQA_MODEL` env (default: `gpt-4o`)
 - Auth: `PAPERQA_API_KEY` (env, supports `$ENV_VAR` syntax)
 
 ## Provider Cascade (Embedding)

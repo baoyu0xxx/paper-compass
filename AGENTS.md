@@ -53,7 +53,7 @@ EMBED_API_KEY=<your embedding API key>  # or $MY_EMBED_KEY
 # EMBED_MODEL=text-embedding-3-small  # optional
 ```
 
-The LLM endpoint must be OpenAI-compatible (chat/completions format). Model defaults to `mimo-v2.5-pro` (configurable in `configs/providers.yaml`).
+The LLM endpoint must be OpenAI-compatible (chat/completions format). Model is configured via the `LLM_MODEL` env var in `.env` (no hardcoded fallback — missing model raises an error).
 
 Embedding defaults to standard OpenAI-compatible format (`text-embedding-3-small`). To use Volcengine, set `VOLC_EMBED_*` variables instead (the system cascades automatically: main → volcengine → local `bge-base`).
 
@@ -62,7 +62,7 @@ Embedding defaults to standard OpenAI-compatible format (`text-embedding-3-small
 ```bash
 paper-compass init \
   --llm-args base_url=https://api.openai.com/v1,model=gpt-4o \
-  --embed-args api_style=volcengine,model=ep-20260420154519-9w64q
+  --embed-args api_style=volcengine,model=doubao-embedding-vision-250615
 ```
 
 ### 3. Verify configuration
@@ -77,7 +77,7 @@ Should show all green (✓) for dotenv, llm, and embed checks.
 
 **Option A — from Zotero SQLite:**
 
-The `sync_zotero.py` script reads Zotero's SQLite database directly. It looks for `zotero.sqlite` in default Zotero data locations:
+The `sync_zotero.py` script reads Zotero's SQLite database directly. Resolution order is: explicit `--db-path` → `ZOTERO_SQLITE_PATH` → default Zotero data directories → common backup directories. Within one directory it prefers `zotero_readonly.sqlite` over `zotero.sqlite`, and you can override the inferred `storage/` path with `--storage-path`.
 
 ```bash
 python scripts/sync_zotero.py --extract-text
@@ -85,9 +85,17 @@ python scripts/sync_zotero.py --extract-text
 
 This produces `data/zotero-export/library.json` and `data/texts/*.txt`.
 
-If the SQLite file is not found automatically, you can specify it:
+If the SQLite file is not found automatically, you can specify it explicitly:
 ```bash
 python scripts/sync_zotero.py --db-path /path/to/zotero.sqlite --extract-text
+```
+
+If the SQLite file and `storage/` directory are not siblings, override both:
+```bash
+python scripts/sync_zotero.py \
+  --db-path /path/to/zotero.sqlite \
+  --storage-path /path/to/storage \
+  --extract-text
 ```
 
 **Option B — from pre-extracted data:**

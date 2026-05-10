@@ -115,7 +115,13 @@ class WikiGenerator:
 
         base_url = self._provider.get("base_url", "").rstrip("/")
         api_key = self._provider.get("api_key", "")
-        model = self._provider.get("model", "mimo-v2.5-pro")
+        model = self._provider.get("model", "")
+        if not model:
+            raise RuntimeError(
+                "No LLM model configured for wiki generation. "
+                "Set LLM_MODEL in your .env file (e.g. LLM_MODEL=deepseek-v4-flash). "
+                "Or run: paper-compass init"
+            )
 
         messages = []
         if system_prompt.strip():

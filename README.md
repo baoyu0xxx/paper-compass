@@ -91,7 +91,11 @@ paper-compass validate
 
 # 4. 准备数据
 python scripts/sync_zotero.py --extract-text
+# → 自动按以下顺序探索：显式 --db-path > ZOTERO_SQLITE_PATH > 默认 Zotero 目录 > 备份目录
 # → data/zotero-export/library.json + data/texts/*.txt
+
+#    若数据库与 storage/ 不在同一目录：
+#    python scripts/sync_zotero.py --db-path /path/to/zotero.sqlite --storage-path /path/to/storage --extract-text
 
 # 5. 构建检索索引
 python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
@@ -143,7 +147,7 @@ paper-compass init
 # 非交互式模式（用于脚本化部署）
 paper-compass init \
   --llm-args base_url=https://api.openai.com/v1,model=gpt-4o \
-  --embed-args api_style=volcengine,model=ep-20260420154519-9w64q \
+  --embed-args api_style=volcengine,model=doubao-embedding-vision-250615 \
   --wiki-prompt economics
 
 # 覆盖已有 .env

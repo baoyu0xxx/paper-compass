@@ -1,8 +1,8 @@
 version: 1
 
 paths:
-  zotero_pdf_root: /mnt/d/zotero_backup
-  zotero_sqlite_path: /mnt/d/zotero_backup/zotero_readonly.sqlite
+  zotero_pdf_root: $ZOTERO_PDF_ROOT
+  zotero_sqlite_path: $ZOTERO_SQLITE_PATH
 
   export_dir: ./data/zotero-export
   manifest_path: ./data/zotero-export/manifest.csv

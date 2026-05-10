@@ -91,7 +91,11 @@ paper-compass validate
 
 # 4. Prepare data
 python scripts/sync_zotero.py --extract-text
+# → auto-discovery order: explicit --db-path > ZOTERO_SQLITE_PATH > default Zotero dirs > backup dirs
 # → data/zotero-export/library.json + data/texts/*.txt
+
+#    If the database and storage/ are not siblings:
+#    python scripts/sync_zotero.py --db-path /path/to/zotero.sqlite --storage-path /path/to/storage --extract-text
 
 # 5. Build search index
 python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
@@ -143,7 +147,7 @@ Step through prompts to configure your LLM (wiki generation) and Embedding provi
 # Non-interactive mode (for scripted deployment)
 paper-compass init \
   --llm-args base_url=https://api.openai.com/v1,model=gpt-4o \
-  --embed-args api_style=volcengine,model=ep-20260420154519-9w64q \
+  --embed-args api_style=volcengine,model=doubao-embedding-vision-250615 \
   --wiki-prompt economics
 
 # Overwrite existing .env

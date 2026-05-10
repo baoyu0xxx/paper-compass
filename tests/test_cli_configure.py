@@ -3,8 +3,6 @@
 Tests the interactive and non-interactive configuration modes.
 """
 
-from __future__ import annotations
-
 import os
 import tempfile
 from pathlib import Path
@@ -60,12 +58,12 @@ class TestEmbedArgsToEnv:
             "api_style": "volcengine",
             "base_url": "https://ark.cn-beijing.volces.com/api/v3/embeddings/multimodal",
             "api_key": "$VOLC_API_KEY",
-            "model": "ep-20260420154519-9w64q",
+            "model": "doubao-embedding-vision-250615",
         })
         assert result == {
             "VOLC_EMBED_BASE_URL": "https://ark.cn-beijing.volces.com/api/v3/embeddings/multimodal",
             "VOLC_EMBED_API_KEY": "$VOLC_API_KEY",
-            "VOLC_EMBED_MODEL": "ep-20260420154519-9w64q",
+            "VOLC_EMBED_MODEL": "doubao-embedding-vision-250615",
         }
 
     def test_default_style_is_openai(self):
