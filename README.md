@@ -5,10 +5,9 @@
 **将你的 Zotero 论文库变成 AI Agent 可直接检索的知识库**
 
 [![version](https://img.shields.io/badge/version-1.2.4-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
-[![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)](LICENSE)
+![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
-[![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)](https://spec.modelcontextprotocol.io/)
-[![tests](https://img.shields.io/badge/tests-159_passed-d4785c?style=flat-square&labelColor=3a3026&color=d4785c)](https://github.com/baoyu0xxx/paper-compass/actions)
+![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
 
 </div>
 
@@ -25,22 +24,9 @@
 - **正文不可检索**——Zotero 可以搜标题、作者、关键词，但 PDF 正文里的研究问题、数据、方法、发现仍然散落在成百上千个文件中。写文献综述时找不到"我好像读过某篇论文说了某个观点"——只能靠记忆，或者一篇篇重新翻。
 - **知识无法沉淀**——每篇论文读完后，理解和笔记留在脑子里。下次问同一个问题时，还得从原始 PDF 重新推导。
 
-近两年出现了两个优秀的开源项目试图解决其中一部分：
+### paper-compass 的设计思路
 
-| | [RAG-Assistant-for-Zotero](https://github.com/aahepburn/RAG-Assistant-for-Zotero) | [llm-wiki-skill](https://github.com/sdyckjq-lab/llm-wiki-skill) | **paper-compass** |
-|---|---|---|---|
-| 面向用户 | 人类（桌面 GUI 应用） | Agent（技能安装） | **Agent（MCP 标准协议）** |
-| 核心能力 | RAG 对话式论文问答 | LLM wiki 知识编译 | **RAG 检索 + LLM wiki 双引擎** |
-| 检索方式 | 语义 + BM25 + 重排序 | 向量搜索 | 语义 + BM25 + 中文分词 + 元数据 |
-| 知识持久化 | 无（每次查询时动态关联） | wiki markdown 页面 | **wiki markdown + ChromaDB 向量索引** |
-| 协议标准 | 独立应用（无标准接口） | 技能文件（平台特定） | **MCP 2024-11-05（跨 Agent 框架）** |
-| 增量索引 | ❌ | N/A | ✅ 指纹清单变更检测 |
-| CLI 配置 | GUI 设置 | bash install.sh | **`paper-compass init` + `validate`** |
-| 中文学术优化 | ❌ | 部分 | ✅ 分词检索 + 经济学预设 + 火山引擎嵌入 |
-
-### paper-compass 做了什么不同的事情
-
-**它是唯一一个将 RAG 原文检索和 LLM wiki 知识编译结合起来、并通过 MCP 标准协议专为 AI Agent 设计的个人学术知识库系统。**
+paper-compass 将 RAG 原文检索与 LLM wiki 知识编译结合起来，通过 MCP 标准协议为 AI Agent 提供个人学术知识库访问能力。
 
 三个设计原则：
 
@@ -484,18 +470,17 @@ paper-compass/
 └── pyproject.toml          # 项目元数据与依赖
 ```
 
-## 开发
+## 开发与调试
+
+<details>
+<summary>点击展开测试与评估命令</summary>
 
 ### 运行测试
 
 ```bash
 pip install -e ".[dev]"
-python3 -m pytest tests/ -v         # 运行所有测试（159 个）
+python3 -m pytest tests/ -v         # 运行所有测试
 python3 -m pytest tests/ -x         # 遇错即停
-python3 -m pytest tests/test_cli_arg_utils.py -v  # CLI 参数解析测试
-python3 -m pytest tests/test_cli_configure.py -v  # 配置命令测试
-python3 -m pytest tests/test_incremental_index.py -v  # 增量索引测试
-python3 -m pytest tests/test_wiki_prompt_resolution.py -v  # Wiki 提示词解析测试
 ```
 
 ### 运行评估
@@ -505,6 +490,8 @@ python eval/run_eval.py             # 全部 12 个查询
 python eval/run_eval.py -v          # 详细输出
 python eval/run_eval.py --mode strict  # 严格键匹配模式
 ```
+
+</details>
 
 ## 继承与创新
 
