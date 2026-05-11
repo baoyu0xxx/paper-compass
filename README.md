@@ -527,8 +527,8 @@ paper-compass 主要在 **Windows WSL（Ubuntu）** 环境中通过 Hermes Agent
 
 ## 鸣谢
 
-- [DeepSeek](https://deepseek.com/) — 提供物美价廉的 Token，使得大规模 Wiki 生成在经济上可行
-- [Hermes Agent](https://hermes-agent.nousresearch.com/) — 灵活的 CLI Agent 框架，启发并承载了 paper-compass 的 MCP 工具集成设计
+- DeepSeek — 提供物美价廉的 Token
+- Hermes Agent
 
 ## 许可证
 

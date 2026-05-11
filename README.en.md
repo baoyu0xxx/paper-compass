@@ -567,8 +567,8 @@ paper-compass has been primarily tested on **Windows WSL (Ubuntu)** with Hermes 
 
 ## Acknowledgments
 
-- [DeepSeek](https://deepseek.com/) — Affordable tokens that make large-scale wiki generation economically feasible
-- [Hermes Agent](https://hermes-agent.nousresearch.com/) — The flexible CLI agent framework that inspired and hosts paper-compass's MCP tool integration
+- DeepSeek — Affordable tokens
+- Hermes Agent
 
 ## Contributing
 
