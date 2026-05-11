@@ -54,26 +54,34 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
 ## 快速开始
 
-### 方式一：uvx 一键运行（推荐）
+### 方式一：Agent 提示词部署（推荐）
 
-如果已安装 [uv](https://docs.astral.sh/uv/)，无需克隆仓库即可直接启动 MCP 服务器：
+将以下提示词复制给你的 AI Agent，它将自动完成 paper-compass 的完整部署：
 
-```bash
-# 直接运行 MCP 服务器
-uvx paper-compass-mcp
+<details>
+<summary>👋 复制这段提示词给你的 Agent</summary>
+
+> 请帮忙在 `$HOME/projects/` 下部署 paper-compass（若目录不存在则创建）。执行以下步骤：
+>
+> 1. 克隆仓库：`git clone https://github.com/baoyu0xxx/paper-compass.git` 到 `$HOME/projects/paper-compass`
+> 2. 安装依赖：`cd $HOME/projects/paper-compass && pip install -e .`
+> 3. 运行 `paper-compass init`，使用你已知的 LLM 和 Embedding API 配置信息进行交互式配置
+> 4. 运行 `paper-compass validate` 验证连通性
+> 5. 将你的 Zotero SQLite 数据库路径导出到 `ZOTERO_SQLITE_PATH` 环境变量，然后运行 `python scripts/sync_zotero.py --extract-text`
+> 6. 运行 `python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild`
+> 7. （可选）运行 `python scripts/ingest_to_wiki.py --limit 3 --workers 1` 测试 wiki 生成
+> 8. 运行 `python scripts/healthcheck.py --smoke` 验证所有子系统
+> 9. 最后将 MCP 配置添加到当前对话框架的配置中（command: `python3`, args: `["scripts/run_mcp_server.py", "--mcp"]`, cwd: `$HOME/projects/paper-compass`）
+>
+> 每一步完成后确认结果再继续下一步。
+
+</details>
+
+根据 Agent 能力不同，也可以简化为一句话指令：
+
+```text
+请帮我克隆 https://github.com/baoyu0xxx/paper-compass.git，安装依赖后运行 paper-compass init 做交互式配置，完成后验证安装并同步我的 Zotero 论文库。
 ```
-
-在 Hermes Agent 或 Claude Desktop 中配置：
-
-```yaml
-mcp:
-  servers:
-    paper-compass:
-      command: uvx
-      args: ["paper-compass-mcp"]
-```
-
-> 💡 首次运行会自动下载并缓存，后续秒级启动。
 
 ### 方式二：从源码安装
 

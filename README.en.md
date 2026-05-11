@@ -73,26 +73,34 @@ Your agent searches your own paper library and returns relevant passages with so
 
 ## Quick Start
 
-### Option A: uvx (Recommended)
+### Option A: Agent Prompt Deployment (Recommended)
 
-If you have [uv](https://docs.astral.sh/uv/) installed, run the MCP server directly without cloning:
+Copy the following prompt to your AI agent — it will handle the full paper-compass setup automatically:
 
-```bash
-# Run the MCP server directly
-uvx paper-compass-mcp
+<details>
+<summary>👋 Copy this prompt to your agent</summary>
+
+> Please deploy paper-compass under `$HOME/projects/` (create the directory if it doesn't exist). Follow these steps:
+>
+> 1. Clone the repo: `git clone https://github.com/baoyu0xxx/paper-compass.git` into `$HOME/projects/paper-compass`
+> 2. Install dependencies: `cd $HOME/projects/paper-compass && pip install -e .`
+> 3. Run `paper-compass init` for interactive LLM and Embedding API configuration using the credentials you know
+> 4. Run `paper-compass validate` to verify connectivity
+> 5. Export your Zotero SQLite database path as `ZOTERO_SQLITE_PATH` env var, then run `python scripts/sync_zotero.py --extract-text`
+> 6. Run `python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild`
+> 7. (Optional) Run `python scripts/ingest_to_wiki.py --limit 3 --workers 1` to test wiki generation
+> 8. Run `python scripts/healthcheck.py --smoke` to verify all subsystems
+> 9. Finally, add the MCP config to your current agent framework (command: `python3`, args: `["scripts/run_mcp_server.py", "--mcp"]`, cwd: `$HOME/projects/paper-compass`)
+>
+> Confirm each step before proceeding to the next.
+
+</details>
+
+For more capable agents, a one-liner suffices:
+
+```text
+Please clone https://github.com/baoyu0xxx/paper-compass.git, install dependencies, run paper-compass init for interactive config, verify the setup, then sync my Zotero library.
 ```
-
-Configure in Hermes Agent or Claude Desktop:
-
-```yaml
-mcp:
-  servers:
-    paper-compass:
-      command: uvx
-      args: ["paper-compass-mcp"]
-```
-
-> 💡 First run auto-downloads and caches; subsequent starts are instant.
 
 ### Option B: From Source
 
