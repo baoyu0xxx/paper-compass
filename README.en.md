@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**Turn your Zotero library into a knowledge base AI agents can query directly**
+**Turn your Zotero library into a dual-engine knowledge base for AI agents — RAG full-text retrieval + LLM wiki knowledge compilation**
 
 [![version](https://img.shields.io/badge/version-1.2.4-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 [![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)](LICENSE)
@@ -72,6 +72,29 @@ Your agent searches your own paper library and returns relevant passages with so
 | 🎯 **Wiki prompt customization** | `WIKI_PROMPT` env var to switch between general academic default (`default`), economics preset (`economics`), or a custom prompt directory — discipline-tailored wiki generation |
 
 ## Quick Start
+
+### Option A: uvx (Recommended)
+
+If you have [uv](https://docs.astral.sh/uv/) installed, run the MCP server directly without cloning:
+
+```bash
+# Run the MCP server directly
+uvx paper-compass-mcp
+```
+
+Configure in Hermes Agent or Claude Desktop:
+
+```yaml
+mcp:
+  servers:
+    paper-compass:
+      command: uvx
+      args: ["paper-compass-mcp"]
+```
+
+> 💡 First run auto-downloads and caches; subsequent starts are instant.
+
+### Option B: From Source
 
 ```bash
 # 1. Clone
@@ -533,6 +556,11 @@ Built on top of these foundations, paper-compass adds the following original des
 ## Compatibility Note
 
 paper-compass has been primarily tested on **Windows WSL (Ubuntu)** with Hermes Agent, with partial testing on **macOS**. It should work on both platforms. **Windows native** is expected to work as well, though not fully tested.
+
+## Acknowledgments
+
+- [DeepSeek](https://deepseek.com/) — Affordable tokens that make large-scale wiki generation economically feasible
+- [Hermes Agent](https://hermes-agent.nousresearch.com/) — The flexible CLI agent framework that inspired and hosts paper-compass's MCP tool integration
 
 ## Contributing
 

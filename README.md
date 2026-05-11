@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**将 Zotero 论文库转化为 AI Agent 可直接检索的知识库**
+**将 Zotero 论文库转化为 AI Agent 可直接检索的双引擎知识库（RAG 原文检索 + LLM Wiki 知识编译）**
 
 [![version](https://img.shields.io/badge/version-1.2.4-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
@@ -53,6 +53,29 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 | 🔄 **嵌入级联回退** | 火山引擎 → OpenAI 兼容端点 → 本地 bge-base，任一层级故障自动降级 |
 
 ## 快速开始
+
+### 方式一：uvx 一键运行（推荐）
+
+如果已安装 [uv](https://docs.astral.sh/uv/)，无需克隆仓库即可直接启动 MCP 服务器：
+
+```bash
+# 直接运行 MCP 服务器
+uvx paper-compass-mcp
+```
+
+在 Hermes Agent 或 Claude Desktop 中配置：
+
+```yaml
+mcp:
+  servers:
+    paper-compass:
+      command: uvx
+      args: ["paper-compass-mcp"]
+```
+
+> 💡 首次运行会自动下载并缓存，后续秒级启动。
+
+### 方式二：从源码安装
 
 ```bash
 # 1. 克隆仓库
@@ -493,6 +516,11 @@ paper-compass 主要在 **Windows WSL（Ubuntu）** 环境中通过 Hermes Agent
 ## 参与贡献
 
 欢迎贡献。如有重大修改，请先提 issue 讨论，再提交 pull request。
+
+## 鸣谢
+
+- [DeepSeek](https://deepseek.com/) — 提供物美价廉的 Token，使得大规模 Wiki 生成在经济上可行
+- [Hermes Agent](https://hermes-agent.nousresearch.com/) — 灵活的 CLI Agent 框架，启发并承载了 paper-compass 的 MCP 工具集成设计
 
 ## 许可证
 
