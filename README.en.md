@@ -52,7 +52,7 @@ Three design principles:
 
 Ask your agent directly:
 
-> "What papers have I collected about how family business succession affects labor structure? What are the key findings? What data and identification strategies did they use?"
+> "What papers do we have about corporate digital transformation? What are the mainstream empirical methods and commonly used proxy variables?"
 
 Your agent searches your own paper library and returns relevant passages with source citations and page numbers — no reliance on generic, unverified web search results.
 
@@ -149,6 +149,9 @@ python3 -m pytest tests/ -x   # ensure tests pass
 
 ### Upgrade Notes
 
+<details>
+<summary>Cross-version upgrade notes (click to expand)</summary>
+
 > ⚠️ **Cross-version upgrades** (e.g. v1.1.x → v1.2.x) may involve config format changes and new env vars.
 >
 > - `.env` is gitignored — upgrades will never overwrite your private config
@@ -156,20 +159,7 @@ python3 -m pytest tests/ -x   # ensure tests pass
 > - If `validate` fails after upgrade, run `paper-compass init --force` to regenerate `.env`
 > - Backup before upgrading: `cp .env .env.backup`
 
-### Version Pinning
-
-Pin to a specific tag for production stability:
-
-```bash
-paper-compass update --version v1.2.4
-```
-
-To resume tracking the latest version:
-
-```bash
-git checkout main
-paper-compass update
-```
+</details>
 
 ## Installation
 
@@ -231,9 +221,7 @@ Copy `.env.example` to `.env` and fill in your values, or use `paper-compass ini
 | `VOLC_EMBED_API_KEY` | No | Volcengine API key |
 | `VOLC_EMBED_MODEL` | No | Volcengine embedding model endpoint ID |
 | `WIKI_PROMPT` | No | Wiki prompt style: `default` (general academic), `economics` (economics preset), or custom path |
-| `PAPERQA_BASE_URL` | Optional | PaperQA5 endpoint for full PDF RAG |
-| `PAPERQA_API_KEY` | Optional | PaperQA5 API key |
-| `PAPERQA_MODEL` | Optional | PaperQA5 model name |
+
 
 > \* At least one of EMBED or VOLC_EMBED must be configured.
 
@@ -300,7 +288,7 @@ WIKI_PROMPT=/home/user/my-prompts
 
 Embedding supports a **cascade fallback** mechanism:
 1. **Primary:** `embedding_main` (OpenAI-compatible, `EMBED_BASE_URL` + `EMBED_API_KEY`)
-2. **Fallback:** `embedding_volcengine` (Volcengine multimodal, `VOLC_EMBED_*` variables)
+2. **Fallback:** `embedding_volcengine` (Volcengine multimodal, `VOLC_EMBED_*` variables) — [Volcengine Quick Start Guide](https://www.volcengine.com/docs/82379/1399008?lang=zh)
 3. **Final fallback:** Local `bge-base` model (no API key needed)
 
 Just configure the corresponding environment variables to enable each fallback level — no YAML editing required.
@@ -542,9 +530,13 @@ Built on top of these foundations, paper-compass adds the following original des
 - **Formal evaluation benchmark**: 12-query retrieval quality evaluation with recall@K scoring and strict/relaxed modes
 - **$ENV_VAR reference syntax**: API keys can reference existing environment variables, no plain-text secrets in `.env`
 
+## Compatibility Note
+
+paper-compass has been primarily tested on **Windows WSL (Ubuntu)** with Hermes Agent, with partial testing on **macOS**. It should work on both platforms. **Windows native** is expected to work as well, though not fully tested.
+
 ## Contributing
 
-Contributions are welcome. Please open an issue to discuss significant changes before submitting a pull request.
+Contributions are welcome. Please open an issue for major changes.
 
 ## License
 

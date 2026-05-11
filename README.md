@@ -17,22 +17,27 @@
 
 ## 概述
 
-paper-compass 将 Zotero 论文库转化为 AI Agent 可直接检索的知识库，通过 RAG 原文检索与 LLM wiki 知识编译两种方式，解决学术文献管理中的两个常见问题：
+当前 AI Agent 在阅读学术文献时面临一个困境：直接读取全文会导致较大的 Token 消耗且检索效率不高；单篇论文的对话式问答往往需要反复传递大段原文，效果却未必理想。
+
+已有方案中，RAG 检索擅长定位原文中的具体段落，llm-wiki（Karpathy 提出的"知识编译一次、持续维护"理念）则通过 LLM 将论文内容提炼为结构化的知识页面。但二者在 Agent 工作流中缺乏有效的结合——要么只做向量检索，要么只做知识编译，缺少一个能快捷使用的、将二者互补的文献检索方案。
+
+**paper-compass 的设计出发点正是填补这一空白**：将 Zotero 论文库转化为 AI Agent 可直接检索的知识库，通过 RAG 原文检索与 LLM wiki 知识编译两种方式互补，解决学术文献管理中的两个常见问题：
 
 1. **正文内容不可检索** — 标题和关键词之外，PDF 中的研究设计、实证方法、核心发现无法被快速定位
 2. **阅读笔记无法沉淀** — 读过的论文内容随时间模糊，再次需要时需重新翻阅全文
 
-### 设计思路
+### 特点
 
-- **Agent-first**：所有功能通过 MCP 工具暴露，Hermes Agent 或 Claude Desktop 可直接调用——无需打开 GUI、复制粘贴、离开对话窗口
+- **Agent-first**：所有功能通过 MCP 工具暴露，AI Agent 可直接调用——无需打开 GUI、复制粘贴、离开对话窗口
 - **双引擎检索**：RAG（原文定位，用于"那篇论文具体说了什么"）与 Wiki（知识编译，用于"这篇论文的方法和发现是什么"）互补
+- **LLM Wiki 知识编译**：将论文内容"编译"为结构化的知识页面并持续维护，类似 llm-wiki 的"一次生成、多次复用"思路，避免每次对话都重复消耗 Token
 - **继承与扩展**：PDF 提取、嵌入、向量存储等核心模块继承自开源实现，在此之上增加 MCP 集成、增量索引、中文学术适配等能力
 
 ### 典型场景
 
 在 Agent 对话中直接问：
 
-> "我之前收集过哪些关于家族企业代际传承对劳动力雇佣结构影响的文献？核心发现是什么？用了什么数据和识别策略？"
+> "有哪些关于企业数字化转型研究的文献？主流的研究方法有哪些？常用的代理变量是什么？"
 
 Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
@@ -125,6 +130,9 @@ python3 -m pytest tests/ -x   # 确保测试通过
 
 ### 升级注意事项
 
+<details>
+<summary>跨版本升级注意事项（点击展开）</summary>
+
 > ⚠️ **跨版本升级**（如 v1.1.x → v1.2.x）可能涉及配置格式变更和环境变量调整。
 >
 > - `.env` 文件不会被自动修改——它是 gitignored 的，升级不会覆盖私有配置
@@ -132,24 +140,9 @@ python3 -m pytest tests/ -x   # 确保测试通过
 > - 如果升级后 `validate` 失败，运行 `paper-compass init --force` 重新生成 `.env`
 > - 建议升级前备份：`cp .env .env.backup`
 
-### 版本锁定
-
-生产环境建议锁定到特定 tag：
-
-```bash
-paper-compass update --version v1.2.4
-```
-
-锁定后 `paper-compass update` 不会自动升级。要恢复跟随最新版本：
-
-```bash
-git checkout main
-paper-compass update
-```
+</details>
 
 ## 安装
-
-### 环境依赖
 
 | 要求 | 说明 |
 |------|------|
@@ -207,9 +200,7 @@ paper-compass init --force
 | `VOLC_EMBED_API_KEY` | 否 | 火山引擎 API 密钥 |
 | `VOLC_EMBED_MODEL` | 否 | 火山引擎嵌入模型端点 ID |
 | `WIKI_PROMPT` | 否 | Wiki 提示词风格：`default`（通用学术）、`economics`（经济学预设）、或自定义路径 |
-| `PAPERQA_BASE_URL` | 可选 | PaperQA5 全文 RAG 端点 |
-| `PAPERQA_API_KEY` | 可选 | PaperQA5 API 密钥 |
-| `PAPERQA_MODEL` | 可选 | PaperQA5 模型名称 |
+
 
 > \* EMBED 和 VOLC_EMBED 至少配置一组。
 
@@ -276,7 +267,7 @@ WIKI_PROMPT=/home/user/my-prompts  # 自定义提示词
 
 嵌入服务支持**级联回退**机制：
 1. **首选** `embedding_main`（OpenAI-compatible，`EMBED_BASE_URL` + `EMBED_API_KEY`）
-2. **回退** `embedding_volcengine`（火山引擎多模态，`VOLC_EMBED_*` 系列变量）
+2. **回退** `embedding_volcengine`（火山引擎多模态，`VOLC_EMBED_*` 系列变量）— [火山引擎快速入门指南](https://www.volcengine.com/docs/82379/1399008?lang=zh)
 3. **最终回退** 本地 `bge-base` 模型（无需 API）
 
 配置对应环境变量即可自动启用各级回退。如需固定使用某一提供方，在 `configs/providers.yaml` 中修改：
@@ -494,6 +485,10 @@ paper-compass 基于以下开源项目构建：
 - 多提供方嵌入级联回退
 - CLI 配置命令（`init` + `validate`）
 - 形式化评估基准（12 查询检索质量评估）
+
+## 兼容性说明
+
+paper-compass 主要在 **Windows WSL（Ubuntu）** 环境中通过 Hermes Agent 进行了较为充分的测试，在 **macOS** 上进行过部分测试。当前应能在这两个平台上正常运行。**Windows 原生环境** 预计也可运行，但未经充分测试。
 
 ## 参与贡献
 
