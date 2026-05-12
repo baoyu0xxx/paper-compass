@@ -8,7 +8,6 @@ Uses ChromaDB vector_store + library.json metadata.
 from __future__ import annotations
 
 import json
-import os
 import re
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
@@ -221,6 +220,102 @@ def get_paper_metadata(
 
 # ── vector search (if store available) ───────────────────────────────────────
 
+def get_vector_collection_info(
+    collection: str = "papers",
+    db_path: str = "data/vectordb",
+) -> Optional[Dict[str, Any]]:
+    """Return metadata for the first matching Chroma collection."""
+    import chromadb as _cdb
+    from chromadb.config import Settings as _CSet
+
+    db_dir = Path(db_path)
+    if not db_dir.exists():
+        return None
+
+    client = _cdb.PersistentClient(path=db_path, settings=_CSet(anonymized_telemetry=False))
+    try:
+        collections = client.list_collections()
+        matching = [c for c in collections if c.name.startswith(collection + "_")]
+        if not matching:
+            return None
+
+        chosen = matching[0]
+        metadata = chosen.metadata or {}
+        sample = chosen.get(limit=1, include=["embeddings"])
+        embeddings = sample.get("embeddings") if sample is not None else None
+        dimension = 2048
+        if embeddings and embeddings[0] is not None:
+            dimension = len(embeddings[0])
+
+        return {
+            "name": chosen.name,
+            "model_id": str(metadata.get("embedding_model", "") or ""),
+            "dimension": dimension,
+        }
+    finally:
+        client.clear_system_cache()
+
+
+def _configure_embedder_for_collection(model_id: str, dimension: int):
+    """Configure an embedder that exactly matches a stored collection."""
+    from paper_compass.embedder import Embedder
+
+    embedder = Embedder()
+
+    try:
+        embedder.configure_local(model_id)
+        return embedder
+    except KeyError:
+        pass
+
+    provider_name, sep, model_name = model_id.partition(":")
+    if not sep or not provider_name or not model_name:
+        raise RuntimeError(
+            f"Indexed collection uses unsupported embedding model '{model_id}'. "
+            "Rebuild the index with a configured local or cloud model."
+        )
+
+    load_project_env()
+    configs = load_all_configs()
+
+    matched_cfg: Optional[Dict[str, Any]] = None
+    for provider_key in ["embedding_main", "embedding_volcengine"]:
+        try:
+            cfg = get_provider_config(provider_key, configs)
+        except KeyError:
+            continue
+        if cfg.get("provider", "openai") != provider_name:
+            continue
+        if cfg.get("model", "") != model_name:
+            continue
+        if not cfg.get("base_url") or not cfg.get("api_key"):
+            raise RuntimeError(
+                f"Embedding provider '{provider_key}' matches indexed model '{model_id}' but is incomplete."
+            )
+        matched_cfg = cfg
+        break
+
+    if matched_cfg is None:
+        raise RuntimeError(
+            f"No configured embedding provider matches indexed model '{model_id}'. "
+            "Update the embedding config or rebuild the index."
+        )
+
+    embedder.configure_cloud(
+        provider_name,
+        matched_cfg.get("base_url", ""),
+        matched_cfg.get("api_key", ""),
+        matched_cfg.get("model", ""),
+        dimension,
+    )
+    if embedder.model_id != model_id:
+        raise RuntimeError(
+            f"Query embedder resolved to '{embedder.model_id}', but the collection expects '{model_id}'. "
+            "Rebuild the index or fix the embedding configuration."
+        )
+    return embedder
+
+
 def vector_search(
     query: str,
     collection: str = "papers",
@@ -231,63 +326,22 @@ def vector_search(
 
     Auto-detects embedding model and dimension from existing collections.
     """
-    from paper_compass.embedder import Embedder
     from paper_compass.vector_store import VectorStore
-    import chromadb as _cdb
-    from chromadb.config import Settings as _CSet
 
     load_project_env()
 
-    db_dir = Path(db_path)
-    if not db_dir.exists():
+    info = get_vector_collection_info(collection=collection, db_path=db_path)
+    if info is None:
         return []
 
-    # Discover collections via ChromaDB API (same Settings as VectorStore)
-    _client = _cdb.PersistentClient(path=db_path, settings=_CSet(anonymized_telemetry=False))
-    try:
-        cols = _client.list_collections()
-        matching = [c for c in cols if c.name.startswith(collection + "_")]
-        if not matching:
-            return []
-
-        # Get model_id from collection metadata
-        meta = matching[0].metadata
-        model_id = meta.get("embedding_model", "volcengine:unknown")
-
-        # Detect vector dimension
-        _sample = matching[0].get(limit=1, include=["embeddings"])
-        actual_dim = 2048
-        embeddings = _sample.get("embeddings") if _sample is not None else None
-        if embeddings is not None and len(embeddings) > 0 and embeddings[0] is not None:
-            actual_dim = len(embeddings[0])
-    finally:
-        _client.clear_system_cache()
-
-    embedder = Embedder()
-    load_project_env()
-    # Cascade: try main first, fall back to volcengine, then fail
-    provider_cfg = None
-    provider_name = "openai"
-    for pkey in ["embedding_main", "embedding_volcengine"]:
-        try:
-            cfg = get_provider_config(pkey)
-            if cfg.get("base_url") and cfg.get("api_key"):
-                provider_cfg = cfg
-                provider_name = cfg.get("provider", "openai")
-                break
-        except Exception:
-            continue
-    if provider_cfg is None:
-        raise RuntimeError("No embedding provider configured")
-    embedder.configure_cloud(
-        provider_name,
-        provider_cfg.get("base_url", ""),
-        provider_cfg.get("api_key", ""),
-        provider_cfg.get("model", ""),
-        actual_dim)
-
-    store = VectorStore(db_path=db_path, collection_name=collection,
-                       embedding_model_id=model_id)
+    model_id = info["model_id"]
+    actual_dim = int(info["dimension"])
+    embedder = _configure_embedder_for_collection(model_id, actual_dim)
+    store = VectorStore(
+        db_path=db_path,
+        collection_name=collection,
+        embedding_model_id=model_id,
+    )
     query_emb = embedder.embed_single(query)
     results = store.search(query_emb, k=k)
 

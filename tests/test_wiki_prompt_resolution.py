@@ -197,3 +197,42 @@ class TestWikiGeneratorWithPromptDirs:
         gen = WikiGenerator()
         assert gen._fallback_prompt, "fallback prompt must always load"
         assert "research wiki" in gen._fallback_prompt.lower()
+
+    def test_generation_falls_back_when_empirical_prompts_missing(self, monkeypatch):
+        monkeypatch.setenv("WIKI_PROMPT", "default")
+        from paper_compass.wiki_gen import WikiGenerator
+
+        gen = WikiGenerator()
+        gen._overview_prompt = ""
+        gen._empirical_prompt = ""
+        gen._fallback_prompt = "fallback prompt body"
+
+        prompt, max_tokens = gen._build_generation_prompt("empirical")
+
+        assert prompt == "fallback prompt body"
+        assert max_tokens == 2000
+
+    def test_split_frontmatter_parses_yaml_lists(self):
+        from paper_compass.wiki_gen import WikiGenerator
+
+        text = (
+            "---\n"
+            "title: Parsed Title\n"
+            "tags:\n"
+            "  - labor\n"
+            "  - did\n"
+            "authors:\n"
+            "  - Zhang Wei\n"
+            "confidence: high\n"
+            "---\n\n"
+            "# Body\n"
+            "Main content.\n"
+        )
+
+        frontmatter, body = WikiGenerator._split_frontmatter(text, "Fallback Title")
+
+        assert frontmatter["title"] == "Parsed Title"
+        assert frontmatter["tags"] == ["labor", "did"]
+        assert frontmatter["authors"] == ["Zhang Wei"]
+        assert frontmatter["confidence"] == "high"
+        assert "Main content." in body

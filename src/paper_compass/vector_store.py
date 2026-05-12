@@ -13,9 +13,12 @@ Supports:
 
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
+
+logger = logging.getLogger(__name__)
 
 
 class VectorStore:
@@ -88,6 +91,7 @@ class VectorStore:
             metadatas=metadatas,
             embeddings=embeddings,
         )
+        self._invalidate_bm25()
 
     def upsert_chunks(
         self,
@@ -159,19 +163,31 @@ class VectorStore:
         """
         semantic = self.search(query_embedding, k=k * 2, where=where)
 
-        if bm25_weight <= 0 or not self._bm25_index:
+        if bm25_weight <= 0:
             # Pure semantic
             return _format_results(semantic)[:k]
 
         # BM25 scoring
         self._ensure_bm25()
+        if self._bm25_index is None:
+            return _format_results(semantic)[:k]
+
         bm25_scores = self._bm25_index.get_scores(query_text.split())
+        bm25_by_id = {
+            chunk_id: float(bm25_scores[i])
+            for i, chunk_id in enumerate(self._bm25_ids)
+        }
+        max_bm25 = max(bm25_by_id.values(), default=0.0)
 
         # Combine scores
         combined: List[Dict[str, Any]] = []
         for i, chunk_id in enumerate(semantic["ids"]):
             sem_score = 1.0 / (1.0 + semantic["distances"][i])  # convert distance to similarity
-            bm25 = bm25_scores.get(chunk_id, 0.0)
+            bm25 = bm25_by_id.get(chunk_id, 0.0)
+            if max_bm25 > 0:
+                bm25 = bm25 / max_bm25
+            else:
+                bm25 = 0.0
             combined_score = (1 - bm25_weight) * sem_score + bm25_weight * bm25
 
             combined.append({
@@ -309,11 +325,16 @@ class VectorStore:
             self._bm25_ids = all_data.get("ids", [])
             corpus = all_data.get("documents", [])
             self._bm25_corpus = [doc.split() for doc in corpus]
-            self._bm25_index = BM25Okapi(self._bm25_corpus, self._bm25_ids)
-        except Exception:
+            if not self._bm25_corpus:
+                self._bm25_index = None
+                return
+            self._bm25_index = BM25Okapi(self._bm25_corpus)
+        except Exception as exc:
             # BM25 is optional — graceful degradation
+            logger.warning("BM25 index build failed; continuing without BM25: %s", exc)
             self._bm25_index = None
             self._bm25_ids = []
+            self._bm25_corpus = []
 
     def _ensure_bm25(self) -> None:
         if self._bm25_index is None:

@@ -24,6 +24,10 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 Status = Tuple[str, str]  # (name, "OK" | "WARN" | "ERROR message")
 
 
+def _is_unresolved_env_reference(value: str) -> bool:
+    return value.startswith("$") and not __import__("os").environ.get(value[1:], "")
+
+
 def _check_env() -> Status:
     """Verify .env exists and essential vars are set."""
     env_path = PROJECT_ROOT / ".env"
@@ -35,14 +39,24 @@ def _check_env() -> Status:
 
     import os
     missing = []
+    unresolved_refs = []
     for var in ("LLM_BASE_URL", "LLM_API_KEY", "VOLC_EMBED_BASE_URL",
                  "VOLC_EMBED_API_KEY", "VOLC_EMBED_MODEL"):
         val = os.environ.get(var, "")
         if not val or val in ("your_key_here", "your_endpoint_id"):
             missing.append(var)
+        elif _is_unresolved_env_reference(val):
+            unresolved_refs.append(f"{var} -> {val[1:]}")
+
+    for var in ("EMBED_BASE_URL", "EMBED_API_KEY"):
+        val = os.environ.get(var, "")
+        if val and _is_unresolved_env_reference(val):
+            unresolved_refs.append(f"{var} -> {val[1:]}")
 
     if missing:
         return ("env_vars", f"WARN: unset/placeholder: {', '.join(missing)}")
+    if unresolved_refs:
+        return ("env_vars", f"ERROR: unresolved env refs: {', '.join(unresolved_refs)}")
     return ("env_vars", "OK")
 
 

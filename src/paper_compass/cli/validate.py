@@ -27,6 +27,10 @@ from paper_compass.env_utils import (
 logger = logging.getLogger(__name__)
 
 
+def _is_unresolved_env_reference(value: str) -> bool:
+    return value.startswith("$") and not os.environ.get(value[1:], "")
+
+
 def _check_dotenv(env_path: str) -> tuple[str, str]:
     """Check .env file exists and has required vars."""
     path = Path(env_path)
@@ -37,12 +41,16 @@ def _check_dotenv(env_path: str) -> tuple[str, str]:
 
     missing = []
     placeholders = []
-    for var in ("LLM_BASE_URL", "LLM_API_KEY"):
+    unresolved_refs = []
+    for var in ("LLM_BASE_URL", "LLM_API_KEY", "EMBED_BASE_URL", "EMBED_API_KEY", "VOLC_EMBED_BASE_URL", "VOLC_EMBED_API_KEY"):
         val = os.environ.get(var, "")
         if not val:
-            missing.append(var)
+            if var in ("LLM_BASE_URL", "LLM_API_KEY"):
+                missing.append(var)
         elif val in ("your_key_here", "sk-your-key-here"):
             placeholders.append(var)
+        elif _is_unresolved_env_reference(val):
+            unresolved_refs.append(f"{var} -> {val[1:]}")
 
     # Check embedding vars (either openai or volcengine)
     has_openai_embed = bool(os.environ.get("EMBED_BASE_URL")) and bool(
@@ -56,6 +64,8 @@ def _check_dotenv(env_path: str) -> tuple[str, str]:
 
     if missing:
         return ("dotenv", f"ERROR: missing: {', '.join(missing)}")
+    if unresolved_refs:
+        return ("dotenv", f"ERROR: unresolved env refs: {', '.join(unresolved_refs)}")
     if placeholders:
         return ("dotenv", f"WARN: placeholder values: {', '.join(placeholders)}")
     return ("dotenv", "OK")

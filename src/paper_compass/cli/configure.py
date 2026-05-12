@@ -534,12 +534,11 @@ def _already_configured_guard(env_path: Path) -> None:
 
 if __name__ == "__main__":
     # Direct invocation (for testing)
-    import sys
     parser = argparse.ArgumentParser(prog="paper-compass init")
     parser.add_argument("--llm-args", default=None, nargs="+", action=MergeDictAction, metavar="<arg>")
     parser.add_argument("--embed-args", default=None, nargs="+", action=MergeDictAction, metavar="<arg>")
     parser.add_argument("--force", "-f", action="store_true", default=False)
     parser.add_argument("--env-path", default=str(DEFAULT_ENV_PATH))
     parser.add_argument("--wiki-prompt", default=None, metavar="<style>")
-    args = parser.parse_args(args_list if args_list is not None else sys.argv[1:])
+    args = parser.parse_args(sys.argv[1:])
     sys.exit(execute_init(args))

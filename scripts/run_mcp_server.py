@@ -34,6 +34,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from paper_compass import __version__
 from paper_compass.mcp_server import handle_tool
 from paper_compass.mcp_contracts import list_tools, tool_names
 
@@ -146,7 +147,7 @@ def mcp_stdio_mode():
                     "protocolVersion": "2024-11-05",
                     "serverInfo": {
                         "name": "paper-compass",
-                        "version": "2.0.0",
+                        "version": __version__,
                     },
                     "capabilities": {
                         "tools": {},

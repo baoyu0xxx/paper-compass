@@ -2,30 +2,26 @@
 
 from __future__ import annotations
 
-import os
 import time
 from typing import Any, Dict, List, Optional
 
-from paper_compass.search import get_paper_metadata, search_library, search_passages
+from paper_compass.search import (
+    get_paper_metadata,
+    get_vector_collection_info,
+    search_library,
+    search_passages,
+    vector_search,
+)
 from paper_compass.logging import emit_trace
 from paper_compass.mcp_contracts import accepted_params, required_params
 from paper_compass.types import UnifiedResponse
 from paper_compass.router import ask_research
 from paper_compass.wiki_store import save_query_to_wiki
-from paper_compass.env_utils import load_project_env
-from paper_compass.config import get_provider_config
 
 
 def _tool_search_wiki(query: str, limit: int = 5, db_path: str = "data/vectordb") -> Dict[str, Any]:
     try:
-        from paper_compass.embedder import Embedder
-        import chromadb as _cdb
-        from chromadb.config import Settings as _CSet
-
-        _client = _cdb.PersistentClient(path=db_path, settings=_CSet(anonymized_telemetry=False))
-        cols = _client.list_collections()
-        wiki_col = next((c for c in cols if c.name.startswith("wiki_")), None)
-        if not wiki_col:
+        if get_vector_collection_info(collection="wiki", db_path=db_path) is None:
             return UnifiedResponse.success(
                 tool="search_wiki",
                 data={"matches": [], "query_interpretation": "no wiki index found"},
@@ -34,53 +30,17 @@ def _tool_search_wiki(query: str, limit: int = 5, db_path: str = "data/vectordb"
                 next_action="Run build_index --wiki first",
             ).to_dict()
 
-        sample = wiki_col.get(limit=1, include=["embeddings"])
-        dim = 2048
-        embeddings = sample.get("embeddings") if sample is not None else None
-        if embeddings is not None and len(embeddings) > 0 and embeddings[0] is not None:
-            dim = len(embeddings[0])
-
-        embedder = Embedder()
-        load_project_env()
-        # Cascade: try main first, fall back to volcengine, then fail
-        provider_cfg = None
-        provider_name = "openai"
-        for pkey in ["embedding_main", "embedding_volcengine"]:
-            try:
-                cfg = get_provider_config(pkey)
-                if cfg.get("base_url") and cfg.get("api_key"):
-                    provider_cfg = cfg
-                    provider_name = cfg.get("provider", "openai")
-                    break
-            except Exception:
-                continue
-        if provider_cfg is None:
-            raise RuntimeError("No embedding provider configured")
-        embedder.configure_cloud(
-            provider_name,
-            provider_cfg.get("base_url", ""),
-            provider_cfg.get("api_key", ""),
-            provider_cfg.get("model", ""),
-            dim,
-        )
-        q_emb = embedder.embed_single(query)
-
-        results = wiki_col.query(
-            query_embeddings=[q_emb],
-            n_results=limit,
-            include=["documents", "metadatas", "distances"],
-        )
-
+        results = vector_search(query, collection="wiki", k=limit, db_path=db_path)
         matches = [
             {
-                "page_path": (results["metadatas"][0][i] or {}).get("page_path", results["ids"][0][i]),
-                "title": (results["metadatas"][0][i] or {}).get("title", results["ids"][0][i]),
-                "page_type": (results["metadatas"][0][i] or {}).get("page_type", ""),
-                "section": (results["metadatas"][0][i] or {}).get("section", ""),
-                "snippet": results["documents"][0][i][:200],
-                "score": round(1.0 / (1.0 + results["distances"][0][i]), 4),
+                "page_path": (match.get("metadata") or {}).get("page_path", match["id"]),
+                "title": (match.get("metadata") or {}).get("title", match["id"]),
+                "page_type": (match.get("metadata") or {}).get("page_type", ""),
+                "section": (match.get("metadata") or {}).get("section", ""),
+                "snippet": match.get("document", "")[:200],
+                "score": match.get("score", 0.0),
             }
-            for i in range(len(results["ids"][0]))
+            for match in results
         ]
 
         confidence = "high" if matches and matches[0]["score"] > 0.5 else "medium" if matches else "low"
@@ -265,6 +225,7 @@ def handle_tool(tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
 
     allowed = set(accepted_params(tool_name))
     filtered = {k: v for k, v in params.items() if k in allowed}
+    unknown_params = sorted(k for k in params.keys() if k not in allowed)
 
     missing_required = [param for param in required_params(tool_name) if param not in filtered]
 
@@ -280,6 +241,11 @@ def handle_tool(tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
     started = time.time()
     response = handler(**filtered)
     elapsed_ms = int((time.time() - started) * 1000)
+    if unknown_params:
+        response.setdefault("warnings", [])
+        response["warnings"].append(
+            f"Ignored unsupported parameters: {', '.join(unknown_params)}"
+        )
 
     emit_trace(
         {
@@ -290,6 +256,7 @@ def handle_tool(tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
             "mode_used": response.get("mode_used", ""),
             "source_ids": [s.get("id", "") for s in response.get("sources", [])],
             "warnings": response.get("warnings", []),
+            "ignored_params": unknown_params,
             "elapsed_ms": elapsed_ms,
         }
     )

@@ -24,6 +24,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import yaml
+
 from paper_compass.config import get_provider_config, load_all_configs
 
 logger = logging.getLogger(__name__)
@@ -102,6 +104,26 @@ class WikiGenerator:
     def _load(self, path: str) -> str:
         p = Path(path)
         return p.read_text(encoding="utf-8") if p.exists() else ""
+
+    def _build_generation_prompt(self, paper_type: str) -> tuple[str, int]:
+        """Pick the best available generation prompt for the paper type."""
+        if paper_type == "empirical":
+            if self._overview_prompt and self._empirical_prompt:
+                return self._overview_prompt + "\n\n---\n\n" + self._empirical_prompt, 3500
+            logger.warning(
+                "Empirical prompts incomplete; falling back to wiki_ingest.md for generation."
+            )
+            return self._fallback_prompt, 2000
+
+        if paper_type in ("theoretical", "review", "descriptive"):
+            if self._overview_prompt:
+                return self._overview_prompt, 2000
+            logger.warning(
+                "Overview prompt missing; falling back to wiki_ingest.md for generation."
+            )
+            return self._fallback_prompt, 2000
+
+        return self._fallback_prompt, 2000
 
     def _call(self, system_prompt: str, user_prompt: str,
               max_tokens: int = 2500, temperature: float = 0.1,
@@ -251,20 +273,11 @@ class WikiGenerator:
             paper_type = self.classify(title, paper_text, metadata)
 
         # Pass 2: compose system prompt based on paper_type
-        if paper_type == "empirical":
-            system_prompt = (
-                self._overview_prompt
-                + "\n\n---\n\n"
-                + self._empirical_prompt
+        system_prompt, max_tok = self._build_generation_prompt(paper_type)
+        if not system_prompt.strip():
+            raise RuntimeError(
+                "No wiki generation prompt is available. Check WIKI_PROMPT and the prompts/ directory."
             )
-            max_tok = 3500
-        elif paper_type in ("theoretical", "review", "descriptive"):
-            system_prompt = self._overview_prompt
-            max_tok = 2000
-        else:
-            # Generic fallback
-            system_prompt = self._fallback_prompt
-            max_tok = 2000
 
         # Build user prompt
         authors = ", ".join(metadata.get("authors", [])) or "(unknown)"
@@ -339,8 +352,14 @@ class WikiGenerator:
                 if lines[i].strip() == "---":
                     end_idx = i
                     break
-            if end_idx:
+            if end_idx is not None:
                 fm_block = "\n".join(lines[1:end_idx])
+                try:
+                    parsed = yaml.safe_load(fm_block) or {}
+                except yaml.YAMLError:
+                    parsed = {}
+                if isinstance(parsed, dict):
+                    fm.update(parsed)
                 for line in fm_block.split("\n"):
                     line = line.strip()
                     if ":" not in line or line.startswith("#"):
@@ -398,6 +417,18 @@ class WikiGenerator:
                     fm["authors"] = author_items
 
                 body = "\n".join(lines[end_idx + 1:])
+
+        for key in ("tags", "authors"):
+            value = fm.get(key, [])
+            if value is None:
+                fm[key] = []
+            elif isinstance(value, list):
+                fm[key] = [str(item).strip() for item in value if str(item).strip()]
+            elif isinstance(value, str):
+                normalized = value.strip()
+                fm[key] = [normalized] if normalized else []
+            else:
+                fm[key] = [str(value).strip()]
 
         return fm, body.strip()
 
