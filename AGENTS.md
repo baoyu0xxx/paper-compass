@@ -166,6 +166,11 @@ All 12 evaluation queries should pass. Healthcheck should show green across all 
 python scripts/run_mcp_server.py --mcp
 ```
 
+`run_mcp_server.py` now inserts the repo's `src/` directory into `sys.path` at startup,
+so editable installs and direct script invocation behave consistently. In practice,
+adding `PYTHONPATH=/absolute/path/to/paper-compass/src` on the client side is still a
+useful defense-in-depth measure for MCP subprocess launches.
+
 **Test individual tools:**
 ```bash
 python scripts/run_mcp_server.py --tool search_wiki --query "家族企业"
@@ -177,12 +182,14 @@ python scripts/run_mcp_server.py --tool ask_research --query "家族企业代际
 
 **Hermes Agent** (`config.yaml`):
 ```yaml
-mcp:
-  servers:
-    paper-compass:
-      command: python3
-      args: ["scripts/run_mcp_server.py", "--mcp"]
-      cwd: "/absolute/path/to/paper-compass"
+mcp_servers:
+  paper-compass:
+    command: python3
+    args: ["/absolute/path/to/paper-compass/scripts/run_mcp_server.py", "--mcp"]
+    env:
+      PYTHONPATH: "/absolute/path/to/paper-compass/src"
+    connect_timeout: 60
+    timeout: 120
 ```
 
 **Claude Desktop** (`claude_desktop_config.json`):
@@ -206,6 +213,7 @@ mcp:
 | Stale env vars | LLM API gets garbage URL | `unset LLM_BASE_URL LLM_API_KEY EMBED_BASE_URL EMBED_API_KEY` and re-run |
 | WSL + BM25 | `multiprocessing` error | Graceful degradation — vector search still works |
 | Volcengine format error | 400 on embedding | Must use `{"input": [{"type": "text", "text": "..."}]}` format |
+| NumPy 2.x alias removal | MCP tool call fails with `np.NaN was removed in the NumPy 2.0 release` | Upgrade to v1.2.5+; search code now uses `np.nan` |
 | Wiki chunk ID collision | Fewer vectors than sections | Same-stem pages in different wiki subdirs |
 | `build_index.py` skips papers | "missing PDF" | Ensure text file paths are correct |
 || ChromaDB dual-client | Weird errors | Never create 2 PersistentClient for same path |
@@ -219,7 +227,11 @@ mcp:
 python3 -m pytest tests/ -v
 ```
 
-All 159 tests must pass.
+Run targeted regression first when touching search / MCP entrypoints:
+
+```bash
+python3 -m pytest tests/test_search_numpy_compat.py -q
+```
 
 New test files:
 - `tests/test_cli_arg_utils.py` — key=value parsing

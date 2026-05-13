@@ -239,17 +239,33 @@ def get_vector_collection_info(
         if not matching:
             return None
 
-        chosen = matching[0]
-        metadata = chosen.metadata or {}
-        sample = chosen.get(limit=1, include=["embeddings"])
-        embeddings = sample.get("embeddings") if sample is not None else None
+        chosen = None
         dimension = 2048
-        if embeddings and embeddings[0] is not None:
-            dimension = len(embeddings[0])
+        model_id = ""
+
+        for candidate in matching:
+            metadata = candidate.metadata or {}
+            sample = candidate.get(limit=1, include=["embeddings"])
+            embeddings = sample.get("embeddings") if sample is not None else None
+            first_embedding = None
+            if embeddings is not None and len(embeddings) > 0:
+                first_embedding = embeddings[0]
+            if first_embedding is None:
+                continue
+
+            chosen = candidate
+            model_id = str(metadata.get("embedding_model", "") or "")
+            dimension = len(first_embedding)
+            break
+
+        if chosen is None:
+            chosen = matching[0]
+            metadata = chosen.metadata or {}
+            model_id = str(metadata.get("embedding_model", "") or "")
 
         return {
             "name": chosen.name,
-            "model_id": str(metadata.get("embedding_model", "") or ""),
+            "model_id": model_id,
             "dimension": dimension,
         }
     finally:

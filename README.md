@@ -4,7 +4,7 @@
 
 **将 Zotero 论文库转化为 AI Agent 可直接检索的双引擎知识库（RAG 原文检索 + LLM Wiki 知识编译）**
 
-[![version](https://img.shields.io/badge/version-1.2.4-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.2.5-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
@@ -71,7 +71,7 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 > 6. 运行 `python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild`
 > 7. （可选）运行 `python scripts/ingest_to_wiki.py --limit 3 --workers 1` 测试 wiki 生成
 > 8. 运行 `python scripts/healthcheck.py --smoke` 验证所有子系统
-> 9. 最后将 MCP 配置添加到当前对话框架的配置中（command: `python3`, args: `["scripts/run_mcp_server.py", "--mcp"]`, cwd: `$HOME/projects/paper-compass`）
+> 9. 最后将 MCP 配置添加到当前对话框架的配置中（Hermes 推荐使用绝对脚本路径，并显式设置 `PYTHONPATH=$HOME/projects/paper-compass/src`）
 >
 > 每一步完成后确认结果再继续下一步。
 
@@ -134,7 +134,7 @@ paper-compass update --check
 paper-compass update
 
 # 更新到指定版本
-paper-compass update --version v1.2.4
+paper-compass update --version v1.2.5
 
 # 模拟更新（查看变更但不执行）
 paper-compass update --dry-run
@@ -153,7 +153,7 @@ paper-compass update --dry-run
 
 ```bash
 git fetch origin --tags
-git checkout v1.2.4          # 或 git pull origin main
+git checkout v1.2.5          # 或 git pull origin main
 pip install -e .
 paper-compass validate        # 验证配置仍然有效
 python3 -m pytest tests/ -x   # 确保测试通过
@@ -382,13 +382,17 @@ python scripts/ingest_to_wiki.py --skip-existing --workers 10
 在 `config.yaml` 中添加：
 
 ```yaml
-mcp:
-  servers:
-    paper-compass:
-      command: python3
-      args: ["scripts/run_mcp_server.py", "--mcp"]
-      cwd: "/path/to/paper-compass"
+mcp_servers:
+  paper-compass:
+    command: python3
+    args: ["/path/to/paper-compass/scripts/run_mcp_server.py", "--mcp"]
+    env:
+      PYTHONPATH: "/path/to/paper-compass/src"
+    connect_timeout: 60
+    timeout: 120
 ```
+
+`scripts/run_mcp_server.py` 现在会在启动时主动把仓库内 `src/` 加入 `sys.path`，以减少 editable install 与脚本直跑之间的差异；但在 MCP 客户端侧显式补 `PYTHONPATH`，通常仍然更稳。
 
 #### 配置 Claude Desktop
 
@@ -413,6 +417,16 @@ python scripts/run_mcp_server.py --tool search_passages --query "具体段落内
 python scripts/run_mcp_server.py --tool ask_research --query "研究问题"
 python scripts/run_mcp_server.py --tool get_paper_metadata --key ZOTERO_KEY
 ```
+
+#### 与 NumPy 2.x 的兼容性
+
+v1.2.5 修复了搜索路径里对已废弃别名 `np.NaN` 的引用，避免在 NumPy 2.x 环境下通过 MCP 调用搜索工具时出现：
+
+```text
+`np.NaN` was removed in the NumPy 2.0 release. Use `np.nan` instead.
+```
+
+如果你在 Agent / MCP 子进程里见到这类报错，升级到 v1.2.5+ 即可。
 
 ## 架构
 
