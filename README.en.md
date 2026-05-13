@@ -4,7 +4,7 @@
 
 **Turn your Zotero library into a dual-engine knowledge base for AI agents — RAG full-text retrieval + LLM wiki knowledge compilation**
 
-[![version](https://img.shields.io/badge/version-1.2.4-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.2.5-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 [![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)](LICENSE)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)](https://spec.modelcontextprotocol.io/)
@@ -90,7 +90,7 @@ Copy the following prompt to your AI agent — it will handle the full paper-com
 > 6. Run `python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild`
 > 7. (Optional) Run `python scripts/ingest_to_wiki.py --limit 3 --workers 1` to test wiki generation
 > 8. Run `python scripts/healthcheck.py --smoke` to verify all subsystems
-> 9. Finally, add the MCP config to your current agent framework (command: `python3`, args: `["scripts/run_mcp_server.py", "--mcp"]`, cwd: `$HOME/projects/paper-compass`)
+> 9. Finally, add the MCP config to your current agent framework (for Hermes, prefer an absolute script path and explicitly set `PYTHONPATH=$HOME/projects/paper-compass/src`)
 >
 > Confirm each step before proceeding to the next.
 
@@ -153,7 +153,7 @@ paper-compass update --check
 paper-compass update
 
 # Update to a specific version
-paper-compass update --version v1.2.4
+paper-compass update --version v1.2.5
 
 # Simulate an update (preview changes only)
 paper-compass update --dry-run
@@ -172,7 +172,7 @@ If automatic update is unavailable (offline, no git, etc.):
 
 ```bash
 git fetch origin --tags
-git checkout v1.2.4          # or git pull origin main
+git checkout v1.2.5          # or git pull origin main
 pip install -e .
 paper-compass validate        # verify config still works
 python3 -m pytest tests/ -x   # ensure tests pass
@@ -409,13 +409,17 @@ python scripts/ingest_to_wiki.py --skip-existing --workers 10
 Add to `config.yaml`:
 
 ```yaml
-mcp:
-  servers:
-    paper-compass:
-      command: python3
-      args: ["scripts/run_mcp_server.py", "--mcp"]
-      cwd: "/path/to/paper-compass"
+mcp_servers:
+  paper-compass:
+    command: python3
+    args: ["/path/to/paper-compass/scripts/run_mcp_server.py", "--mcp"]
+    env:
+      PYTHONPATH: "/path/to/paper-compass/src"
+    connect_timeout: 60
+    timeout: 120
 ```
+
+`scripts/run_mcp_server.py` now inserts the repo's `src/` directory into `sys.path` at startup, reducing differences between editable installs and direct script execution. In practice, explicitly setting `PYTHONPATH` on the MCP client side is still the more robust setup.
 
 #### With Claude Desktop
 
@@ -440,6 +444,16 @@ python scripts/run_mcp_server.py --tool search_passages --query "specific passag
 python scripts/run_mcp_server.py --tool ask_research --query "research question"
 python scripts/run_mcp_server.py --tool get_paper_metadata --key YOUR_ZOTERO_KEY
 ```
+
+#### NumPy 2.x Compatibility
+
+v1.2.5 fixes a deprecated `np.NaN` alias on the search path, which could otherwise break MCP search tool calls under NumPy 2.x with an error like:
+
+```text
+`np.NaN` was removed in the NumPy 2.0 release. Use `np.nan` instead.
+```
+
+If you see this in an agent / MCP subprocess, upgrading to v1.2.5+ resolves it.
 
 ## Architecture
 
