@@ -4,7 +4,7 @@
 
 **Turn your Zotero library into a dual-engine knowledge base for AI agents — RAG full-text retrieval + LLM wiki knowledge compilation**
 
-[![version](https://img.shields.io/badge/version-1.2.5-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.2.6-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 [![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)](LICENSE)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)](https://spec.modelcontextprotocol.io/)
@@ -574,6 +574,12 @@ Built on top of these foundations, paper-compass adds the following original des
 - **Multi-provider embedding cascade**: Three-tier automatic fallback (OpenAI → Volcengine → local bge-base), no code changes required
 - **Formal evaluation benchmark**: 12-query retrieval quality evaluation with recall@K scoring and strict/relaxed modes
 - **$ENV_VAR reference syntax**: API keys can reference existing environment variables, no plain-text secrets in `.env`
+
+## Changelog
+
+| Version | Date | Changes |
+|---------|------|---------|
+| v1.2.6 | 2026-05-13 | **MCP cold-start optimization** — Removed `clear_system_cache()` which forced double ChromaDB segment reload; introduced module-level shared `PersistentClient` singleton to avoid dual-client antipattern; background collection pre-warming on MCP handshake. First semantic tool calls reduced from 22-50s to 16-29s; sub-second after MCP pre-warm. |
 
 ## Compatibility Note
 

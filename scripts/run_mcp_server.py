@@ -30,6 +30,7 @@ Usage:
 import argparse
 import json
 import sys
+import threading
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
@@ -114,6 +115,34 @@ def interactive_mode():
         print()
 
 
+def _prewarm_collections(db_path: str = "data/vectordb") -> None:
+    """Background pre-load of wiki & papers ChromaDB collections.
+
+    Called in a daemon thread right after the MCP initialize handshake
+    so that HNSW segment data is already in memory before the first
+    ``tools/call`` arrives.  This turns a 13-50 s cold start into a
+    sub-second warm one.
+    """
+    import chromadb as _cdb
+    from chromadb.config import Settings as _CSet
+
+    try:
+        client = _cdb.PersistentClient(path=db_path, settings=_CSet(anonymized_telemetry=False))
+    except Exception:
+        return
+
+    for prefix in ("wiki", "papers"):
+        try:
+            for c in client.list_collections():
+                if c.name.startswith(prefix + "_") and c.count() > 0:
+                    # A single data-access call forces ChromaDB to load
+                    # all HNSW segment files for this collection.
+                    c.get(limit=1, include=["embeddings"])
+                    break
+        except Exception:
+            pass
+
+
 def mcp_stdio_mode():
     """MCP JSON-RPC stdio server with proper initialize handshake.
 
@@ -159,6 +188,9 @@ def mcp_stdio_mode():
 
         if method == "notifications/initialized":
             initialized = True
+            # Pre-warm ChromaDB collections in the background so the
+            # first tool call is fast (avoids 13-50 s HNSW segment load).
+            threading.Thread(target=_prewarm_collections, daemon=True).start()
             # No response for notifications
             continue
 

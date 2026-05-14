@@ -8,12 +8,44 @@ Uses ChromaDB vector_store + library.json metadata.
 from __future__ import annotations
 
 import json
+import os
 import re
+import threading
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from paper_compass.env_utils import load_project_env
 from paper_compass.config import load_all_configs, get_provider_config
+
+# ── Shared PersistentClient singleton ────────────────────────────────────────
+# Avoids creating multiple PersistentClient instances for the same db_path,
+# which is both slower (double segment load) and error-prone per ChromaDB docs.
+
+_client: Any = None
+_client_path: Optional[str] = None
+_lock = threading.Lock()
+
+
+def _get_client(db_path: str) -> Any:
+    """Return a shared ChromaDB PersistentClient for *db_path*.
+
+    All callers in this module share one instance so that HNSW segment
+    data loaded by ``get_vector_collection_info`` stays warm for
+    ``vector_search`` / ``VectorStore``.
+    """
+    global _client, _client_path
+    with _lock:
+        if _client is None or _client_path != db_path:
+            import chromadb as _cdb
+            from chromadb.config import Settings as _CSet
+            # Ensure .env is loaded before the first client creation so
+            # that any env-dependent ChromaDB settings are respected.
+            load_project_env()
+            _client = _cdb.PersistentClient(
+                path=db_path, settings=_CSet(anonymized_telemetry=False)
+            )
+            _client_path = db_path
+        return _client
 
 
 # ── library.json access ──────────────────────────────────────────────────────
@@ -224,52 +256,50 @@ def get_vector_collection_info(
     collection: str = "papers",
     db_path: str = "data/vectordb",
 ) -> Optional[Dict[str, Any]]:
-    """Return metadata for the first matching Chroma collection."""
-    import chromadb as _cdb
-    from chromadb.config import Settings as _CSet
+    """Return metadata for the first matching Chroma collection.
 
+    Uses the module-level shared ``PersistentClient`` so that HNSW
+    segment data stays warm for subsequent ``vector_search`` calls.
+    """
     db_dir = Path(db_path)
     if not db_dir.exists():
         return None
 
-    client = _cdb.PersistentClient(path=db_path, settings=_CSet(anonymized_telemetry=False))
-    try:
-        collections = client.list_collections()
-        matching = [c for c in collections if c.name.startswith(collection + "_")]
-        if not matching:
-            return None
+    client = _get_client(db_path)
+    collections = client.list_collections()
+    matching = [c for c in collections if c.name.startswith(collection + "_")]
+    if not matching:
+        return None
 
-        chosen = None
-        dimension = 2048
-        model_id = ""
+    chosen = None
+    dimension = 2048
+    model_id = ""
 
-        for candidate in matching:
-            metadata = candidate.metadata or {}
-            sample = candidate.get(limit=1, include=["embeddings"])
-            embeddings = sample.get("embeddings") if sample is not None else None
-            first_embedding = None
-            if embeddings is not None and len(embeddings) > 0:
-                first_embedding = embeddings[0]
-            if first_embedding is None:
-                continue
+    for candidate in matching:
+        metadata = candidate.metadata or {}
+        sample = candidate.get(limit=1, include=["embeddings"])
+        embeddings = sample.get("embeddings") if sample is not None else None
+        first_embedding = None
+        if embeddings is not None and len(embeddings) > 0:
+            first_embedding = embeddings[0]
+        if first_embedding is None:
+            continue
 
-            chosen = candidate
-            model_id = str(metadata.get("embedding_model", "") or "")
-            dimension = len(first_embedding)
-            break
+        chosen = candidate
+        model_id = str(metadata.get("embedding_model", "") or "")
+        dimension = len(first_embedding)
+        break
 
-        if chosen is None:
-            chosen = matching[0]
-            metadata = chosen.metadata or {}
-            model_id = str(metadata.get("embedding_model", "") or "")
+    if chosen is None:
+        chosen = matching[0]
+        metadata = chosen.metadata or {}
+        model_id = str(metadata.get("embedding_model", "") or "")
 
-        return {
-            "name": chosen.name,
-            "model_id": model_id,
-            "dimension": dimension,
-        }
-    finally:
-        client.clear_system_cache()
+    return {
+        "name": chosen.name,
+        "model_id": model_id,
+        "dimension": dimension,
+    }
 
 
 def _configure_embedder_for_collection(model_id: str, dimension: int):
@@ -357,6 +387,7 @@ def vector_search(
         db_path=db_path,
         collection_name=collection,
         embedding_model_id=model_id,
+        chroma_client=_get_client(db_path),
     )
     query_emb = embedder.embed_single(query)
     results = store.search(query_emb, k=k)

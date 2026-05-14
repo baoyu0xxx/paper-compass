@@ -39,6 +39,7 @@ class VectorStore:
         db_path: str,
         collection_name: str = "papercompass",
         embedding_model_id: str = "bge-base",
+        chroma_client: Any = None,
     ):
         import chromadb
         from chromadb.config import Settings
@@ -49,9 +50,14 @@ class VectorStore:
         self.collection_name = f"{collection_name}_{safe_id}"
 
         os.makedirs(self.db_path, exist_ok=True)
-        self.chroma_client = chromadb.PersistentClient(
-            path=self.db_path, settings=Settings(anonymized_telemetry=False)
-        )
+        if chroma_client is not None:
+            self.chroma_client = chroma_client
+            self._owns_client = False
+        else:
+            self.chroma_client = chromadb.PersistentClient(
+                path=self.db_path, settings=Settings(anonymized_telemetry=False)
+            )
+            self._owns_client = True
         self.collection = self.chroma_client.get_or_create_collection(
             name=self.collection_name,
             metadata={
