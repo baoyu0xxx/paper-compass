@@ -4,7 +4,7 @@
 
 **将 Zotero 论文库转化为 AI Agent 可直接检索的双引擎知识库（RAG 原文检索 + LLM Wiki 知识编译）**
 
-[![version](https://img.shields.io/badge/version-1.2.6-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.2.7-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
@@ -109,22 +109,60 @@ python scripts/sync_zotero.py --extract-text
 #    若数据库与 storage/ 不在同一目录：
 #    python scripts/sync_zotero.py --db-path /path/to/zotero.sqlite --storage-path /path/to/storage --extract-text
 
-# 5. 构建检索索引
+# 5. 日常数据增量更新（推荐）
+paper-compass sync \
+  --db-source-path /path/to/zotero_readonly.sqlite \
+  --storage-path /path/to/storage
+# → 顺序执行 Zotero 同步、论文增量索引、wiki 增量生成、wiki 索引
+# → 自动写入 data/state/last_sync.json
+# → 若检测到 vectordb 脏状态，会阻断并给出 rebuild 建议
+
+# 6. 仅构建检索索引（手动模式）
 python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
 
-# 6. 生成 wiki 页面（可选，数百篇论文通常需数小时）
+# 7. 生成 wiki 页面（可选，数百篇论文通常需数小时）
 nohup python scripts/ingest_to_wiki.py --skip-existing > data/logs/wiki_gen.log 2>&1 &
 # 完成后：
 python scripts/build_index.py --wiki
 
-# 7. 验证
+# 8. 验证
 python scripts/healthcheck.py --smoke
 python eval/run_eval.py -v
 ```
 
 ## 更新
 
-### 自动更新（推荐）
+注意区分两类“更新”：
+
+- `paper-compass update`：更新 paper-compass 代码版本
+- `paper-compass sync`：更新 Zotero / 文本 / 向量库 / wiki 数据
+
+### 数据增量更新（推荐）
+
+```bash
+# 标准增量更新
+paper-compass sync \
+  --db-source-path /path/to/zotero_readonly.sqlite \
+  --storage-path /path/to/storage
+
+# 仅预览将执行哪些阶段
+paper-compass sync --dry-run
+
+# 若上次异常退出导致 vectordb 脏状态，可带备份重建 papers 索引
+paper-compass sync \
+  --rebuild papers \
+  --backup-corrupted-db \
+  --db-source-path /path/to/zotero_readonly.sqlite \
+  --storage-path /path/to/storage
+```
+
+`paper-compass sync` 会：
+- 在写入前检查 `data/vectordb/` 是否存在 journal / WAL / manifest 损坏等异常状态
+- 顺序执行 `sync_zotero.py` → `build_index.py --incremental --prune-deleted` → `ingest_to_wiki.py --skip-existing` → `build_index.py --wiki`
+- 写入 `data/state/last_sync.json` 记录最近一次运行状态
+- 在检测到向量库损坏时停止写入，并给出 rebuild 建议
+
+### 自动更新代码（推荐）
 
 ```bash
 # 检查是否有新版本可用
@@ -134,7 +172,7 @@ paper-compass update --check
 paper-compass update
 
 # 更新到指定版本
-paper-compass update --version v1.2.5
+paper-compass update --version v1.2.7
 
 # 模拟更新（查看变更但不执行）
 paper-compass update --dry-run
@@ -153,7 +191,7 @@ paper-compass update --dry-run
 
 ```bash
 git fetch origin --tags
-git checkout v1.2.5          # 或 git pull origin main
+git checkout v1.2.7          # 或 git pull origin main
 pip install -e .
 paper-compass validate        # 验证配置仍然有效
 python3 -m pytest tests/ -x   # 确保测试通过
@@ -328,6 +366,12 @@ LLM 模型、Chroma 集合命名、MCP 跟踪等配置位于 `configs/` 目录�
 # 交互式配置 LLM 和嵌入服务
 paper-compass init
 
+# 一键执行 Zotero / 向量库 / wiki 数据同步
+paper-compass sync --db-source-path /path/to/zotero_readonly.sqlite --storage-path /path/to/storage
+
+# 代码升级
+paper-compass update
+
 # 验证配置与 API 连通性
 paper-compass validate
 ```
@@ -336,6 +380,8 @@ paper-compass validate
 
 ```bash
 paper-compass init --help
+paper-compass sync --help
+paper-compass update --help
 paper-compass validate --help
 ```
 
@@ -457,9 +503,11 @@ Zotero SQLite + PDF
 ```
 paper-compass/
 ├── src/paper_compass/       # 核心库
-│   ├── cli/                 # CLI 命令（init, validate）
+│   ├── cli/                 # CLI 命令（init, sync, update, validate）
 │   │   ├── __init__.py      # 主入口 paper-compass
 │   │   ├── configure.py     # paper-compass init 配置命令
+│   │   ├── sync_data.py     # paper-compass sync 数据同步命令
+│   │   ├── update.py        # paper-compass update 代码升级命令
 │   │   └── validate.py      # paper-compass validate 连通性验证
 │   ├── search.py            # search_library、search_passages、向量搜索
 │   ├── router.py            # ask_research 多层路由
@@ -473,10 +521,12 @@ paper-compass/
 │   ├── config.py            # YAML 配置加载与 $ENV_VAR 解析
 │   ├── types.py             # 响应数据类
 │   ├── index_manifest.py    # 基于指纹的增量索引
+│   ├── index_health.py      # vectordb 健康检查与损坏检测
 │   ├── logging.py           # JSONL 跟踪日志
+│   ├── pipeline_sync.py     # 一键数据同步流水线编排
 │   ├── pdf_extract.py       # PyMuPDF + pdfplumber 文本提取
 │   └── zotero_sqlite.py     # Zotero SQLite 读取
-├── scripts/                # CLI 入口（5 个脚本）
+├── scripts/                # CLI 入口与独立脚本
 ├── configs/                # YAML 配置模板
 ├── prompts/                # Wiki 生成提示词
 │   ├── wiki_overview.md    # 通用学术默认提示词（v1.2.1）
@@ -535,6 +585,7 @@ paper-compass 基于以下开源项目构建：
 
 | 版本 | 日期 | 内容 |
 |------|------|------|
+| v1.2.7 | 2026-05-15 | **数据同步命令 + vectordb 健康守卫** — 新增 `paper-compass sync`，将 `sync_zotero.py`、论文增量索引、wiki 增量生成与 wiki 向量化整合为一条命令；新增 `data/state/last_sync.json` 与 `data/state/sync.lock` 记录运行状态并阻止重叠执行；在写入前检测 Chroma journal/WAL/manifest/可读性，发现脏状态或损坏时阻断增量写入，并支持 `--rebuild {papers,wiki,all}` 与 `--backup-corrupted-db` 恢复路径。 |
 | v1.2.6 | 2026-05-13 | **MCP cold-start 优化** — 消除 ChromaDB `clear_system_cache()` 导致的段文件二次加载；全局共享 `PersistentClient` 实例避免双 client 问题；MCP 握手后后台预加载 wiki 和 papers 集合。首次语义检索工具调用从 22-50s 降至 16-29s，MCP 模式下预加载后亚秒级响应。 |
 
 ## 兼容性说明

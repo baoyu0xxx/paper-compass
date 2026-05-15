@@ -27,6 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from paper_compass.config import get_provider_config, load_all_configs
 from paper_compass.embedder import Embedder
 from paper_compass.env_utils import load_project_env
+from paper_compass.index_health import inspect_index_health
 from paper_compass.index_manifest import (
     build_paper_fingerprint,
     diff_manifest,
@@ -217,7 +218,7 @@ def _iter_paper_chunks(full_text: str, item: Dict[str, Any]) -> Iterable[Tuple[s
             {
                 "item_key": key,
                 "title": item.get("title", ""),
-                "year": item.get("year"),
+                "year": item.get("year") or 0,
                 "authors": ", ".join(item.get("authors", [])),
                 "collections": ", ".join(item.get("collections", [])),
                 "tags": ", ".join(item.get("tags", [])),
@@ -330,6 +331,14 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         print(f"ERROR: library.json not found: {library_path}")
         print("Run sync_zotero.py --extract-text first.")
         sys.exit(1)
+
+    health = inspect_index_health(args.db_path)
+    if health.severity in {"warning", "corrupted"}:
+        label = "corrupted state" if health.severity == "corrupted" else "requires attention"
+        print(f"ERROR: vectordb {label}: {args.db_path}")
+        print(f"Detected: {health.summary}")
+        print(f"Recommended action: {health.recommended_action}")
+        sys.exit(2)
 
     items = json.loads(library_path.read_text(encoding="utf-8"))
 

@@ -117,7 +117,29 @@ The `library.json` format: a JSON array of objects with at minimum:
 }
 ```
 
-### 5. Build search index
+### 5. 日常数据同步（推荐）
+
+推荐优先使用一键命令，而不是手工串多个脚本：
+
+```bash
+paper-compass sync \
+  --db-source-path /path/to/zotero_readonly.sqlite \
+  --storage-path /path/to/storage
+```
+
+这个命令会顺序执行：
+1. `sync_zotero.py --extract-text`
+2. `build_index.py --incremental --prune-deleted`
+3. `ingest_to_wiki.py --skip-existing`
+4. `build_index.py --wiki`
+
+并额外提供：
+- `data/vectordb/` 健康检查（journal / wal / manifest / Chroma 可读性）
+- `data/state/last_sync.json` 状态记录
+- 损坏时阻断写入并给出恢复建议
+- `--rebuild papers|wiki|all` + `--backup-corrupted-db` 恢复路径
+
+### 6. 手动执行各阶段（仅在需要细粒度控制时）
 
 ```bash
 python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild

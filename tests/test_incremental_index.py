@@ -2,6 +2,8 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from helpers import FakeEmbedder, FakeStore, load_build_index
 from paper_compass.index_manifest import compute_text_sha1, diff_manifest
 
@@ -165,3 +167,48 @@ def test_wiki_reindex_is_idempotent(tmp_path):
     assert any(
         "updated" in payload["document"] for payload in store.docs.values()
     )
+
+
+def test_index_papers_refuses_corrupted_vectordb(tmp_path, monkeypatch, capsys):
+    module = load_build_index()
+    item = make_paper(tmp_path, "A1", "a" * 2200)
+    library_path = write_library(tmp_path, [item])
+    args = make_args(tmp_path, library_path)
+
+    class Report:
+        severity = "corrupted"
+        summary = "metadata segment broken"
+        recommended_action = "paper-compass sync --rebuild papers --backup-corrupted-db"
+
+    monkeypatch.setattr(module, "inspect_index_health", lambda path: Report())
+
+    with pytest.raises(SystemExit) as exc:
+        module.index_papers(args, embedder=FakeEmbedder(), store=FakeStore())
+
+    assert exc.value.code == 2
+    output = capsys.readouterr().out
+    assert "corrupted" in output.lower()
+    assert "metadata segment broken" in output
+    assert "paper-compass sync --rebuild papers" in output
+
+
+def test_index_papers_refuses_warning_vectordb(tmp_path, monkeypatch, capsys):
+    module = load_build_index()
+    item = make_paper(tmp_path, "A1", "a" * 2200)
+    library_path = write_library(tmp_path, [item])
+    args = make_args(tmp_path, library_path)
+
+    class Report:
+        severity = "warning"
+        summary = "sqlite transient files present: journal"
+        recommended_action = "inspect and rebuild if needed"
+
+    monkeypatch.setattr(module, "inspect_index_health", lambda path: Report())
+
+    with pytest.raises(SystemExit) as exc:
+        module.index_papers(args, embedder=FakeEmbedder(), store=FakeStore())
+
+    assert exc.value.code == 2
+    output = capsys.readouterr().out
+    assert "vectordb requires attention" in output.lower()
+    assert "journal" in output.lower()
