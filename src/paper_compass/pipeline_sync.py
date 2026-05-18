@@ -69,6 +69,30 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _write_state(
+    state_path: Path,
+    *,
+    status: str,
+    stage: str,
+    planned_stages: list[str],
+    completed_stages: list[str],
+    error: str = "",
+    finished_at: str | None = None,
+) -> None:
+    _write_json(
+        state_path,
+        {
+            "started_at": _utc_now_iso(),
+            "finished_at": finished_at,
+            "status": status,
+            "stage": stage,
+            "planned_stages": planned_stages,
+            "completed_stages": completed_stages,
+            "error": error,
+        },
+    )
+
+
 def _backup_vectordb(db_path: Path) -> Path | None:
     if not db_path.exists():
         return None
@@ -186,48 +210,34 @@ def run_sync_pipeline(options: SyncOptions) -> SyncResult:
 
     lock = _acquire_lock(options.project_root)
     completed_stages: list[str] = []
-    _write_json(
+    _write_state(
         state_path,
-        {
-            "started_at": _utc_now_iso(),
-            "finished_at": None,
-            "status": "running",
-            "stage": planned[0] if planned else "completed",
-            "planned_stages": planned,
-            "completed_stages": completed_stages,
-            "error": "",
-        },
+        status="running",
+        stage=planned[0] if planned else "completed",
+        planned_stages=planned,
+        completed_stages=completed_stages,
     )
 
     try:
         for stage in planned:
-            _write_json(
+            _write_state(
                 state_path,
-                {
-                    "started_at": _utc_now_iso(),
-                    "finished_at": None,
-                    "status": "running",
-                    "stage": stage,
-                    "planned_stages": planned,
-                    "completed_stages": completed_stages,
-                    "error": "",
-                },
+                status="running",
+                stage=stage,
+                planned_stages=planned,
+                completed_stages=completed_stages,
             )
             command = _build_stage_command(options, stage)
             _run_stage_command(options.project_root, command)
             completed_stages.append(stage)
 
-        _write_json(
+        _write_state(
             state_path,
-            {
-                "started_at": _utc_now_iso(),
-                "finished_at": _utc_now_iso(),
-                "status": "ok",
-                "stage": "completed",
-                "planned_stages": planned,
-                "completed_stages": completed_stages,
-                "error": "",
-            },
+            status="ok",
+            stage="completed",
+            planned_stages=planned,
+            completed_stages=completed_stages,
+            finished_at=_utc_now_iso(),
         )
         return SyncResult(
             status="ok",
@@ -237,17 +247,14 @@ def run_sync_pipeline(options: SyncOptions) -> SyncResult:
             state_path=str(state_path),
         )
     except Exception as exc:
-        _write_json(
+        _write_state(
             state_path,
-            {
-                "started_at": _utc_now_iso(),
-                "finished_at": _utc_now_iso(),
-                "status": "failed",
-                "stage": completed_stages[-1] if completed_stages else (planned[0] if planned else "completed"),
-                "planned_stages": planned,
-                "completed_stages": completed_stages,
-                "error": str(exc),
-            },
+            status="failed",
+            stage=completed_stages[-1] if completed_stages else (planned[0] if planned else "completed"),
+            planned_stages=planned,
+            completed_stages=completed_stages,
+            error=str(exc),
+            finished_at=_utc_now_iso(),
         )
         raise
     finally:

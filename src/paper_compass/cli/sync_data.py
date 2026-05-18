@@ -62,14 +62,12 @@ def execute_sync(args: argparse.Namespace) -> int:
 
     print()
     print(f"  sync status: {result.status}")
-    planned = getattr(result, "planned_stages", None)
-    if not isinstance(planned, (list, tuple)):
-        planned = []
-    completed = getattr(result, "completed_stages", None)
-    if not isinstance(completed, (list, tuple)):
-        completed = []
-    print(f"  planned stages: {', '.join(planned) if planned else '(none)'}")
-    print(f"  completed stages: {', '.join(completed) if completed else '(none)'}")
-    print(f"  state file: {getattr(result, 'state_path', '(unknown)')}")
-    print(f"  summary: {getattr(result, 'summary', '')}")
+    print(
+        f"  planned stages: {', '.join(result.planned_stages) if result.planned_stages else '(none)'}"
+    )
+    print(
+        f"  completed stages: {', '.join(result.completed_stages) if result.completed_stages else '(none)'}"
+    )
+    print(f"  state file: {result.state_path}")
+    print(f"  summary: {result.summary}")
     return 0

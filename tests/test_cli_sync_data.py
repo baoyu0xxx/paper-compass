@@ -8,6 +8,8 @@ from unittest import mock
 
 import pytest
 
+from paper_compass.pipeline_sync import SyncResult
+
 
 class TestSyncCliArgParsing:
     def test_subcommand_registered(self):
@@ -50,10 +52,31 @@ class TestSyncExecute:
         from paper_compass.cli import sync_data
 
         args = _make_parser().parse_args(["--dry-run"])
-        with mock.patch.object(sync_data, "run_sync_pipeline") as mocked:
-            mocked.return_value = mock.Mock(status="dry_run", summary="planned")
-            rc = sync_data.execute_sync(args)
+        result = SyncResult(
+            status="dry_run",
+            summary="planned",
+            planned_stages=["sync_zotero", "index_papers"],
+            completed_stages=[],
+            state_path="/tmp/last_sync.json",
+        )
+        with mock.patch.object(sync_data, "run_sync_pipeline", return_value=result) as mocked:
+            with mock.patch("sys.stdout", io.StringIO()) as fake_out:
+                rc = sync_data.execute_sync(args)
+
         assert rc == 0
+        called_options = mocked.call_args.args[0]
+        assert called_options.project_root == sync_data.PROJECT_ROOT
+        assert called_options.db_path == sync_data.PROJECT_ROOT / "data/vectordb"
+        assert called_options.db_source_path is None
+        assert called_options.storage_path is None
+        assert called_options.dry_run is True
+        assert called_options.rebuild == "none"
+        output = fake_out.getvalue()
+        assert "sync status: dry_run" in output
+        assert "planned stages: sync_zotero, index_papers" in output
+        assert "completed stages: (none)" in output
+        assert "state file: /tmp/last_sync.json" in output
+        assert "summary: planned" in output
 
     def test_execute_sync_returns_one_on_health_error(self):
         from paper_compass.cli import sync_data
@@ -65,6 +88,16 @@ class TestSyncExecute:
                 rc = sync_data.execute_sync(args)
                 assert rc == 1
                 assert "broken" in fake_out.getvalue()
+
+    def test_execute_sync_returns_one_on_runtime_error(self):
+        from paper_compass.cli import sync_data
+
+        args = _make_parser().parse_args([])
+        with mock.patch.object(sync_data, "run_sync_pipeline", side_effect=RuntimeError("oops")):
+            with mock.patch("sys.stdout", io.StringIO()) as fake_out:
+                rc = sync_data.execute_sync(args)
+                assert rc == 1
+                assert "oops" in fake_out.getvalue()
 
 
 def _make_parser():

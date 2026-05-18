@@ -15,6 +15,7 @@ from paper_compass.cli.update import (
     _detect_env_var_changes,
     _ensure_clean_worktree,
     _ensure_git_available,
+    _execute_update_impl,
     _get_current_version,
     _get_latest_tag,
     _parse_env_vars,
@@ -348,6 +349,63 @@ class TestCliArgParsing:
         parser = _make_parser()
         args = parser.parse_args(["--dry-run"])
         assert args.dry_run is True
+
+
+class TestExecuteUpdateImpl:
+    def test_check_mode_reports_available_changes_without_updating(self):
+        args = _make_parser().parse_args(["--check"])
+
+        with mock.patch("paper_compass.cli.update._ensure_git_available"), mock.patch(
+            "paper_compass.cli.update._get_current_version", return_value="v1.2.0"
+        ), mock.patch(
+            "paper_compass.cli.update._git", return_value=mock.Mock(returncode=0)
+        ), mock.patch(
+            "paper_compass.cli.update._get_target_version", return_value="v1.3.0"
+        ), mock.patch(
+            "paper_compass.cli.update._get_changelog",
+            return_value="abc123 feat: improve sync",
+        ), mock.patch(
+            "paper_compass.cli.update._perform_update"
+        ) as perform_update, mock.patch("sys.stdout", io.StringIO()) as fake_out:
+            rc = _execute_update_impl(args)
+
+        assert rc == 0
+        perform_update.assert_not_called()
+        output = fake_out.getvalue()
+        assert "Current version: v1.2.0" in output
+        assert "Target version:  v1.3.0" in output
+        assert "Available changes (v1.2.0 → v1.3.0):" in output
+        assert "run 'paper-compass update' to apply this update" in output.lower()
+
+    def test_dry_run_stops_before_perform_update(self):
+        args = _make_parser().parse_args(["--dry-run"])
+
+        with mock.patch("paper_compass.cli.update._ensure_git_available"), mock.patch(
+            "paper_compass.cli.update._get_current_version", return_value="v1.2.0"
+        ), mock.patch(
+            "paper_compass.cli.update._git", return_value=mock.Mock(returncode=0)
+        ), mock.patch(
+            "paper_compass.cli.update._get_target_version", return_value="v1.3.0"
+        ), mock.patch(
+            "paper_compass.cli.update._detect_breaking_changes",
+            return_value=["  ⚠ Example warning"],
+        ), mock.patch(
+            "paper_compass.cli.update._get_changelog",
+            return_value="abc123 feat: improve sync",
+        ), mock.patch(
+            "paper_compass.cli.update._ensure_clean_worktree"
+        ) as ensure_clean, mock.patch(
+            "paper_compass.cli.update._perform_update"
+        ) as perform_update, mock.patch("sys.stdout", io.StringIO()) as fake_out:
+            rc = _execute_update_impl(args)
+
+        assert rc == 0
+        ensure_clean.assert_not_called()
+        perform_update.assert_not_called()
+        output = fake_out.getvalue()
+        assert "Updating v1.2.0 → v1.3.0" in output
+        assert "⚠ Upgrade notes:" in output
+        assert "(dry-run — no changes made)" in output
 
 
 def _make_parser():

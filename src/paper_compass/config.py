@@ -114,28 +114,19 @@ def get_provider_config(
 
     provider = dict(providers[provider_name])
 
-    # Resolve env-var-referenced values
-    for key in ["base_url_env", "model_env"]:
-        if key in provider:
-            env_name = provider.pop(key)
-            target_field = {
-                "base_url_env": "base_url",
-                "model_env": "model",
-            }[key]
-            value = _resolve_env_value(os.environ.get(env_name, ""))
-            if value:
-            # If env var is empty/falsy, keep the existing default value
-            # (provider.yaml's "model" field serves as the default)
-                provider[target_field] = value
-
-    # Resolve api_key_env
-    if "api_key_env" in provider:
-        env_name = provider.pop("api_key_env")
+    # Resolve env-backed provider fields while preserving defaults on empty values.
+    env_field_map = {
+        "base_url_env": "base_url",
+        "model_env": "model",
+        "api_key_env": "api_key",
+    }
+    for env_key, target_field in env_field_map.items():
+        if env_key not in provider:
+            continue
+        env_name = provider.pop(env_key)
         value = _resolve_env_value(os.environ.get(env_name, ""))
         if value:
-            # If env var is empty/falsy, keep the existing default value
-            # (provider.yaml's "model" field serves as the default)
-            provider["api_key"] = value
+            provider[target_field] = value
 
     return provider
 

@@ -169,6 +169,50 @@ providers:
         finally:
             monkeypatch.delenv("TEST_MODEL_OVERRIDE", raising=False)
 
+    def test_base_url_env_overrides_default(self, monkeypatch):
+        """base_url_env should override the default base_url when env var is set."""
+        import tempfile
+
+        monkeypatch.setenv("TEST_BASE_URL_OVERRIDE", "https://override.example/v2")
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                Path(tmpdir, "providers.yaml").write_text(
+                    "version: 1\n"
+                    "providers:\n"
+                    "  main:\n"
+                    "    api_style: openai-compatible\n"
+                    "    base_url: https://example.com/v1\n"
+                    "    base_url_env: TEST_BASE_URL_OVERRIDE\n"
+                    "    model: test-model\n"
+                )
+                configs = load_all_configs(tmpdir)
+                provider = get_provider_config("main", configs)
+                assert provider["base_url"] == "https://override.example/v2"
+        finally:
+            monkeypatch.delenv("TEST_BASE_URL_OVERRIDE", raising=False)
+
+    def test_base_url_env_empty_falls_back_to_default(self, monkeypatch):
+        """When base_url_env is set but env var is empty, default base_url is kept."""
+        import tempfile
+
+        monkeypatch.setenv("TEST_BASE_URL_OVERRIDE", "")
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                Path(tmpdir, "providers.yaml").write_text(
+                    "version: 1\n"
+                    "providers:\n"
+                    "  main:\n"
+                    "    api_style: openai-compatible\n"
+                    "    base_url: https://example.com/v1\n"
+                    "    base_url_env: TEST_BASE_URL_OVERRIDE\n"
+                    "    model: test-model\n"
+                )
+                configs = load_all_configs(tmpdir)
+                provider = get_provider_config("main", configs)
+                assert provider["base_url"] == "https://example.com/v1"
+        finally:
+            monkeypatch.delenv("TEST_BASE_URL_OVERRIDE", raising=False)
+
     def test_provider_field_preserved(self):
         """New 'provider' field should be accessible from config."""
         import tempfile
