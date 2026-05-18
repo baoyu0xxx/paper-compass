@@ -4,7 +4,7 @@
 
 **将 Zotero 论文库转化为 AI Agent 可直接检索的双引擎知识库（RAG 原文检索 + LLM Wiki 知识编译）**
 
-[![version](https://img.shields.io/badge/version-1.2.7-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.2.8-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
@@ -54,7 +54,32 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
 ## 快速开始
 
-### 方式一：Agent 提示词部署（推荐）
+### 方式一：标准包安装（推荐）
+
+普通用户建议直接安装已发布的 Python 包，而不是先 `git clone` 再 editable install：
+
+```bash
+python3 -m pip install paper-compass
+
+# 交互式配置
+paper-compass init
+
+# 验证配置与 API 连通性
+paper-compass validate
+```
+
+完成安装后，可继续执行数据同步与索引构建：
+
+```bash
+paper-compass sync \
+  --db-source-path /path/to/zotero_readonly.sqlite \
+  --storage-path /path/to/storage
+paper-compass-healthcheck --smoke
+```
+
+如果你是首次部署，仍建议阅读下方“安装”“配置”和“MCP 集成”章节，确认 `.env`、Zotero 路径与嵌入服务配置正确。
+
+### 方式二：Agent 提示词部署
 
 将以下提示词复制给你的 AI Agent，它将自动完成 paper-compass 的完整部署：
 
@@ -83,13 +108,13 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 请帮我克隆 https://github.com/baoyu0xxx/paper-compass.git，安装依赖后运行 paper-compass init 做交互式配置，完成后验证安装并同步我的 Zotero 论文库。
 ```
 
-### 方式二：从源码安装
+### 方式三：从源码安装（开发者）
 
 ```bash
 # 1. 克隆仓库
 git clone https://github.com/baoyu0xxx/paper-compass.git
 cd paper-compass
-pip install -e .
+python3 -m pip install -e .
 
 # 2. 配置环境变量 — 交互式（推荐）
 paper-compass init
@@ -132,10 +157,21 @@ python eval/run_eval.py -v
 
 ## 更新
 
-注意区分两类“更新”：
+注意区分三类“更新”：
 
-- `paper-compass update`：更新 paper-compass 代码版本
+- `python3 -m pip install --upgrade paper-compass`：升级已发布的安装包
+- `paper-compass update`：更新 git clone 安装的仓库代码版本
 - `paper-compass sync`：更新 Zotero / 文本 / 向量库 / wiki 数据
+
+### 安装包升级（推荐）
+
+如果你是通过 PyPI / wheel 安装的，优先使用：
+
+```bash
+python3 -m pip install --upgrade paper-compass
+```
+
+这适用于大多数普通用户。
 
 ### 数据增量更新（推荐）
 
@@ -162,7 +198,7 @@ paper-compass sync \
 - 写入 `data/state/last_sync.json` 记录最近一次运行状态
 - 在检测到向量库损坏时停止写入，并给出 rebuild 建议
 
-### 自动更新代码（推荐）
+### 自动更新代码（仅适用于 git clone 安装）
 
 ```bash
 # 检查是否有新版本可用
@@ -184,6 +220,8 @@ paper-compass update --dry-run
 - 检测断点变更（新增的必填环境变量、配置格式变化等）并给出提示
 - 运行 `paper-compass validate` 验证配置连通性
 - 运行测试冒烟检查
+
+如果你不是通过 `git clone` 安装，而是通过 PyPI 或 wheel 安装，`paper-compass update` 不适用；请改用 `python3 -m pip install --upgrade paper-compass`。
 
 ### 手动更新
 
@@ -220,14 +258,36 @@ python3 -m pytest tests/ -x   # 确保测试通过
 | LLM API 密钥 | Wiki 生成需要 OpenAI 兼容端点（`LLM_BASE_URL` + `LLM_API_KEY`） |
 | 嵌入服务 API 密钥 | 支持 OpenAI-compatible 及火山引擎多模态嵌入 |
 
-### 从源码安装
+### 标准包安装（推荐）
+
+```bash
+python3 -m pip install paper-compass
+```
+
+升级：
+
+```bash
+python3 -m pip install --upgrade paper-compass
+```
+
+安装后即可使用：
+
+```bash
+paper-compass --help
+paper-compass init
+paper-compass validate
+paper-compass-healthcheck --help
+paper-compass-mcp --help
+```
+
+### 从源码安装（开发者）
 
 ```bash
 git clone https://github.com/baoyu0xxx/paper-compass.git
 cd paper-compass
-pip install -e .           # 核心依赖
-pip install -e ".[dev]"    # 含 pytest，用于测试
-pip install -e ".[paperqa]" # 含 PaperQA5 集成（可选）
+python3 -m pip install -e .            # 核心依赖
+python3 -m pip install -e ".[dev]"     # 含 pytest / build / twine
+python3 -m pip install -e ".[paperqa]" # 含 PaperQA5 集成（可选）
 ```
 
 安装后即可使用 `paper-compass` CLI 命令。

@@ -4,11 +4,10 @@
 
 **Turn your Zotero library into a dual-engine knowledge base for AI agents — RAG full-text retrieval + LLM wiki knowledge compilation**
 
-[![version](https://img.shields.io/badge/version-1.2.6-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
-[![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)](LICENSE)
+[![version](https://img.shields.io/badge/version-1.2.8-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
-[![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)](https://spec.modelcontextprotocol.io/)
-[![tests](https://img.shields.io/badge/tests-159_passed-d4785c?style=flat-square&labelColor=3a3026&color=d4785c)](https://github.com/baoyu0xxx/paper-compass/actions)
+![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
 
 </div>
 
@@ -73,7 +72,32 @@ Your agent searches your own paper library and returns relevant passages with so
 
 ## Quick Start
 
-### Option A: Agent Prompt Deployment (Recommended)
+### Option A: Package Installation (Recommended)
+
+For most users, install the published package directly instead of cloning the repository first:
+
+```bash
+python3 -m pip install paper-compass
+
+# Interactive setup
+paper-compass init
+
+# Verify configuration and API connectivity
+paper-compass validate
+```
+
+After installation, continue with data sync and indexing:
+
+```bash
+paper-compass sync \
+  --db-source-path /path/to/zotero_readonly.sqlite \
+  --storage-path /path/to/storage
+paper-compass-healthcheck --smoke
+```
+
+If this is your first deployment, still review the Installation, Configuration, and MCP Integration sections below to confirm `.env`, Zotero paths, and embedding provider settings.
+
+### Option B: Agent Prompt Deployment
 
 Copy the following prompt to your AI agent — it will handle the full paper-compass setup automatically:
 
@@ -102,13 +126,13 @@ For more capable agents, a one-liner suffices:
 Please clone https://github.com/baoyu0xxx/paper-compass.git, install dependencies, run paper-compass init for interactive config, verify the setup, then sync my Zotero library.
 ```
 
-### Option B: From Source
+### Option C: From Source (Developers)
 
 ```bash
 # 1. Clone
 git clone https://github.com/baoyu0xxx/paper-compass.git
 cd paper-compass
-pip install -e .
+python3 -m pip install -e .
 
 # 2. Configure — interactive (recommended)
 paper-compass init
@@ -143,7 +167,23 @@ python eval/run_eval.py -v
 
 ## Updating
 
-### Automatic Update (Recommended)
+Distinguish three kinds of updates:
+
+- `python3 -m pip install --upgrade paper-compass`: upgrade the published package
+- `paper-compass update`: update a git-clone installation of the repository
+- `paper-compass sync`: update Zotero / text / vector index / wiki data
+
+### Package Upgrade (Recommended)
+
+If you installed paper-compass from PyPI or a wheel, use:
+
+```bash
+python3 -m pip install --upgrade paper-compass
+```
+
+This is the recommended path for most users.
+
+### Automatic Update (git-clone installs only)
 
 ```bash
 # Check for available updates
@@ -165,6 +205,8 @@ paper-compass update --dry-run
 - Detects breaking changes (new required env vars, config format changes) and warns you
 - Runs `paper-compass validate` to verify API connectivity
 - Runs a quick test smoke check
+
+If you installed paper-compass from PyPI or a wheel, do not use `paper-compass update`; use `python3 -m pip install --upgrade paper-compass` instead.
 
 ### Manual Update
 
@@ -203,14 +245,36 @@ python3 -m pytest tests/ -x   # ensure tests pass
 | LLM API key | Wiki generation via OpenAI-compatible endpoint (`LLM_BASE_URL` + `LLM_API_KEY`) |
 | Embedding API key | OpenAI-compatible or Volcengine multimodal, or local models |
 
-### From Source
+### Package Installation (Recommended)
+
+```bash
+python3 -m pip install paper-compass
+```
+
+Upgrade with:
+
+```bash
+python3 -m pip install --upgrade paper-compass
+```
+
+After installation, the following commands should be available:
+
+```bash
+paper-compass --help
+paper-compass init
+paper-compass validate
+paper-compass-healthcheck --help
+paper-compass-mcp --help
+```
+
+### From Source (Developers)
 
 ```bash
 git clone https://github.com/baoyu0xxx/paper-compass.git
 cd paper-compass
-pip install -e .          # core dependencies
-pip install -e ".[dev]"   # + pytest for testing
-pip install -e ".[paperqa]"  # + PaperQA5 integration (optional)
+python3 -m pip install -e .             # core dependencies
+python3 -m pip install -e ".[dev]"      # + pytest / build / twine
+python3 -m pip install -e ".[paperqa]"  # + PaperQA5 integration (optional)
 ```
 
 Once installed, the `paper-compass` CLI command is available (see CLI Commands section).

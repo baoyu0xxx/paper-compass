@@ -18,6 +18,7 @@ from typing import Any
 
 from paper_compass.cli.arg_utils import MergeDictAction
 from paper_compass.env_utils import PROJECT_ROOT, DEFAULT_ENV_PATH, load_project_env
+from paper_compass.resources import resolve_package_path
 
 # ── Default values ──────────────────────────────────────────────────────────
 
@@ -37,7 +38,7 @@ DEFAULT_VOLC_EMBED_MODEL = "doubao-embedding-vision-250615"  # example — repla
 
 def _available_disciplines() -> list[str]:
     """Discover installed discipline presets under prompts/disciplines/."""
-    disciplines_dir = Path("prompts/disciplines")
+    disciplines_dir = resolve_package_path("prompts/disciplines")
     if not disciplines_dir.exists() or not disciplines_dir.is_dir():
         return []
     result = []

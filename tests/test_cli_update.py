@@ -184,7 +184,7 @@ class TestEnsureGitAvailable:
             "paper_compass.cli.update.PROJECT_ROOT", tmp_path
         ), mock.patch("subprocess.run") as mock_run:
             mock_run.return_value = mock.Mock(returncode=0)
-            with pytest.raises(RuntimeError, match="Not a git repository"):
+            with pytest.raises(RuntimeError, match="pip install --upgrade paper-compass"):
                 _ensure_git_available()
 
     def test_git_not_found(self, tmp_path):

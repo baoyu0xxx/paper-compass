@@ -90,6 +90,14 @@ class TestLoadAllConfigs:
         configs = load_all_configs("/nonexistent/dir")
         assert configs == {}
 
+    def test_load_all_configs_falls_back_to_packaged_dir_when_cwd_has_no_configs(self, monkeypatch, tmp_path):
+        monkeypatch.chdir(tmp_path)
+
+        configs = load_all_configs("configs")
+
+        assert "providers" in configs
+        assert "paths" in configs
+
 
 class TestGetProviderConfig:
     def test_lookup_provider(self):

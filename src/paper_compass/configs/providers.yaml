@@ -1,0 +1,47 @@
+version: 1
+
+default_provider: wiki_generation
+
+providers:
+  wiki_generation:
+    api_style: openai-compatible
+    base_url_env: LLM_BASE_URL
+    api_key_env: LLM_API_KEY
+    model_env: LLM_MODEL
+    temperature: 0.1
+    max_tokens: 4000
+    timeout_seconds: 120
+
+  embedding_main:
+    provider: openai
+    api_style: openai-compatible
+    base_url_env: EMBED_BASE_URL
+    api_key_env: EMBED_API_KEY
+    model: text-embedding-3-small
+    model_env: EMBED_MODEL
+    timeout_seconds: 120
+
+  embedding_volcengine:
+    provider: volcengine
+    api_style: openai-compatible
+    base_url_env: VOLC_EMBED_BASE_URL
+    api_key_env: VOLC_EMBED_API_KEY
+    model_env: VOLC_EMBED_MODEL
+    timeout_seconds: 120
+
+  paperqa_answer:
+    api_style: openai-compatible
+    base_url_env: PAPERQA_BASE_URL
+    api_key_env: PAPERQA_API_KEY
+    model_env: PAPERQA_MODEL
+    temperature: 0.0
+    max_tokens: 4000
+    timeout_seconds: 120
+
+roles:
+  wiki_ingest: wiki_generation
+  wiki_query: wiki_generation
+  router_classify: wiki_generation
+  paperqa_answer: paperqa_answer
+  pdf_embedding: embedding_main
+  wiki_embedding: embedding_main

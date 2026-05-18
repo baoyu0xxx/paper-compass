@@ -1,0 +1,38 @@
+version: 1
+
+mcp:
+  server_name: paper-compass
+  enabled: true
+
+  tools:
+    - search_wiki
+    - search_library
+    - ask_research
+    - get_paper_metadata
+    - save_to_wiki
+
+  response:
+    include_trace_id: true
+    include_confidence: true
+    include_sources: true
+    include_next_suggested_action: true
+    max_result_items: 10
+
+  routing:
+    default_mode: auto
+    allow_force_mode: true
+    upgrade_to_pdf_when:
+      - detail_request
+      - source_verification_request
+      - wiki_no_match
+      - wiki_low_confidence
+
+  safety:
+    allow_writeback_tool: true
+    require_nonempty_title_for_writeback: true
+
+  trace:
+    enabled: false
+    path: data/traces/mcp_traces.jsonl
+    include_query_text: true
+    include_source_ids: true

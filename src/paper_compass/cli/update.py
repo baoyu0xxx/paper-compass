@@ -48,7 +48,9 @@ def _ensure_git_available() -> None:
     if not (PROJECT_ROOT / ".git").exists():
         raise RuntimeError(
             f"Not a git repository: {PROJECT_ROOT}\n"
-            "paper-compass update only works when installed via git clone."
+            "paper-compass update only works when installed via git clone.\n"
+            "If you installed paper-compass from PyPI or a wheel, upgrade with:\n"
+            "  python3 -m pip install --upgrade paper-compass"
         )
 
 

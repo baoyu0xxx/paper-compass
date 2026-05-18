@@ -1,0 +1,44 @@
+version: 1
+
+rag:
+  backend: paperqa
+  enabled: true
+
+  data_sources:
+    paper_directory_from: paths.zotero_pdf_root
+    sqlite_metadata_from: paths.zotero_sqlite_path
+    manifest_path_from: paths.manifest_path
+    library_json_path_from: paths.library_json_path
+    pqa_home_from: paths.pqa_home
+
+  llm_role: paperqa_answer
+  embedding_role: pdf_embedding
+
+  default_mode: filtered
+  allow_full_library_query: true
+
+  filters:
+    enabled: true
+    allowed_fields:
+      - collections
+      - tags
+      - authors
+      - year
+    default_limit: 10
+
+  answer:
+    max_sources: 5
+    evidence_k: 8
+    answer_length: concise_with_citations
+    temperature: 0.0
+
+  indexing:
+    auto_reuse_existing_index: true
+    rebuild_on_manifest_change: false
+    embedding_batch_size: null
+
+  output:
+    include_evidence_snippets: true
+    include_page_hints: true
+    include_doc_metadata: true
+    max_snippets: 8

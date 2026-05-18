@@ -27,6 +27,7 @@ from typing import Any, Dict, List, Optional
 import yaml
 
 from paper_compass.config import get_provider_config, load_all_configs
+from paper_compass.resources import resolve_package_path
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +88,7 @@ class WikiGenerator:
 
         A valid discipline directory must contain wiki_overview.md.
         """
-        disciplines_dir = Path("prompts/disciplines")
+        disciplines_dir = resolve_package_path("prompts/disciplines")
         if not disciplines_dir.exists() or not disciplines_dir.is_dir():
             return []
         result = []
@@ -102,7 +103,7 @@ class WikiGenerator:
     # ── helpers ───────────────────────────────────────────────────────────
 
     def _load(self, path: str) -> str:
-        p = Path(path)
+        p = resolve_package_path(path)
         return p.read_text(encoding="utf-8") if p.exists() else ""
 
     def _build_generation_prompt(self, paper_type: str) -> tuple[str, int]:

@@ -1,8 +1,23 @@
 [project]
 name = "paper-compass"
-version = "1.2.7"
+version = "1.2.8"
 description = "Personal academic paper retrieval and knowledge navigation infrastructure"
+readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+authors = [
+  { name = "baoyu0xxx" }
+]
+keywords = ["zotero", "rag", "mcp", "research", "academic-papers"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Information Analysis",
+]
 dependencies = [
   "pyyaml>=6.0",
   "chromadb>=0.4.0",
@@ -12,14 +27,21 @@ dependencies = [
   "sentence-transformers>=2.2.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/baoyu0xxx/paper-compass"
+Repository = "https://github.com/baoyu0xxx/paper-compass"
+Issues = "https://github.com/baoyu0xxx/paper-compass/issues"
+
 [project.scripts]
 paper-compass = "paper_compass.cli:main"
-paper-compass-healthcheck = "scripts.healthcheck:main"
-paper-compass-mcp = "scripts.run_mcp_server:main"
+paper-compass-healthcheck = "paper_compass.healthcheck:main"
+paper-compass-mcp = "paper_compass.mcp_cli:main"
 
 [project.optional-dependencies]
 dev = [
   "pytest>=8.0",
+  "build>=1.2.2",
+  "twine>=5.1.1",
 ]
 paperqa = [
   "paper-qa>=5",
@@ -28,6 +50,16 @@ paperqa = [
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+paper_compass = [
+  "configs/*.yaml",
+  "prompts/*.md",
+  "prompts/disciplines/*/*.md",
+]
 
 [build-system]
 requires = ["setuptools>=68", "wheel"]

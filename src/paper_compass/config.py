@@ -1,10 +1,8 @@
-"""
-Configuration loader for paper-compass.
+"""Load YAML configuration files from the repo or installed package resources."""
 
-Loads YAML config files and resolves environment variable references.
-Designed as a thin, testable layer over the configs/ directory.
-"""
+from __future__ import annotations
 
+from importlib.resources import files
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -13,41 +11,73 @@ import yaml
 
 def _resolve_env(value: str) -> str:
     """Resolve ${ENV_VAR} or $ENV_VAR references in a string."""
-    import re
     import os
+    import re
 
     def replacer(match):
         var_name = match.group(1) or match.group(2)
         return os.environ.get(var_name, "")
 
-    return re.sub(r'\$\{(\w+)\}|\$(\w+)', replacer, value)
+    return re.sub(r"\$\{(\w+)\}|\$(\w+)", replacer, value)
 
 
 def _resolve_env_recursive(obj: Any) -> Any:
     """Recursively resolve env vars in dicts, lists, and strings."""
     if isinstance(obj, str):
         return _resolve_env(obj)
-    elif isinstance(obj, dict):
+    if isinstance(obj, dict):
         return {k: _resolve_env_recursive(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
+    if isinstance(obj, list):
         return [_resolve_env_recursive(v) for v in obj]
     return obj
 
 
+def _candidate_paths(config_dir: str | Path) -> list[Path]:
+    path = Path(config_dir)
+    candidates: list[Path] = []
+
+    if path.is_absolute():
+        return [path]
+
+    candidates.append(path)
+    package_root = Path(__file__).resolve().parents[2]
+    candidates.append(package_root / path)
+    return candidates
+
+
+def _resource_path(config_dir: str | Path) -> Path | None:
+    path = Path(config_dir)
+    if path.is_absolute():
+        return None
+
+    try:
+        resource = files("paper_compass") / path.as_posix()
+    except ModuleNotFoundError:
+        return None
+
+    try:
+        if resource.is_dir():
+            return Path(str(resource))
+    except FileNotFoundError:
+        return None
+    return None
+
+
+def resolve_config_dir(config_dir: str | Path = "configs") -> Path:
+    """Resolve a config directory from cwd, repo root, or installed package data."""
+    for candidate in _candidate_paths(config_dir):
+        if candidate.exists() and candidate.is_dir():
+            return candidate
+
+    resource_dir = _resource_path(config_dir)
+    if resource_dir is not None:
+        return resource_dir
+
+    return Path(config_dir)
+
+
 def load_yaml_config(filepath: str, resolve_env: bool = True) -> Dict[str, Any]:
-    """Load a single YAML config file.
-
-    Args:
-        filepath: Path to the YAML file.
-        resolve_env: Whether to resolve ${ENV_VAR} references in values.
-
-    Returns:
-        Parsed config dictionary.
-
-    Raises:
-        FileNotFoundError: If the file does not exist.
-        yaml.YAMLError: If the YAML is malformed.
-    """
+    """Load a single YAML config file."""
     path = Path(filepath)
     if not path.exists():
         raise FileNotFoundError(f"Config file not found: {filepath}")
@@ -62,15 +92,8 @@ def load_yaml_config(filepath: str, resolve_env: bool = True) -> Dict[str, Any]:
 
 
 def load_all_configs(config_dir: str = "configs") -> Dict[str, Any]:
-    """Load all YAML config files from a directory.
-
-    Args:
-        config_dir: Path to the config directory.
-
-    Returns:
-        Dictionary mapping config name (stem) to its parsed content.
-    """
-    dir_path = Path(config_dir)
+    """Load all YAML config files from a directory."""
+    dir_path = resolve_config_dir(config_dir)
     configs: Dict[str, Any] = {}
 
     if not dir_path.exists():
@@ -86,18 +109,7 @@ def load_all_configs(config_dir: str = "configs") -> Dict[str, Any]:
 def get_provider_config(
     provider_name: str, configs: Optional[Dict[str, Any]] = None
 ) -> Dict[str, Any]:
-    """Look up a specific provider config from the loaded providers.
-
-    Args:
-        provider_name: Name of the provider (key in providers.yaml).
-        configs: Pre-loaded configs dict, or None to load fresh.
-
-    Returns:
-        Provider config dict with env vars resolved.
-
-    Raises:
-        KeyError: If provider_name is not found.
-    """
+    """Look up a specific provider config from the loaded providers."""
     import os
 
     if configs is None:
@@ -114,7 +126,6 @@ def get_provider_config(
 
     provider = dict(providers[provider_name])
 
-    # Resolve env-backed provider fields while preserving defaults on empty values.
     env_field_map = {
         "base_url_env": "base_url",
         "model_env": "model",
@@ -132,19 +143,13 @@ def get_provider_config(
 
 
 def _resolve_env_value(value: str) -> str:
-    """Resolve a value that may be an $ENV_VAR reference.
-
-    If the value starts with '$', treat the rest as an environment variable name
-    and look it up. Otherwise return the value as-is.
-
-    This enables users to store $OPENAI_API_KEY in .env instead of a literal key.
-    """
+    """Resolve a value that may be an $ENV_VAR reference."""
     import os
+
     if value.startswith("$"):
-        inner_name = value[1:]  # strip the $
+        inner_name = value[1:]
         resolved = os.environ.get(inner_name, "")
         if resolved:
             return resolved
-        # If the inner env var is not set, return the original $VAR as fallback
         return value
     return value
