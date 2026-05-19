@@ -14,6 +14,11 @@ data/vectordb/
 data/zotero-export/*.csv
 data/zotero-export/*.json
 
+# Runtime state / backups / local debugging
+data/state/
+data/vectordb.bak.*/
+_check_collections.py
+
 # Wiki cache
 wiki/.cache/
 wiki/queries/

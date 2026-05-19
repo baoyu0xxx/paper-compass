@@ -122,6 +122,10 @@ def resolve_zotero_source(
     env_map = env if env is not None else os.environ
     tried: List[ZoteroPathAttempt] = []
     storage_override = Path(storage_path).expanduser() if storage_path else None
+    if storage_override is None:
+        env_storage_path = env_map.get("ZOTERO_STORAGE_PATH", "").strip()
+        if env_storage_path:
+            storage_override = Path(env_storage_path).expanduser()
 
     explicit_db_path = db_path or None
     if explicit_db_path:

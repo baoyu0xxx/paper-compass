@@ -48,8 +48,6 @@ def test_env_path_used_when_no_explicit_db_path(tmp_path, monkeypatch):
     assert resolved.db_path == env_root / "zotero.sqlite"
     assert resolved.storage_path == env_root / "storage"
     assert resolved.source_kind == "env"
-
-
 def test_default_root_preferred_over_backup_root(tmp_path):
     default_root = _make_zotero_dir(tmp_path / "default", readonly=True, storage=True)
     backup_root = _make_zotero_dir(tmp_path / "backup", readonly=True, storage=True)
@@ -93,6 +91,23 @@ def test_explicit_storage_path_overrides_default_storage(tmp_path):
     resolved = resolve_zotero_source(
         db_path=str(root / "zotero_readonly.sqlite"),
         storage_path=str(custom_storage),
+        default_roots=[],
+        backup_roots=[],
+    )
+
+    assert resolved.db_path == root / "zotero_readonly.sqlite"
+    assert resolved.storage_path == custom_storage
+    assert resolved.source_kind == "explicit"
+
+
+def test_storage_env_path_is_used_when_explicit_storage_missing(tmp_path, monkeypatch):
+    root = _make_zotero_dir(tmp_path / "zotero", readonly=True, storage=False)
+    custom_storage = tmp_path / "env-storage"
+    custom_storage.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setenv("ZOTERO_STORAGE_PATH", str(custom_storage))
+
+    resolved = resolve_zotero_source(
+        db_path=str(root / "zotero_readonly.sqlite"),
         default_roots=[],
         backup_roots=[],
     )

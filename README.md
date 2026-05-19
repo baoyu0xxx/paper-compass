@@ -19,7 +19,7 @@
 
 当前 AI Agent 在阅读学术文献时面临一个困境：直接读取全文会导致较大的 Token 消耗且检索效率不高；单篇论文的对话式问答往往需要反复传递大段原文，效果却未必理想。
 
-已有方案中，RAG 检索擅长定位原文中的具体段落，llm-wiki（Karpathy 提出的"知识编译一次、持续维护"理念）则通过 LLM 将论文内容提炼为结构化的知识页面。但二者在 Agent 工作流中缺乏有效的结合——要么只做向量检索，要么只做知识编译，缺少一个能快捷使用的、将二者互补的文献检索方案。
+已有方案中，RAG 检索擅长定位原文中的具体段落，llm-wiki（Karpathy 提出的"知识编译一次、持续维护"理念）则通过 LLM 将论文内容提炼为结构化的知识页面。但二者在 Agent 工作流中缺乏有效的结合——要么只做向量检索，要么只做知识编译，能找到的结合二者的项目又多缺少更好的agent支持。总体而言，缺少一个能快捷使用的、将二者互补的agent文献检索方案。
 
 **paper-compass 的设计出发点正是填补这一空白**：将 Zotero 论文库转化为 AI Agent 可直接检索的知识库，通过 RAG 原文检索与 LLM wiki 知识编译两种方式互补，解决学术文献管理中的两个常见问题：
 
@@ -56,29 +56,31 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
 ### 方式一：通过 GitHub Release 安装（推荐）
 
-当前推荐直接从 GitHub Release 安装已发布的 wheel，而不是先 `git clone` 再 editable install：
+当前推荐直接从 GitHub Release 安装已发布的 wheel。请将下面命令中的版本号替换为你要安装的已发布版本（例如当前 latest release）：
 
 ```bash
 python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.10/paper_compass-1.2.10-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/vX.Y.Z/paper_compass-X.Y.Z-py3-none-any.whl
 
 # 交互式配置
 paper-compass init
 
 # 验证配置与 API 连通性
 paper-compass validate
-```
 
-完成安装后，可继续执行数据同步与索引构建：
-
-```bash
+# 增量同步 Zotero / 索引 / wiki 数据
 paper-compass sync \
   --db-source-path /path/to/zotero_readonly.sqlite \
   --storage-path /path/to/storage
-paper-compass-healthcheck --smoke
 ```
 
-如果你是首次部署，仍建议阅读下方“安装”“配置”和“MCP 集成”章节，确认 `.env`、Zotero 路径与嵌入服务配置正确。
+查看当前已发布版本：
+
+```bash
+gh release list --repo baoyu0xxx/paper-compass --limit 5
+```
+
+如果目标 release 尚未发布，可先使用下方“从源码安装（开发）”方式。
 
 ### 方式二：Agent 提示词部署
 
@@ -109,7 +111,7 @@ paper-compass-healthcheck --smoke
 请帮我克隆 https://github.com/baoyu0xxx/paper-compass.git，安装依赖后运行 paper-compass init 做交互式配置，完成后验证安装并同步我的 Zotero 论文库。
 ```
 
-### 方式三：从源码安装（开发者）
+### 方式三：从源码安装（开发）
 
 ```bash
 # 1. 克隆仓库
@@ -170,10 +172,14 @@ python eval/run_eval.py -v
 
 ```bash
 python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.10/paper_compass-1.2.10-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/vX.Y.Z/paper_compass-X.Y.Z-py3-none-any.whl
 ```
 
-升级到后续版本时，只需把 URL 中的版本号替换为对应 release，例如 `v1.2.9`。
+升级到后续版本时，只需把 URL 中的版本号替换为对应 release。发布版本列表可用：
+
+```bash
+gh release list --repo baoyu0xxx/paper-compass --limit 10
+```
 
 ### 数据增量更新（推荐）
 
@@ -227,7 +233,7 @@ paper-compass update --dry-run
 
 ### 手动更新
 
-如果无法使用自动更新（离线、git 不可用等），可手动操作：
+如果无法使用自动更新，可手动操作：
 
 ```bash
 git fetch origin --tags
@@ -251,71 +257,18 @@ python3 -m pytest tests/ -x   # 确保测试通过
 
 </details>
 
-## 安装
+## 安装与配置补充
+
+前面的“快速开始”已经给出三种主路径：Release 安装、Agent 提示词部署、源码安装。这里仅补充不会在首次上手时立即记住、但后续常会查阅的细节。
+
+### 环境要求
 
 | 要求 | 说明 |
 |------|------|
 | Python ≥ 3.11 | 使用 `python3 --version` 检查 |
-| Zotero 论文库 | 可选 — 支持使用预提取的文本文件 |
+| Zotero 论文库 | 可选 — 也支持使用预提取的文本文件 |
 | LLM API 密钥 | Wiki 生成需要 OpenAI 兼容端点（`LLM_BASE_URL` + `LLM_API_KEY`） |
 | 嵌入服务 API 密钥 | 支持 OpenAI-compatible 及火山引擎多模态嵌入 |
-
-### 通过 GitHub Release 安装（推荐）
-
-```bash
-python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.10/paper_compass-1.2.10-py3-none-any.whl
-```
-
-升级：
-
-```bash
-python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.10/paper_compass-1.2.10-py3-none-any.whl
-```
-
-安装后即可使用：
-
-```bash
-paper-compass --help
-paper-compass init
-paper-compass validate
-paper-compass-healthcheck --help
-paper-compass-mcp --help
-```
-
-### 从源码安装（开发者）
-
-```bash
-git clone https://github.com/baoyu0xxx/paper-compass.git
-cd paper-compass
-python3 -m pip install -e .            # 核心依赖
-python3 -m pip install -e ".[dev]"     # 含 pytest / build / twine
-python3 -m pip install -e ".[paperqa]" # 含 PaperQA5 集成（可选）
-```
-
-安装后即可使用 `paper-compass` CLI 命令。
-
-## 配置
-
-### 交互式配置（推荐）
-
-```bash
-paper-compass init
-```
-
-按提示逐步填写 LLM（Wiki 生成）和 Embedding 服务的 Base URL、API Key 和模型名称，最后选择 wiki 提示词风格。API Key 支持 `$ENV_VAR` 语法，可直接引用已有环境变量（如 `$OPENAI_API_KEY`）。
-
-```bash
-# 非交互式模式（用于脚本化部署）
-paper-compass init \
-  --llm-args base_url=https://api.openai.com/v1,model=gpt-4o \
-  --embed-args api_style=volcengine,model=doubao-embedding-vision-250615 \
-  --wiki-prompt economics
-
-# 覆盖已有 .env
-paper-compass init --force
-```
 
 ### 环境变量
 
