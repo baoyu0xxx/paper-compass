@@ -54,12 +54,13 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
 ## 快速开始
 
-### 方式一：标准包安装（推荐）
+### 方式一：通过 GitHub Release 安装（推荐）
 
-普通用户建议直接安装已发布的 Python 包，而不是先 `git clone` 再 editable install：
+当前推荐直接从 GitHub Release 安装已发布的 wheel，而不是先 `git clone` 再 editable install：
 
 ```bash
-python3 -m pip install paper-compass
+python3 -m pip install \
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.8/paper_compass-1.2.8-py3-none-any.whl
 
 # 交互式配置
 paper-compass init
@@ -159,19 +160,20 @@ python eval/run_eval.py -v
 
 注意区分三类“更新”：
 
-- `python3 -m pip install --upgrade paper-compass`：升级已发布的安装包
+- `python3 -m pip install <GitHub Release wheel URL>`：安装或切换到指定发布版本
 - `paper-compass update`：更新 git clone 安装的仓库代码版本
 - `paper-compass sync`：更新 Zotero / 文本 / 向量库 / wiki 数据
 
-### 安装包升级（推荐）
+### Release 安装包升级（推荐）
 
-如果你是通过 PyPI / wheel 安装的，优先使用：
+如果你是通过 GitHub Release 安装的，建议直接指定目标 wheel URL：
 
 ```bash
-python3 -m pip install --upgrade paper-compass
+python3 -m pip install --upgrade \
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.8/paper_compass-1.2.8-py3-none-any.whl
 ```
 
-这适用于大多数普通用户。
+升级到后续版本时，只需把 URL 中的版本号替换为对应 release，例如 `v1.2.9`。
 
 ### 数据增量更新（推荐）
 
@@ -221,7 +223,7 @@ paper-compass update --dry-run
 - 运行 `paper-compass validate` 验证配置连通性
 - 运行测试冒烟检查
 
-如果你不是通过 `git clone` 安装，而是通过 PyPI 或 wheel 安装，`paper-compass update` 不适用；请改用 `python3 -m pip install --upgrade paper-compass`。
+如果你不是通过 `git clone` 安装，而是通过 GitHub Release wheel 安装，`paper-compass update` 不适用；请改用对应 release URL 的 `pip install --upgrade`。
 
 ### 手动更新
 
@@ -258,16 +260,18 @@ python3 -m pytest tests/ -x   # 确保测试通过
 | LLM API 密钥 | Wiki 生成需要 OpenAI 兼容端点（`LLM_BASE_URL` + `LLM_API_KEY`） |
 | 嵌入服务 API 密钥 | 支持 OpenAI-compatible 及火山引擎多模态嵌入 |
 
-### 标准包安装（推荐）
+### 通过 GitHub Release 安装（推荐）
 
 ```bash
-python3 -m pip install paper-compass
+python3 -m pip install \
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.8/paper_compass-1.2.8-py3-none-any.whl
 ```
 
 升级：
 
 ```bash
-python3 -m pip install --upgrade paper-compass
+python3 -m pip install --upgrade \
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.8/paper_compass-1.2.8-py3-none-any.whl
 ```
 
 安装后即可使用：

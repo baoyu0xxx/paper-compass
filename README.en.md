@@ -72,12 +72,13 @@ Your agent searches your own paper library and returns relevant passages with so
 
 ## Quick Start
 
-### Option A: Package Installation (Recommended)
+### Option A: Install from GitHub Release (Recommended)
 
-For most users, install the published package directly instead of cloning the repository first:
+For most users, install the published wheel from GitHub Release directly instead of cloning the repository first:
 
 ```bash
-python3 -m pip install paper-compass
+python3 -m pip install \
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.8/paper_compass-1.2.8-py3-none-any.whl
 
 # Interactive setup
 paper-compass init
@@ -169,19 +170,20 @@ python eval/run_eval.py -v
 
 Distinguish three kinds of updates:
 
-- `python3 -m pip install --upgrade paper-compass`: upgrade the published package
+- `python3 -m pip install <GitHub Release wheel URL>`: install or switch to a specific published release
 - `paper-compass update`: update a git-clone installation of the repository
 - `paper-compass sync`: update Zotero / text / vector index / wiki data
 
-### Package Upgrade (Recommended)
+### Release Upgrade (Recommended)
 
-If you installed paper-compass from PyPI or a wheel, use:
+If you installed paper-compass from GitHub Release, upgrade by pointing pip to the target wheel URL:
 
 ```bash
-python3 -m pip install --upgrade paper-compass
+python3 -m pip install --upgrade \
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.8/paper_compass-1.2.8-py3-none-any.whl
 ```
 
-This is the recommended path for most users.
+For later versions, replace the version in the URL, for example `v1.2.9`.
 
 ### Automatic Update (git-clone installs only)
 
@@ -206,7 +208,7 @@ paper-compass update --dry-run
 - Runs `paper-compass validate` to verify API connectivity
 - Runs a quick test smoke check
 
-If you installed paper-compass from PyPI or a wheel, do not use `paper-compass update`; use `python3 -m pip install --upgrade paper-compass` instead.
+If you installed paper-compass from a GitHub Release wheel, do not use `paper-compass update`; use `pip install --upgrade` with the corresponding release URL instead.
 
 ### Manual Update
 
@@ -245,16 +247,18 @@ python3 -m pytest tests/ -x   # ensure tests pass
 | LLM API key | Wiki generation via OpenAI-compatible endpoint (`LLM_BASE_URL` + `LLM_API_KEY`) |
 | Embedding API key | OpenAI-compatible or Volcengine multimodal, or local models |
 
-### Package Installation (Recommended)
+### Install from GitHub Release (Recommended)
 
 ```bash
-python3 -m pip install paper-compass
+python3 -m pip install \
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.8/paper_compass-1.2.8-py3-none-any.whl
 ```
 
 Upgrade with:
 
 ```bash
-python3 -m pip install --upgrade paper-compass
+python3 -m pip install --upgrade \
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.8/paper_compass-1.2.8-py3-none-any.whl
 ```
 
 After installation, the following commands should be available:
