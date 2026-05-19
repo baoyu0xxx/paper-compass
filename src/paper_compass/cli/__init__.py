@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import sys
 
+from paper_compass import __version__
 from paper_compass.cli import configure, sync_data, update, validate
 
 
@@ -22,6 +23,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         prog="paper-compass",
         description="Personal academic paper retrieval and knowledge navigation",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=__version__,
     )
     subparsers = parser.add_subparsers(
         dest="command",
