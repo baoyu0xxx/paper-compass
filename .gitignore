@@ -19,11 +19,15 @@ data/state/
 data/vectordb.bak.*/
 _check_collections.py
 
-# Wiki cache
+# Wiki cache and generated outputs
 wiki/.cache/
 wiki/queries/
 wiki/topics/
 wiki/papers/
+wiki/methods/
+
+# Build artifacts
+dist/
 
 # Hermes planning artifacts
 .hermes/plans/
