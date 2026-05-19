@@ -56,11 +56,11 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
 ### 方式一：通过 GitHub Release 安装（推荐）
 
-当前推荐直接从 GitHub Release 安装已发布的 wheel。请将下面命令中的版本号替换为你要安装的已发布版本（例如当前 latest release）：
+当前推荐直接从 GitHub Release 安装已发布的 wheel：
 
 ```bash
 python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/vX.Y.Z/paper_compass-X.Y.Z-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.10/paper_compass-1.2.10-py3-none-any.whl
 
 # 交互式配置
 paper-compass init
@@ -74,13 +74,7 @@ paper-compass sync \
   --storage-path /path/to/storage
 ```
 
-查看当前已发布版本：
-
-```bash
-gh release list --repo baoyu0xxx/paper-compass --limit 5
-```
-
-如果目标 release 尚未发布，可先使用下方“从源码安装（开发）”方式。
+如果你更倾向于手工部署或开发环境安装，可使用下方“从源码安装（开发）”方式。
 
 ### 方式二：Agent 提示词部署
 
@@ -172,10 +166,10 @@ python eval/run_eval.py -v
 
 ```bash
 python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/vX.Y.Z/paper_compass-X.Y.Z-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.10/paper_compass-1.2.10-py3-none-any.whl
 ```
 
-升级到后续版本时，只需把 URL 中的版本号替换为对应 release。发布版本列表可用：
+如需安装其他已发布版本，可将上面 URL 中的版本号替换为对应 release。发布版本列表可用：
 
 ```bash
 gh release list --repo baoyu0xxx/paper-compass --limit 10
@@ -216,7 +210,7 @@ paper-compass update --check
 paper-compass update
 
 # 更新到指定版本
-paper-compass update --version v1.2.7
+paper-compass update --version v1.2.10
 
 # 模拟更新（查看变更但不执行）
 paper-compass update --dry-run
@@ -237,7 +231,7 @@ paper-compass update --dry-run
 
 ```bash
 git fetch origin --tags
-git checkout v1.2.7          # 或 git pull origin main
+git checkout v1.2.10         # 或 git pull origin main
 pip install -e .
 paper-compass validate        # 验证配置仍然有效
 python3 -m pytest tests/ -x   # 确保测试通过
@@ -257,18 +251,30 @@ python3 -m pytest tests/ -x   # 确保测试通过
 
 </details>
 
-## 安装与配置补充
+## 安装
 
-前面的“快速开始”已经给出三种主路径：Release 安装、Agent 提示词部署、源码安装。这里仅补充不会在首次上手时立即记住、但后续常会查阅的细节。
+前面的“快速开始”已经给出三种主路径：Release 安装、Agent 提示词部署、源码安装。这里集中列出安装要求与安装后的补充说明。
 
 ### 环境要求
 
 | 要求 | 说明 |
 |------|------|
 | Python ≥ 3.11 | 使用 `python3 --version` 检查 |
-| Zotero 论文库 | 可选 — 也支持使用预提取的文本文件 |
+| Zotero 论文库 | 可选 — 支持使用预提取的文本文件 |
 | LLM API 密钥 | Wiki 生成需要 OpenAI 兼容端点（`LLM_BASE_URL` + `LLM_API_KEY`） |
 | 嵌入服务 API 密钥 | 支持 OpenAI-compatible 及火山引擎多模态嵌入 |
+
+### 安装后可用命令
+
+```bash
+paper-compass --help
+paper-compass init
+paper-compass validate
+paper-compass-healthcheck --help
+paper-compass-mcp --help
+```
+
+## 配置
 
 ### 环境变量
 
