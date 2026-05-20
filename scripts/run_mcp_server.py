@@ -247,6 +247,38 @@ def main():
     parser.add_argument("--query", help="Search query")
     parser.add_argument("--limit", type=int, default=10, help="Max results")
     parser.add_argument("--force-mode", default="auto", choices=["auto", "wiki", "pdf", "hybrid"])
+    parser.add_argument(
+        "--search-mode",
+        default="semantic",
+        choices=["semantic", "keyword", "hybrid"],
+        help="Passage search mode for search_passages",
+    )
+    parser.add_argument(
+        "--max-sources",
+        type=int,
+        default=5,
+        help="Maximum source papers/snippets for ask_research",
+    )
+    parser.add_argument(
+        "--db-path",
+        default="data/vectordb",
+        help="Path to ChromaDB persistent directory",
+    )
+    parser.add_argument(
+        "--text-dir",
+        default="data/texts",
+        help="Path to extracted text directory",
+    )
+    parser.add_argument(
+        "--library-path",
+        default="data/zotero-export/library.json",
+        help="Path to library.json",
+    )
+    parser.add_argument(
+        "--wiki-root",
+        default="./wiki",
+        help="Wiki root directory for save_to_wiki",
+    )
     parser.add_argument("--id-or-doi", help="Paper identifier (doc_id or DOI)")
     parser.add_argument("--title", help="Wiki page title (for save_to_wiki)")
     parser.add_argument("--content", help="Wiki page content (for save_to_wiki)")
@@ -285,6 +317,18 @@ def main():
         params["limit"] = args.limit
     if args.force_mode:
         params["force_mode"] = args.force_mode
+    if args.search_mode:
+        params["search_mode"] = args.search_mode
+    if args.max_sources is not None:
+        params["max_sources"] = args.max_sources
+    if args.db_path:
+        params["db_path"] = args.db_path
+    if args.text_dir:
+        params["text_dir"] = args.text_dir
+    if args.library_path:
+        params["library_path"] = args.library_path
+    if args.wiki_root:
+        params["wiki_root"] = args.wiki_root
     if args.id_or_doi:
         params["id_or_doi"] = args.id_or_doi
     if args.title:

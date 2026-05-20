@@ -9,6 +9,7 @@ mcp:
     - search_library
     - ask_research
     - get_paper_metadata
+    - search_passages
     - save_to_wiki
 
   response:

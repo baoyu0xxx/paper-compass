@@ -35,13 +35,20 @@ def _check_env() -> Status:
         return ("env_file", "WARN: .env not found (copy from .env.example)")
 
     from paper_compass.env_utils import load_project_env
+
     load_project_env()
 
     import os
+
     missing = []
     unresolved_refs = []
-    for var in ("LLM_BASE_URL", "LLM_API_KEY", "VOLC_EMBED_BASE_URL",
-                 "VOLC_EMBED_API_KEY", "VOLC_EMBED_MODEL"):
+    for var in (
+        "LLM_BASE_URL",
+        "LLM_API_KEY",
+        "VOLC_EMBED_BASE_URL",
+        "VOLC_EMBED_API_KEY",
+        "VOLC_EMBED_MODEL",
+    ):
         val = os.environ.get(var, "")
         if not val or val in ("your_key_here", "your_endpoint_id"):
             missing.append(var)
@@ -83,7 +90,10 @@ def _check_vectordb() -> Status:
     try:
         import chromadb
         from chromadb.config import Settings
-        client = chromadb.PersistentClient(path=str(db_path), settings=Settings(anonymized_telemetry=False))
+
+        client = chromadb.PersistentClient(
+            path=str(db_path), settings=Settings(anonymized_telemetry=False)
+        )
         cols = client.list_collections()
         names = [c.name for c in cols]
         if not names:
@@ -123,34 +133,77 @@ def _check_deps() -> Status:
         except ImportError:
             missing.append(pkg_name)
     if missing:
-        return ("deps", f"WARN: missing: {', '.join(missing)}")
+        return ("deps", f"ERROR: missing imports: {', '.join(missing)}")
     return ("deps", "OK")
 
 
 def _check_mcp_contracts() -> Status:
     """Verify MCP contracts and handlers are aligned."""
     try:
-        from paper_compass.mcp_contracts import list_tools, accepted_params, required_params
-        from paper_compass.mcp_server import _HANDLERS  # noqa: F401
+        from paper_compass.mcp_contracts import list_tools, required_params
+
         tools = list_tools()
         names = [t["name"] for t in tools]
-        expected_count = 6  # search_wiki, search_library, ask_research, get_paper_metadata, save_to_wiki, search_passages
-        if len(names) != expected_count:
-            return ("mcp_contracts", f"WARN: expected {expected_count} tools, got {len(names)}")
-        # Verify each contract has required params defined
+        expected = {
+            "search_wiki",
+            "search_library",
+            "ask_research",
+            "get_paper_metadata",
+            "search_passages",
+            "save_to_wiki",
+        }
+        missing = sorted(expected - set(names))
+        if missing:
+            return ("mcp_contracts", f"ERROR: missing tools: {', '.join(missing)}")
+        if len(names) != len(expected):
+            return ("mcp_contracts", f"WARN: expected {len(expected)} tools, got {len(names)}")
         for t in tools:
             req = required_params(t["name"])
             if not req:
                 return ("mcp_contracts", f"WARN: tool '{t['name']}' has no required params")
-        return ("mcp_contracts", "OK")
+        return ("mcp_contracts", f"OK ({len(names)} tools)")
     except Exception as e:
         return ("mcp_contracts", f"ERROR: {e}")
+
+
+def _check_config_sync() -> Status:
+    """Verify repo and packaged YAML config files are in sync."""
+    repo_configs = PROJECT_ROOT / "configs"
+    packaged_configs = PROJECT_ROOT / "src" / "paper_compass" / "configs"
+    try:
+        repo_files = {p.name: p for p in repo_configs.glob("*.yaml")}
+        packaged_files = {p.name: p for p in packaged_configs.glob("*.yaml")}
+    except Exception as e:
+        return ("config_sync", f"ERROR: {e}")
+
+    if repo_files.keys() != packaged_files.keys():
+        return (
+            "config_sync",
+            "ERROR: config file sets differ between repo and packaged configs",
+        )
+
+    mismatched = [
+        name
+        for name in sorted(repo_files)
+        if repo_files[name].read_text(encoding="utf-8")
+        != packaged_files[name].read_text(encoding="utf-8")
+    ]
+    if mismatched:
+        return (
+            "config_sync",
+            f"ERROR: mismatched config files: {', '.join(mismatched)}",
+        )
+    return ("config_sync", f"OK ({len(repo_files)} yaml files synced)")
 
 
 def _smoke_embedding() -> Status:
     """Probe Volcengine embedding API (one short text)."""
     import os
+    import urllib.error
+    import urllib.request
+
     from paper_compass.env_utils import load_project_env
+
     load_project_env()
 
     base_url = os.environ.get("VOLC_EMBED_BASE_URL", "")
@@ -160,13 +213,12 @@ def _smoke_embedding() -> Status:
     if not all((base_url, api_key, model)):
         return ("embed_smoke", "SKIP: VOLC_EMBED_* not configured")
 
-    import urllib.request
-    import urllib.error
-
-    payload = json.dumps({
-        "model": model,
-        "input": [{"type": "text", "text": "healthcheck test"}],
-    }).encode("utf-8")
+    payload = json.dumps(
+        {
+            "model": model,
+            "input": [{"type": "text", "text": "healthcheck test"}],
+        }
+    ).encode("utf-8")
 
     req = urllib.request.Request(
         base_url,
@@ -205,6 +257,7 @@ def main() -> int:
     checks.append(_check_vectordb())
     checks.append(_check_wiki())
     checks.append(_check_mcp_contracts())
+    checks.append(_check_config_sync())
 
     if args.smoke:
         checks.append(_smoke_embedding())

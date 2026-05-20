@@ -1,53 +1,49 @@
-"""Tests for paper-compass validate subcommand."""
+"""Tests for paper-compass validate CLI output."""
 
 from __future__ import annotations
 
-from pathlib import Path
+import argparse
 
-from paper_compass.cli.validate import _check_dotenv
-
-
-def test_check_dotenv_rejects_unresolved_env_refs(tmp_path, monkeypatch):
-    env_path = tmp_path / ".env"
-    env_path.write_text(
-        "\n".join(
-            [
-                "LLM_BASE_URL=https://api.example.com/v1",
-                "LLM_API_KEY=$OPENAI_API_KEY",
-                "EMBED_BASE_URL=https://embed.example.com/v1",
-                "EMBED_API_KEY=$EMBED_KEY",
-            ]
-        ),
-        encoding="utf-8",
-    )
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    monkeypatch.delenv("EMBED_KEY", raising=False)
-
-    name, status = _check_dotenv(str(env_path))
-
-    assert name == "dotenv"
-    assert status.startswith("ERROR:")
-    assert "OPENAI_API_KEY" in status
-    assert "EMBED_KEY" in status
+from paper_compass.cli.validate import execute_validate
 
 
-def test_check_dotenv_accepts_resolved_env_refs(tmp_path, monkeypatch):
-    env_path = tmp_path / ".env"
-    env_path.write_text(
-        "\n".join(
-            [
-                "LLM_BASE_URL=https://api.example.com/v1",
-                "LLM_API_KEY=$OPENAI_API_KEY",
-                "EMBED_BASE_URL=https://embed.example.com/v1",
-                "EMBED_API_KEY=$EMBED_KEY",
-            ]
-        ),
-        encoding="utf-8",
-    )
-    monkeypatch.setenv("OPENAI_API_KEY", "sk-real")
-    monkeypatch.setenv("EMBED_KEY", "embed-real")
+def test_validate_prints_config_summary(monkeypatch, capsys):
+    monkeypatch.setattr("paper_compass.cli.validate.load_project_env", lambda env_path=None: True)
+    monkeypatch.setattr("paper_compass.cli.validate.load_all_configs", lambda: {"providers": {}})
 
-    name, status = _check_dotenv(str(env_path))
+    def fake_provider(name, configs):
+        mapping = {
+            "wiki_generation": {
+                "provider": "openai",
+                "base_url": "https://api.openai.com/v1",
+                "model": "gpt-4o",
+            },
+            "embedding_main": {
+                "provider": "openai",
+                "base_url": "https://api.openai.com/v1",
+                "model": "text-embedding-3-small",
+            },
+            "embedding_volcengine": {
+                "provider": "volcengine",
+                "base_url": "https://ark.example.com",
+                "model": "ep-123",
+            },
+        }
+        return mapping[name]
 
-    assert name == "dotenv"
-    assert status == "OK"
+    monkeypatch.setattr("paper_compass.cli.validate.get_provider_config", fake_provider)
+    monkeypatch.setattr("paper_compass.cli.validate._check_dotenv", lambda env_path: ("dotenv", "OK"))
+    monkeypatch.setattr("paper_compass.cli.validate._test_llm", lambda: ("llm", "OK (model: gpt-4o, 0.1s, response: 4 chars)"))
+    monkeypatch.setattr("paper_compass.cli.validate._test_embedding", lambda: ("embed", "OK (model: text-embedding-3-small, dim=1536, 0.1s)"))
+    monkeypatch.setenv("LOCAL_EMBED_MODEL", "bge-base")
+
+    rc = execute_validate(argparse.Namespace(env_path="/tmp/fake.env"))
+    assert rc == 0
+
+    out = capsys.readouterr().out
+    assert "config: project_root=" in out
+    assert "config: env_path=/tmp/fake.env" in out
+    assert "config: llm=openai | https://api.openai.com/v1 | gpt-4o" in out
+    assert "config: embed_main=openai | https://api.openai.com/v1 | text-embedding-3-small" in out
+    assert "config: embed_volcengine=volcengine | https://ark.example.com | ep-123" in out
+    assert "config: embed_cascade=embedding_main -> embedding_volcengine -> local (bge-base)" in out

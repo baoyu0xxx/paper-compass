@@ -177,6 +177,23 @@ providers:
         finally:
             monkeypatch.delenv("TEST_MODEL_OVERRIDE", raising=False)
 
+    def test_dimension_field_is_preserved(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            Path(tmpdir, "providers.yaml").write_text(
+                "version: 1\n"
+                "providers:\n"
+                "  main:\n"
+                "    api_style: openai-compatible\n"
+                "    base_url: https://example.com/v1\n"
+                "    model: test-model\n"
+                "    dimension: 3072\n"
+            )
+            configs = load_all_configs(tmpdir)
+            provider = get_provider_config("main", configs)
+            assert provider["dimension"] == 3072
+
     def test_base_url_env_overrides_default(self, monkeypatch):
         """base_url_env should override the default base_url when env var is set."""
         import tempfile

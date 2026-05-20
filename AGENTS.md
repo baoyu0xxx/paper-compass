@@ -6,7 +6,7 @@ This document guides an AI agent (Claude Code, Codex, Hermes, etc.) through depl
 
 `paper-compass` is a personal academic paper retrieval infrastructure. It takes a Zotero PDF library, generates structured wiki pages via LLM, builds vector search indices, and exposes 6 MCP tools for AI agent consumption.
 
-**Tech stack**: Python ≥3.11, ChromaDB, PyMuPDF, Volcengine embeddings, OpenAI-compatible LLM endpoint.
+**Tech stack**: Python ≥3.11, ChromaDB, PyMuPDF, Volcengine/OpenAI-compatible embeddings with local fallback, OpenAI-compatible LLM endpoint.
 
 ## Step-by-Step Deployment
 
@@ -19,7 +19,7 @@ pip install -e .
 pip install -e ".[dev]"   # for tests
 ```
 
-Once installed, the `paper-compass` CLI is available (see step 2).
+Once installed, the `paper-compass` CLI is available (see step 2). High-frequency commands now include `paper-compass search ...` for local retrieval and `paper-compass status` for runtime inspection.
 
 ### 2. Configure environment
 
@@ -55,7 +55,7 @@ EMBED_API_KEY=<your embedding API key>  # or $MY_EMBED_KEY
 
 The LLM endpoint must be OpenAI-compatible (chat/completions format). Model is configured via the `LLM_MODEL` env var in `.env` (no hardcoded fallback — missing model raises an error).
 
-Embedding defaults to standard OpenAI-compatible format (`text-embedding-3-small`). To use Volcengine, set `VOLC_EMBED_*` variables instead (the system cascades automatically: main → volcengine → local `bge-base`).
+Embedding defaults to standard OpenAI-compatible format (`text-embedding-3-small`). To use Volcengine, set `VOLC_EMBED_*` variables instead. The runtime cascade is `EMBED_*` → `VOLC_EMBED_*` → local fallback (`bge-base` by default, override with `LOCAL_EMBED_MODEL`).
 
 **Option C — Non-interactive (scripted):**
 
@@ -77,7 +77,7 @@ Should show all green (✓) for dotenv, llm, and embed checks.
 
 **Option A — from Zotero SQLite:**
 
-The `sync_zotero.py` script reads Zotero's SQLite database directly. Resolution order is: explicit `--db-path` → `ZOTERO_SQLITE_PATH` → default Zotero data directories → common backup directories. Within one directory it prefers `zotero_readonly.sqlite` over `zotero.sqlite`, and you can override the inferred `storage/` path with `--storage-path`.
+The `sync_zotero.py` script reads Zotero's SQLite database directly. Resolution order is: explicit `--db-path` → `ZOTERO_SQLITE_PATH` → default Zotero data directories → optional backup roots (for example `ZOTERO_BACKUP_ROOT` if configured). Within one directory it prefers `zotero_readonly.sqlite` over `zotero.sqlite`, and you can override the inferred `storage/` path with `--storage-path`.
 
 ```bash
 python scripts/sync_zotero.py --extract-text
@@ -142,10 +142,21 @@ paper-compass sync \
 ### 6. 手动执行各阶段（仅在需要细粒度控制时）
 
 ```bash
-python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
+scripts/pc-index-full.sh
+scripts/pc-index-incremental.sh
 ```
 
 This creates ChromaDB collections under `data/vectordb/`.
+
+如果只是单独补 wiki 页面或重建 wiki 向量索引，可优先用：
+
+```bash
+scripts/pc-wiki-build.sh --limit 3
+scripts/pc-wiki-index.sh
+```
+
+这些 shell 只负责：固定 repo root、补默认路径、透传附加参数；
+不要在 agent 操作里把它们当成新的复杂参数层。
 
 **Pitfall**: If `build_index.py` skips papers with "missing PDF" even when text files exist, check that:
 1. `text_file` paths in `library.json` are valid
@@ -158,7 +169,7 @@ This creates ChromaDB collections under `data/vectordb/`.
 python scripts/ingest_to_wiki.py --limit 3 --workers 1
 
 # Full run (400 papers ~5h, safe to interrupt and resume)
-nohup python scripts/ingest_to_wiki.py --skip-existing --workers 10 > data/logs/wiki_gen.log 2>&1 &
+scripts/pc-wiki-ingest-bg.sh
 ```
 
 Monitor progress:
@@ -185,7 +196,7 @@ All 12 evaluation queries should pass. Healthcheck should show green across all 
 
 **As a standalone MCP server (stdio mode):**
 ```bash
-python scripts/run_mcp_server.py --mcp
+scripts/run_mcp.sh
 ```
 
 `run_mcp_server.py` now inserts the repo's `src/` directory into `sys.path` at startup,
@@ -193,11 +204,17 @@ so editable installs and direct script invocation behave consistently. In practi
 adding `PYTHONPATH=/absolute/path/to/paper-compass/src` on the client side is still a
 useful defense-in-depth measure for MCP subprocess launches.
 
+如果要绕过 shell 直接调底层脚本，也仍可使用 `python scripts/run_mcp_server.py --mcp`。
+
 **Test individual tools:**
 ```bash
-python scripts/run_mcp_server.py --tool search_wiki --query "家族企业"
-python scripts/run_mcp_server.py --tool search_library --query "succession"
-python scripts/run_mcp_server.py --tool ask_research --query "家族企业代际传承对劳动力结构的影响"
+paper-compass search wiki --query "家族企业"
+paper-compass search library --query "succession"
+paper-compass search passages --query "劳动力结构" --search-mode hybrid
+paper-compass search ask --query "家族企业代际传承对劳动力结构的影响"
+paper-compass status
+paper-compass-mcp --tool search_passages --query "劳动力结构" --search-mode keyword --db-path data/vectordb --text-dir data/texts --library-path data/zotero-export/library.json
+python scripts/run_mcp_server.py --tool ask_research --query "家族企业代际传承对劳动力结构的影响" --max-sources 7 --db-path data/vectordb
 ```
 
 ### 9. Configure AI agent clients

@@ -129,7 +129,21 @@ def _test_embedding() -> tuple[str, str]:
             except KeyError:
                 continue
         else:
-            return ("embed", "SKIP: no embedding provider configured")
+            local_model = os.environ.get("LOCAL_EMBED_MODEL", "bge-base").strip() or "bge-base"
+            try:
+                from paper_compass.embedder import Embedder
+
+                embedder = Embedder()
+                embedder.configure_local(local_model)
+                return (
+                    "embed",
+                    f"OK (local fallback configured: {local_model}, dim={embedder.dimension}; no cloud provider configured)",
+                )
+            except Exception as e:
+                return (
+                    "embed",
+                    f"WARN: no cloud provider configured; local fallback '{local_model}' unavailable: {e}",
+                )
     except FileNotFoundError as e:
         return ("embed", f"ERROR: config load failed: {e}")
 
@@ -208,6 +222,42 @@ def execute_validate(args: argparse.Namespace) -> int:
 
     print()
     print("  paper-compass validation")
+    print()
+
+    load_project_env(env_path)
+    configs = load_all_configs()
+
+    try:
+        llm_provider = get_provider_config("wiki_generation", configs)
+    except Exception:
+        llm_provider = {}
+
+    try:
+        embed_main_provider = get_provider_config("embedding_main", configs)
+    except Exception:
+        embed_main_provider = {}
+
+    try:
+        embed_volc_provider = get_provider_config("embedding_volcengine", configs)
+    except Exception:
+        embed_volc_provider = {}
+
+    local_fallback = os.environ.get("LOCAL_EMBED_MODEL", "bge-base").strip() or "bge-base"
+
+    print(f"  config: project_root={PROJECT_ROOT}")
+    print(f"  config: env_path={Path(env_path)}")
+    print(
+        f"  config: llm={llm_provider.get('provider', 'n.a.')} | {llm_provider.get('base_url', 'n.a.')} | {llm_provider.get('model', 'n.a.') or 'n.a.'}"
+    )
+    print(
+        f"  config: embed_main={embed_main_provider.get('provider', 'n.a.')} | {embed_main_provider.get('base_url', 'n.a.')} | {embed_main_provider.get('model', 'n.a.') or 'n.a.'}"
+    )
+    print(
+        f"  config: embed_volcengine={embed_volc_provider.get('provider', 'n.a.')} | {embed_volc_provider.get('base_url', 'n.a.')} | {embed_volc_provider.get('model', 'n.a.') or 'n.a.'}"
+    )
+    print(
+        f"  config: embed_cascade=embedding_main -> embedding_volcengine -> local ({local_fallback})"
+    )
     print()
 
     checks = [

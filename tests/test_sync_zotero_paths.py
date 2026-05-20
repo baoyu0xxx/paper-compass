@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from paper_compass.zotero_paths import (
+    DEFAULT_BACKUP_ROOTS,
     resolve_zotero_source,
     ZoteroSourceNotFoundError,
 )
@@ -22,6 +23,10 @@ def _make_zotero_dir(root: Path, *, readonly: bool = False, writable: bool = Tru
     if storage:
         (root / "storage").mkdir(parents=True, exist_ok=True)
     return root
+
+
+def test_default_backup_roots_empty_for_portable_distribution():
+    assert DEFAULT_BACKUP_ROOTS == []
 
 
 def test_explicit_db_path_wins_over_auto_candidates(tmp_path):
@@ -48,6 +53,8 @@ def test_env_path_used_when_no_explicit_db_path(tmp_path, monkeypatch):
     assert resolved.db_path == env_root / "zotero.sqlite"
     assert resolved.storage_path == env_root / "storage"
     assert resolved.source_kind == "env"
+
+
 def test_default_root_preferred_over_backup_root(tmp_path):
     default_root = _make_zotero_dir(tmp_path / "default", readonly=True, storage=True)
     backup_root = _make_zotero_dir(tmp_path / "backup", readonly=True, storage=True)
@@ -69,6 +76,17 @@ def test_backup_root_used_when_default_root_missing(tmp_path):
         default_roots=[default_root],
         backup_roots=[backup_root],
     )
+
+    assert resolved.db_path == backup_root / "zotero_readonly.sqlite"
+    assert resolved.storage_path == backup_root / "storage"
+    assert resolved.source_kind == "backup"
+
+
+def test_backup_root_env_used_when_present(tmp_path, monkeypatch):
+    backup_root = _make_zotero_dir(tmp_path / "env-backup", readonly=True, storage=True)
+    monkeypatch.setenv("ZOTERO_BACKUP_ROOT", str(backup_root))
+
+    resolved = resolve_zotero_source(default_roots=[])
 
     assert resolved.db_path == backup_root / "zotero_readonly.sqlite"
     assert resolved.storage_path == backup_root / "storage"

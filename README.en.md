@@ -4,7 +4,7 @@
 
 **Turn your Zotero library into a dual-engine knowledge base for AI agents — RAG full-text retrieval + LLM wiki knowledge compilation**
 
-[![version](https://img.shields.io/badge/version-1.2.10-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.2.11-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
@@ -60,7 +60,7 @@ The recommended path is to install the published wheel from GitHub Release direc
 
 ```bash
 python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.10/paper_compass-1.2.10-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.11/paper_compass-1.2.11-py3-none-any.whl
 
 # Interactive setup
 paper-compass init
@@ -92,7 +92,7 @@ Copy the following prompt to your AI agent — it will handle the full paper-com
 > 5. Export your Zotero SQLite database path as `ZOTERO_SQLITE_PATH` env var, then run `python scripts/sync_zotero.py --extract-text`
 > 6. Run `python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild`
 > 7. (Optional) Run `python scripts/ingest_to_wiki.py --limit 3 --workers 1` to test wiki generation
-> 8. Run `python scripts/healthcheck.py --smoke` to verify all subsystems
+> 8. Run `paper-compass-healthcheck --smoke` to verify all subsystems
 > 9. Finally, add the MCP config to your current agent framework (for Hermes, prefer an absolute script path and explicitly set `PYTHONPATH=$HOME/projects/paper-compass/src`)
 >
 > Confirm each step before proceeding to the next.
@@ -139,18 +139,26 @@ paper-compass sync \
 # → writes data/state/last_sync.json automatically
 # → blocks writes and suggests a rebuild if vectordb is dirty or corrupted
 
-# 6. Build the search index only (manual mode)
-python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
+# 6. Run individual stages manually (only when you need finer control)
+scripts/pc-index-full.sh
+scripts/pc-index-incremental.sh
+scripts/pc-wiki-build.sh --limit 3
+scripts/pc-wiki-index.sh
 
-# 7. Generate wiki pages (optional, often takes hours for hundreds of papers)
-nohup python scripts/ingest_to_wiki.py --skip-existing > data/logs/wiki_gen.log 2>&1 &
-# After completion:
-python scripts/build_index.py --wiki
+# 7. Long-running wiki generation (optional; hundreds of papers often take hours)
+scripts/pc-wiki-ingest-bg.sh
+# View logs:
+tail -f data/logs/wiki_gen.log
 
 # 8. Verify
-python scripts/healthcheck.py --smoke
+paper-compass-healthcheck --smoke
 python eval/run_eval.py -v
 ```
+
+These `scripts/pc-*.sh` wrappers are intentionally thin: they pin repo root, provide sane default paths, and reduce long-command typing errors.
+If you prefer direct Python entrypoints, `scripts/build_index.py` and `scripts/ingest_to_wiki.py` remain supported.
+
+Starting with v1.2.11, installed `paper-compass-mcp` and `paper-compass-healthcheck` entrypoints point directly to package-resident implementations. A compatibility shim is also kept for stale local wrappers so old `scripts.*` imports no longer break startup.
 
 ## Updating
 
@@ -166,7 +174,7 @@ If you installed paper-compass from GitHub Release, point pip directly to the ta
 
 ```bash
 python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.10/paper_compass-1.2.10-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.11/paper_compass-1.2.11-py3-none-any.whl
 ```
 
 To install another published version later, replace the version in the URL accordingly. Published releases can be listed with:
@@ -200,6 +208,27 @@ paper-compass sync \
 - write `data/state/last_sync.json` to record the latest run status
 - stop writes and suggest a rebuild if vector-store corruption is detected
 
+If you only want one stage manually, use the shell wrappers from the repo:
+
+```bash
+# full papers index rebuild
+scripts/pc-index-full.sh
+
+# incremental papers index
+scripts/pc-index-incremental.sh
+
+# wiki generation in foreground
+scripts/pc-wiki-build.sh --limit 3
+
+# wiki generation in background
+scripts/pc-wiki-ingest-bg.sh
+
+# wiki vector index
+scripts/pc-wiki-index.sh
+```
+
+These wrappers are stage-level convenience commands only; append extra arguments when needed and pass them through to the underlying Python scripts.
+
 ### Automatic Code Update (git-clone installs only)
 
 ```bash
@@ -210,7 +239,7 @@ paper-compass update --check
 paper-compass update
 
 # Update to a specific version
-paper-compass update --version v1.2.10
+paper-compass update --version v1.2.11
 
 # Simulate an update (preview without executing)
 paper-compass update --dry-run
@@ -231,7 +260,7 @@ If automatic update is unavailable, you can update manually:
 
 ```bash
 git fetch origin --tags
-git checkout v1.2.10         # or git pull origin main
+git checkout v1.2.11         # or git pull origin main
 pip install -e .
 paper-compass validate        # verify that the configuration still works
 python3 -m pytest tests/ -x   # ensure tests pass

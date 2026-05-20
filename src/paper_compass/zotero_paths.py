@@ -6,9 +6,7 @@ from pathlib import Path
 from typing import Iterable, List, Optional, Sequence
 
 
-DEFAULT_BACKUP_ROOTS = [
-    Path("/mnt/d/zotero_backup"),
-]
+DEFAULT_BACKUP_ROOTS: list[Path] = []
 
 
 @dataclass(frozen=True)
@@ -72,6 +70,9 @@ def _default_root_candidates() -> List[Path]:
 
 def _backup_root_candidates(extra_roots: Optional[Sequence[Path]] = None) -> List[Path]:
     combined = list(DEFAULT_BACKUP_ROOTS)
+    env_backup_root = os.environ.get("ZOTERO_BACKUP_ROOT", "").strip()
+    if env_backup_root:
+        combined.append(Path(env_backup_root))
     if extra_roots:
         combined.extend(Path(p) for p in extra_roots)
     return _dedupe_paths(combined)

@@ -151,6 +151,7 @@ def _init_embedder() -> Embedder:
     configs = load_all_configs("configs")
 
     embedder = Embedder()
+    local_model_id = os.environ.get("LOCAL_EMBED_MODEL", "bge-base").strip() or "bge-base"
 
     # Try configured providers in order
     for provider_key in ["embedding_main", "embedding_volcengine"]:
@@ -166,7 +167,7 @@ def _init_embedder() -> Embedder:
                 base_url=base_url,
                 api_key=api_key,
                 model=provider_cfg.get("model", ""),
-                dimension=2048,
+                dimension=int(provider_cfg.get("dimension", 1536)),
             )
             print(f"  Embedding: cloud ({provider_name}, dim={embedder.dimension})")
             return embedder
@@ -174,8 +175,8 @@ def _init_embedder() -> Embedder:
             continue
 
     # Fallback to local
-    embedder.configure_local("bge-base")
-    print(f"  Embedding: local (bge-base, dim={embedder.dimension})")
+    embedder.configure_local(local_model_id)
+    print(f"  Embedding: local ({local_model_id}, dim={embedder.dimension})")
     return embedder
 
 

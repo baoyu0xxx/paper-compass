@@ -29,7 +29,12 @@ def package_root() -> Path:
 
 
 def project_root() -> Path:
-    return package_root().parent
+    root = package_root()
+    if root.name == "paper_compass":
+        return root.parent.parent
+    if root.name == "src":
+        return root.parent
+    return root
 
 
 def resolve_package_path(relative_path: str | Path) -> Path:

@@ -1,7 +1,9 @@
-"""paper-compass CLI — model selection, data sync, and configuration.
+"""paper-compass CLI — model selection, search, status, data sync, and configuration.
 
 Usage:
     paper-compass init       Configure LLM and embedding providers
+    paper-compass search     Search wiki, library, passages, or ask_research
+    paper-compass status     Show resolved config and local index status
     paper-compass sync       Run incremental data sync for Zotero / index / wiki
     paper-compass update     Update to the latest version
     paper-compass validate   Test connectivity and configuration
@@ -15,7 +17,7 @@ import argparse
 import sys
 
 from paper_compass import __version__
-from paper_compass.cli import configure, sync_data, update, validate
+from paper_compass.cli import configure, search, status, sync_data, update, validate
 
 
 def main() -> int:
@@ -36,6 +38,8 @@ def main() -> int:
     )
 
     configure.add_subcommand_parser(subparsers)
+    search.add_subcommand_parser(subparsers)
+    status.add_subcommand_parser(subparsers)
     sync_data.add_subcommand_parser(subparsers)
     update.add_subcommand_parser(subparsers)
     validate.add_subcommand_parser(subparsers)

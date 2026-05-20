@@ -4,7 +4,7 @@
 
 **将 Zotero 论文库转化为 AI Agent 可直接检索的双引擎知识库（RAG 原文检索 + LLM Wiki 知识编译）**
 
-[![version](https://img.shields.io/badge/version-1.2.10-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.2.11-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
@@ -50,7 +50,7 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 | 🔍 **双模式段落检索** | 语义向量（dense）和 BM25 关键词（sparse）并行，兼顾概念相似性与精确术语匹配 |
 | 📊 **增量索引** | 基于指纹清单（manifest）的变更检测，新增或修改论文后只更新变化部分，无需全量重建 |
 | 🇨🇳 **中文学术支持** | 中文分词感知的检索与评分，经济学预设 wiki 提示词，适配中文学术文献 |
-| 🔄 **嵌入级联回退** | 火山引擎 → OpenAI 兼容端点 → 本地 bge-base，任一层级故障自动降级 |
+| 🔄 **嵌入级联回退** | OpenAI-compatible (`EMBED_*`) → 火山引擎 (`VOLC_EMBED_*`) → 本地模型（默认 `bge-base`，可用 `LOCAL_EMBED_MODEL` 改为 `specter` / `minilm`） |
 
 ## 快速开始
 
@@ -60,7 +60,7 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
 ```bash
 python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.10/paper_compass-1.2.10-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.11/paper_compass-1.2.11-py3-none-any.whl
 
 # 交互式配置
 paper-compass init
@@ -125,7 +125,7 @@ paper-compass validate
 
 # 4. 准备数据
 python scripts/sync_zotero.py --extract-text
-# → 自动按以下顺序探索：显式 --db-path > ZOTERO_SQLITE_PATH > 默认 Zotero 目录 > 备份目录
+# → 自动按以下顺序探索：显式 --db-path > ZOTERO_SQLITE_PATH > 默认 Zotero 目录 > 可选备份目录（如配置了 ZOTERO_BACKUP_ROOT）
 # → data/zotero-export/library.json + data/texts/*.txt
 
 #    若数据库与 storage/ 不在同一目录：
@@ -139,18 +139,27 @@ paper-compass sync \
 # → 自动写入 data/state/last_sync.json
 # → 若检测到 vectordb 脏状态，会阻断并给出 rebuild 建议
 
-# 6. 仅构建检索索引（手动模式）
-python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
+# 6. 手动执行单个阶段（仅在需要细粒度控制时）
+scripts/pc-index-full.sh
+scripts/pc-index-incremental.sh
+scripts/pc-wiki-build.sh --limit 3
+scripts/pc-wiki-index.sh
 
-# 7. 生成 wiki 页面（可选，数百篇论文通常需数小时）
-nohup python scripts/ingest_to_wiki.py --skip-existing > data/logs/wiki_gen.log 2>&1 &
-# 完成后：
-python scripts/build_index.py --wiki
+# 7. wiki 长任务（可选，数百篇论文通常需数小时）
+scripts/pc-wiki-ingest-bg.sh
+# 查看日志：
+tail -f data/logs/wiki_gen.log
 
 # 8. 验证
-python scripts/healthcheck.py --smoke
+paper-compass-healthcheck --smoke
 python eval/run_eval.py -v
 ```
+
+这些 `scripts/pc-*.sh` 都是薄包装：负责固定 repo root、补默认路径、减少长命令手输错误；
+如果你更偏好直接调 Python 脚本，也仍然可以继续使用 `scripts/build_index.py` / `scripts/ingest_to_wiki.py`。
+
+自 v1.2.11 起，安装态 `paper-compass-mcp` 与 `paper-compass-healthcheck` 入口已直接指向包内实现；
+若本地仍残留旧 wrapper，也提供兼容层，不会再因为 `scripts.*` 模块缺失而启动失败。
 
 ## 更新
 
@@ -166,7 +175,7 @@ python eval/run_eval.py -v
 
 ```bash
 python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.10/paper_compass-1.2.10-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.11/paper_compass-1.2.11-py3-none-any.whl
 ```
 
 如需安装其他已发布版本，可将上面 URL 中的版本号替换为对应 release。发布版本列表可用：
@@ -200,6 +209,27 @@ paper-compass sync \
 - 写入 `data/state/last_sync.json` 记录最近一次运行状态
 - 在检测到向量库损坏时停止写入，并给出 rebuild 建议
 
+如果你只想手动执行某一个阶段，可使用仓库内 shell 包装：
+
+```bash
+# papers 全量索引
+scripts/pc-index-full.sh
+
+# papers 增量索引
+scripts/pc-index-incremental.sh
+
+# wiki 页面生成（前台）
+scripts/pc-wiki-build.sh --limit 3
+
+# wiki 页面生成（后台）
+scripts/pc-wiki-ingest-bg.sh
+
+# wiki 向量索引
+scripts/pc-wiki-index.sh
+```
+
+这些 shell 只做阶段级 convenience wrapper，不负责重写底层参数逻辑；如需特殊参数，可直接继续在命令末尾追加传给底层脚本。
+
 ### 自动更新代码（仅适用于 git clone 安装）
 
 ```bash
@@ -210,7 +240,7 @@ paper-compass update --check
 paper-compass update
 
 # 更新到指定版本
-paper-compass update --version v1.2.10
+paper-compass update --version v1.2.11
 
 # 模拟更新（查看变更但不执行）
 paper-compass update --dry-run
@@ -231,10 +261,10 @@ paper-compass update --dry-run
 
 ```bash
 git fetch origin --tags
-git checkout v1.2.10         # 或 git pull origin main
+git checkout v1.2.11         # 或 git pull origin main
 pip install -e .
-paper-compass validate        # 验证配置仍然有效
-python3 -m pytest tests/ -x   # 确保测试通过
+paper-compass validate        # 验证配置仍然可用
+python3 -m pytest tests/ -x   # 确认测试通过
 ```
 
 ### 升级注意事项
@@ -269,6 +299,8 @@ python3 -m pytest tests/ -x   # 确保测试通过
 ```bash
 paper-compass --help
 paper-compass init
+paper-compass search --help
+paper-compass status
 paper-compass validate
 paper-compass-healthcheck --help
 paper-compass-mcp --help
@@ -291,6 +323,7 @@ paper-compass-mcp --help
 | `VOLC_EMBED_BASE_URL` | 否 | 火山引擎多模态嵌入端点（备选方案） |
 | `VOLC_EMBED_API_KEY` | 否 | 火山引擎 API 密钥 |
 | `VOLC_EMBED_MODEL` | 否 | 火山引擎嵌入模型端点 ID |
+| `LOCAL_EMBED_MODEL` | 否 | 云端嵌入均未配置时的本地回退模型：`bge-base`（默认）/ `specter` / `minilm` |
 | `WIKI_PROMPT` | 否 | Wiki 提示词风格：`default`（通用学术）、`economics`（经济学预设）、或自定义路径 |
 
 
@@ -360,7 +393,9 @@ WIKI_PROMPT=/home/user/my-prompts  # 自定义提示词
 嵌入服务支持**级联回退**机制：
 1. **首选** `embedding_main`（OpenAI-compatible，`EMBED_BASE_URL` + `EMBED_API_KEY`）
 2. **回退** `embedding_volcengine`（火山引擎多模态，`VOLC_EMBED_*` 系列变量）— [火山引擎快速入门指南](https://www.volcengine.com/docs/82379/1399008?lang=zh)
-3. **最终回退** 本地 `bge-base` 模型（无需 API）
+3. **最终回退** 本地模型（默认 `bge-base`，可通过 `LOCAL_EMBED_MODEL` 设为 `specter` 或 `minilm`）
+
+`paper-compass validate` 在没有任何云端嵌入 provider 时，会显式报告将使用本地 fallback；实际构建索引时，`build_index.py` 也会按同一顺序执行。
 
 配置对应环境变量即可自动启用各级回退。如需固定使用某一提供方，在 `configs/providers.yaml` 中修改：
 
@@ -371,6 +406,13 @@ roles:
 ```
 
 ### 高级配置
+
+`config.py` 会优先从当前工作目录 / 仓库根目录的 `configs/` 读取配置，并在安装包场景下回退到 `src/paper_compass/configs/` 中的打包资源。也因此，仓库里会同时看到两套同名 YAML（例如两个 `mcp.yaml`）：
+
+- `configs/`：开发态直跑脚本时使用
+- `src/paper_compass/configs/`：打包安装后作为 package data 使用
+
+这两套文件应保持完全一致；项目测试会对它们做同步校验，避免再次发生配置漂移。
 
 LLM 模型、Chroma 集合命名、MCP 跟踪等配置位于 `configs/` 目录下，详见各文件内注释：
 
@@ -389,6 +431,15 @@ LLM 模型、Chroma 集合命名、MCP 跟踪等配置位于 `configs/` 目录�
 # 交互式配置 LLM 和嵌入服务
 paper-compass init
 
+# 本地检索统一入口
+paper-compass search wiki --query "家族企业代际传承"
+paper-compass search library --query "succession"
+paper-compass search passages --query "劳动力结构" --search-mode hybrid
+paper-compass search ask --query "家族企业继承如何影响劳动力结构？"
+
+# 查看当前解析后的配置 / 数据 / 向量库状态
+paper-compass status
+
 # 一键执行 Zotero / 向量库 / wiki 数据同步
 paper-compass sync --db-source-path /path/to/zotero_readonly.sqlite --storage-path /path/to/storage
 
@@ -403,6 +454,8 @@ paper-compass validate
 
 ```bash
 paper-compass init --help
+paper-compass search --help
+paper-compass status --help
 paper-compass sync --help
 paper-compass update --help
 paper-compass validate --help
@@ -480,11 +533,15 @@ mcp_servers:
 #### CLI 工具模式
 
 ```bash
-python scripts/run_mcp_server.py --tool search_wiki --query "家族企业代际传承"
-python scripts/run_mcp_server.py --tool search_library --query "作者姓名"
-python scripts/run_mcp_server.py --tool search_passages --query "具体段落内容"
-python scripts/run_mcp_server.py --tool ask_research --query "研究问题"
-python scripts/run_mcp_server.py --tool get_paper_metadata --key ZOTERO_KEY
+paper-compass-mcp --tool search_wiki --query "家族企业代际传承"
+paper-compass-mcp --tool search_library --query "作者姓名"
+paper-compass-mcp --tool search_passages --query "具体段落内容" --search-mode keyword
+paper-compass-mcp --tool search_passages --query "具体段落内容" --search-mode hybrid --db-path data/vectordb --text-dir data/texts --library-path data/zotero-export/library.json
+paper-compass-mcp --tool ask_research --query "研究问题" --max-sources 7 --db-path data/vectordb
+paper-compass-mcp --tool get_paper_metadata --id-or-doi ZOTERO_KEY
+
+# 兼容原脚本入口
+python scripts/run_mcp_server.py --tool search_passages --query "具体段落内容" --search-mode keyword
 ```
 
 #### 与 NumPy 2.x 的兼容性
