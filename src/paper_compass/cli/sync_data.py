@@ -6,6 +6,7 @@ One-command data sync for Zotero metadata, paper index, wiki generation, and wik
 from __future__ import annotations
 
 import argparse
+import shlex
 
 from paper_compass.pipeline_sync import SyncOptions, VectordbHealthError, run_sync_pipeline
 from paper_compass.env_utils import PROJECT_ROOT
@@ -26,7 +27,9 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
     parser.add_argument("--storage-path", default="", help="Explicit path to Zotero storage directory")
     parser.add_argument("--snapshot-db", choices=["auto", "always", "never"], default="auto", help="Whether to snapshot the Zotero sqlite before reading")
     parser.add_argument("--snapshot-dir", default="data/state/zotero-snapshots", help="Directory for temporary Zotero sqlite snapshots")
-    parser.add_argument("--allow-live-zotero-read", action="store_true", help="Allow direct reads from a live Zotero sqlite when snapshoting is disabled")
+    parser.add_argument("--snapshot-keep", type=int, default=5, help="Number of runtime Zotero sqlite snapshots to keep")
+    parser.add_argument("--snapshot-max-age-days", type=int, default=0, help="Delete runtime snapshots older than N days; 0 disables age-based cleanup")
+    parser.add_argument("--allow-live-zotero-read", action="store_true", help="Allow direct reads from a live Zotero sqlite when snapshotting is disabled")
     parser.add_argument("--library", default="data/zotero-export/library.json", help="Path to library.json")
     parser.add_argument("--wiki-root", default="./wiki", help="Wiki root directory")
     parser.add_argument("--workers", type=int, default=10, help="Worker count for wiki generation")
@@ -50,6 +53,8 @@ def execute_sync(args: argparse.Namespace) -> int:
                 storage_path=args.storage_path or None,
                 snapshot_db=args.snapshot_db,
                 snapshot_dir=args.snapshot_dir,
+                snapshot_keep=args.snapshot_keep,
+                snapshot_max_age_days=args.snapshot_max_age_days,
                 allow_live_zotero_read=args.allow_live_zotero_read,
                 library_path=args.library,
                 wiki_root=args.wiki_root,
@@ -79,5 +84,11 @@ def execute_sync(args: argparse.Namespace) -> int:
         f"  completed stages: {', '.join(result.completed_stages) if result.completed_stages else '(none)'}"
     )
     print(f"  state file: {result.state_path}")
+    if result.health_summary:
+        print(f"  health preflight: {result.health_summary}")
+    if result.planned_commands:
+        print("  planned commands:")
+        for command in result.planned_commands:
+            print(f"    {shlex.join(command)}")
     print(f"  summary: {result.summary}")
     return 0

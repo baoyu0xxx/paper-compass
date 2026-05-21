@@ -11,8 +11,8 @@ rag:
     library_json_path_from: paths.library_json_path
     pqa_home_from: paths.pqa_home
 
-  llm_role: paperqa_answer
-  embedding_role: pdf_embedding
+  llm_role: wiki_generation
+  embedding_role: embedding
 
   default_mode: filtered
   allow_full_library_query: true

@@ -8,7 +8,7 @@ wiki:
 
   llm_role: wiki_ingest
   query_llm_role: wiki_query
-  embedding_role: wiki_embedding
+  embedding_role: embedding
 
   page_types:
     - papers

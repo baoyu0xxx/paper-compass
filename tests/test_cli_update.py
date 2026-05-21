@@ -59,9 +59,9 @@ class TestParseEnvVars:
         assert _parse_env_vars("# just a comment") == {}
 
     def test_vars_with_underscores_and_digits(self):
-        text = "VOLC_EMBED_API_KEY=key123\nPAPERQA_MODEL=gpt-4o\n"
+        text = "VOLC_EMBED_API_KEY=key123\nEMBED_MODEL=text-embedding-3-small\n"
         result = _parse_env_vars(text)
-        assert result == {"VOLC_EMBED_API_KEY": False, "PAPERQA_MODEL": False}
+        assert result == {"VOLC_EMBED_API_KEY": False, "EMBED_MODEL": False}
 
 
 # ── _detect_env_var_changes ──────────────────────────────────────────────

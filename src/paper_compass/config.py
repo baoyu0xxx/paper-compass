@@ -161,18 +161,14 @@ def _resolve_embedding_role_selection(
             "pdf_embedding and wiki_embedding must reference the same embedding provider; split embedding roles are not supported"
         )
 
-    if shared_provider:
-        selected_provider = shared_provider
-        config_source = "shared"
-    else:
-        selected_provider = pdf_provider or wiki_provider or "embedding_main"
-        config_source = "legacy" if legacy_fields else "default"
+    if legacy_fields:
+        raise ValueError(
+            "roles.pdf_embedding / roles.wiki_embedding are no longer supported; "
+            "use one shared roles.embedding so papers and wiki stay in the same embedding space"
+        )
 
-    for legacy_name, legacy_value in (("pdf_embedding", pdf_provider), ("wiki_embedding", wiki_provider)):
-        if shared_provider and legacy_value and legacy_value != selected_provider:
-            raise ValueError(
-                f"roles.embedding={selected_provider!r} conflicts with legacy roles.{legacy_name}={legacy_value!r}; use one shared embedding role"
-            )
+    selected_provider = shared_provider or "embedding_main"
+    config_source = "shared" if shared_provider else "default"
 
     return selected_provider, config_source, legacy_fields, providers, roles
 
@@ -183,9 +179,8 @@ def get_embedding_provider_order(configs: Optional[Dict[str, Any]] = None) -> li
     Preferred config shape:
     - roles.embedding = <provider name>
 
-    Legacy compatibility:
-    - roles.pdf_embedding / roles.wiki_embedding may still exist temporarily
-    - if both legacy keys exist, they must match
+    Legacy split roles (`roles.pdf_embedding` / `roles.wiki_embedding`) are rejected
+    because they can create incompatible paper and wiki embedding spaces.
 
     Splitting paper/wiki embeddings is rejected because it would create
     incompatible embedding spaces between indexed papers and wiki vectors.

@@ -248,6 +248,11 @@ def _smoke_embedding() -> Status:
 def main() -> int:
     parser = argparse.ArgumentParser(description="paper-compass healthcheck")
     parser.add_argument("--smoke", action="store_true", help="Include API connectivity probes")
+    parser.add_argument(
+        "--deps-only",
+        action="store_true",
+        help="Only check Python dependencies; skip env, data, vectordb, wiki, MCP, and API probes",
+    )
     args = parser.parse_args()
 
     checks: List[Status] = []
@@ -255,13 +260,15 @@ def main() -> int:
     checks.append(_check_bm25_dep())
     checks.append(_check_pdf_fallback_dep())
     checks.append(_check_local_embedding_dep())
-    checks.append(_check_env())
-    checks.append(_check_library())
-    checks.append(_check_vectordb())
-    checks.append(_check_wiki())
-    checks.append(_check_mcp_contracts())
 
-    if args.smoke:
+    if not args.deps_only:
+        checks.append(_check_env())
+        checks.append(_check_library())
+        checks.append(_check_vectordb())
+        checks.append(_check_wiki())
+        checks.append(_check_mcp_contracts())
+
+    if args.smoke and not args.deps_only:
         checks.append(_smoke_embedding())
 
     all_ok = True

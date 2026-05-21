@@ -104,3 +104,42 @@ def test_prepare_zotero_database_refuses_live_direct_read_without_override(tmp_p
             snapshot_dir=tmp_path / "data" / "state" / "zotero-snapshots",
             allow_live_zotero_read=False,
         )
+
+
+def test_cleanup_sqlite_snapshots_keeps_newest_n(tmp_path):
+    from paper_compass.zotero_snapshot import cleanup_sqlite_snapshots
+
+    snapshot_dir = tmp_path / "snapshots"
+    snapshot_dir.mkdir()
+    files = []
+    for idx in range(4):
+        path = snapshot_dir / f"zotero.20260521-180{idx}00.sqlite"
+        path.write_text(str(idx), encoding="utf-8")
+        # Make ordering deterministic on filesystems with coarse timestamp resolution.
+        import os
+        os.utime(path, (idx, idx))
+        files.append(path)
+
+    result = cleanup_sqlite_snapshots(snapshot_dir, keep=2, max_age_days=0, dry_run=False)
+
+    assert result.scanned_count == 4
+    assert result.deleted_count == 2
+    assert files[0].exists() is False
+    assert files[1].exists() is False
+    assert files[2].exists() is True
+    assert files[3].exists() is True
+
+
+def test_cleanup_sqlite_snapshots_dry_run_does_not_delete(tmp_path):
+    from paper_compass.zotero_snapshot import cleanup_sqlite_snapshots
+
+    snapshot_dir = tmp_path / "snapshots"
+    snapshot_dir.mkdir()
+    old = snapshot_dir / "zotero.20260521-180000.sqlite"
+    old.write_text("old", encoding="utf-8")
+
+    result = cleanup_sqlite_snapshots(snapshot_dir, keep=0, max_age_days=0, dry_run=True)
+
+    assert result.scanned_count == 1
+    assert result.deleted_count == 1
+    assert old.exists() is True

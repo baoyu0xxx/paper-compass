@@ -36,6 +36,28 @@ def test_run_sync_pipeline_dry_run_reports_all_stages(tmp_path):
     ]
 
 
+def test_run_sync_pipeline_dry_run_reports_commands_without_creating_state(tmp_path, monkeypatch):
+    from paper_compass import pipeline_sync
+    from paper_compass.pipeline_sync import SyncOptions, run_sync_pipeline
+
+    monkeypatch.setattr(pipeline_sync, "inspect_index_health", lambda path: _report(severity="ok", summary="healthy"))
+
+    result = run_sync_pipeline(
+        SyncOptions(
+            project_root=tmp_path,
+            db_path=tmp_path / "data" / "vectordb",
+            dry_run=True,
+        )
+    )
+
+    assert result.status == "dry_run"
+    assert result.planned_commands
+    assert result.planned_commands[0][1].endswith("scripts/sync_zotero.py")
+    assert result.health_summary == "ok: healthy"
+    assert not (tmp_path / "data" / "state" / "sync.lock").exists()
+    assert not (tmp_path / "data" / "state" / "last_sync.json").exists()
+
+
 def test_run_sync_pipeline_aborts_on_corrupted_vectordb(tmp_path, monkeypatch):
     from paper_compass import pipeline_sync
     from paper_compass.pipeline_sync import SyncOptions, VectordbHealthError
@@ -158,4 +180,8 @@ def test_build_stage_command_passes_snapshot_flags(tmp_path):
     assert command[command.index("--snapshot-db") + 1] == "always"
     assert "--snapshot-dir" in command
     assert command[command.index("--snapshot-dir") + 1] == "data/state/zotero-snapshots"
+    assert "--snapshot-keep" in command
+    assert command[command.index("--snapshot-keep") + 1] == "5"
+    assert "--snapshot-max-age-days" in command
+    assert command[command.index("--snapshot-max-age-days") + 1] == "0"
     assert "--allow-live-zotero-read" in command

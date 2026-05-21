@@ -4,7 +4,7 @@
 
 **将 Zotero 论文库转化为 AI Agent 可直接检索的双引擎知识库（RAG 原文检索 + LLM Wiki 知识编译）**
 
-[![version](https://img.shields.io/badge/version-1.2.11-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.3.0-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
@@ -60,7 +60,7 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
 ```bash
 python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.11/paper_compass-1.2.11-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.3.0/paper_compass-1.3.0-py3-none-any.whl
 
 # 交互式配置
 paper-compass init
@@ -70,7 +70,7 @@ paper-compass validate
 
 # 增量同步 Zotero / 索引 / wiki 数据
 paper-compass sync \
-  --db-source-path /path/to/zotero_readonly.sqlite \
+  --db-source-path /path/to/zotero.sqlite \
   --storage-path /path/to/storage
 ```
 
@@ -128,12 +128,14 @@ python scripts/sync_zotero.py --extract-text
 # → 自动按以下顺序探索：显式 --db-path > ZOTERO_SQLITE_PATH > 默认 Zotero 目录 > 可选备份目录（如配置了 ZOTERO_BACKUP_ROOT）
 # → data/zotero-export/library.json + data/texts/*.txt
 
+自动发现只会选择 Zotero 官方数据库文件 `zotero.sqlite`。旧的 `zotero_readonly.sqlite` 不再自动发现，因为长期手动快照可能变成过期副本；如确需短期兼容，可通过 `--db-source-path` / `--db-path` 显式指定。当自动发现命中默认 Zotero profile 时，`--snapshot-db auto` 会在 `data/state/zotero-snapshots/` 下创建运行时 SQLite 快照，并读取该快照而不是直接读取 live Zotero profile。
+
 #    若数据库与 storage/ 不在同一目录：
 #    python scripts/sync_zotero.py --db-path /path/to/zotero.sqlite --storage-path /path/to/storage --extract-text
 
 # 5. 日常数据增量更新（推荐）
 paper-compass sync \
-  --db-source-path /path/to/zotero_readonly.sqlite \
+  --db-source-path /path/to/zotero.sqlite \
   --storage-path /path/to/storage
 # → 顺序执行 Zotero 同步、论文增量索引、wiki 增量生成、wiki 索引
 # → 自动写入 data/state/last_sync.json
@@ -158,8 +160,7 @@ python eval/run_eval.py -v
 这些 `scripts/pc-*.sh` 都是薄包装：负责固定 repo root、补默认路径、减少长命令手输错误；
 如果你更偏好直接调 Python 脚本，也仍然可以继续使用 `scripts/build_index.py` / `scripts/ingest_to_wiki.py`。
 
-自 v1.2.11 起，安装态 `paper-compass-mcp` 与 `paper-compass-healthcheck` 入口已直接指向包内实现；
-若本地仍残留旧 wrapper，也提供兼容层，不会再因为 `scripts.*` 模块缺失而启动失败。
+自 v1.3.0 起，安装态 `paper-compass-mcp` 与 `paper-compass-healthcheck` 入口已直接指向包内实现；历史打包用的 `scripts.*` 兼容层已移除，请使用当前 console script 或仓库内 `scripts/` 文件。
 
 ## 更新
 
@@ -175,7 +176,7 @@ python eval/run_eval.py -v
 
 ```bash
 python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.11/paper_compass-1.2.11-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.3.0/paper_compass-1.3.0-py3-none-any.whl
 ```
 
 如需安装其他已发布版本，可将上面 URL 中的版本号替换为对应 release。发布版本列表可用：
@@ -189,7 +190,7 @@ gh release list --repo baoyu0xxx/paper-compass --limit 10
 ```bash
 # 标准增量更新
 paper-compass sync \
-  --db-source-path /path/to/zotero_readonly.sqlite \
+  --db-source-path /path/to/zotero.sqlite \
   --storage-path /path/to/storage
 
 # 仅预览将执行哪些阶段
@@ -199,7 +200,7 @@ paper-compass sync --dry-run
 paper-compass sync \
   --rebuild papers \
   --backup-corrupted-db \
-  --db-source-path /path/to/zotero_readonly.sqlite \
+  --db-source-path /path/to/zotero.sqlite \
   --storage-path /path/to/storage
 ```
 
@@ -240,7 +241,7 @@ paper-compass update --check
 paper-compass update
 
 # 更新到指定版本
-paper-compass update --version v1.2.11
+paper-compass update --version v1.3.0
 
 # 模拟更新（查看变更但不执行）
 paper-compass update --dry-run
@@ -261,7 +262,7 @@ paper-compass update --dry-run
 
 ```bash
 git fetch origin --tags
-git checkout v1.2.11         # 或 git pull origin main
+git checkout v1.3.0         # 或 git pull origin main
 pip install -e .
 paper-compass validate        # 验证配置仍然可用
 python3 -m pytest tests/ -x   # 确认测试通过
@@ -411,7 +412,7 @@ roles:
   embedding: embedding_volcengine   # 论文与 wiki 共用同一个 embedding provider
 ```
 
-这里不再建议分别设置 `pdf_embedding` / `wiki_embedding`。论文索引与 wiki 索引必须处于同一 embedding 空间，因此配置层也只保留一个共享 embedding 入口。旧版若仍出现这两个键，也应保持一致，仅作为兼容读取使用。
+默认配置已移除旧版拆分式 embedding 入口。论文索引与 wiki 索引必须处于同一 embedding 空间，因此配置层只使用一个共享的 `roles.embedding`。
 ### 高级配置
 
 `config.py` 会优先从当前工作目录 / 仓库根目录的 `configs/` 读取配置，并在安装包场景下回退到 `src/paper_compass/configs/` 中的打包资源。也因此，仓库里会同时看到两套同名 YAML（例如两个 `mcp.yaml`）：
@@ -438,18 +439,25 @@ LLM 模型、Chroma 集合命名、MCP 跟踪等配置位于 `configs/` 目录�
 # 交互式配置 LLM 和嵌入服务
 paper-compass init
 
-# 本地检索统一入口
-paper-compass search wiki --query "家族企业代际传承"
-paper-compass search library --query "succession"
-paper-compass search passages --query "劳动力结构" --search-mode hybrid
-paper-compass search ask --query "家族企业继承如何影响劳动力结构？"
+# 本地检索统一入口（v1.3.0 发布前已用本地 417 条文献、406 个 wiki 页面实测）
+paper-compass search wiki --query "家族企业代际传承" --limit 3
+# → 返回“代际传承与家族企业多元化经营”“代际传承对家族企业风险承担的影响”等 wiki 页面
+
+paper-compass search library --query "家族企业代际传承" --limit 5
+# → 返回“家族企业代际传承与数字化转型”等本地 library.json 记录
+
+paper-compass search passages --query "家族企业代际传承 劳动力结构" --search-mode hybrid --limit 3
+# → 同时检索原文关键词/BM25 与语义向量片段
+
+paper-compass search ask --query "家族企业代际传承对劳动力结构有什么影响" --force-mode hybrid --max-sources 3
+# → 汇总 wiki、library 和 PDF evidence，输出带来源的检索结果
 
 # 查看当前解析后的配置 / 数据 / 向量库状态
 paper-compass status
 # → 包括 embedding role / active provider / cascade，以及 wiki prompt bundle 是否 degraded
 
 # 一键执行 Zotero / 向量库 / wiki 数据同步
-paper-compass sync --db-source-path /path/to/zotero_readonly.sqlite --storage-path /path/to/storage
+paper-compass sync --db-source-path /path/to/zotero.sqlite --storage-path /path/to/storage
 
 # 代码升级
 paper-compass update
@@ -477,7 +485,7 @@ paper-compass validate --help
 | `scripts/build_index.py` | 构建 ChromaDB 向量索引（论文 + wiki） | `--full-rebuild`、`--incremental`、`--prune-deleted`、`--wiki` |
 | `scripts/ingest_to_wiki.py` | 批量 LLM wiki 生成 | `--skip-existing`、`--workers 10`、`--limit N` |
 | `scripts/run_mcp_server.py` | MCP 服务（stdio / 工具调用 / 交互模式） | `--mcp`、`--tool <name> --query "..."` |
-| `scripts/healthcheck.py` | 子系统健康检查 | `--smoke`（含 API 连通性探测） |
+| `scripts/healthcheck.py` | 子系统健康检查 | `--deps-only`、`--smoke`（含 API 连通性探测） |
 
 #### 构建索引
 
@@ -630,6 +638,8 @@ paper-compass/
 ├── tests/                  # pytest 测试套件
 └── pyproject.toml          # 项目元数据与依赖
 ```
+
+发布新版本前，请按 `docs/release-checklist.md` 检查代码、文档、测试、tag 与 release asset 是否一致。
 
 ## 开发与调试
 

@@ -11,6 +11,7 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+import time
 
 from paper_compass.zotero_paths import ZoteroSourceResolution
 
@@ -68,4 +69,56 @@ def prepare_zotero_database_for_read(
         used_snapshot=False,
         snapshot_path=None,
         reason="direct",
+    )
+
+
+@dataclass(frozen=True)
+class SnapshotCleanupResult:
+    scanned_count: int
+    deleted_count: int
+    deleted_paths: list[Path]
+    dry_run: bool
+
+
+def cleanup_sqlite_snapshots(
+    snapshot_dir: Path,
+    *,
+    keep: int = 5,
+    max_age_days: int = 0,
+    dry_run: bool = False,
+) -> SnapshotCleanupResult:
+    if keep < 0:
+        raise ValueError("keep must be >= 0")
+    if max_age_days < 0:
+        raise ValueError("max_age_days must be >= 0")
+    if not snapshot_dir.exists() or not snapshot_dir.is_dir():
+        return SnapshotCleanupResult(0, 0, [], dry_run)
+
+    candidates = sorted(
+        snapshot_dir.glob("zotero.*.sqlite"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+
+    to_delete: list[Path] = []
+    if keep == 0:
+        to_delete.extend(candidates)
+    elif len(candidates) > keep:
+        to_delete.extend(candidates[keep:])
+
+    if max_age_days:
+        cutoff = time.time() - max_age_days * 86400
+        for path in candidates:
+            if path.stat().st_mtime < cutoff and path not in to_delete:
+                to_delete.append(path)
+
+    if not dry_run:
+        for path in to_delete:
+            path.unlink(missing_ok=True)
+
+    return SnapshotCleanupResult(
+        scanned_count=len(candidates),
+        deleted_count=len(to_delete),
+        deleted_paths=to_delete,
+        dry_run=dry_run,
     )

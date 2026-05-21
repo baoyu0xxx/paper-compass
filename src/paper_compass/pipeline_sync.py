@@ -25,6 +25,8 @@ class SyncOptions:
     storage_path: str | None = None
     snapshot_db: str = "auto"
     snapshot_dir: str = "data/state/zotero-snapshots"
+    snapshot_keep: int = 5
+    snapshot_max_age_days: int = 0
     allow_live_zotero_read: bool = False
     library_path: str = "data/zotero-export/library.json"
     wiki_root: str = "./wiki"
@@ -45,6 +47,8 @@ class SyncResult:
     planned_stages: list[str]
     completed_stages: list[str]
     state_path: str
+    planned_commands: list[list[str]] | None = None
+    health_summary: str = ""
 
 
 def _utc_now_iso() -> str:
@@ -120,6 +124,10 @@ def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
             options.snapshot_db,
             "--snapshot-dir",
             options.snapshot_dir,
+            "--snapshot-keep",
+            str(options.snapshot_keep),
+            "--snapshot-max-age-days",
+            str(options.snapshot_max_age_days),
         ]
         if options.allow_live_zotero_read:
             cmd.append("--allow-live-zotero-read")
@@ -204,12 +212,19 @@ def run_sync_pipeline(options: SyncOptions) -> SyncResult:
     state_path = _state_path(options.project_root)
 
     if options.dry_run:
+        try:
+            report = inspect_index_health(options.db_path)
+            health_summary = f"{report.severity}: {report.summary}"
+        except Exception as exc:
+            health_summary = f"error: {exc}"
         return SyncResult(
             status="dry_run",
             summary="Dry run only; no commands executed.",
             planned_stages=planned,
             completed_stages=[],
             state_path=str(state_path),
+            planned_commands=[_build_stage_command(options, stage) for stage in planned],
+            health_summary=health_summary,
         )
 
     report = inspect_index_health(options.db_path)

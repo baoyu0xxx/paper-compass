@@ -62,6 +62,18 @@ class TestSyncCliArgParsing:
         assert args.snapshot_dir == "tmp/zsnap"
         assert args.allow_live_zotero_read is True
 
+    def test_snapshot_cleanup_flags(self):
+        parser = _make_parser()
+        args = parser.parse_args([
+            "--snapshot-keep",
+            "3",
+            "--snapshot-max-age-days",
+            "14",
+        ])
+
+        assert args.snapshot_keep == 3
+        assert args.snapshot_max_age_days == 14
+
 
 class TestSyncExecute:
     def test_execute_sync_returns_zero_on_success(self):
@@ -89,6 +101,8 @@ class TestSyncExecute:
         assert called_options.rebuild == "none"
         assert called_options.snapshot_db == "auto"
         assert called_options.snapshot_dir == "data/state/zotero-snapshots"
+        assert called_options.snapshot_keep == 5
+        assert called_options.snapshot_max_age_days == 0
         assert called_options.allow_live_zotero_read is False
         output = fake_out.getvalue()
         assert "sync status: dry_run" in output

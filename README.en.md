@@ -4,7 +4,7 @@
 
 **Turn your Zotero library into a dual-engine knowledge base for AI agents — RAG full-text retrieval + LLM wiki knowledge compilation**
 
-[![version](https://img.shields.io/badge/version-1.2.11-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.3.0-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
@@ -50,7 +50,7 @@ The agent locates relevant passages in your paper library and returns quoted evi
 | 🔍 **Dual-mode passage retrieval** | Dense semantic vectors and BM25 keyword retrieval run in parallel, balancing conceptual similarity and exact-term matching |
 | 📊 **Incremental indexing** | Manifest-based change detection updates only added or modified papers instead of rebuilding everything |
 | 🇨🇳 **Chinese academic support** | Chinese segmentation-aware retrieval and scoring, plus economics preset wiki prompts for Chinese-language research |
-| 🔄 **Embedding cascade fallback** | Volcengine → OpenAI-compatible endpoint → local bge-base, with automatic fallback when one layer fails |
+| 🔄 **Embedding cascade fallback** | OpenAI-compatible (`EMBED_*`) → Volcengine (`VOLC_EMBED_*`) → local model (`bge-base` by default, configurable via `LOCAL_EMBED_MODEL`) |
 
 ## Quick Start
 
@@ -60,7 +60,7 @@ The recommended path is to install the published wheel from GitHub Release direc
 
 ```bash
 python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.11/paper_compass-1.2.11-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.3.0/paper_compass-1.3.0-py3-none-any.whl
 
 # Interactive setup
 paper-compass init
@@ -70,7 +70,7 @@ paper-compass validate
 
 # Incrementally sync Zotero / index / wiki data
 paper-compass sync \
-  --db-source-path /path/to/zotero_readonly.sqlite \
+  --db-source-path /path/to/zotero.sqlite \
   --storage-path /path/to/storage
 ```
 
@@ -128,12 +128,14 @@ python scripts/sync_zotero.py --extract-text
 # → auto-discovery order: explicit --db-path > ZOTERO_SQLITE_PATH > default Zotero dirs > backup dirs
 # → data/zotero-export/library.json + data/texts/*.txt
 
+Auto-discovery only selects Zotero's official `zotero.sqlite`. The legacy `zotero_readonly.sqlite` filename is not auto-discovered because long-lived manual snapshots can become stale. It remains accepted only when explicitly passed via `--db-source-path` / `--db-path` for short-term compatibility. When auto-discovery resolves a default Zotero profile, `--snapshot-db auto` creates a runtime SQLite snapshot under `data/state/zotero-snapshots/` and reads that snapshot instead of directly reading the live Zotero profile.
+
 #    If the database and storage/ are not in the same directory:
 #    python scripts/sync_zotero.py --db-path /path/to/zotero.sqlite --storage-path /path/to/storage --extract-text
 
 # 5. Routine incremental data sync (recommended)
 paper-compass sync \
-  --db-source-path /path/to/zotero_readonly.sqlite \
+  --db-source-path /path/to/zotero.sqlite \
   --storage-path /path/to/storage
 # → runs Zotero sync, incremental paper indexing, incremental wiki generation, and wiki indexing in sequence
 # → writes data/state/last_sync.json automatically
@@ -158,7 +160,7 @@ python eval/run_eval.py -v
 These `scripts/pc-*.sh` wrappers are intentionally thin: they pin repo root, provide sane default paths, and reduce long-command typing errors.
 If you prefer direct Python entrypoints, `scripts/build_index.py` and `scripts/ingest_to_wiki.py` remain supported.
 
-Starting with v1.2.11, installed `paper-compass-mcp` and `paper-compass-healthcheck` entrypoints point directly to package-resident implementations. A compatibility shim is also kept for stale local wrappers so old `scripts.*` imports no longer break startup.
+Starting with v1.3.0, installed `paper-compass-mcp` and `paper-compass-healthcheck` entrypoints point directly to package-resident implementations. The historical packaged `scripts.*` compatibility shims have been removed; use the current console scripts or the repository `scripts/` files directly.
 
 ## Updating
 
@@ -174,7 +176,7 @@ If you installed paper-compass from GitHub Release, point pip directly to the ta
 
 ```bash
 python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.2.11/paper_compass-1.2.11-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.3.0/paper_compass-1.3.0-py3-none-any.whl
 ```
 
 To install another published version later, replace the version in the URL accordingly. Published releases can be listed with:
@@ -188,7 +190,7 @@ gh release list --repo baoyu0xxx/paper-compass --limit 10
 ```bash
 # Standard incremental update
 paper-compass sync \
-  --db-source-path /path/to/zotero_readonly.sqlite \
+  --db-source-path /path/to/zotero.sqlite \
   --storage-path /path/to/storage
 
 # Preview stages only
@@ -198,7 +200,7 @@ paper-compass sync --dry-run
 paper-compass sync \
   --rebuild papers \
   --backup-corrupted-db \
-  --db-source-path /path/to/zotero_readonly.sqlite \
+  --db-source-path /path/to/zotero.sqlite \
   --storage-path /path/to/storage
 ```
 
@@ -239,7 +241,7 @@ paper-compass update --check
 paper-compass update
 
 # Update to a specific version
-paper-compass update --version v1.2.11
+paper-compass update --version v1.3.0
 
 # Simulate an update (preview without executing)
 paper-compass update --dry-run
@@ -260,7 +262,7 @@ If automatic update is unavailable, you can update manually:
 
 ```bash
 git fetch origin --tags
-git checkout v1.2.11         # or git pull origin main
+git checkout v1.3.0         # or git pull origin main
 pip install -e .
 paper-compass validate        # verify that the configuration still works
 python3 -m pytest tests/ -x   # ensure tests pass
@@ -409,7 +411,7 @@ roles:
   embedding: embedding_volcengine   # papers and wiki share the same embedding provider
 ```
 
-`pdf_embedding` and `wiki_embedding` are no longer the recommended config surface. Paper chunks and wiki chunks must remain in the same embedding space, so the config now exposes one shared embedding entry. If those legacy keys still appear in an older config, they should only be treated as compatibility fields and must remain identical.
+The legacy split embedding-role surface has been removed from default configs. Paper chunks and wiki chunks must remain in the same embedding space, so the config now exposes one shared `roles.embedding` entry.
 
 ### Advanced Configuration
 
@@ -430,18 +432,25 @@ After installation, the `paper-compass` command is available directly:
 # Interactive configuration of the LLM and embedding provider
 paper-compass init
 
-# Unified local retrieval entrypoint
-paper-compass search wiki --query "family-firm succession"
-paper-compass search library --query "succession"
-paper-compass search passages --query "labor structure" --search-mode hybrid
-paper-compass search ask --query "How does family-firm succession affect labor structure?"
+# Unified local retrieval entrypoint (v1.3.0 was smoke-tested on a local library with 417 records and 406 wiki pages)
+paper-compass search wiki --query "family-firm succession" --limit 3
+# → returns relevant wiki pages such as intergenerational succession and family-firm diversification/risk-taking
+
+paper-compass search library --query "family-firm succession" --limit 5
+# → returns matching records from the local library.json metadata
+
+paper-compass search passages --query "family-firm succession labor structure" --search-mode hybrid --limit 3
+# → combines full-text keyword/BM25 retrieval with semantic vector passages
+
+paper-compass search ask --query "How does family-firm succession affect labor structure?" --force-mode hybrid --max-sources 3
+# → assembles wiki, library, and PDF evidence into a sourced retrieval result
 
 # Inspect resolved configuration / data / vectordb state
 paper-compass status
 # → includes embedding role / active provider / cascade, plus whether the wiki prompt bundle is degraded
 
 # One-command sync for Zotero / vector index / wiki data
-paper-compass sync --db-source-path /path/to/zotero_readonly.sqlite --storage-path /path/to/storage
+paper-compass sync --db-source-path /path/to/zotero.sqlite --storage-path /path/to/storage
 
 # Code update
 paper-compass update

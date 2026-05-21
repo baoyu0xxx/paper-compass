@@ -85,3 +85,29 @@ def test_pdf_fallback_dependency_check_warns_when_missing(monkeypatch):
     assert result[0] == "pdf_fallback"
     assert result[1].startswith("WARN")
     assert "pdfplumber" in result[1]
+
+
+def test_healthcheck_deps_only_skips_project_state_checks(monkeypatch, capsys):
+    from paper_compass import healthcheck
+
+    calls = []
+
+    monkeypatch.setattr(healthcheck, "_check_core_deps", lambda: calls.append("core") or ("core_deps", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_bm25_dep", lambda: calls.append("bm25") or ("bm25", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_pdf_fallback_dep", lambda: calls.append("pdf") or ("pdf_fallback", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_local_embedding_dep", lambda: calls.append("local") or ("local_embed", "SKIP: cloud embedding configured"))
+    monkeypatch.setattr(healthcheck, "_check_env", lambda: calls.append("env") or ("env_vars", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_library", lambda: calls.append("library") or ("library.json", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_vectordb", lambda: calls.append("vectordb") or ("vectordb", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_wiki", lambda: calls.append("wiki") or ("wiki", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_mcp_contracts", lambda: calls.append("mcp") or ("mcp_contracts", "OK"))
+    monkeypatch.setattr("sys.argv", ["paper-compass-healthcheck", "--deps-only"])
+
+    rc = healthcheck.main()
+
+    assert rc == 0
+    assert calls == ["core", "bm25", "pdf", "local"]
+    output = capsys.readouterr().out
+    assert "core_deps" in output
+    assert "library.json" not in output
+    assert "vectordb" not in output

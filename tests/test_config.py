@@ -356,7 +356,7 @@ class TestEmbeddingProviderOrder:
 
         assert get_embedding_provider_order(configs) == ["embedding_volcengine", "embedding_main"]
 
-    def test_embedding_provider_order_supports_legacy_matching_roles(self):
+    def test_embedding_provider_order_rejects_legacy_matching_roles(self):
         from paper_compass.config import get_embedding_provider_order
 
         configs = {
@@ -372,7 +372,8 @@ class TestEmbeddingProviderOrder:
             }
         }
 
-        assert get_embedding_provider_order(configs) == ["embedding_volcengine", "embedding_main"]
+        with pytest.raises(ValueError, match="roles.embedding"):
+            get_embedding_provider_order(configs)
 
     def test_embedding_provider_order_rejects_legacy_split_roles(self):
         from paper_compass.config import get_embedding_provider_order
@@ -392,6 +393,20 @@ class TestEmbeddingProviderOrder:
 
         with pytest.raises(ValueError, match="pdf_embedding and wiki_embedding"):
             get_embedding_provider_order(configs)
+
+    def test_default_configs_do_not_use_legacy_embedding_roles_or_paperqa_provider(self):
+        from paper_compass.config import load_all_configs
+
+        configs = load_all_configs()
+        providers_cfg = configs["providers"]
+        roles = providers_cfg.get("roles", {})
+        providers = providers_cfg.get("providers", {})
+
+        assert "pdf_embedding" not in roles
+        assert "wiki_embedding" not in roles
+        assert roles["embedding"] == "embedding_main"
+        assert "paperqa_answer" not in roles
+        assert "paperqa_answer" not in providers
 
 
 class TestResolveEmbeddingRuntime:

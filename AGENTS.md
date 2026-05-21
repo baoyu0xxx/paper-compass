@@ -77,13 +77,15 @@ Should show all green (✓) for dotenv, llm, and embed checks.
 
 **Option A — from Zotero SQLite:**
 
-The `sync_zotero.py` script reads Zotero's SQLite database directly. Resolution order is: explicit `--db-path` → `ZOTERO_SQLITE_PATH` → default Zotero data directories → optional backup roots (for example `ZOTERO_BACKUP_ROOT` if configured). Within one directory it prefers `zotero_readonly.sqlite` over `zotero.sqlite`, and you can override the inferred `storage/` path with `--storage-path`.
+The `sync_zotero.py` script reads Zotero's SQLite database directly. Resolution order is: explicit `--db-path` → `ZOTERO_SQLITE_PATH` → default Zotero data directories → optional backup roots (for example `ZOTERO_BACKUP_ROOT` if configured). Auto-discovery only selects Zotero's official `zotero.sqlite`; legacy `zotero_readonly.sqlite` is accepted only when explicitly passed via `--db-path` / `--db-source-path`. You can override the inferred `storage/` path with `--storage-path`.
 
 ```bash
 python scripts/sync_zotero.py --extract-text
 ```
 
 This produces `data/zotero-export/library.json` and `data/texts/*.txt`.
+
+When auto-discovery resolves a default Zotero profile, `--snapshot-db auto` creates a runtime SQLite snapshot under `data/state/zotero-snapshots/` and reads that snapshot instead of directly reading the live Zotero profile. Explicit backup/env paths are treated as non-live unless configured otherwise.
 
 If the SQLite file is not found automatically, you can specify it explicitly:
 ```bash
@@ -123,7 +125,7 @@ The `library.json` format: a JSON array of objects with at minimum:
 
 ```bash
 paper-compass sync \
-  --db-source-path /path/to/zotero_readonly.sqlite \
+  --db-source-path /path/to/zotero.sqlite \
   --storage-path /path/to/storage
 ```
 
@@ -257,8 +259,10 @@ mcp_servers:
 | `build_index.py` skips papers | "missing PDF" | Ensure text file paths are correct |
 || ChromaDB dual-client | Weird errors | Never create 2 PersistentClient for same path |
 || Mac: multiple Python installs | `pip3 show pkg` says "not found" but `python3` can import it | Always use `python3 -m pip install ...` and `python3 -m pip show ...` instead of bare `pip` / `pip3` |
-|| Shell env var pollution | API call uses wrong URL | `unset MIMO_BASE_URL` etc. before running |
+|| Shell env var pollution | API call uses wrong URL | `unset LLM_BASE_URL LLM_API_KEY EMBED_BASE_URL EMBED_API_KEY VOLC_EMBED_BASE_URL VOLC_EMBED_API_KEY` before running |
 || $ENV_VAR not resolved | "unauthorized" errors | Ensure the referenced env var is actually set in your shell |
+
+Before publishing a new version, follow `docs/release-checklist.md` to keep code, docs, tests, tags, and release assets aligned.
 
 ## Running Tests
 
@@ -281,9 +285,9 @@ New test files:
 ## Dependencies
 
 All declared in `pyproject.toml`:
-- **Runtime**: pyyaml, chromadb, pymupdf, pdfplumber, rank-bm25, sentence-transformers
+- **Runtime**: pyyaml, chromadb, pymupdf, rank-bm25
+- **Optional**: sentence-transformers (`local-embed`), pdfplumber (`pdf-fallback`)
 - **Dev**: pytest
-- **Optional**: paper-qa (for PaperQA5 full PDF RAG)
 
 ## Key Files
 

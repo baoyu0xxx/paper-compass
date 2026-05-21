@@ -31,18 +31,9 @@ providers:
     dimension: 2048
     timeout_seconds: 120
 
-  paperqa_answer:
-    api_style: openai-compatible
-    base_url_env: PAPERQA_BASE_URL
-    api_key_env: PAPERQA_API_KEY
-    model_env: PAPERQA_MODEL
-    temperature: 0.0
-    max_tokens: 4000
-    timeout_seconds: 120
 
 roles:
   wiki_ingest: wiki_generation
   wiki_query: wiki_generation
   router_classify: wiki_generation
-  paperqa_answer: paperqa_answer
   embedding: embedding_main

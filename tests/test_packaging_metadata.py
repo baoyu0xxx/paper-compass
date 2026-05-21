@@ -33,6 +33,10 @@ def test_console_scripts_point_to_package_modules():
     assert not scripts["paper-compass-mcp"].startswith("scripts.")
 
 
+def test_legacy_scripts_compat_package_is_not_shipped():
+    assert not (PROJECT_ROOT / "src" / "scripts").exists()
+
+
 def test_sentence_transformers_is_not_a_core_dependency():
     project = _load_pyproject()["project"]
     deps = project["dependencies"]

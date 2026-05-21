@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from paper_compass.pdf_extract import PDFExtractor
 from paper_compass.zotero_paths import ZoteroSourceNotFoundError, resolve_zotero_source
-from paper_compass.zotero_snapshot import prepare_zotero_database_for_read
+from paper_compass.zotero_snapshot import cleanup_sqlite_snapshots, prepare_zotero_database_for_read
 from paper_compass.zotero_sqlite import ZoteroLibrary
 
 
@@ -53,10 +53,12 @@ def main():
         default="data/state/zotero-snapshots",
         help="Directory for temporary sqlite snapshots when reading live Zotero databases",
     )
+    parser.add_argument("--snapshot-keep", type=int, default=5, help="Number of runtime Zotero sqlite snapshots to keep")
+    parser.add_argument("--snapshot-max-age-days", type=int, default=0, help="Delete runtime snapshots older than N days; 0 disables age-based cleanup")
     parser.add_argument(
         "--allow-live-zotero-read",
         action="store_true",
-        help="Allow direct reads from a live Zotero sqlite when snapshoting is disabled",
+        help="Allow direct reads from a live Zotero sqlite when snapshotting is disabled",
     )
     args = parser.parse_args()
 
@@ -93,6 +95,14 @@ def main():
     lib = ZoteroLibrary(str(prepared.read_db_path), storage_path=str(source.storage_path))
     items = lib.get_all_items_with_pdfs()
     lib.close()
+
+    cleanup = cleanup_sqlite_snapshots(
+        Path(args.snapshot_dir),
+        keep=args.snapshot_keep,
+        max_age_days=args.snapshot_max_age_days,
+    )
+    if cleanup.scanned_count:
+        print(f"  Snapshot cleanup: scanned={cleanup.scanned_count}, deleted={cleanup.deleted_count}")
 
     print(f"  Found {len(items)} items with PDFs")
 
