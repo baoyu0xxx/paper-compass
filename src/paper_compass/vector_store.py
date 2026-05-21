@@ -15,11 +15,19 @@ from __future__ import annotations
 
 import logging
 import os
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
+
 logger = logging.getLogger(__name__)
 
+
+@dataclass(frozen=True)
+class BM25BuildResult:
+    available: bool
+    indexed_documents: int = 0
+    reason: str = ""
 
 class VectorStore:
     """Persistent vector store backed by ChromaDB.
@@ -319,10 +327,10 @@ class VectorStore:
                 matched.append(_id)
         return matched
 
-    def build_bm25(self, force: bool = False) -> None:
+    def build_bm25(self, force: bool = False) -> BM25BuildResult:
         """Build or rebuild the BM25 keyword index from current collection."""
         if not force and self._bm25_index is not None:
-            return
+            return BM25BuildResult(True, len(self._bm25_ids))
 
         try:
             from rank_bm25 import BM25Okapi
@@ -333,14 +341,16 @@ class VectorStore:
             self._bm25_corpus = [doc.split() for doc in corpus]
             if not self._bm25_corpus:
                 self._bm25_index = None
-                return
+                return BM25BuildResult(False, 0, "empty corpus")
             self._bm25_index = BM25Okapi(self._bm25_corpus)
+            return BM25BuildResult(True, len(self._bm25_ids))
         except Exception as exc:
             # BM25 is optional — graceful degradation
             logger.warning("BM25 index build failed; continuing without BM25: %s", exc)
             self._bm25_index = None
             self._bm25_ids = []
             self._bm25_corpus = []
+            return BM25BuildResult(False, 0, str(exc))
 
     def _ensure_bm25(self) -> None:
         if self._bm25_index is None:

@@ -137,3 +137,25 @@ def test_run_sync_pipeline_creates_and_removes_lock(tmp_path, monkeypatch):
 
     assert result.status == "ok"
     assert not lock_path.exists()
+
+
+def test_build_stage_command_passes_snapshot_flags(tmp_path):
+    from paper_compass.pipeline_sync import SyncOptions, _build_stage_command
+
+    options = SyncOptions(
+        project_root=tmp_path,
+        db_path=tmp_path / "vectordb",
+        db_source_path="/tmp/zotero.sqlite",
+        storage_path="/tmp/storage",
+        snapshot_db="always",
+        snapshot_dir="data/state/zotero-snapshots",
+        allow_live_zotero_read=True,
+    )
+
+    command = _build_stage_command(options, "sync_zotero")
+
+    assert "--snapshot-db" in command
+    assert command[command.index("--snapshot-db") + 1] == "always"
+    assert "--snapshot-dir" in command
+    assert command[command.index("--snapshot-dir") + 1] == "data/state/zotero-snapshots"
+    assert "--allow-live-zotero-read" in command

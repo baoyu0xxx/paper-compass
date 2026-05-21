@@ -31,3 +31,23 @@ def test_console_scripts_point_to_package_modules():
     assert scripts["paper-compass-mcp"].startswith("paper_compass.")
     assert not scripts["paper-compass-healthcheck"].startswith("scripts.")
     assert not scripts["paper-compass-mcp"].startswith("scripts.")
+
+
+def test_sentence_transformers_is_not_a_core_dependency():
+    project = _load_pyproject()["project"]
+    deps = project["dependencies"]
+    optional = project["optional-dependencies"]
+
+    assert not any(dep.startswith("sentence-transformers") for dep in deps)
+    assert "local-embed" in optional
+    assert any(dep.startswith("sentence-transformers") for dep in optional["local-embed"])
+
+
+def test_pdfplumber_is_not_a_core_dependency():
+    project = _load_pyproject()["project"]
+    deps = project["dependencies"]
+    optional = project["optional-dependencies"]
+
+    assert not any(dep.startswith("pdfplumber") for dep in deps)
+    assert "pdf-fallback" in optional
+    assert any(dep.startswith("pdfplumber") for dep in optional["pdf-fallback"])

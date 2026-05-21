@@ -23,6 +23,9 @@ class SyncOptions:
     db_path: Path
     db_source_path: str | None = None
     storage_path: str | None = None
+    snapshot_db: str = "auto"
+    snapshot_dir: str = "data/state/zotero-snapshots"
+    allow_live_zotero_read: bool = False
     library_path: str = "data/zotero-export/library.json"
     wiki_root: str = "./wiki"
     workers: int = 10
@@ -111,7 +114,15 @@ def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
             cmd += ["--db-path", options.db_source_path]
         if options.storage_path:
             cmd += ["--storage-path", options.storage_path]
-        cmd += ["--extract-text"]
+        cmd += [
+            "--extract-text",
+            "--snapshot-db",
+            options.snapshot_db,
+            "--snapshot-dir",
+            options.snapshot_dir,
+        ]
+        if options.allow_live_zotero_read:
+            cmd.append("--allow-live-zotero-read")
         return cmd
     if stage == "index_papers":
         cmd = [

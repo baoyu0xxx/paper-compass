@@ -21,6 +21,7 @@ class ZoteroSourceResolution:
     storage_path: Path
     source_kind: str
     tried: List[ZoteroPathAttempt]
+    is_live_candidate: bool = False
 
 
 class ZoteroSourceNotFoundError(FileNotFoundError):
@@ -50,7 +51,7 @@ def _dedupe_paths(paths: Iterable[Path]) -> List[Path]:
 
 
 def _candidate_db_paths(root: Path) -> List[Path]:
-    return [root / "zotero_readonly.sqlite", root / "zotero.sqlite"]
+    return [root / "zotero.sqlite"]
 
 
 def _default_root_candidates() -> List[Path]:
@@ -84,6 +85,7 @@ def _resolve_candidate(
     storage_override: Optional[Path],
     source_kind: str,
     tried: List[ZoteroPathAttempt],
+    is_live_candidate: bool,
 ) -> Optional[ZoteroSourceResolution]:
     db_candidate = db_candidate.expanduser()
     if not db_candidate.exists():
@@ -109,6 +111,7 @@ def _resolve_candidate(
         storage_path=storage_path,
         source_kind=source_kind,
         tried=list(tried),
+        is_live_candidate=is_live_candidate,
     )
 
 
@@ -135,6 +138,7 @@ def resolve_zotero_source(
             storage_override=storage_override,
             source_kind="explicit",
             tried=tried,
+            is_live_candidate=False,
         )
         if resolved is not None:
             return resolved
@@ -147,6 +151,7 @@ def resolve_zotero_source(
             storage_override=storage_override,
             source_kind="env",
             tried=tried,
+            is_live_candidate=False,
         )
         if resolved is not None:
             return resolved
@@ -159,6 +164,7 @@ def resolve_zotero_source(
                 storage_override=storage_override,
                 source_kind="default",
                 tried=tried,
+                is_live_candidate=True,
             )
             if resolved is not None:
                 return resolved
@@ -171,6 +177,7 @@ def resolve_zotero_source(
                 storage_override=storage_override,
                 source_kind="backup",
                 tried=tried,
+                is_live_candidate=False,
             )
             if resolved is not None:
                 return resolved

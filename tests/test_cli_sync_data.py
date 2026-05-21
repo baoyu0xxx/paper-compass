@@ -25,6 +25,9 @@ class TestSyncCliArgParsing:
                 assert "--rebuild" in output
                 assert "--dry-run" in output
                 assert "--backup-corrupted-db" in output
+                assert "--snapshot-db" in output
+                assert "--snapshot-dir" in output
+                assert "--allow-live-zotero-read" in output
 
     def test_rebuild_choices_and_defaults(self):
         parser = _make_parser()
@@ -45,6 +48,19 @@ class TestSyncCliArgParsing:
         assert args.skip_paper_index is True
         assert args.skip_wiki_ingest is True
         assert args.skip_wiki_index is True
+
+    def test_snapshot_flags(self):
+        parser = _make_parser()
+        args = parser.parse_args([
+            "--snapshot-db",
+            "always",
+            "--snapshot-dir",
+            "tmp/zsnap",
+            "--allow-live-zotero-read",
+        ])
+        assert args.snapshot_db == "always"
+        assert args.snapshot_dir == "tmp/zsnap"
+        assert args.allow_live_zotero_read is True
 
 
 class TestSyncExecute:
@@ -71,6 +87,9 @@ class TestSyncExecute:
         assert called_options.storage_path is None
         assert called_options.dry_run is True
         assert called_options.rebuild == "none"
+        assert called_options.snapshot_db == "auto"
+        assert called_options.snapshot_dir == "data/state/zotero-snapshots"
+        assert called_options.allow_live_zotero_read is False
         output = fake_out.getvalue()
         assert "sync status: dry_run" in output
         assert "planned stages: sync_zotero, index_papers" in output

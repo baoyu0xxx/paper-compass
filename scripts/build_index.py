@@ -415,7 +415,7 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         manifest["items"] = {key: current_items[key] for key in process_keys}
 
     save_manifest(manifest_path, manifest)
-    store.build_bm25(force=True)
+    bm25_result = store.build_bm25(force=True)
 
     print()
     print("── Paper Index Summary ──")
@@ -427,6 +427,13 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
     print(f"  Indexed papers:        {summary['indexed_papers']}")
     print(f"  Indexed chunks:        {summary['indexed_chunks']}")
     print(f"  Deleted chunks:        {summary['deleted_chunks']}")
+    bm25_available = getattr(bm25_result, "available", None)
+    if bm25_available is True:
+        print(f"  BM25:                  OK ({bm25_result.indexed_documents} documents)")
+    elif bm25_available is False:
+        print(f"  BM25:                  WARN ({bm25_result.reason}; semantic search still available)")
+    else:
+        print("  BM25:                  OK (status unavailable from store backend)")
     print(f"  Manifest:              {manifest_path}")
     print(f"  Collection:            {store.collection_name} ({store.count()} vectors)")
 
@@ -489,12 +496,19 @@ def index_wiki(args, embedder: Any | None = None, store: VectorStore | None = No
         progress_label="Indexed wiki sections",
     )
 
-    store.build_bm25(force=True)
+    bm25_result = store.build_bm25(force=True)
     print()
     print("── Wiki Index Summary ──")
     print(f"  Wiki sections indexed: {pages_indexed}")
     if excluded_count:
         print(f"  Excluded files:         {excluded_count} (log.md, index.md, non-knowledge dirs)")
+    bm25_available = getattr(bm25_result, "available", None)
+    if bm25_available is True:
+        print(f"  BM25:                  OK ({bm25_result.indexed_documents} documents)")
+    elif bm25_available is False:
+        print(f"  BM25:                  WARN ({bm25_result.reason}; semantic search still available)")
+    else:
+        print("  BM25:                  OK (status unavailable from store backend)")
     print(f"  Collection:            {store.collection_name} ({store.count()} vectors)")
     return {"indexed_sections": pages_indexed, "collection": store.collection_name}
 

@@ -2,8 +2,8 @@
 Zotero SQLite reader for paper-compass.
 
 Adapted from RAG-Assistant-for-Zotero backend/zotero_dbase.py.
-Reads zotero.sqlite (or zotero_readonly.sqlite) to extract metadata
-and resolve PDF attachment paths.
+Reads official/backup zotero.sqlite via SQLite read-only URI and resolves
+PDF attachment paths.
 
 Design:
   - Thread-safe read-only connection
@@ -23,7 +23,7 @@ class ZoteroLibrary:
     """Read-only access to a Zotero SQLite database.
 
     Args:
-        db_path: Path to zotero.sqlite or zotero_readonly.sqlite.
+        db_path: Path to zotero.sqlite. The connection is opened with mode=ro.
         storage_path: Override for Zotero storage directory.
                       Defaults to <db_parent>/storage.
     """
@@ -35,6 +35,8 @@ class ZoteroLibrary:
 
     def _get_connection(self) -> sqlite3.Connection:
         if not hasattr(self._local, "conn") or self._local.conn is None:
+            # Always open Zotero databases in SQLite read-only mode. Do not replace
+            # this with sqlite3.connect(path), which could create/write sidecar files.
             self._local.conn = sqlite3.connect(
                 f"file:{self.db_path}?mode=ro",
                 uri=True,

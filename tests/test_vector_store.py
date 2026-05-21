@@ -116,3 +116,27 @@ def test_hybrid_search_orders_by_combined_score(monkeypatch):
     results = store.hybrid_search("gamma", [0.1], k=2, bm25_weight=0.5)
 
     assert [r["id"] for r in results] == ["b", "a"]
+
+
+def test_build_bm25_reports_missing_dependency(monkeypatch):
+    import builtins
+
+    original_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "rank_bm25":
+            raise ImportError("No module named 'rank_bm25'")
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+    store = object.__new__(VectorStore)
+    store.collection = DummyCollection(ids=["a"], documents=["alpha beta"])
+    store._bm25_index = None
+    store._bm25_corpus = []
+    store._bm25_ids = []
+
+    result = store.build_bm25(force=True)
+
+    assert result.available is False
+    assert "rank_bm25" in result.reason

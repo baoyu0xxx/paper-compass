@@ -55,50 +55,75 @@ def test_env_path_used_when_no_explicit_db_path(tmp_path, monkeypatch):
     assert resolved.source_kind == "env"
 
 
-def test_default_root_preferred_over_backup_root(tmp_path):
-    default_root = _make_zotero_dir(tmp_path / "default", readonly=True, storage=True)
-    backup_root = _make_zotero_dir(tmp_path / "backup", readonly=True, storage=True)
+def test_default_root_uses_official_sqlite_over_backup_root(tmp_path):
+    default_root = _make_zotero_dir(tmp_path / "default", readonly=True, writable=True, storage=True)
+    backup_root = _make_zotero_dir(tmp_path / "backup", readonly=True, writable=True, storage=True)
 
     resolved = resolve_zotero_source(
         default_roots=[default_root],
         backup_roots=[backup_root],
     )
 
-    assert resolved.db_path == default_root / "zotero_readonly.sqlite"
+    assert resolved.db_path == default_root / "zotero.sqlite"
     assert resolved.source_kind == "default"
+    assert resolved.is_live_candidate is True
 
 
 def test_backup_root_used_when_default_root_missing(tmp_path):
     default_root = tmp_path / "default-missing"
-    backup_root = _make_zotero_dir(tmp_path / "backup", readonly=True, storage=True)
+    backup_root = _make_zotero_dir(tmp_path / "backup", readonly=True, writable=True, storage=True)
 
     resolved = resolve_zotero_source(
         default_roots=[default_root],
         backup_roots=[backup_root],
     )
 
-    assert resolved.db_path == backup_root / "zotero_readonly.sqlite"
+    assert resolved.db_path == backup_root / "zotero.sqlite"
     assert resolved.storage_path == backup_root / "storage"
     assert resolved.source_kind == "backup"
+    assert resolved.is_live_candidate is False
 
 
 def test_backup_root_env_used_when_present(tmp_path, monkeypatch):
-    backup_root = _make_zotero_dir(tmp_path / "env-backup", readonly=True, storage=True)
+    backup_root = _make_zotero_dir(tmp_path / "env-backup", readonly=True, writable=True, storage=True)
     monkeypatch.setenv("ZOTERO_BACKUP_ROOT", str(backup_root))
 
     resolved = resolve_zotero_source(default_roots=[])
 
-    assert resolved.db_path == backup_root / "zotero_readonly.sqlite"
+    assert resolved.db_path == backup_root / "zotero.sqlite"
     assert resolved.storage_path == backup_root / "storage"
     assert resolved.source_kind == "backup"
 
 
-def test_readonly_sqlite_preferred_over_writable_sqlite(tmp_path):
+def test_official_sqlite_preferred_over_legacy_readonly_sqlite(tmp_path):
     root = _make_zotero_dir(tmp_path / "zotero", readonly=True, writable=True, storage=True)
 
     resolved = resolve_zotero_source(default_roots=[root], backup_roots=[])
 
+    assert resolved.db_path == root / "zotero.sqlite"
+
+
+def test_legacy_readonly_sqlite_is_not_auto_discovered(tmp_path):
+    root = _make_zotero_dir(tmp_path / "zotero", readonly=True, writable=False, storage=True)
+
+    with pytest.raises(ZoteroSourceNotFoundError) as exc_info:
+        resolve_zotero_source(default_roots=[root], backup_roots=[])
+
+    assert any("zotero.sqlite" in attempt.path for attempt in exc_info.value.tried)
+    assert not any("zotero_readonly.sqlite" in attempt.path for attempt in exc_info.value.tried)
+
+
+def test_explicit_legacy_readonly_sqlite_still_supported(tmp_path):
+    root = _make_zotero_dir(tmp_path / "zotero", readonly=True, writable=False, storage=True)
+
+    resolved = resolve_zotero_source(
+        db_path=str(root / "zotero_readonly.sqlite"),
+        default_roots=[],
+        backup_roots=[],
+    )
+
     assert resolved.db_path == root / "zotero_readonly.sqlite"
+    assert resolved.source_kind == "explicit"
 
 
 def test_explicit_storage_path_overrides_default_storage(tmp_path):
@@ -153,25 +178,25 @@ def test_explicit_db_path_must_be_a_file(tmp_path):
 def test_invalid_env_db_path_falls_through_to_default_candidates(tmp_path, monkeypatch):
     invalid_env_db = tmp_path / "broken.sqlite"
     invalid_env_db.mkdir(parents=True, exist_ok=True)
-    good_default_root = _make_zotero_dir(tmp_path / "default", readonly=True, storage=True)
+    good_default_root = _make_zotero_dir(tmp_path / "default", readonly=True, writable=True, storage=True)
     monkeypatch.setenv("ZOTERO_SQLITE_PATH", str(invalid_env_db))
 
     resolved = resolve_zotero_source(default_roots=[good_default_root], backup_roots=[])
 
-    assert resolved.db_path == good_default_root / "zotero_readonly.sqlite"
+    assert resolved.db_path == good_default_root / "zotero.sqlite"
     assert any("not a file" in attempt.reason for attempt in resolved.tried)
 
 
 def test_incomplete_default_root_falls_back_to_backup_root(tmp_path):
     broken_default = _make_zotero_dir(tmp_path / "default", readonly=True, storage=False)
-    backup_root = _make_zotero_dir(tmp_path / "backup", readonly=True, storage=True)
+    backup_root = _make_zotero_dir(tmp_path / "backup", readonly=True, writable=True, storage=True)
 
     resolved = resolve_zotero_source(
         default_roots=[broken_default],
         backup_roots=[backup_root],
     )
 
-    assert resolved.db_path == backup_root / "zotero_readonly.sqlite"
+    assert resolved.db_path == backup_root / "zotero.sqlite"
     assert any("storage directory not found" in attempt.reason for attempt in resolved.tried)
 
 
@@ -183,7 +208,8 @@ def test_error_includes_tried_candidates_and_manual_override_hint(tmp_path):
 
     err = exc_info.value
     assert err.tried
-    assert any("zotero_readonly.sqlite" in attempt.path for attempt in err.tried)
+    assert any("zotero.sqlite" in attempt.path for attempt in err.tried)
+    assert not any("zotero_readonly.sqlite" in attempt.path for attempt in err.tried)
     message = str(err)
     assert "--db-path" in message
     assert "--storage-path" in message

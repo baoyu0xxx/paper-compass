@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
+from paper_compass.config import resolve_embedding_runtime
 from paper_compass.env_utils import PROJECT_ROOT, load_project_env
 
 
@@ -32,9 +33,6 @@ def _check_env() -> Status:
     for var in (
         "LLM_BASE_URL",
         "LLM_API_KEY",
-        "VOLC_EMBED_BASE_URL",
-        "VOLC_EMBED_API_KEY",
-        "VOLC_EMBED_MODEL",
     ):
         val = os.environ.get(var, "")
         if not val or val in ("your_key_here", "your_endpoint_id"):
@@ -42,7 +40,15 @@ def _check_env() -> Status:
         elif _is_unresolved_env_reference(val):
             unresolved_refs.append(f"{var} -> {val[1:]}")
 
-    for var in ("EMBED_BASE_URL", "EMBED_API_KEY"):
+    for var in (
+        "VOLC_EMBED_BASE_URL",
+        "VOLC_EMBED_API_KEY",
+        "VOLC_EMBED_MODEL",
+        "EMBED_BASE_URL",
+        "EMBED_API_KEY",
+        "EMBED_MODEL",
+        "LOCAL_EMBED_MODEL",
+    ):
         val = os.environ.get(var, "")
         if val and _is_unresolved_env_reference(val):
             unresolved_refs.append(f"{var} -> {val[1:]}")
@@ -100,13 +106,10 @@ def _check_wiki() -> Status:
     return ("wiki", f"OK ({len(papers)} papers, {len(topics)} topics)")
 
 
-def _check_deps() -> Status:
+def _check_core_deps() -> Status:
     deps = {
         "chromadb": "chromadb",
         "pymupdf": "fitz",
-        "pdfplumber": "pdfplumber",
-        "rank_bm25": "rank_bm25",
-        "sentence_transformers": "sentence_transformers",
         "pyyaml": "yaml",
     }
     missing = []
@@ -116,8 +119,48 @@ def _check_deps() -> Status:
         except ImportError:
             missing.append(pkg_name)
     if missing:
-        return ("deps", f"WARN: missing: {', '.join(missing)}")
-    return ("deps", "OK")
+        return ("core_deps", f"ERROR: missing imports: {', '.join(missing)}")
+    return ("core_deps", "OK")
+
+
+def _check_bm25_dep() -> Status:
+    try:
+        __import__("rank_bm25")
+        return ("bm25", "OK")
+    except ImportError:
+        return (
+            "bm25",
+            "WARN: rank_bm25 missing; hybrid/BM25 retrieval will degrade to semantic-only search",
+        )
+
+
+def _check_pdf_fallback_dep() -> Status:
+    try:
+        __import__("pdfplumber")
+        return ("pdf_fallback", "OK")
+    except ImportError:
+        return (
+            "pdf_fallback",
+            "WARN: pdfplumber missing; PyMuPDF remains available but PDF fallback extraction is disabled",
+        )
+
+
+def _check_local_embedding_dep() -> Status:
+    runtime = resolve_embedding_runtime()
+    if runtime.get("resolved_cloud_config"):
+        return (
+            "local_embed",
+            "SKIP: cloud embedding configured; sentence_transformers not required unless local fallback is used",
+        )
+
+    try:
+        __import__("sentence_transformers")
+        return ("local_embed", f"OK ({runtime.get('local_fallback_model', 'bge-base')})")
+    except ImportError:
+        return (
+            "local_embed",
+            "WARN: sentence_transformers missing; local embedding fallback is unavailable",
+        )
 
 
 def _check_mcp_contracts() -> Status:
@@ -143,23 +186,38 @@ def _smoke_embedding() -> Status:
     import os
 
     load_project_env()
+    runtime = resolve_embedding_runtime()
+    resolved = runtime.get("resolved_cloud_config")
 
-    base_url = os.environ.get("VOLC_EMBED_BASE_URL", "")
-    api_key = os.environ.get("VOLC_EMBED_API_KEY", "")
-    model = os.environ.get("VOLC_EMBED_MODEL", "")
-
-    if not all((base_url, api_key, model)):
-        return ("embed_smoke", "SKIP: VOLC_EMBED_* not configured")
+    if not resolved:
+        local_model = runtime.get("local_fallback_model", "bge-base")
+        return ("embed_smoke", f"SKIP: no cloud embedding configured (local fallback: {local_model})")
 
     import urllib.error
     import urllib.request
 
-    payload = json.dumps(
-        {
-            "model": model,
-            "input": [{"type": "text", "text": "healthcheck test"}],
-        }
-    ).encode("utf-8")
+    provider = resolved.get("provider", "openai")
+    base_url = resolved.get("base_url", "")
+    api_key = resolved.get("api_key", "")
+    model = resolved.get("model", "")
+
+    if not all((base_url, api_key, model)):
+        return ("embed_smoke", "ERROR: resolved embedding provider is missing base_url/api_key/model")
+
+    if provider == "volcengine":
+        payload = json.dumps(
+            {
+                "model": model,
+                "input": [{"type": "text", "text": "healthcheck test"}],
+            }
+        ).encode("utf-8")
+    else:
+        payload = json.dumps(
+            {
+                "model": model,
+                "input": ["healthcheck test"],
+            }
+        ).encode("utf-8")
 
     req = urllib.request.Request(
         base_url,
@@ -175,9 +233,12 @@ def _smoke_embedding() -> Status:
         emb = data.get("data", {})
         if isinstance(emb, dict):
             dim = len(emb.get("embedding", []))
+        elif isinstance(emb, list) and emb:
+            first = emb[0] if emb else {}
+            dim = len(first.get("embedding", [])) if isinstance(first, dict) else 0
         else:
-            dim = len(emb.get("embedding", emb)) if emb else 0
-        return ("embed_smoke", f"OK (dim={dim})")
+            dim = 0
+        return ("embed_smoke", f"OK ({provider}, dim={dim})")
     except urllib.error.HTTPError as e:
         return ("embed_smoke", f"ERROR: HTTP {e.code}")
     except Exception as e:
@@ -190,7 +251,10 @@ def main() -> int:
     args = parser.parse_args()
 
     checks: List[Status] = []
-    checks.append(_check_deps())
+    checks.append(_check_core_deps())
+    checks.append(_check_bm25_dep())
+    checks.append(_check_pdf_fallback_dep())
+    checks.append(_check_local_embedding_dep())
     checks.append(_check_env())
     checks.append(_check_library())
     checks.append(_check_vectordb())
@@ -207,6 +271,8 @@ def main() -> int:
             all_ok = False
         elif status.startswith("WARN"):
             icon = "⚠"
+        elif status.startswith("SKIP"):
+            icon = "↷"
         elif status == "OK" or status.startswith("OK "):
             icon = "✓"
         else:
@@ -215,9 +281,9 @@ def main() -> int:
 
     print()
     if all_ok:
-        print("✓ All checks passed (warnings are non-blocking)")
+        print("✓ All blocking checks passed (warnings are non-blocking)")
     else:
-        print("✗ Some errors detected — review above")
+        print("✗ Some blocking errors detected — review above")
 
     return 0 if all_ok else 1
 

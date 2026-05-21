@@ -18,8 +18,15 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
         description="Execute the paper-compass data sync pipeline with health checks and rebuild controls.",
     )
     parser.add_argument("--db-path", default="data/vectordb", help="Path to ChromaDB persistent directory")
-    parser.add_argument("--db-source-path", default="", help="Explicit path to zotero.sqlite or zotero_readonly.sqlite")
+    parser.add_argument(
+        "--db-source-path",
+        default="",
+        help="Explicit path to zotero.sqlite. Legacy zotero_readonly.sqlite is not auto-discovered.",
+    )
     parser.add_argument("--storage-path", default="", help="Explicit path to Zotero storage directory")
+    parser.add_argument("--snapshot-db", choices=["auto", "always", "never"], default="auto", help="Whether to snapshot the Zotero sqlite before reading")
+    parser.add_argument("--snapshot-dir", default="data/state/zotero-snapshots", help="Directory for temporary Zotero sqlite snapshots")
+    parser.add_argument("--allow-live-zotero-read", action="store_true", help="Allow direct reads from a live Zotero sqlite when snapshoting is disabled")
     parser.add_argument("--library", default="data/zotero-export/library.json", help="Path to library.json")
     parser.add_argument("--wiki-root", default="./wiki", help="Wiki root directory")
     parser.add_argument("--workers", type=int, default=10, help="Worker count for wiki generation")
@@ -41,6 +48,9 @@ def execute_sync(args: argparse.Namespace) -> int:
                 db_path=PROJECT_ROOT / args.db_path,
                 db_source_path=args.db_source_path or None,
                 storage_path=args.storage_path or None,
+                snapshot_db=args.snapshot_db,
+                snapshot_dir=args.snapshot_dir,
+                allow_live_zotero_read=args.allow_live_zotero_read,
                 library_path=args.library,
                 wiki_root=args.wiki_root,
                 workers=args.workers,

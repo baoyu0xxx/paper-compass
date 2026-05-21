@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from paper_compass.pdf_extract import PDFExtractor
 from paper_compass.zotero_paths import ZoteroSourceNotFoundError, resolve_zotero_source
+from paper_compass.zotero_snapshot import prepare_zotero_database_for_read
 from paper_compass.zotero_sqlite import ZoteroLibrary
 
 
@@ -28,7 +29,10 @@ def main():
     parser.add_argument(
         "--db-path",
         default=None,
-        help="Explicit path to zotero.sqlite or zotero_readonly.sqlite. Overrides auto-discovery.",
+        help=(
+            "Explicit path to zotero.sqlite. Legacy zotero_readonly.sqlite is accepted "
+            "only when explicitly supplied. Overrides auto-discovery."
+        ),
     )
     parser.add_argument(
         "--storage-path",
@@ -38,6 +42,22 @@ def main():
     parser.add_argument("--out-dir", default="./data/zotero-export")
     parser.add_argument("--extract-text", action="store_true", help="Extract and cache PDF full text")
     parser.add_argument("--text-dir", default="./data/texts")
+    parser.add_argument(
+        "--snapshot-db",
+        choices=["auto", "always", "never"],
+        default="auto",
+        help="Whether to snapshot the Zotero sqlite before reading (default: auto)",
+    )
+    parser.add_argument(
+        "--snapshot-dir",
+        default="data/state/zotero-snapshots",
+        help="Directory for temporary sqlite snapshots when reading live Zotero databases",
+    )
+    parser.add_argument(
+        "--allow-live-zotero-read",
+        action="store_true",
+        help="Allow direct reads from a live Zotero sqlite when snapshoting is disabled",
+    )
     args = parser.parse_args()
 
     try:
@@ -60,7 +80,17 @@ def main():
     print(f"Reading Zotero database: {source.db_path}")
     print(f"  Storage directory: {source.storage_path}")
     print(f"  Discovery source:  {source.source_kind}")
-    lib = ZoteroLibrary(str(source.db_path), storage_path=str(source.storage_path))
+    print("  Read mode:         SQLite read-only URI")
+    prepared = prepare_zotero_database_for_read(
+        source,
+        snapshot_policy=args.snapshot_db,
+        snapshot_dir=Path(args.snapshot_dir),
+        allow_live_zotero_read=args.allow_live_zotero_read,
+    )
+    print(f"  Read database:     {prepared.read_db_path}")
+    if prepared.used_snapshot:
+        print(f"  Snapshot source:   {prepared.original_db_path}")
+    lib = ZoteroLibrary(str(prepared.read_db_path), storage_path=str(source.storage_path))
     items = lib.get_all_items_with_pdfs()
     lib.close()
 
