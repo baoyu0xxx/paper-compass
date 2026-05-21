@@ -7,10 +7,12 @@ Two-pass architecture:
                       If non-empirical: wiki_overview.md only
                       Fallback: wiki_ingest.md (generic)
 
-Prompt files are resolved from WIKI_PROMPT env var:
+Prompt bundle resolution is explicit and observable:
   - default (or unset): prompts/wiki_overview.md + prompts/wiki_empirical.md
   - economics: prompts/disciplines/economics/
   - custom path: {path}/wiki_overview.md + {path}/wiki_empirical.md
+  - degraded mode: missing generation prompts still allow fallback wiki_ingest.md,
+    but the runtime reports the degraded state instead of silently drifting.
 
 Uses the wiki_generation provider from configs/providers.yaml.
 """
@@ -32,6 +34,72 @@ from paper_compass.resources import resolve_package_path
 logger = logging.getLogger(__name__)
 
 
+def _available_disciplines() -> list[str]:
+    """Discover installed discipline presets under prompts/disciplines/."""
+    disciplines_dir = resolve_package_path("prompts/disciplines")
+    if not disciplines_dir.exists() or not disciplines_dir.is_dir():
+        return []
+    result = []
+    try:
+        for d in sorted(disciplines_dir.iterdir()):
+            if d.is_dir() and (d / "wiki_overview.md").exists():
+                result.append(d.name)
+    except OSError:
+        pass
+    return result
+
+
+def describe_wiki_prompt_bundle(selection: str | None = None) -> dict[str, Any]:
+    """Resolve wiki prompt inputs into an explicit, inspectable bundle description."""
+    selected = selection
+    if selected is None:
+        selected = os.environ.get("WIKI_PROMPT", "default")
+    selected = (selected or "default").strip() or "default"
+
+    disciplines = _available_disciplines()
+    if selected == "default":
+        prompt_dir = "prompts"
+    elif selected in disciplines:
+        prompt_dir = f"prompts/disciplines/{selected}"
+    else:
+        prompt_dir = selected
+
+    router_loaded = resolve_package_path("prompts/wiki_router.md").exists()
+    overview_loaded = resolve_package_path(f"{prompt_dir}/wiki_overview.md").exists()
+    empirical_loaded = resolve_package_path(f"{prompt_dir}/wiki_empirical.md").exists()
+    fallback_loaded = resolve_package_path("prompts/wiki_ingest.md").exists()
+
+    mode = "normal"
+    reason = ""
+    if not overview_loaded and not empirical_loaded:
+        mode = "degraded"
+        reason = "missing generation prompts; falling back to wiki_ingest.md"
+    elif not overview_loaded:
+        mode = "degraded"
+        reason = "missing wiki_overview.md; some paper types will fall back to wiki_ingest.md"
+    elif not empirical_loaded:
+        mode = "degraded"
+        reason = "missing wiki_empirical.md; empirical papers will fall back to wiki_ingest.md"
+    elif not router_loaded:
+        mode = "degraded"
+        reason = "missing wiki_router.md; classification will default to empirical"
+    elif not fallback_loaded:
+        mode = "degraded"
+        reason = "missing wiki_ingest.md; fallback generation prompt unavailable"
+
+    return {
+        "selection": selected,
+        "prompt_dir": prompt_dir,
+        "mode": mode,
+        "fallback_enabled": fallback_loaded,
+        "router_loaded": router_loaded,
+        "overview_loaded": overview_loaded,
+        "empirical_loaded": empirical_loaded,
+        "fallback_loaded": fallback_loaded,
+        "reason": reason,
+    }
+
+
 class WikiGenerator:
     """Generate structured wiki pages from paper text using an LLM.
 
@@ -47,58 +115,31 @@ class WikiGenerator:
         self._configs = load_all_configs(config_dir)
         self._provider = get_provider_config("wiki_generation", self._configs)
 
-        # Resolve prompt directory from WIKI_PROMPT env var
-        prompt_dir = self._resolve_prompt_dir()
+        self._prompt_bundle = describe_wiki_prompt_bundle()
+        prompt_dir = self._prompt_bundle["prompt_dir"]
 
-        # Prompt files
         self._router_prompt = self._load("prompts/wiki_router.md")
         self._overview_prompt = self._load(f"{prompt_dir}/wiki_overview.md")
         self._empirical_prompt = self._load(f"{prompt_dir}/wiki_empirical.md")
         self._fallback_prompt = self._load("prompts/wiki_ingest.md")
 
-        # Warn if fallback prompts are being used (default prompts missing)
-        if not self._overview_prompt and not self._empirical_prompt:
+        if self._prompt_bundle["mode"] == "degraded":
             logger.warning(
-                "No prompts found at %s/ — falling back to wiki_ingest.md for all papers. "
-                "Run `paper-compass init` to configure wiki prompts, or set WIKI_PROMPT "
-                "to a valid prompt directory (default, economics, or a custom path).",
+                "Wiki prompt bundle degraded for selection %s (%s): %s",
+                self._prompt_bundle["selection"],
                 prompt_dir,
+                self._prompt_bundle["reason"],
             )
 
     # ── prompt resolution ─────────────────────────────────────────────────
 
     def _resolve_prompt_dir(self) -> str:
-        """Resolve the prompt directory from WIKI_PROMPT env var.
-
-        Returns a relative or absolute path to the directory containing
-        wiki_overview.md and wiki_empirical.md.
-        """
-        wiki_prompt = os.environ.get("WIKI_PROMPT", "default").strip()
-        if not wiki_prompt or wiki_prompt == "default":
-            return "prompts"
-        elif wiki_prompt in self._available_disciplines():
-            return f"prompts/disciplines/{wiki_prompt}"
-        else:
-            # Custom path — use as-is
-            return wiki_prompt
+        """Resolve the selected prompt directory from the explicit prompt bundle."""
+        return self._prompt_bundle["prompt_dir"]
 
     @staticmethod
     def _available_disciplines() -> list[str]:
-        """Discover installed discipline presets under prompts/disciplines/.
-
-        A valid discipline directory must contain wiki_overview.md.
-        """
-        disciplines_dir = resolve_package_path("prompts/disciplines")
-        if not disciplines_dir.exists() or not disciplines_dir.is_dir():
-            return []
-        result = []
-        try:
-            for d in sorted(disciplines_dir.iterdir()):
-                if d.is_dir() and (d / "wiki_overview.md").exists():
-                    result.append(d.name)
-        except OSError:
-            pass
-        return result
+        return _available_disciplines()
 
     # ── helpers ───────────────────────────────────────────────────────────
 

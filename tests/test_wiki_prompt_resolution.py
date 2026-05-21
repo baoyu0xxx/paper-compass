@@ -20,7 +20,7 @@ from paper_compass.cli.configure import (
 
 
 class TestResolvePromptDir:
-    """Test _resolve_prompt_dir() via WikiGenerator."""
+    """Test resolve_wiki_prompt_bundle() via WikiGenerator."""
 
     def test_default_when_unset(self, monkeypatch):
         """WIKI_PROMPT unset → 'prompts' directory."""
@@ -28,6 +28,7 @@ class TestResolvePromptDir:
         from paper_compass.wiki_gen import WikiGenerator
 
         gen = WikiGenerator()
+        assert gen._prompt_bundle["prompt_dir"] == "prompts"
         assert gen._resolve_prompt_dir() == "prompts"
 
     def test_default_when_default(self, monkeypatch):
@@ -36,6 +37,7 @@ class TestResolvePromptDir:
         from paper_compass.wiki_gen import WikiGenerator
 
         gen = WikiGenerator()
+        assert gen._prompt_bundle["selection"] == "default"
         assert gen._resolve_prompt_dir() == "prompts"
 
     def test_economics_discipline(self, monkeypatch):
@@ -44,6 +46,7 @@ class TestResolvePromptDir:
         from paper_compass.wiki_gen import WikiGenerator
 
         gen = WikiGenerator()
+        assert gen._prompt_bundle["selection"] == "economics"
         assert gen._resolve_prompt_dir() == "prompts/disciplines/economics"
 
     def test_custom_path(self, monkeypatch):
@@ -52,6 +55,7 @@ class TestResolvePromptDir:
         from paper_compass.wiki_gen import WikiGenerator
 
         gen = WikiGenerator()
+        assert gen._prompt_bundle["selection"] == "my/custom/prompts"
         assert gen._resolve_prompt_dir() == "my/custom/prompts"
 
     def test_absolute_custom_path(self, monkeypatch):
@@ -60,6 +64,7 @@ class TestResolvePromptDir:
         from paper_compass.wiki_gen import WikiGenerator
 
         gen = WikiGenerator()
+        assert gen._prompt_bundle["selection"] == "/absolute/path/to/prompts"
         assert gen._resolve_prompt_dir() == "/absolute/path/to/prompts"
 
     def test_unknown_discipline_treated_as_custom_path(self, monkeypatch):
@@ -68,7 +73,7 @@ class TestResolvePromptDir:
         from paper_compass.wiki_gen import WikiGenerator
 
         gen = WikiGenerator()
-        # Falls through to custom path
+        assert gen._prompt_bundle["selection"] == "physics"
         assert gen._resolve_prompt_dir() == "physics"
 
 
@@ -206,11 +211,25 @@ class TestWikiGeneratorWithPromptDirs:
         gen._overview_prompt = ""
         gen._empirical_prompt = ""
         gen._fallback_prompt = "fallback prompt body"
+        gen._prompt_bundle["overview_loaded"] = False
+        gen._prompt_bundle["empirical_loaded"] = False
+        gen._prompt_bundle["fallback_loaded"] = True
 
         prompt, max_tokens = gen._build_generation_prompt("empirical")
 
         assert prompt == "fallback prompt body"
         assert max_tokens == 2000
+
+    def test_prompt_bundle_marks_degraded_when_custom_prompt_dir_missing(self, monkeypatch):
+        monkeypatch.setenv("WIKI_PROMPT", "/tmp/missing-prompts")
+        from paper_compass.wiki_gen import WikiGenerator
+
+        gen = WikiGenerator()
+
+        assert gen._prompt_bundle["selection"] == "/tmp/missing-prompts"
+        assert gen._prompt_bundle["mode"] == "degraded"
+        assert gen._prompt_bundle["fallback_loaded"] is True
+        assert "missing generation prompts" in gen._prompt_bundle["reason"]
 
     def test_split_frontmatter_parses_yaml_lists(self):
         from paper_compass.wiki_gen import WikiGenerator

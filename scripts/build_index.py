@@ -24,7 +24,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from paper_compass.config import get_provider_config, load_all_configs
+from paper_compass.config import resolve_embedding_runtime
 from paper_compass.embedder import Embedder
 from paper_compass.env_utils import load_project_env
 from paper_compass.index_health import inspect_index_health
@@ -143,38 +143,29 @@ def _iter_wiki_sections(md_file: Path, wiki_root: Path) -> Iterable[Tuple[str, s
 
 
 def _init_embedder() -> Embedder:
-    """Initialize embedder from project config + env.
-
-    Tries providers in cascade: embedding_main → embedding_volcengine → local.
-    """
+    """Initialize embedder from the unified embedding runtime resolver."""
     load_project_env()
-    configs = load_all_configs("configs")
+    runtime = resolve_embedding_runtime()
 
     embedder = Embedder()
-    local_model_id = os.environ.get("LOCAL_EMBED_MODEL", "bge-base").strip() or "bge-base"
+    resolved_cloud = runtime.get("resolved_cloud_config")
+    local_model_id = runtime.get("local_fallback_model", "bge-base")
 
-    # Try configured providers in order
-    for provider_key in ["embedding_main", "embedding_volcengine"]:
-        try:
-            provider_cfg = get_provider_config(provider_key, configs)
-            base_url = provider_cfg.get("base_url", "")
-            api_key = provider_cfg.get("api_key", "")
-            if not base_url or not api_key:
-                continue
-            provider_name = provider_cfg.get("provider", "openai")
-            embedder.configure_cloud(
-                provider=provider_name,
-                base_url=base_url,
-                api_key=api_key,
-                model=provider_cfg.get("model", ""),
-                dimension=int(provider_cfg.get("dimension", 1536)),
-            )
-            print(f"  Embedding: cloud ({provider_name}, dim={embedder.dimension})")
-            return embedder
-        except Exception:
-            continue
+    if resolved_cloud:
+        provider_name = resolved_cloud.get("provider", "openai")
+        embedder.configure_cloud(
+            provider=provider_name,
+            base_url=resolved_cloud.get("base_url", ""),
+            api_key=resolved_cloud.get("api_key", ""),
+            model=resolved_cloud.get("model", ""),
+            dimension=int(resolved_cloud.get("dimension", 1536)),
+        )
+        print(
+            "  Embedding: cloud "
+            f"({runtime.get('resolved_provider')}, {provider_name}, dim={embedder.dimension})"
+        )
+        return embedder
 
-    # Fallback to local
     embedder.configure_local(local_model_id)
     print(f"  Embedding: local ({local_model_id}, dim={embedder.dimension})")
     return embedder

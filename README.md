@@ -323,11 +323,11 @@ paper-compass-mcp --help
 | `VOLC_EMBED_BASE_URL` | 否 | 火山引擎多模态嵌入端点（备选方案） |
 | `VOLC_EMBED_API_KEY` | 否 | 火山引擎 API 密钥 |
 | `VOLC_EMBED_MODEL` | 否 | 火山引擎嵌入模型端点 ID |
-| `LOCAL_EMBED_MODEL` | 否 | 云端嵌入均未配置时的本地回退模型：`bge-base`（默认）/ `specter` / `minilm` |
+| `LOCAL_EMBED_MODEL` | 否 | 本地 embedding fallback 模型：`bge-base`（默认）/ `specter` / `minilm` |
 | `WIKI_PROMPT` | 否 | Wiki 提示词风格：`default`（通用学术）、`economics`（经济学预设）、或自定义路径 |
 
 
-> \* EMBED 和 VOLC_EMBED 至少配置一组。
+> \* 若配置了云端 embedding provider，则需提供对应的 API 信息；若未配置云端 provider，系统会回退到 `LOCAL_EMBED_MODEL`（默认 `bge-base`）。
 
 #### $ENV_VAR 引用语法
 
@@ -350,10 +350,15 @@ paper-compass validate
 输出示例：
 
 ```
+  config: llm=openai | https://api.openai.com/v1 | gpt-4o
+  config: embedding_role=embedding | source=shared | selected=embedding_main | active=embedding_main
+  config: embedding_candidates=embedding_main -> embedding_volcengine -> local (bge-base)
   ✓ dotenv: OK
   ✓ llm: OK (model: gpt-4o, 1.2s, response: 15 chars)
-  ✓ embed: OK (model: text-embedding-3-small, dim=1536, 0.8s)
+  ✓ embed: OK (provider: embedding_main, model: text-embedding-3-small, dim=1536, 0.8s)
 ```
+
+`paper-compass validate` 现在会显式打印解析后的 embedding 运行时信息：共享 role、当前选中的 cloud provider、候选链路，以及在没有任何云端 provider 时将回退到的本地模型。这样 CLI 展示与 `build_index.py` 的真实运行时语义保持一致。
 
 ### Wiki 提示词选择
 
@@ -386,6 +391,8 @@ WIKI_PROMPT=/home/user/my-prompts  # 自定义提示词
 
 **自定义提示词：** 确保自定义目录下包含 `wiki_overview.md`，可选 `wiki_empirical.md`。分类器 `wiki_router.md` 对所有模式统一使用 `prompts/` 下的版本。
 
+如果某些 prompt 文件缺失，系统不会再默默漂移到隐式 fallback。当前运行时会把 prompt bundle 标记为 `degraded`，并在 `paper-compass status` 中显式展示缺失状态与 fallback 原因。
+
 </details>
 
 ### 嵌入提供方切换与级联回退
@@ -395,16 +402,16 @@ WIKI_PROMPT=/home/user/my-prompts  # 自定义提示词
 2. **回退** `embedding_volcengine`（火山引擎多模态，`VOLC_EMBED_*` 系列变量）— [火山引擎快速入门指南](https://www.volcengine.com/docs/82379/1399008?lang=zh)
 3. **最终回退** 本地模型（默认 `bge-base`，可通过 `LOCAL_EMBED_MODEL` 设为 `specter` 或 `minilm`）
 
-`paper-compass validate` 在没有任何云端嵌入 provider 时，会显式报告将使用本地 fallback；实际构建索引时，`build_index.py` 也会按同一顺序执行。
+`paper-compass validate` 在没有任何云端嵌入 provider 时，会显式报告将使用本地 fallback；实际构建索引时，`build_index.py` 也会按同一顺序执行。`paper-compass status` 也会展示相同的 embedding runtime 视图，包括 shared role、selected provider、active provider、候选链路与已解析的 provider registry，避免 CLI 展示与真实运行时漂移。
 
-配置对应环境变量即可自动启用各级回退。如需固定使用某一提供方，在 `configs/providers.yaml` 中修改：
+配置对应环境变量即可自动启用各级回退。如需固定使用某一提供方，可在 `configs/providers.yaml` 中把唯一的共享嵌入角色改到目标 provider，例如：
 
 ```yaml
 roles:
-  pdf_embedding: embedding_volcengine   # 固定使用火山引擎
-  wiki_embedding: embedding_volcengine
+  embedding: embedding_volcengine   # 论文与 wiki 共用同一个 embedding provider
 ```
 
+这里不再建议分别设置 `pdf_embedding` / `wiki_embedding`。论文索引与 wiki 索引必须处于同一 embedding 空间，因此配置层也只保留一个共享 embedding 入口。旧版若仍出现这两个键，也应保持一致，仅作为兼容读取使用。
 ### 高级配置
 
 `config.py` 会优先从当前工作目录 / 仓库根目录的 `configs/` 读取配置，并在安装包场景下回退到 `src/paper_compass/configs/` 中的打包资源。也因此，仓库里会同时看到两套同名 YAML（例如两个 `mcp.yaml`）：
@@ -439,6 +446,7 @@ paper-compass search ask --query "家族企业继承如何影响劳动力结构�
 
 # 查看当前解析后的配置 / 数据 / 向量库状态
 paper-compass status
+# → 包括 embedding role / active provider / cascade，以及 wiki prompt bundle 是否 degraded
 
 # 一键执行 Zotero / 向量库 / wiki 数据同步
 paper-compass sync --db-source-path /path/to/zotero_readonly.sqlite --storage-path /path/to/storage

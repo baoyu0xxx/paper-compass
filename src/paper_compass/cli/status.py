@@ -11,10 +11,11 @@ import os
 from pathlib import Path
 from typing import Any
 
-from paper_compass.config import get_provider_config, load_all_configs
+from paper_compass.config import get_provider_config, load_all_configs, resolve_embedding_runtime
 from paper_compass.env_utils import DEFAULT_ENV_PATH, PROJECT_ROOT, load_project_env
 from paper_compass.index_health import inspect_index_health
 from paper_compass.resources import project_root
+from paper_compass.wiki_gen import describe_wiki_prompt_bundle
 
 
 def _mask_secret(value: str) -> str:
@@ -78,12 +79,16 @@ def _list_vectordb_collections(db_path: Path) -> list[dict[str, Any]]:
 
 def _detect_embed_cascade(configs: dict[str, Any]) -> list[str]:
     cascade: list[str] = []
-    main_cfg = _safe_provider("embedding_main", configs)
-    volc_cfg = _safe_provider("embedding_volcengine", configs)
-    if main_cfg is not None:
-        cascade.append(f"embedding_main ({main_cfg.get('provider', 'openai')}:{main_cfg.get('model', '')})")
-    if volc_cfg is not None:
-        cascade.append(f"embedding_volcengine ({volc_cfg.get('provider', 'openai')}:{volc_cfg.get('model', '')})")
+    try:
+        ordered = get_embedding_provider_order(configs)
+    except ValueError as exc:
+        return [f"INVALID: {exc}"]
+
+    for provider_name in ordered:
+        cfg = _safe_provider(provider_name, configs)
+        if cfg is None:
+            continue
+        cascade.append(f"{provider_name} ({cfg.get('provider', 'openai')}:{cfg.get('model', '')})")
     cascade.append(f"local ({(os.environ.get('LOCAL_EMBED_MODEL', 'bge-base').strip() or 'bge-base')})")
     return cascade
 
@@ -97,8 +102,34 @@ def collect_status() -> dict[str, Any]:
     env_loaded = env_path.exists() and env_path.is_file()
 
     llm_cfg = _safe_provider("wiki_generation", configs) or {}
-    embed_main_cfg = _safe_provider("embedding_main", configs) or {}
-    embed_volc_cfg = _safe_provider("embedding_volcengine", configs) or {}
+
+    try:
+        embedding_runtime = resolve_embedding_runtime(configs)
+    except (ValueError, KeyError) as exc:
+        embedding_runtime = {
+            "role": "embedding",
+            "config_source": "invalid",
+            "selected_provider": "n.a.",
+            "resolved_provider": None,
+            "resolved_cloud_config": None,
+            "candidate_order": [],
+            "display_cascade": [f"INVALID ({exc})"],
+            "local_fallback_model": os.environ.get("LOCAL_EMBED_MODEL", "bge-base").strip() or "bge-base",
+            "legacy_fields": [],
+            "configured_candidates": [],
+            "error": str(exc),
+        }
+
+    masked_candidates = []
+    for entry in embedding_runtime.get("configured_candidates", []):
+        masked_candidates.append(
+            {
+                **entry,
+                "api_key": _mask_secret(entry.get("api_key", "")),
+            }
+        )
+
+    prompt_bundle = describe_wiki_prompt_bundle()
 
     library_path = PROJECT_ROOT / "data" / "zotero-export" / "library.json"
     wiki_root = PROJECT_ROOT / "wiki"
@@ -118,21 +149,16 @@ def collect_status() -> dict[str, Any]:
             "api_key": _mask_secret(llm_cfg.get("api_key", "")),
         },
         "embedding": {
-            "main": {
-                "provider": embed_main_cfg.get("provider", ""),
-                "base_url": embed_main_cfg.get("base_url", ""),
-                "model": embed_main_cfg.get("model", ""),
-                "api_key": _mask_secret(embed_main_cfg.get("api_key", "")),
-            },
-            "volcengine": {
-                "provider": embed_volc_cfg.get("provider", ""),
-                "base_url": embed_volc_cfg.get("base_url", ""),
-                "model": embed_volc_cfg.get("model", ""),
-                "api_key": _mask_secret(embed_volc_cfg.get("api_key", "")),
-            },
-            "local_fallback_model": os.environ.get("LOCAL_EMBED_MODEL", "bge-base").strip() or "bge-base",
-            "cascade_order": _detect_embed_cascade(configs),
+            "role": embedding_runtime.get("role", "embedding"),
+            "config_source": embedding_runtime.get("config_source", "unknown"),
+            "selected_provider": embedding_runtime.get("selected_provider", ""),
+            "resolved_provider": embedding_runtime.get("resolved_provider"),
+            "local_fallback_model": embedding_runtime.get("local_fallback_model", "bge-base"),
+            "display_cascade": embedding_runtime.get("display_cascade", []),
+            "legacy_fields": embedding_runtime.get("legacy_fields", []),
+            "configured_candidates": masked_candidates,
         },
+        "wiki_prompt": prompt_bundle,
         "library": {
             "path": str(library_path),
             "record_count": _read_library_count(library_path),
@@ -172,10 +198,29 @@ def _print_status_report(status: dict[str, Any]) -> None:
 
     embed = status["embedding"]
     print("  embedding")
-    print(f"    main: {embed['main']['provider'] or 'n.a.'} | {embed['main']['base_url'] or 'n.a.'} | {embed['main']['model'] or 'n.a.'} | {embed['main']['api_key']}")
-    print(f"    volcengine: {embed['volcengine']['provider'] or 'n.a.'} | {embed['volcengine']['base_url'] or 'n.a.'} | {embed['volcengine']['model'] or 'n.a.'} | {embed['volcengine']['api_key']}")
+    print(
+        f"    embedding role: {embed['role']} | source={embed['config_source']} | selected={embed['selected_provider'] or 'n.a.'} | active={embed['resolved_provider'] or 'local'}"
+    )
     print(f"    local fallback: {embed['local_fallback_model']}")
-    print(f"    cascade: {' -> '.join(embed['cascade_order'])}")
+    print(f"    cascade: {' -> '.join(embed['display_cascade'])}")
+    if embed["legacy_fields"]:
+        print(f"    legacy fields: {', '.join(embed['legacy_fields'])}")
+    for candidate in embed["configured_candidates"]:
+        print(
+            f"    - {candidate['name']}: {candidate['provider'] or 'n.a.'} | {candidate['base_url'] or 'n.a.'} | {candidate['model'] or 'n.a.'} | {candidate['api_key']}"
+        )
+    print()
+
+    prompt = status["wiki_prompt"]
+    print("  wiki prompt")
+    print(
+        f"    prompt bundle: {prompt['mode']} | selection={prompt['selection']} | dir={prompt['prompt_dir']}"
+    )
+    print(
+        f"    files: router={prompt['router_loaded']} overview={prompt['overview_loaded']} empirical={prompt['empirical_loaded']} fallback={prompt['fallback_loaded']}"
+    )
+    if prompt.get("reason"):
+        print(f"    note: {prompt['reason']}")
     print()
 
     library = status["library"]

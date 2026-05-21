@@ -45,5 +45,4 @@ roles:
   wiki_query: wiki_generation
   router_classify: wiki_generation
   paperqa_answer: paperqa_answer
-  pdf_embedding: embedding_main
-  wiki_embedding: embedding_main
+  embedding: embedding_main

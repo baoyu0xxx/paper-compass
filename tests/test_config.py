@@ -336,3 +336,135 @@ class TestResolveEnvValue:
         finally:
             monkeypatch.delenv("LLM_API_KEY", raising=False)
             monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+
+
+class TestEmbeddingProviderOrder:
+    def test_embedding_provider_order_prefers_single_shared_embedding_role(self):
+        from paper_compass.config import get_embedding_provider_order
+
+        configs = {
+            "providers": {
+                "providers": {
+                    "embedding_main": {},
+                    "embedding_volcengine": {},
+                },
+                "roles": {
+                    "embedding": "embedding_volcengine",
+                },
+            }
+        }
+
+        assert get_embedding_provider_order(configs) == ["embedding_volcengine", "embedding_main"]
+
+    def test_embedding_provider_order_supports_legacy_matching_roles(self):
+        from paper_compass.config import get_embedding_provider_order
+
+        configs = {
+            "providers": {
+                "providers": {
+                    "embedding_main": {},
+                    "embedding_volcengine": {},
+                },
+                "roles": {
+                    "pdf_embedding": "embedding_volcengine",
+                    "wiki_embedding": "embedding_volcengine",
+                },
+            }
+        }
+
+        assert get_embedding_provider_order(configs) == ["embedding_volcengine", "embedding_main"]
+
+    def test_embedding_provider_order_rejects_legacy_split_roles(self):
+        from paper_compass.config import get_embedding_provider_order
+
+        configs = {
+            "providers": {
+                "providers": {
+                    "embedding_main": {},
+                    "embedding_volcengine": {},
+                },
+                "roles": {
+                    "pdf_embedding": "embedding_main",
+                    "wiki_embedding": "embedding_volcengine",
+                },
+            }
+        }
+
+        with pytest.raises(ValueError, match="pdf_embedding and wiki_embedding"):
+            get_embedding_provider_order(configs)
+
+
+class TestResolveEmbeddingRuntime:
+    def test_resolve_embedding_runtime_prefers_first_configured_cloud_candidate(self, monkeypatch):
+        from paper_compass.config import resolve_embedding_runtime
+
+        monkeypatch.setenv("LOCAL_EMBED_MODEL", "bge-base")
+        configs = {
+            "providers": {
+                "providers": {
+                    "embedding_main": {
+                        "provider": "openai",
+                        "base_url": "https://api.openai.com/v1/embeddings",
+                        "api_key": "sk-main",
+                        "model": "text-embedding-3-small",
+                    },
+                    "embedding_volcengine": {
+                        "provider": "volcengine",
+                        "base_url": "https://ark.example.com",
+                        "api_key": "ark-test",
+                        "model": "ep-123",
+                    },
+                },
+                "roles": {
+                    "embedding": "embedding_volcengine",
+                },
+            }
+        }
+
+        runtime = resolve_embedding_runtime(configs)
+
+        assert runtime["role"] == "embedding"
+        assert runtime["config_source"] == "shared"
+        assert runtime["selected_provider"] == "embedding_volcengine"
+        assert runtime["resolved_provider"] == "embedding_volcengine"
+        assert runtime["candidate_order"] == ["embedding_volcengine", "embedding_main"]
+        assert runtime["display_cascade"] == [
+            "embedding_volcengine",
+            "embedding_main",
+            "local (bge-base)",
+        ]
+        assert runtime["configured_candidates"][0]["name"] == "embedding_volcengine"
+        assert runtime["configured_candidates"][0]["api_key_configured"] is True
+
+    def test_resolve_embedding_runtime_reports_local_only_when_no_cloud_provider_is_configured(self, monkeypatch):
+        from paper_compass.config import resolve_embedding_runtime
+
+        monkeypatch.setenv("LOCAL_EMBED_MODEL", "minilm")
+        configs = {
+            "providers": {
+                "providers": {
+                    "embedding_main": {
+                        "provider": "openai",
+                        "model": "text-embedding-3-small",
+                    },
+                    "embedding_volcengine": {
+                        "provider": "volcengine",
+                        "model": "ep-123",
+                    },
+                },
+                "roles": {
+                    "embedding": "embedding_main",
+                },
+            }
+        }
+
+        runtime = resolve_embedding_runtime(configs)
+
+        assert runtime["resolved_provider"] is None
+        assert runtime["resolved_cloud_config"] is None
+        assert runtime["local_fallback_model"] == "minilm"
+        assert runtime["display_cascade"] == [
+            "embedding_main",
+            "embedding_volcengine",
+            "local (minilm)",
+        ]

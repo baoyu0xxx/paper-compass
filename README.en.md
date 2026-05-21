@@ -298,6 +298,8 @@ The three main paths have already been introduced in Quick Start: Release instal
 ```bash
 paper-compass --help
 paper-compass init
+paper-compass search --help
+paper-compass status
 paper-compass validate
 paper-compass-healthcheck --help
 paper-compass-mcp --help
@@ -320,9 +322,10 @@ Copy `.env.example` to `.env` and fill in your values, or use `paper-compass ini
 | `VOLC_EMBED_BASE_URL` | No | Volcengine multimodal embedding endpoint (alternative) |
 | `VOLC_EMBED_API_KEY` | No | Volcengine API key |
 | `VOLC_EMBED_MODEL` | No | Volcengine embedding model endpoint ID |
+| `LOCAL_EMBED_MODEL` | No | Local embedding fallback model: `bge-base` (default), `specter`, or `minilm` |
 | `WIKI_PROMPT` | No | Wiki prompt style: `default` (general academic), `economics` (economics preset), or a custom path |
 
-> * At least one of EMBED or VOLC_EMBED must be configured.
+> * If you configure a cloud embedding provider, you must provide the corresponding API settings. If no cloud provider is configured, the system falls back to `LOCAL_EMBED_MODEL` (default: `bge-base`).
 
 #### $ENV_VAR Reference Syntax
 
@@ -345,10 +348,15 @@ paper-compass validate
 Example output:
 
 ```text
+  config: llm=openai | https://api.openai.com/v1 | gpt-4o
+  config: embedding_role=embedding | source=shared | selected=embedding_main | active=embedding_main
+  config: embedding_candidates=embedding_main -> embedding_volcengine -> local (bge-base)
   ✓ dotenv: OK
   ✓ llm: OK (model: gpt-4o, 1.2s, response: 15 chars)
-  ✓ embed: OK (model: text-embedding-3-small, dim=1536, 0.8s)
+  ✓ embed: OK (provider: embedding_main, model: text-embedding-3-small, dim=1536, 0.8s)
 ```
+
+`paper-compass validate` now prints the resolved embedding runtime explicitly: the shared role, the selected cloud provider, the candidate chain, and the local fallback that will be used when no cloud provider is configured. This keeps CLI output aligned with the actual runtime semantics used by `build_index.py`.
 
 ### Wiki Prompt Selection
 
@@ -381,6 +389,8 @@ WIKI_PROMPT=/home/user/my-prompts  # custom prompts
 
 **Custom prompts:** make sure your custom directory contains `wiki_overview.md`, and optionally `wiki_empirical.md`. The classifier `wiki_router.md` is shared across all modes from the main `prompts/` directory.
 
+If some prompt files are missing, the system no longer drifts into implicit fallback silently. The runtime now marks the prompt bundle as `degraded`, and `paper-compass status` reports both the missing state and the fallback reason explicitly.
+
 </details>
 
 ### Embedding Provider Switching and Cascade Fallback
@@ -390,13 +400,16 @@ The embedding layer supports **cascade fallback**:
 2. **Fallback** `embedding_volcengine` (Volcengine multimodal, `VOLC_EMBED_*`) — [Volcengine quick-start guide](https://www.volcengine.com/docs/82379/1399008?lang=zh)
 3. **Final fallback** local `bge-base` model (no API required)
 
-Set the corresponding environment variables to enable each layer automatically. If you want to force a specific provider, change it in `configs/providers.yaml`:
+Configure the relevant environment variables to enable the cascade automatically. `paper-compass validate` reports the local fallback path explicitly when no cloud embedding provider is configured, and `paper-compass status` shows the same embedding runtime view (shared role, selected provider, active provider, candidate chain, and resolved provider registry) so the CLI no longer drifts from the real runtime behavior.
+
+If you want to pin a cloud provider, point the single shared embedding role in `configs/providers.yaml` to that provider:
 
 ```yaml
 roles:
-  pdf_embedding: embedding_volcengine   # force Volcengine
-  wiki_embedding: embedding_volcengine
+  embedding: embedding_volcengine   # papers and wiki share the same embedding provider
 ```
+
+`pdf_embedding` and `wiki_embedding` are no longer the recommended config surface. Paper chunks and wiki chunks must remain in the same embedding space, so the config now exposes one shared embedding entry. If those legacy keys still appear in an older config, they should only be treated as compatibility fields and must remain identical.
 
 ### Advanced Configuration
 
@@ -417,6 +430,16 @@ After installation, the `paper-compass` command is available directly:
 # Interactive configuration of the LLM and embedding provider
 paper-compass init
 
+# Unified local retrieval entrypoint
+paper-compass search wiki --query "family-firm succession"
+paper-compass search library --query "succession"
+paper-compass search passages --query "labor structure" --search-mode hybrid
+paper-compass search ask --query "How does family-firm succession affect labor structure?"
+
+# Inspect resolved configuration / data / vectordb state
+paper-compass status
+# → includes embedding role / active provider / cascade, plus whether the wiki prompt bundle is degraded
+
 # One-command sync for Zotero / vector index / wiki data
 paper-compass sync --db-source-path /path/to/zotero_readonly.sqlite --storage-path /path/to/storage
 
@@ -431,6 +454,8 @@ For full usage details:
 
 ```bash
 paper-compass init --help
+paper-compass search --help
+paper-compass status --help
 paper-compass sync --help
 paper-compass update --help
 paper-compass validate --help

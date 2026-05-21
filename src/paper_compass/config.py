@@ -142,6 +142,115 @@ def get_provider_config(
     return provider
 
 
+def _resolve_embedding_role_selection(
+    configs: Dict[str, Any],
+) -> tuple[str, str, list[str], Dict[str, Any], Dict[str, Any]]:
+    providers_cfg = configs.get("providers", {})
+    providers = providers_cfg.get("providers", {})
+    roles = providers_cfg.get("roles", {})
+
+    shared_provider = roles.get("embedding")
+    pdf_provider = roles.get("pdf_embedding")
+    wiki_provider = roles.get("wiki_embedding")
+    legacy_fields = [
+        name for name, value in (("pdf_embedding", pdf_provider), ("wiki_embedding", wiki_provider)) if value
+    ]
+
+    if pdf_provider and wiki_provider and pdf_provider != wiki_provider:
+        raise ValueError(
+            "pdf_embedding and wiki_embedding must reference the same embedding provider; split embedding roles are not supported"
+        )
+
+    if shared_provider:
+        selected_provider = shared_provider
+        config_source = "shared"
+    else:
+        selected_provider = pdf_provider or wiki_provider or "embedding_main"
+        config_source = "legacy" if legacy_fields else "default"
+
+    for legacy_name, legacy_value in (("pdf_embedding", pdf_provider), ("wiki_embedding", wiki_provider)):
+        if shared_provider and legacy_value and legacy_value != selected_provider:
+            raise ValueError(
+                f"roles.embedding={selected_provider!r} conflicts with legacy roles.{legacy_name}={legacy_value!r}; use one shared embedding role"
+            )
+
+    return selected_provider, config_source, legacy_fields, providers, roles
+
+
+def get_embedding_provider_order(configs: Optional[Dict[str, Any]] = None) -> list[str]:
+    """Resolve embedding provider preference from one shared embedding role.
+
+    Preferred config shape:
+    - roles.embedding = <provider name>
+
+    Legacy compatibility:
+    - roles.pdf_embedding / roles.wiki_embedding may still exist temporarily
+    - if both legacy keys exist, they must match
+
+    Splitting paper/wiki embeddings is rejected because it would create
+    incompatible embedding spaces between indexed papers and wiki vectors.
+    """
+    if configs is None:
+        configs = load_all_configs()
+
+    selected_provider, _config_source, _legacy_fields, providers, _roles = _resolve_embedding_role_selection(configs)
+
+    ordered: list[str] = []
+    for provider_name in (selected_provider, "embedding_main", "embedding_volcengine"):
+        if provider_name in providers and provider_name not in ordered:
+            ordered.append(provider_name)
+
+    return ordered
+
+
+def resolve_embedding_runtime(configs: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Resolve the shared embedding runtime used by paper and wiki indexing/search.
+
+    Returns a normalized runtime description suitable for build/runtime logic,
+    CLI status/validate output, and compatibility checks.
+    """
+    import os
+
+    if configs is None:
+        configs = load_all_configs()
+
+    selected_provider, config_source, legacy_fields, _providers, _roles = _resolve_embedding_role_selection(configs)
+    candidate_order = get_embedding_provider_order(configs)
+    local_model = os.environ.get("LOCAL_EMBED_MODEL", "bge-base").strip() or "bge-base"
+
+    configured_candidates: list[Dict[str, Any]] = []
+    resolved_provider: str | None = None
+    resolved_cloud_config: Dict[str, Any] | None = None
+
+    for provider_name in candidate_order:
+        provider_cfg = get_provider_config(provider_name, configs)
+        candidate_info = {
+            "name": provider_name,
+            "provider": provider_cfg.get("provider", "openai"),
+            "base_url": provider_cfg.get("base_url", ""),
+            "model": provider_cfg.get("model", ""),
+            "api_key": provider_cfg.get("api_key", ""),
+            "api_key_configured": bool(provider_cfg.get("api_key", "")),
+        }
+        configured_candidates.append(candidate_info)
+        if resolved_provider is None and provider_cfg.get("base_url") and provider_cfg.get("api_key"):
+            resolved_provider = provider_name
+            resolved_cloud_config = provider_cfg
+
+    return {
+        "role": "embedding",
+        "config_source": config_source,
+        "selected_provider": selected_provider,
+        "resolved_provider": resolved_provider,
+        "resolved_cloud_config": resolved_cloud_config,
+        "candidate_order": candidate_order,
+        "display_cascade": [*candidate_order, f"local ({local_model})"],
+        "local_fallback_model": local_model,
+        "legacy_fields": legacy_fields,
+        "configured_candidates": configured_candidates,
+    }
+
+
 def _resolve_env_value(value: str) -> str:
     """Resolve a value that may be an $ENV_VAR reference."""
     import os

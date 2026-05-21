@@ -17,7 +17,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-from paper_compass.config import get_provider_config, load_all_configs
+from paper_compass.config import get_provider_config, load_all_configs, resolve_embedding_runtime
 from paper_compass.env_utils import (
     DEFAULT_ENV_PATH,
     PROJECT_ROOT,
@@ -117,43 +117,43 @@ def _test_llm() -> tuple[str, str]:
 
 
 def _test_embedding() -> tuple[str, str]:
-    """Test embedding API connectivity via the configured provider cascade."""
+    """Test embedding API connectivity via the unified embedding runtime."""
     try:
         configs = load_all_configs()
-        # Try main embedding first, fall back to volcengine
-        for pkey in ["embedding_main", "embedding_volcengine"]:
-            try:
-                provider = get_provider_config(pkey, configs)
-                if provider.get("base_url") and provider.get("api_key"):
-                    break
-            except KeyError:
-                continue
-        else:
-            local_model = os.environ.get("LOCAL_EMBED_MODEL", "bge-base").strip() or "bge-base"
-            try:
-                from paper_compass.embedder import Embedder
-
-                embedder = Embedder()
-                embedder.configure_local(local_model)
-                return (
-                    "embed",
-                    f"OK (local fallback configured: {local_model}, dim={embedder.dimension}; no cloud provider configured)",
-                )
-            except Exception as e:
-                return (
-                    "embed",
-                    f"WARN: no cloud provider configured; local fallback '{local_model}' unavailable: {e}",
-                )
+        runtime = resolve_embedding_runtime(configs)
     except FileNotFoundError as e:
         return ("embed", f"ERROR: config load failed: {e}")
+    except ValueError as e:
+        return ("embed", f"ERROR: {e}")
+    except KeyError as e:
+        return ("embed", f"ERROR: provider config failed: {e}")
+
+    provider = runtime.get("resolved_cloud_config")
+    if provider is None:
+        local_model = runtime.get("local_fallback_model", "bge-base")
+        try:
+            from paper_compass.embedder import Embedder
+
+            embedder = Embedder()
+            embedder.configure_local(local_model)
+            return (
+                "embed",
+                f"OK (local fallback configured: {local_model}, dim={embedder.dimension}; no cloud provider configured)",
+            )
+        except Exception as e:
+            return (
+                "embed",
+                f"WARN: no cloud provider configured; local fallback '{local_model}' unavailable: {e}",
+            )
 
     base_url = provider.get("base_url", "").rstrip("/")
     api_key = provider.get("api_key", "")
     model = provider.get("model", "unknown")
+    provider_label = runtime.get("resolved_provider", "unknown")
     is_volc = provider.get("provider") == "volcengine"
 
     if not base_url or not api_key:
-        return ("embed", "SKIP: base_url or api_key not configured")
+        return ("embed", f"SKIP: resolved provider {provider_label} missing base_url or api_key")
 
     if is_volc:
         payload = json.dumps({
@@ -190,7 +190,7 @@ def _test_embedding() -> tuple[str, str]:
             dim = len(emb) if emb else 0
         else:
             dim = 0
-        status = f"OK (model: {model}, dim={dim}, {elapsed:.1f}s)"
+        status = f"OK (provider: {provider_label}, model: {model}, dim={dim}, {elapsed:.1f}s)"
         return ("embed", status)
     except urllib.error.HTTPError as e:
         return ("embed", f"ERROR: HTTP {e.code} - {e.reason}")
@@ -228,21 +228,32 @@ def execute_validate(args: argparse.Namespace) -> int:
     configs = load_all_configs()
 
     try:
+        embedding_runtime = resolve_embedding_runtime(configs)
+    except (ValueError, KeyError) as exc:
+        embedding_runtime = {
+            "role": "embedding",
+            "config_source": "invalid",
+            "selected_provider": "n.a.",
+            "resolved_provider": None,
+            "resolved_cloud_config": None,
+            "candidate_order": [],
+            "display_cascade": [f"INVALID ({exc})"],
+            "local_fallback_model": os.environ.get("LOCAL_EMBED_MODEL", "bge-base").strip() or "bge-base",
+            "legacy_fields": [],
+            "configured_candidates": [],
+            "error": str(exc),
+        }
+
+    try:
         llm_provider = get_provider_config("wiki_generation", configs)
     except Exception:
         llm_provider = {}
 
-    try:
-        embed_main_provider = get_provider_config("embedding_main", configs)
-    except Exception:
-        embed_main_provider = {}
-
-    try:
-        embed_volc_provider = get_provider_config("embedding_volcengine", configs)
-    except Exception:
-        embed_volc_provider = {}
-
-    local_fallback = os.environ.get("LOCAL_EMBED_MODEL", "bge-base").strip() or "bge-base"
+    embedding_registry = embedding_runtime.get("configured_candidates", [])
+    embedding_role = embedding_runtime.get("role", "embedding")
+    config_source = embedding_runtime.get("config_source", "unknown")
+    selected_provider = embedding_runtime.get("selected_provider", "n.a.")
+    resolved_provider = embedding_runtime.get("resolved_provider") or "local"
 
     print(f"  config: project_root={PROJECT_ROOT}")
     print(f"  config: env_path={Path(env_path)}")
@@ -250,14 +261,19 @@ def execute_validate(args: argparse.Namespace) -> int:
         f"  config: llm={llm_provider.get('provider', 'n.a.')} | {llm_provider.get('base_url', 'n.a.')} | {llm_provider.get('model', 'n.a.') or 'n.a.'}"
     )
     print(
-        f"  config: embed_main={embed_main_provider.get('provider', 'n.a.')} | {embed_main_provider.get('base_url', 'n.a.')} | {embed_main_provider.get('model', 'n.a.') or 'n.a.'}"
+        f"  config: embedding_role={embedding_role} | source={config_source} | selected={selected_provider} | active={resolved_provider}"
     )
     print(
-        f"  config: embed_volcengine={embed_volc_provider.get('provider', 'n.a.')} | {embed_volc_provider.get('base_url', 'n.a.')} | {embed_volc_provider.get('model', 'n.a.') or 'n.a.'}"
+        f"  config: embedding_candidates={' -> '.join(embedding_runtime.get('display_cascade', []))}"
     )
-    print(
-        f"  config: embed_cascade=embedding_main -> embedding_volcengine -> local ({local_fallback})"
-    )
+    if embedding_registry:
+        registry_line = " ; ".join(
+            f"{entry.get('name', 'unknown')}[{entry.get('provider', 'n.a.')}|{entry.get('base_url', 'n.a.') or 'n.a.'}|{entry.get('model', 'n.a.') or 'n.a.'}]"
+            for entry in embedding_registry
+        )
+        print(f"  config: embedding_registry={registry_line}")
+    else:
+        print("  config: embedding_registry=n.a.")
     print()
 
     checks = [

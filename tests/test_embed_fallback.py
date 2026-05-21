@@ -23,24 +23,19 @@ def test_init_embedder_uses_provider_dimension(monkeypatch, build_index_module):
     monkeypatch.setattr(build_index_module, "load_project_env", lambda *args, **kwargs: True)
     monkeypatch.setattr(
         build_index_module,
-        "load_all_configs",
-        lambda *_args, **_kwargs: {"providers": {}},
+        "resolve_embedding_runtime",
+        lambda *_args, **_kwargs: {
+            "resolved_provider": "embedding_main",
+            "resolved_cloud_config": {
+                "provider": "openai",
+                "base_url": "https://embed.example.com/v1/embeddings",
+                "api_key": "sk-test",
+                "model": "custom-embed",
+                "dimension": 3072,
+            },
+            "local_fallback_model": "bge-base",
+        },
     )
-
-    provider_cfg = {
-        "provider": "openai",
-        "base_url": "https://embed.example.com/v1/embeddings",
-        "api_key": "sk-test",
-        "model": "custom-embed",
-        "dimension": 3072,
-    }
-
-    def fake_get_provider_config(name, _configs):
-        if name == "embedding_main":
-            return provider_cfg
-        raise KeyError(name)
-
-    monkeypatch.setattr(build_index_module, "get_provider_config", fake_get_provider_config)
 
     embedder = build_index_module._init_embedder()
 
@@ -52,13 +47,12 @@ def test_init_embedder_uses_local_model_env_on_fallback(monkeypatch, build_index
     monkeypatch.setattr(build_index_module, "load_project_env", lambda *args, **kwargs: True)
     monkeypatch.setattr(
         build_index_module,
-        "load_all_configs",
-        lambda *_args, **_kwargs: {"providers": {}},
-    )
-    monkeypatch.setattr(
-        build_index_module,
-        "get_provider_config",
-        lambda *_args, **_kwargs: (_ for _ in ()).throw(KeyError("missing")),
+        "resolve_embedding_runtime",
+        lambda *_args, **_kwargs: {
+            "resolved_provider": None,
+            "resolved_cloud_config": None,
+            "local_fallback_model": "minilm",
+        },
     )
     monkeypatch.setenv("LOCAL_EMBED_MODEL", "minilm")
 
@@ -71,11 +65,15 @@ def test_init_embedder_uses_local_model_env_on_fallback(monkeypatch, build_index
 def test_validate_reports_local_fallback_without_cloud_provider(monkeypatch):
     from paper_compass.cli import validate as validate_mod
 
-    monkeypatch.setattr(validate_mod, "load_all_configs", lambda *_args, **_kwargs: {"providers": {}})
+    monkeypatch.setattr(validate_mod, "load_all_configs", lambda *_args, **_kwargs: {})
     monkeypatch.setattr(
         validate_mod,
-        "get_provider_config",
-        lambda *_args, **_kwargs: (_ for _ in ()).throw(KeyError("missing")),
+        "resolve_embedding_runtime",
+        lambda *_args, **_kwargs: {
+            "resolved_provider": None,
+            "resolved_cloud_config": None,
+            "local_fallback_model": "bge-base",
+        },
     )
     monkeypatch.delenv("LOCAL_EMBED_MODEL", raising=False)
 

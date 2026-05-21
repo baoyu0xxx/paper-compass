@@ -21,24 +21,46 @@ def fake_status_payload():
             "api_key": "sk-...abcd (20 chars)",
         },
         "embedding": {
-            "main": {
-                "provider": "openai",
-                "base_url": "https://api.openai.com/v1",
-                "model": "text-embedding-3-small",
-                "api_key": "sk-...wxyz (24 chars)",
-            },
-            "volcengine": {
-                "provider": "volcengine",
-                "base_url": "https://ark.example.com",
-                "model": "ep-123",
-                "api_key": "ark-...efgh (18 chars)",
-            },
+            "role": "embedding",
+            "config_source": "shared",
+            "selected_provider": "embedding_volcengine",
+            "resolved_provider": "embedding_volcengine",
             "local_fallback_model": "bge-base",
-            "cascade_order": [
-                "embedding_main (openai:text-embedding-3-small)",
-                "embedding_volcengine (volcengine:ep-123)",
+            "display_cascade": [
+                "embedding_volcengine",
+                "embedding_main",
                 "local (bge-base)",
             ],
+            "legacy_fields": [],
+            "configured_candidates": [
+                {
+                    "name": "embedding_volcengine",
+                    "provider": "volcengine",
+                    "base_url": "https://ark.example.com",
+                    "model": "ep-123",
+                    "api_key": "ark-...efgh (18 chars)",
+                    "api_key_configured": True,
+                },
+                {
+                    "name": "embedding_main",
+                    "provider": "openai",
+                    "base_url": "https://api.openai.com/v1",
+                    "model": "text-embedding-3-small",
+                    "api_key": "sk-...wxyz (24 chars)",
+                    "api_key_configured": True,
+                },
+            ],
+        },
+        "wiki_prompt": {
+            "selection": "default",
+            "prompt_dir": "prompts",
+            "mode": "normal",
+            "fallback_enabled": True,
+            "router_loaded": True,
+            "overview_loaded": True,
+            "empirical_loaded": True,
+            "fallback_loaded": True,
+            "reason": "",
         },
         "library": {
             "path": "/repo/data/zotero-export/library.json",
@@ -89,4 +111,6 @@ def test_status_cli_text(monkeypatch, capsys, fake_status_payload):
     assert "project root: /repo" in out
     assert "records: 12" in out
     assert "health: ok" in out
+    assert "embedding role: embedding | source=shared | selected=embedding_volcengine | active=embedding_volcengine" in out
+    assert "prompt bundle: normal | selection=default | dir=prompts" in out
     assert "papers_openai_text-embedding-3-small" in out
