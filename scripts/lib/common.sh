@@ -28,12 +28,43 @@ pc_require_cmd() {
   command -v "$cmd" >/dev/null 2>&1 || pc_die "required command not found: $cmd"
 }
 
+pc_can_run_python() {
+  local candidate="$1"
+  [[ -n "$candidate" ]] || return 1
+
+  if [[ "$candidate" == */* || "$candidate" == *\\* ]]; then
+    [[ -x "$candidate" ]] || return 1
+  else
+    command -v "$candidate" >/dev/null 2>&1 || return 1
+  fi
+
+  "$candidate" -c 'import sys' >/dev/null 2>&1
+}
+
 pc_default_python() {
   if [[ -n "${PAPER_COMPASS_PYTHON:-}" ]]; then
+    pc_can_run_python "${PAPER_COMPASS_PYTHON}" || pc_die "configured PAPER_COMPASS_PYTHON is not runnable: ${PAPER_COMPASS_PYTHON}"
     printf '%s\n' "${PAPER_COMPASS_PYTHON}"
     return
   fi
-  printf '%s\n' "python3"
+
+  local repo_root
+  repo_root="$(pc_repo_root)"
+
+  local candidate
+  for candidate in \
+    "${repo_root}/.venv/bin/python" \
+    "${repo_root}/.venv/Scripts/python.exe" \
+    python \
+    python3
+  do
+    if pc_can_run_python "$candidate"; then
+      printf '%s\n' "$candidate"
+      return
+    fi
+  done
+
+  pc_die "no runnable Python interpreter found (tried ${repo_root}/.venv/bin/python, python, python3)"
 }
 
 pc_default_library_path() {

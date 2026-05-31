@@ -277,7 +277,10 @@ def get_vector_collection_info(
 
     for candidate in matching:
         metadata = candidate.metadata or {}
-        sample = candidate.get(limit=1, include=["embeddings"])
+        try:
+            sample = candidate.get(limit=1, include=["embeddings"])
+        except Exception:
+            sample = None
         embeddings = sample.get("embeddings") if sample is not None else None
         first_embedding = None
         if embeddings is not None and len(embeddings) > 0:
@@ -294,12 +297,49 @@ def get_vector_collection_info(
         chosen = matching[0]
         metadata = chosen.metadata or {}
         model_id = str(metadata.get("embedding_model", "") or "")
+        dimension = _infer_dimension_for_model(model_id, fallback=dimension)
 
     return {
         "name": chosen.name,
         "model_id": model_id,
         "dimension": dimension,
     }
+
+
+def _infer_dimension_for_model(model_id: str, fallback: int = 2048) -> int:
+    """Best-effort dimension inference when Chroma cannot return sample embeddings."""
+    from paper_compass.embedder import Embedder
+
+    if not model_id:
+        return fallback
+
+    embedder = Embedder()
+    try:
+        return int(embedder.configure_local(model_id))
+    except KeyError:
+        pass
+
+    provider_name, sep, model_name = model_id.partition(":")
+    if not sep or not provider_name or not model_name:
+        return fallback
+
+    load_project_env()
+    configs = load_all_configs()
+    for provider_key in ["embedding_main", "embedding_volcengine"]:
+        try:
+            cfg = get_provider_config(provider_key, configs)
+        except KeyError:
+            continue
+        if cfg.get("provider", "openai") != provider_name:
+            continue
+        if cfg.get("model", "") != model_name:
+            continue
+        try:
+            return int(cfg.get("dimension", fallback))
+        except (TypeError, ValueError):
+            return fallback
+
+    return fallback
 
 
 def _configure_embedder_for_collection(model_id: str, dimension: int):
