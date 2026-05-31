@@ -10,6 +10,7 @@ from typing import List, Tuple
 
 from paper_compass.config import resolve_embedding_runtime
 from paper_compass.env_utils import PROJECT_ROOT, load_project_env
+from paper_compass.index_health import inspect_index_health
 
 
 Status = Tuple[str, str]
@@ -79,14 +80,12 @@ def _check_vectordb() -> Status:
     if not db_path.exists():
         return ("vectordb", "WARN: not found (run build_index first)")
     try:
-        import chromadb
-        from chromadb.config import Settings
-
-        client = chromadb.PersistentClient(
-            path=str(db_path), settings=Settings(anonymized_telemetry=False)
-        )
-        cols = client.list_collections()
-        names = [c.name for c in cols]
+        report = inspect_index_health(db_path)
+        if report.severity == "corrupted":
+            return ("vectordb", f"ERROR: {report.summary}")
+        if report.severity == "warning":
+            return ("vectordb", f"WARN: {report.summary}")
+        names = list(report.collection_counts.keys())
         if not names:
             return ("vectordb", "WARN: no collections found")
         return ("vectordb", f"OK ({len(names)} collections: {', '.join(names)})")

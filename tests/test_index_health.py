@@ -100,3 +100,38 @@ def test_inspect_index_health_marks_invalid_manifest_as_corrupted(tmp_path, monk
     assert report.ok is False
     assert report.severity == "corrupted"
     assert "manifest" in report.summary.lower()
+
+
+def test_inspect_index_health_warns_on_paper_manifest_store_mismatch(tmp_path, monkeypatch):
+    from paper_compass import index_health
+
+    db_path = tmp_path / "vectordb"
+    db_path.mkdir()
+    (db_path / "papers_fake.manifest.json").write_text(
+        '{"items": {"A1": {}, "B2": {}}}', encoding="utf-8"
+    )
+
+    class DummyCollection:
+        name = "papers_fake"
+
+        def count(self) -> int:
+            return 1
+
+        def get(self, limit=None, include=None):
+            return {"metadatas": [{"item_key": "A1"}]}
+
+    class DummyClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def list_collections(self):
+            return [DummyCollection()]
+
+    monkeypatch.setattr(index_health, "_create_persistent_client", DummyClient)
+
+    report = index_health.inspect_index_health(db_path)
+
+    assert report.ok is False
+    assert report.severity == "warning"
+    assert report.manifest_only_keys == {"papers_fake": ["B2"]}
+    assert "manifest/store mismatch" in report.summary

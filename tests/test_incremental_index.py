@@ -8,6 +8,17 @@ from helpers import FakeEmbedder, FakeStore, load_build_index
 from paper_compass.index_manifest import compute_text_sha1, diff_manifest
 
 
+def test_load_manifest_missing_path_returns_independent_items_dicts(tmp_path):
+    from paper_compass.index_manifest import load_manifest
+
+    first = load_manifest(str(tmp_path / "missing-a.json"))
+    second = load_manifest(str(tmp_path / "missing-b.json"))
+
+    first["items"]["A"] = {"text_sha1": "a"}
+
+    assert second["items"] == {}
+
+
 def make_paper(tmp_path: Path, key: str, text: str):
     pdf_path = tmp_path / f"{key}.pdf"
     pdf_path.write_text("pdf placeholder", encoding="utf-8")
@@ -136,6 +147,63 @@ def test_incremental_prune_deleted_removes_chunks(tmp_path):
         payload["metadata"].get("item_key") == "B2"
         for payload in store.docs.values()
     )
+
+
+def test_incremental_repairs_manifest_entry_missing_from_store(tmp_path):
+    module = load_build_index()
+    item_a = make_paper(tmp_path, "A1", "a" * 2200)
+    item_b = make_paper(tmp_path, "B2", "b" * 2200)
+    library_path = write_library(tmp_path, [item_a, item_b])
+    args = make_args(tmp_path, library_path)
+    store = FakeStore()
+    embedder = FakeEmbedder()
+
+    module.index_papers(args, embedder=embedder, store=store)
+    deleted = store.delete_item("B2")
+    assert deleted > 0
+
+    summary = module.index_papers(args, embedder=embedder, store=store)
+
+    assert summary["indexed_papers"] == 1
+    assert summary["missing_vectors"] == 1
+    assert summary["unchanged"] == 1
+    assert store.get_chunk_ids_for_item("B2")
+
+
+def test_incremental_refuses_large_changed_set_without_override(tmp_path):
+    module = load_build_index()
+    items = [make_paper(tmp_path, f"P{i}", chr(97 + i) * 2200) for i in range(4)]
+    library_path = write_library(tmp_path, items)
+    args = make_args(tmp_path, library_path)
+    store = FakeStore()
+    embedder = FakeEmbedder()
+
+    module.index_papers(args, embedder=embedder, store=store)
+    for item in items:
+        Path(item["text_file"]).write_text("changed " * 400, encoding="utf-8")
+
+    with pytest.raises(SystemExit) as exc:
+        module.index_papers(args, embedder=embedder, store=store)
+
+    assert exc.value.code == 3
+
+
+def test_incremental_large_changed_set_can_be_explicitly_allowed(tmp_path):
+    module = load_build_index()
+    items = [make_paper(tmp_path, f"P{i}", chr(97 + i) * 2200) for i in range(4)]
+    library_path = write_library(tmp_path, items)
+    args = make_args(tmp_path, library_path, allow_large_incremental=True)
+    store = FakeStore()
+    embedder = FakeEmbedder()
+
+    module.index_papers(args, embedder=embedder, store=store)
+    for item in items:
+        Path(item["text_file"]).write_text("changed " * 400, encoding="utf-8")
+
+    summary = module.index_papers(args, embedder=embedder, store=store)
+
+    assert summary["changed"] == 4
+    assert summary["indexed_papers"] == 4
 
 
 def test_wiki_reindex_is_idempotent(tmp_path):

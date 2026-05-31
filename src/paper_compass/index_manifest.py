@@ -24,13 +24,23 @@ def utc_now_iso() -> str:
 def load_manifest(path: str) -> Dict[str, Any]:
     manifest_path = Path(path)
     if not manifest_path.exists():
-        return dict(EMPTY_MANIFEST)
+        return {
+            "collection_name": "",
+            "embedding_model_id": "",
+            "chunking_version": "",
+            "items": {},
+        }
 
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError(f"Manifest must be a JSON object: {manifest_path}")
 
-    merged = dict(EMPTY_MANIFEST)
+    merged = {
+        "collection_name": "",
+        "embedding_model_id": "",
+        "chunking_version": "",
+        "items": {},
+    }
     merged.update(data)
     if not isinstance(merged.get("items"), dict):
         raise ValueError(f"Manifest 'items' must be an object: {manifest_path}")
@@ -102,4 +112,39 @@ def diff_manifest(current_items: Dict[str, Dict[str, Any]], manifest_items: Dict
         "changed": changed_keys,
         "unchanged": unchanged_keys,
         "deleted": deleted_keys,
+    }
+
+
+def split_manifest_vs_store(
+    current_items: Dict[str, Dict[str, Any]],
+    manifest_items: Dict[str, Dict[str, Any]],
+    store_item_keys: Iterable[str],
+) -> Dict[str, list[str]]:
+    """Compare current library, manifest, and actual vector-store keys.
+
+    Returns a normalized diff for incremental repair:
+    - new: in current library but not in manifest
+    - changed: in both current and manifest, but fingerprint differs
+    - unchanged: in current and manifest, fingerprints equal, and present in store
+    - deleted: in manifest but not current library
+    - missing_in_store: in current+manifest but absent from store
+    - orphan_in_store: in store but absent from current library
+    """
+
+    manifest_diff = diff_manifest(current_items, manifest_items)
+    store_keys = {str(key) for key in store_item_keys if key}
+    current_keys = set(current_items.keys())
+    manifest_keys = set(manifest_items.keys())
+
+    missing_in_store = sorted((current_keys & manifest_keys) - store_keys)
+    orphan_in_store = sorted(store_keys - current_keys)
+    unchanged = sorted(set(manifest_diff["unchanged"]) - set(missing_in_store))
+
+    return {
+        "new": manifest_diff["new"],
+        "changed": manifest_diff["changed"],
+        "unchanged": unchanged,
+        "deleted": manifest_diff["deleted"],
+        "missing_in_store": missing_in_store,
+        "orphan_in_store": orphan_in_store,
     }

@@ -109,11 +109,15 @@ def _backup_vectordb(db_path: Path) -> Path | None:
     return backup_path
 
 
+def _script_path(project_root: Path, script_name: str) -> str:
+    return (project_root / "scripts" / script_name).as_posix()
+
+
 def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
     project_root = options.project_root
     python = sys.executable
     if stage == "sync_zotero":
-        cmd = [python, str(project_root / "scripts" / "sync_zotero.py")]
+        cmd = [python, _script_path(project_root, "sync_zotero.py")]
         if options.db_source_path:
             cmd += ["--db-path", options.db_source_path]
         if options.storage_path:
@@ -135,7 +139,7 @@ def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
     if stage == "index_papers":
         cmd = [
             python,
-            str(project_root / "scripts" / "build_index.py"),
+            _script_path(project_root, "build_index.py"),
             "--library",
             options.library_path,
             "--db-path",
@@ -149,7 +153,7 @@ def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
     if stage == "ingest_wiki":
         cmd = [
             python,
-            str(project_root / "scripts" / "ingest_to_wiki.py"),
+            _script_path(project_root, "ingest_to_wiki.py"),
             "--library",
             options.library_path,
             "--wiki-root",
@@ -162,7 +166,7 @@ def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
     if stage == "index_wiki":
         cmd = [
             python,
-            str(project_root / "scripts" / "build_index.py"),
+            _script_path(project_root, "build_index.py"),
             "--wiki",
             "--db-path",
             str(options.db_path),

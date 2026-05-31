@@ -111,3 +111,24 @@ def test_healthcheck_deps_only_skips_project_state_checks(monkeypatch, capsys):
     assert "core_deps" in output
     assert "library.json" not in output
     assert "vectordb" not in output
+
+
+def test_vectordb_healthcheck_reports_index_health_corruption(monkeypatch):
+    from types import SimpleNamespace
+    from paper_compass import healthcheck
+
+    monkeypatch.setattr(
+        healthcheck,
+        "inspect_index_health",
+        lambda path: SimpleNamespace(
+            severity="corrupted",
+            summary="hnsw index load failed",
+            collection_counts={},
+            manifest_files=[],
+        ),
+    )
+
+    name, status = healthcheck._check_vectordb()
+
+    assert name == "vectordb"
+    assert status == "ERROR: hnsw index load failed"

@@ -33,6 +33,7 @@ from paper_compass.index_manifest import (
     diff_manifest,
     load_manifest,
     save_manifest,
+    split_manifest_vs_store,
 )
 from paper_compass.vector_store import VectorStore
 
@@ -41,6 +42,8 @@ PAPER_CHUNK_SIZE = 1500
 PAPER_CHUNK_OVERLAP = 200
 PAPER_TEXT_TRUNCATE = 2000
 PAPER_CHUNKING_VERSION = f"papers_v1_cs{PAPER_CHUNK_SIZE}_ol{PAPER_CHUNK_OVERLAP}_trunc{PAPER_TEXT_TRUNCATE}"
+LARGE_INCREMENTAL_CHANGE_RATIO = 0.30
+LARGE_INCREMENTAL_CHANGE_MINIMUM = 3
 
 # Wiki indexing: allowed directories and excluded files
 _ALLOWED_WIKI_DIRS = {"papers", "topics", "methods", "comparisons"}
@@ -316,6 +319,58 @@ def _prepare_index_inputs(items: List[Dict[str, Any]], args, embedder_model_id: 
     return fingerprints, full_texts, skipped
 
 
+def _get_bool_arg(args: Any, name: str, default: bool = False) -> bool:
+    return bool(getattr(args, name, default))
+
+
+def _large_incremental_keys(new_keys: list[str], changed_keys: list[str], current_count: int) -> list[str]:
+    if current_count == 0:
+        return []
+    risky = sorted(set(new_keys) | set(changed_keys))
+    if len(risky) < LARGE_INCREMENTAL_CHANGE_MINIMUM:
+        return []
+    if len(risky) / current_count < LARGE_INCREMENTAL_CHANGE_RATIO:
+        return []
+    return risky
+
+
+def _abort_large_incremental(risky_keys: list[str], current_count: int) -> None:
+    print("ERROR: incremental paper index would rewrite a large share of the library.")
+    print(f"Detected: {len(risky_keys)}/{current_count} papers require fresh embeddings.")
+    print("This may indicate manifest drift or a near-full rebuild under --incremental.")
+    print("Use --allow-large-incremental only after reviewing the diff, or run an explicit full rebuild.")
+    print(f"Sample keys: {', '.join(risky_keys[:10])}")
+    sys.exit(3)
+
+
+def _store_item_keys_or_abort(store: Any) -> set[str]:
+    try:
+        return set(store.get_indexed_item_keys())
+    except Exception as exc:
+        print("ERROR: unable to inspect existing vector-store item keys before incremental indexing.")
+        print(f"Detected: {exc}")
+        print("Recommended action: inspect healthcheck output, then rebuild papers with a vectordb backup if needed.")
+        sys.exit(2)
+
+
+def _validate_processed_keys_present(store: Any, process_keys: list[str]) -> None:
+    if not process_keys:
+        return
+    try:
+        indexed_keys = set(store.get_indexed_item_keys())
+    except Exception as exc:
+        print("ERROR: unable to verify vector-store state after indexing.")
+        print(f"Detected: {exc}")
+        sys.exit(2)
+
+    missing = sorted(set(process_keys) - indexed_keys)
+    if missing:
+        print("ERROR: vector-store verification failed after indexing.")
+        print(f"Missing item keys after write: {', '.join(missing[:10])}")
+        print("Manifest was not saved as complete; rerun after inspecting/rebuilding vectordb.")
+        sys.exit(2)
+
+
 def index_papers(args, embedder: Any | None = None, store: VectorStore | None = None) -> Dict[str, Any]:
     """Index PDF text chunks into ChromaDB with incremental support."""
     library_path = Path(args.library)
@@ -326,11 +381,19 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
 
     health = inspect_index_health(args.db_path)
     if health.severity in {"warning", "corrupted"}:
-        label = "corrupted state" if health.severity == "corrupted" else "requires attention"
-        print(f"ERROR: vectordb {label}: {args.db_path}")
-        print(f"Detected: {health.summary}")
-        print(f"Recommended action: {health.recommended_action}")
-        sys.exit(2)
+        can_incrementally_repair = (
+            args.incremental
+            and health.severity == "warning"
+            and (getattr(health, "manifest_only_keys", {}) or getattr(health, "store_only_keys", {}))
+            and not (health.has_journal or health.has_wal or health.has_shm)
+        )
+        if not can_incrementally_repair:
+            label = "corrupted state" if health.severity == "corrupted" else "requires attention"
+            print(f"ERROR: vectordb {label}: {args.db_path}")
+            print(f"Detected: {health.summary}")
+            print(f"Recommended action: {health.recommended_action}")
+            sys.exit(2)
+        print(f"WARNING: vectordb manifest/store mismatch will be repaired incrementally: {health.summary}")
 
     items = json.loads(library_path.read_text(encoding="utf-8"))
 
@@ -358,7 +421,10 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         manifest.setdefault("items", {})
 
     current_items, full_texts, skipped = _prepare_index_inputs(items, args, embedder.model_id)
-    diff = diff_manifest(current_items, manifest.get("items", {}))
+    manifest_items = manifest.get("items", {})
+    diff = diff_manifest(current_items, manifest_items)
+    missing_vector_keys: list[str] = []
+    orphan_vector_keys: list[str] = []
 
     if args.full_rebuild:
         process_keys = sorted(current_items.keys())
@@ -366,24 +432,39 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         deleted_keys: List[str] = []
         unchanged_keys: List[str] = []
         new_keys = process_keys
+        repair_keys: list[str] = []
+        orphan_delete_keys: list[str] = []
     elif args.incremental:
-        process_keys = diff["new"] + diff["changed"]
-        changed_keys = diff["changed"]
-        deleted_keys = diff["deleted"] if args.prune_deleted else []
-        unchanged_keys = diff["unchanged"]
+        store_item_keys = _store_item_keys_or_abort(store)
+        diff = split_manifest_vs_store(current_items, manifest_items, store_item_keys)
         new_keys = diff["new"]
+        changed_keys = diff["changed"]
+        missing_vector_keys = diff["missing_in_store"]
+        orphan_vector_keys = diff["orphan_in_store"]
+        repair_keys = sorted(set(changed_keys) | set(missing_vector_keys))
+        process_keys = sorted(set(new_keys) | set(repair_keys))
+        deleted_keys = diff["deleted"] if args.prune_deleted else []
+        orphan_delete_keys = orphan_vector_keys if args.prune_deleted else []
+        unchanged_keys = diff["unchanged"]
+        risky = _large_incremental_keys(new_keys, changed_keys, len(current_items))
+        if manifest_items and risky and not _get_bool_arg(args, "allow_large_incremental"):
+            _abort_large_incremental(risky, len(current_items))
     else:
         process_keys = sorted(current_items.keys())
         changed_keys = sorted(set(diff["changed"]) | set(diff["unchanged"]))
         deleted_keys = []
         unchanged_keys = []
         new_keys = diff["new"]
+        repair_keys = changed_keys
+        orphan_delete_keys = []
 
     summary = {
         "new": len(new_keys),
         "changed": len(changed_keys),
         "unchanged": len(unchanged_keys),
-        "deleted": len(deleted_keys),
+        "deleted": len(set(deleted_keys) | set(orphan_delete_keys)),
+        "missing_vectors": len(missing_vector_keys),
+        "orphan_vectors": len(orphan_vector_keys),
         "skipped": len(skipped),
         "indexed_papers": 0,
         "indexed_chunks": 0,
@@ -393,7 +474,7 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
     }
 
     if args.prune_deleted:
-        for key in deleted_keys:
+        for key in sorted(set(deleted_keys) | set(orphan_delete_keys)):
             deleted = store.delete_item(key)
             summary["deleted_chunks"] += deleted
             manifest["items"].pop(key, None)
@@ -401,7 +482,7 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
     for key in process_keys:
         item = next(item for item in items if item.get("key") == key)
         full_text = full_texts[key]
-        if args.full_rebuild or key in changed_keys:
+        if args.full_rebuild or key in repair_keys:
             summary["deleted_chunks"] += store.delete_item(key)
 
         chunk_count = _index_single_paper(store, embedder, item, full_text)
@@ -410,6 +491,8 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         summary["indexed_papers"] += 1
         summary["indexed_chunks"] += chunk_count
         manifest["items"][key] = current_items[key]
+
+    _validate_processed_keys_present(store, process_keys)
 
     if args.full_rebuild:
         manifest["items"] = {key: current_items[key] for key in process_keys}
@@ -422,6 +505,8 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
     print(f"  New papers:            {summary['new']}")
     print(f"  Changed papers:        {summary['changed']}")
     print(f"  Unchanged papers:      {summary['unchanged']}")
+    print(f"  Missing vectors fixed: {summary['missing_vectors']}")
+    print(f"  Orphan vectors found:  {summary['orphan_vectors']}")
     print(f"  Deleted papers pruned: {summary['deleted']}")
     print(f"  Skipped papers:        {summary['skipped']}")
     print(f"  Indexed papers:        {summary['indexed_papers']}")
@@ -524,6 +609,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--incremental", action="store_true", help="Only index new or changed papers")
     parser.add_argument("--full-rebuild", action="store_true", help="Clear the paper collection and rebuild all paper vectors")
     parser.add_argument("--prune-deleted", action="store_true", help="Delete vectors for papers no longer present in library.json")
+    parser.add_argument(
+        "--allow-large-incremental",
+        action="store_true",
+        help="Allow incremental runs that would rewrite a large share of papers",
+    )
     parser.add_argument("--manifest-path", default="", help="Optional override for the incremental manifest path")
     return parser
 
@@ -534,7 +624,7 @@ def main() -> None:
 
     if args.incremental and args.full_rebuild:
         parser.error("--incremental and --full-rebuild cannot be used together")
-    if args.wiki and (args.incremental or args.full_rebuild or args.prune_deleted or args.extract_text):
+    if args.wiki and (args.incremental or args.full_rebuild or args.prune_deleted or args.extract_text or args.allow_large_incremental):
         print("WARNING: paper-only flags are ignored in --wiki mode")
 
     if args.wiki:

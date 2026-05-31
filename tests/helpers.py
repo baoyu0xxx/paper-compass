@@ -50,6 +50,13 @@ class FakeStore:
             if payload["metadata"].get("item_key") == item_key
         ]
 
+    def get_indexed_item_keys(self):
+        return {
+            str(payload["metadata"].get("item_key"))
+            for payload in self.docs.values()
+            if payload["metadata"].get("item_key")
+        }
+
     def delete_item(self, item_key):
         ids = self.get_chunk_ids_for_item(item_key)
         for doc_id in ids:
