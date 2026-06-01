@@ -93,7 +93,7 @@ def main():
     if prepared.used_snapshot:
         print(f"  Snapshot source:   {prepared.original_db_path}")
     lib = ZoteroLibrary(str(prepared.read_db_path), storage_path=str(source.storage_path))
-    items = lib.get_all_items()
+    items = lib.get_all_items_with_pdfs()
     lib.close()
 
     cleanup = cleanup_sqlite_snapshots(
@@ -104,12 +104,10 @@ def main():
     if cleanup.scanned_count:
         print(f"  Snapshot cleanup: scanned={cleanup.scanned_count}, deleted={cleanup.deleted_count}")
 
-    items_with_pdf = sum(1 for item in items if item.get("pdf_path"))
-    print(f"  Found {len(items)} total items")
-    print(f"  Items with PDF attachments: {items_with_pdf}")
+    print(f"  Found {len(items)} items with PDFs")
 
     if not items:
-        print("WARNING: No Zotero items found.")
+        print("WARNING: No items with PDFs found.")
         sys.exit(0)
 
     # ── Enrich: extract text if requested ──
@@ -157,7 +155,6 @@ def main():
     print()
     print("── Sync Report ──")
     print(f"  Total items:           {len(items)}")
-    print(f"  Items with PDFs:       {items_with_pdf}")
     print(f"  Missing PDF files:     {missing_pdf}")
     print(f"  Unique tags:           {len(tags_set)}")
     print(f"  Unique collections:    {len(collections_set)}")

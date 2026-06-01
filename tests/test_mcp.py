@@ -82,18 +82,6 @@ class TestHandleTool:
         result = handle_tool("search_library", {"query": "test", "limit": 3})
         assert result["tool"] == "search_library"
         assert "ok" in result
-        if result.get("ok"):
-            assert "coverage_status" in result["data"]
-
-    def test_search_library_prefers_sync_guidance_when_local_coverage_missing(self):
-        result = handle_tool(
-            "search_library",
-            {"query": "Feature augmentations for high-dimensional learning", "limit": 5},
-        )
-        assert result["tool"] == "search_library"
-        assert result["ok"] is True
-        assert result["data"]["coverage_status"] == "missing_from_library_json"
-        assert "library.json" in result["next_suggested_action"] or "sync_zotero" in result["next_suggested_action"]
 
     def test_search_wiki_no_vectordb(self):
         """search_wiki should handle missing vector DB gracefully."""

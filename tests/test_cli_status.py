@@ -66,11 +66,6 @@ def fake_status_payload():
             "path": "/repo/data/zotero-export/library.json",
             "record_count": 12,
         },
-        "coverage": {
-            "diagnosis": "covered",
-            "query": "Feature augmentations for high-dimensional learning",
-            "recommendations": ["若检索仍命中不到，进一步检查 search_library / search_passages 排序与阈值"],
-        },
         "wiki": {
             "root": "/repo/wiki",
             "page_counts": {"papers": 8, "topics": 3},
@@ -115,7 +110,6 @@ def test_status_cli_text(monkeypatch, capsys, fake_status_payload):
     assert "paper-compass status" in out
     assert "project root: /repo" in out
     assert "records: 12" in out
-    assert "coverage[Feature augmentations for high-dimensional learning]: covered" in out
     assert "health: ok" in out
     assert "embedding role: embedding | source=shared | selected=embedding_volcengine | active=embedding_volcengine" in out
     assert "prompt bundle: normal | selection=default | dir=prompts" in out

@@ -5,7 +5,6 @@ from __future__ import annotations
 import time
 from typing import Any, Dict, List, Optional
 
-from paper_compass.paper_coverage import inspect_paper_coverage
 from paper_compass.search import (
     get_paper_metadata,
     get_vector_collection_info,
@@ -59,7 +58,6 @@ def _tool_search_wiki(query: str, limit: int = 5, db_path: str = "data/vectordb"
 def _tool_search_library(query: str, filters: Optional[Dict[str, Any]] = None, limit: int = 10) -> Dict[str, Any]:
     try:
         results = search_library(query, filters=filters, limit=limit)
-        coverage = inspect_paper_coverage(query)
     except Exception as e:
         return UnifiedResponse.error("search_library", [str(e)]).to_dict()
 
@@ -67,28 +65,11 @@ def _tool_search_library(query: str, filters: Optional[Dict[str, Any]] = None, l
 
     return UnifiedResponse.success(
         tool="search_library",
-        data={
-            "matches": results,
-            "filters_used": filters or {},
-            "coverage_status": coverage.diagnosis,
-            "coverage": {
-                "query": coverage.query,
-                "library_match": coverage.library_match,
-                "text_file": coverage.text_file.__dict__,
-                "pdf_file": coverage.pdf_file.__dict__,
-                "vector_index": coverage.vector_index,
-                "wiki_page": coverage.wiki_page.__dict__,
-                "recommendations": coverage.recommendations,
-            },
-        },
+        data={"matches": results, "filters_used": filters or {}},
         mode_used="library",
         confidence=confidence,
         sources=[{"source_type": "pdf_doc", "id": m["doc_id"], "title": m["title"]} for m in results],
-        next_action=(
-            coverage.recommendations[0]
-            if coverage.diagnosis != "covered" and coverage.recommendations
-            else ("Use ask_research for deeper analysis" if results else "Try broadening filters or run sync_zotero")
-        ),
+        next_action="Use ask_research for deeper analysis" if results else "Try broadening filters or run sync_zotero",
     ).to_dict()
 
 
@@ -203,7 +184,6 @@ def _tool_search_passages(
             text_dir=text_dir,
             library_path=library_path,
         )
-        coverage = inspect_paper_coverage(query, library_path=library_path, text_dir=text_dir, db_path=db_path)
     except Exception as e:
         return UnifiedResponse.error("search_passages", [str(e)]).to_dict()
 
@@ -214,16 +194,11 @@ def _tool_search_passages(
             "matches": results,
             "search_mode_used": search_mode,
             "query_interpretation": f"{search_mode} passage search",
-            "coverage_status": coverage.diagnosis,
         },
         mode_used=search_mode,
         confidence=confidence,
         sources=[{"source_type": "pdf_doc", "id": m["doc_id"], "title": m["title"]} for m in results],
-        next_action=(
-            coverage.recommendations[0]
-            if coverage.diagnosis != "covered" and coverage.recommendations
-            else ("Use ask_research for deeper analysis" if results else "Try broadening keywords or switch to hybrid mode")
-        ),
+        next_action="Use ask_research for deeper analysis" if results else "Try broadening keywords or switch to hybrid mode",
     ).to_dict()
 
 
