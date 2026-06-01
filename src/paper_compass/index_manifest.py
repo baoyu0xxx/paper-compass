@@ -88,6 +88,15 @@ def build_paper_fingerprint(
     }
 
 
+def _fingerprint_core(data: Dict[str, Any]) -> Dict[str, Any]:
+    core = dict(data)
+    core.pop("updated_at", None)
+    core.pop("pdf_path", None)
+    core.pop("text_file", None)
+    core.pop("pdf_mtime", None)
+    return core
+
+
 def diff_manifest(current_items: Dict[str, Dict[str, Any]], manifest_items: Dict[str, Dict[str, Any]]) -> Dict[str, list[str]]:
     current_keys = set(current_items.keys())
     manifest_keys = set(manifest_items.keys())
@@ -98,10 +107,8 @@ def diff_manifest(current_items: Dict[str, Dict[str, Any]], manifest_items: Dict
     changed_keys = []
 
     for key in sorted(current_keys & manifest_keys):
-        current = dict(current_items[key])
-        previous = dict(manifest_items[key])
-        current.pop("updated_at", None)
-        previous.pop("updated_at", None)
+        current = _fingerprint_core(current_items[key])
+        previous = _fingerprint_core(manifest_items[key])
         if current == previous:
             unchanged_keys.append(key)
         else:

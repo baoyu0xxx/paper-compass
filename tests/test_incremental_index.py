@@ -280,3 +280,83 @@ def test_index_papers_refuses_warning_vectordb(tmp_path, monkeypatch, capsys):
     output = capsys.readouterr().out
     assert "vectordb requires attention" in output.lower()
     assert "journal" in output.lower()
+
+
+def test_diff_manifest_ignores_path_and_mtime_drift_when_text_is_unchanged():
+    current = {
+        "A": {
+            "item_key": "A",
+            "pdf_path": "/mnt/d/papers/A.pdf",
+            "text_file": "/mnt/d/texts/A.txt",
+            "text_sha1": compute_text_sha1("same text"),
+            "text_size": len("same text"),
+            "pdf_mtime": 200,
+            "chunking_version": "v1",
+            "embedding_model_id": "m1",
+            "chunk_count": 2,
+            "updated_at": "2026-06-01T00:00:00Z",
+        }
+    }
+    previous = {
+        "A": {
+            "item_key": "A",
+            "pdf_path": r"D:\\papers\\A.pdf",
+            "text_file": "",
+            "text_sha1": compute_text_sha1("same text"),
+            "text_size": len("same text"),
+            "pdf_mtime": 100,
+            "chunking_version": "v1",
+            "embedding_model_id": "m1",
+            "chunk_count": 2,
+            "updated_at": "2026-05-01T00:00:00Z",
+        }
+    }
+
+    result = diff_manifest(current, previous)
+
+    assert result == {
+        "new": [],
+        "changed": [],
+        "unchanged": ["A"],
+        "deleted": [],
+    }
+
+
+def test_diff_manifest_still_detects_real_text_change():
+    current = {
+        "A": {
+            "item_key": "A",
+            "pdf_path": "/mnt/d/papers/A.pdf",
+            "text_file": "/mnt/d/texts/A.txt",
+            "text_sha1": compute_text_sha1("new text"),
+            "text_size": len("new text"),
+            "pdf_mtime": 200,
+            "chunking_version": "v1",
+            "embedding_model_id": "m1",
+            "chunk_count": 2,
+            "updated_at": "2026-06-01T00:00:00Z",
+        }
+    }
+    previous = {
+        "A": {
+            "item_key": "A",
+            "pdf_path": r"D:\\papers\\A.pdf",
+            "text_file": "",
+            "text_sha1": compute_text_sha1("old text"),
+            "text_size": len("old text"),
+            "pdf_mtime": 100,
+            "chunking_version": "v1",
+            "embedding_model_id": "m1",
+            "chunk_count": 2,
+            "updated_at": "2026-05-01T00:00:00Z",
+        }
+    }
+
+    result = diff_manifest(current, previous)
+
+    assert result == {
+        "new": [],
+        "changed": ["A"],
+        "unchanged": [],
+        "deleted": [],
+    }
