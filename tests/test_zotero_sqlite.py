@@ -33,3 +33,19 @@ def test_zotero_library_opens_database_in_read_only_mode(tmp_path):
     assert sqlite3.connect(db_path).execute(
         "SELECT name FROM sqlite_master WHERE type='table' AND name='should_fail'"
     ).fetchone() is None
+    assert not (tmp_path / "zotero.sqlite-wal").exists()
+    assert not (tmp_path / "zotero.sqlite-shm").exists()
+    assert not (tmp_path / "zotero.sqlite-journal").exists()
+
+
+def test_zotero_library_readonly_uri_handles_spaces_and_hashes(tmp_path):
+    db_path = _make_minimal_sqlite(tmp_path / "Zotero Profile #1" / "zotero.sqlite")
+    storage_path = db_path.parent / "storage"
+    storage_path.mkdir()
+
+    lib = ZoteroLibrary(str(db_path), storage_path=str(storage_path))
+    try:
+        conn = lib._get_connection()
+        assert conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+    finally:
+        lib.close()

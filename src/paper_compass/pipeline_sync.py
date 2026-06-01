@@ -135,6 +135,8 @@ def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
         ]
         if options.allow_live_zotero_read:
             cmd.append("--allow-live-zotero-read")
+        if options.dry_run:
+            cmd.append("--dry-run")
         return cmd
     if stage == "index_papers":
         cmd = [
@@ -149,6 +151,8 @@ def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
             cmd.append("--full-rebuild")
         else:
             cmd += ["--incremental", "--prune-deleted"]
+        if options.dry_run:
+            cmd.append("--dry-run")
         return cmd
     if stage == "ingest_wiki":
         cmd = [

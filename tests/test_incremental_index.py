@@ -56,6 +56,8 @@ def make_args(tmp_path: Path, library_path: Path, **overrides):
         full_rebuild=False,
         prune_deleted=False,
         manifest_path=str(tmp_path / "manifest.json"),
+        dry_run=False,
+        allow_large_incremental=False,
     )
     defaults.update(overrides)
     return SimpleNamespace(**defaults)
@@ -188,6 +190,31 @@ def test_incremental_refuses_large_changed_set_without_override(tmp_path):
     assert exc.value.code == 3
 
 
+def test_incremental_large_guard_uses_configured_thresholds(tmp_path, monkeypatch):
+    from paper_compass.config import IndexingSettings
+
+    module = load_build_index()
+    items = [make_paper(tmp_path, f"P{i}", chr(97 + i) * 2200) for i in range(4)]
+    library_path = write_library(tmp_path, items)
+    args = make_args(tmp_path, library_path)
+    store = FakeStore()
+    embedder = FakeEmbedder()
+
+    module.index_papers(args, embedder=embedder, store=store)
+    for item in items:
+        Path(item["text_file"]).write_text("changed " * 400, encoding="utf-8")
+    monkeypatch.setattr(
+        module,
+        "resolve_indexing_settings",
+        lambda: IndexingSettings(large_incremental_change_ratio=1.0, large_incremental_change_minimum=99),
+    )
+
+    summary = module.index_papers(args, embedder=embedder, store=store)
+
+    assert summary["changed"] == 4
+    assert summary["indexed_papers"] == 4
+
+
 def test_incremental_large_changed_set_can_be_explicitly_allowed(tmp_path):
     module = load_build_index()
     items = [make_paper(tmp_path, f"P{i}", chr(97 + i) * 2200) for i in range(4)]
@@ -204,6 +231,45 @@ def test_incremental_large_changed_set_can_be_explicitly_allowed(tmp_path):
 
     assert summary["changed"] == 4
     assert summary["indexed_papers"] == 4
+
+
+def test_incremental_metadata_only_updates_chunk_metadata_without_embedding(tmp_path):
+    module = load_build_index()
+    item = make_paper(tmp_path, "A1", "a" * 2200)
+    library_path = write_library(tmp_path, [item])
+    args = make_args(tmp_path, library_path)
+    store = FakeStore()
+    embedder = FakeEmbedder()
+
+    first = module.index_papers(args, embedder=embedder, store=store)
+    calls_after_first = embedder.embed_calls
+    updated_item = {**item, "title": "Updated Title", "tags": ["updated"]}
+    library_path.write_text(json.dumps([updated_item], ensure_ascii=False, indent=2), encoding="utf-8")
+    second = module.index_papers(args, embedder=embedder, store=store)
+
+    assert first["indexed_papers"] == 1
+    assert second["metadata_only"] == 1
+    assert second["indexed_papers"] == 0
+    assert embedder.embed_calls == calls_after_first
+    assert all(payload["metadata"]["title"] == "Updated Title" for payload in store.docs.values())
+
+
+def test_incremental_dry_run_does_not_write_manifest_or_vectors(tmp_path):
+    module = load_build_index()
+    item = make_paper(tmp_path, "A1", "a" * 2200)
+    library_path = write_library(tmp_path, [item])
+    manifest_path = tmp_path / "manifest.json"
+    args = make_args(tmp_path, library_path, dry_run=True, manifest_path=str(manifest_path))
+    store = FakeStore()
+    embedder = FakeEmbedder()
+
+    summary = module.index_papers(args, embedder=embedder, store=store)
+
+    assert summary["dry_run"] is True
+    assert summary["embedding_required"] == 1
+    assert embedder.embed_calls == 0
+    assert store.count() == 0
+    assert not manifest_path.exists()
 
 
 def test_wiki_reindex_is_idempotent(tmp_path):

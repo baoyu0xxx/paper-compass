@@ -24,7 +24,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from paper_compass.config import resolve_embedding_runtime
+from paper_compass.config import resolve_embedding_runtime, resolve_indexing_settings
 from paper_compass.embedder import Embedder
 from paper_compass.env_utils import load_project_env
 from paper_compass.index_health import inspect_index_health
@@ -33,8 +33,8 @@ from paper_compass.index_manifest import (
     diff_manifest,
     load_manifest,
     save_manifest,
-    split_manifest_vs_store,
 )
+from paper_compass.index_planner import plan_paper_index
 from paper_compass.vector_store import VectorStore
 
 
@@ -210,16 +210,20 @@ def _iter_paper_chunks(full_text: str, item: Dict[str, Any]) -> Iterable[Tuple[s
         yield (
             f"{key}_c{chunk_idx}",
             chunk_text[:PAPER_TEXT_TRUNCATE],
-            {
-                "item_key": key,
-                "title": item.get("title", ""),
-                "year": item.get("year") or 0,
-                "authors": ", ".join(item.get("authors", [])),
-                "collections": ", ".join(item.get("collections", [])),
-                "tags": ", ".join(item.get("tags", [])),
-            },
+            _paper_chunk_metadata(item),
         )
         chunk_idx += 1
+
+
+def _paper_chunk_metadata(item: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "item_key": item.get("key", ""),
+        "title": item.get("title", ""),
+        "year": item.get("year") or 0,
+        "authors": ", ".join(item.get("authors", [])),
+        "collections": ", ".join(item.get("collections", [])),
+        "tags": ", ".join(item.get("tags", [])),
+    }
 
 
 def _write_index_batches(
@@ -323,13 +327,20 @@ def _get_bool_arg(args: Any, name: str, default: bool = False) -> bool:
     return bool(getattr(args, name, default))
 
 
-def _large_incremental_keys(new_keys: list[str], changed_keys: list[str], current_count: int) -> list[str]:
+def _large_incremental_keys(
+    new_keys: list[str],
+    changed_keys: list[str],
+    current_count: int,
+    *,
+    minimum: int = LARGE_INCREMENTAL_CHANGE_MINIMUM,
+    ratio: float = LARGE_INCREMENTAL_CHANGE_RATIO,
+) -> list[str]:
     if current_count == 0:
         return []
     risky = sorted(set(new_keys) | set(changed_keys))
-    if len(risky) < LARGE_INCREMENTAL_CHANGE_MINIMUM:
+    if len(risky) < minimum:
         return []
-    if len(risky) / current_count < LARGE_INCREMENTAL_CHANGE_RATIO:
+    if len(risky) / current_count < ratio:
         return []
     return risky
 
@@ -341,6 +352,23 @@ def _abort_large_incremental(risky_keys: list[str], current_count: int) -> None:
     print("Use --allow-large-incremental only after reviewing the diff, or run an explicit full rebuild.")
     print(f"Sample keys: {', '.join(risky_keys[:10])}")
     sys.exit(3)
+
+
+def _print_paper_index_plan(summary: Dict[str, Any], process_keys: list[str]) -> None:
+    print()
+    print("── Paper Index Plan ──")
+    print(f"  New papers:                 {summary['new']}")
+    print(f"  Content changed:            {summary['content_changed']}")
+    print(f"  Metadata-only changed:      {summary['metadata_only']}")
+    print(f"  Path-only changed:          {summary['path_only']}")
+    print(f"  Missing vectors to repair:  {summary['missing_vectors']}")
+    print(f"  Deleted papers:             {summary['deleted']}")
+    print(f"  Embedding-required papers:  {summary['embedding_required']}")
+    print(f"  Estimated chunks to embed:  {summary['estimated_chunks_to_embed']}")
+    print(f"  Skipped papers:             {summary['skipped']}")
+    print(f"  Manifest:                   {summary['manifest_path']}")
+    if process_keys:
+        print(f"  Sample embedding keys:      {', '.join(process_keys[:10])}")
 
 
 def _store_item_keys_or_abort(store: Any) -> set[str]:
@@ -405,12 +433,15 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
     )
     manifest_path = _resolve_manifest_path(args, store)
 
+    dry_run = _get_bool_arg(args, "dry_run")
     if args.full_rebuild:
-        store.clear()
+        if not dry_run:
+            store.clear()
         manifest = {
             "collection_name": store.collection_name,
             "embedding_model_id": embedder.model_id,
             "chunking_version": PAPER_CHUNKING_VERSION,
+            "schema_version": 2,
             "items": {},
         }
     else:
@@ -418,13 +449,15 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         manifest["collection_name"] = store.collection_name
         manifest["embedding_model_id"] = embedder.model_id
         manifest["chunking_version"] = PAPER_CHUNKING_VERSION
+        manifest["schema_version"] = 2
         manifest.setdefault("items", {})
 
     current_items, full_texts, skipped = _prepare_index_inputs(items, args, embedder.model_id)
     manifest_items = manifest.get("items", {})
-    diff = diff_manifest(current_items, manifest_items)
     missing_vector_keys: list[str] = []
     orphan_vector_keys: list[str] = []
+    metadata_only_keys: list[str] = []
+    path_only_keys: list[str] = []
 
     if args.full_rebuild:
         process_keys = sorted(current_items.keys())
@@ -436,20 +469,40 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         orphan_delete_keys: list[str] = []
     elif args.incremental:
         store_item_keys = _store_item_keys_or_abort(store)
-        diff = split_manifest_vs_store(current_items, manifest_items, store_item_keys)
-        new_keys = diff["new"]
-        changed_keys = diff["changed"]
-        missing_vector_keys = diff["missing_in_store"]
-        orphan_vector_keys = diff["orphan_in_store"]
+        plan = plan_paper_index(
+            current_items,
+            manifest_items,
+            store_item_keys,
+            prune_deleted=args.prune_deleted,
+        )
+        new_keys = plan.new
+        changed_keys = plan.content_changed
+        metadata_only_keys = plan.metadata_only
+        path_only_keys = plan.path_only
+        missing_vector_keys = plan.missing_in_store
+        orphan_vector_keys = plan.orphan_in_store
         repair_keys = sorted(set(changed_keys) | set(missing_vector_keys))
-        process_keys = sorted(set(new_keys) | set(repair_keys))
-        deleted_keys = diff["deleted"] if args.prune_deleted else []
+        process_keys = plan.process_keys
+        deleted_keys = plan.deleted if args.prune_deleted else []
         orphan_delete_keys = orphan_vector_keys if args.prune_deleted else []
-        unchanged_keys = diff["unchanged"]
-        risky = _large_incremental_keys(new_keys, changed_keys, len(current_items))
-        if manifest_items and risky and not _get_bool_arg(args, "allow_large_incremental"):
+        unchanged_keys = plan.unchanged
+        indexing_settings = resolve_indexing_settings()
+        risky = _large_incremental_keys(
+            new_keys,
+            sorted(set(changed_keys) | set(missing_vector_keys)),
+            len(current_items),
+            minimum=indexing_settings.large_incremental_change_minimum,
+            ratio=indexing_settings.large_incremental_change_ratio,
+        )
+        if (
+            manifest_items
+            and risky
+            and indexing_settings.require_dry_run_for_large_incremental
+            and not _get_bool_arg(args, "allow_large_incremental")
+        ):
             _abort_large_incremental(risky, len(current_items))
     else:
+        diff = diff_manifest(current_items, manifest_items)
         process_keys = sorted(current_items.keys())
         changed_keys = sorted(set(diff["changed"]) | set(diff["unchanged"]))
         deleted_keys = []
@@ -459,19 +512,30 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         orphan_delete_keys = []
 
     summary = {
+        "dry_run": dry_run,
         "new": len(new_keys),
         "changed": len(changed_keys),
+        "content_changed": len(changed_keys),
+        "metadata_only": len(metadata_only_keys),
+        "path_only": len(path_only_keys),
         "unchanged": len(unchanged_keys),
         "deleted": len(set(deleted_keys) | set(orphan_delete_keys)),
         "missing_vectors": len(missing_vector_keys),
         "orphan_vectors": len(orphan_vector_keys),
+        "embedding_required": len(process_keys),
+        "estimated_chunks_to_embed": sum(current_items[key].get("indexing", {}).get("chunk_count") or 0 for key in process_keys),
         "skipped": len(skipped),
         "indexed_papers": 0,
         "indexed_chunks": 0,
+        "metadata_updated_chunks": 0,
         "deleted_chunks": 0,
         "manifest_path": manifest_path,
         "collection": store.collection_name,
     }
+
+    if dry_run:
+        _print_paper_index_plan(summary, process_keys)
+        return summary
 
     if args.prune_deleted:
         for key in sorted(set(deleted_keys) | set(orphan_delete_keys)):
@@ -479,8 +543,15 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
             summary["deleted_chunks"] += deleted
             manifest["items"].pop(key, None)
 
+    item_by_key = {item.get("key"): item for item in items}
+    for key in sorted(set(metadata_only_keys) | set(path_only_keys)):
+        manifest["items"][key] = current_items[key]
+        if key in metadata_only_keys:
+            updated = store.update_item_metadata(key, _paper_chunk_metadata(item_by_key[key]))
+            summary["metadata_updated_chunks"] += updated
+
     for key in process_keys:
-        item = next(item for item in items if item.get("key") == key)
+        item = item_by_key[key]
         full_text = full_texts[key]
         if args.full_rebuild or key in repair_keys:
             summary["deleted_chunks"] += store.delete_item(key)
@@ -615,6 +686,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Allow incremental runs that would rewrite a large share of papers",
     )
     parser.add_argument("--manifest-path", default="", help="Optional override for the incremental manifest path")
+    parser.add_argument("--dry-run", action="store_true", help="Plan paper index changes without embedding or writing")
     return parser
 
 
@@ -624,7 +696,7 @@ def main() -> None:
 
     if args.incremental and args.full_rebuild:
         parser.error("--incremental and --full-rebuild cannot be used together")
-    if args.wiki and (args.incremental or args.full_rebuild or args.prune_deleted or args.extract_text or args.allow_large_incremental):
+    if args.wiki and (args.incremental or args.full_rebuild or args.prune_deleted or args.extract_text or args.allow_large_incremental or args.dry_run):
         print("WARNING: paper-only flags are ignored in --wiki mode")
 
     if args.wiki:

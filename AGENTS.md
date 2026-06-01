@@ -77,7 +77,7 @@ Should show all green (✓) for dotenv, llm, and embed checks.
 
 **Option A — from Zotero SQLite:**
 
-The `sync_zotero.py` script reads Zotero's SQLite database directly. Resolution order is: explicit `--db-path` → `ZOTERO_SQLITE_PATH` → default Zotero data directories → optional backup roots (for example `ZOTERO_BACKUP_ROOT` if configured). Auto-discovery only selects Zotero's official `zotero.sqlite`; legacy `zotero_readonly.sqlite` is accepted only when explicitly passed via `--db-path` / `--db-source-path`. You can override the inferred `storage/` path with `--storage-path`.
+The `sync_zotero.py` script reads Zotero's SQLite database through a read-only SQLite URI (`mode=ro`) with `PRAGMA query_only=ON`. Resolution order is: explicit `--db-path` → `ZOTERO_SQLITE_PATH` → default Zotero data directories → optional backup roots (for example `ZOTERO_BACKUP_ROOT` if configured). Auto-discovery only selects Zotero's official `zotero.sqlite`; legacy `zotero_readonly.sqlite` is accepted only when explicitly passed via `--db-path` / `--db-source-path`. You can override the inferred `storage/` path with `--storage-path`.
 
 ```bash
 python scripts/sync_zotero.py --extract-text
@@ -85,7 +85,7 @@ python scripts/sync_zotero.py --extract-text
 
 This produces `data/zotero-export/library.json` and `data/texts/*.txt`.
 
-When auto-discovery resolves a default Zotero profile, `--snapshot-db auto` creates a runtime SQLite snapshot under `data/state/zotero-snapshots/` and reads that snapshot instead of directly reading the live Zotero profile. Explicit backup/env paths are treated as non-live unless configured otherwise.
+When auto-discovery resolves a default Zotero profile, `--snapshot-db auto` creates a runtime SQLite snapshot under `data/state/zotero-snapshots/` and reads that snapshot instead of directly reading the live Zotero profile. Explicit backup/env paths are treated as non-live unless configured otherwise. This does not write to or modify the original Zotero SQLite database. Use `python scripts/sync_zotero.py --dry-run` to inspect the resolved database, storage directory, and snapshot policy before syncing.
 
 If the SQLite file is not found automatically, you can specify it explicitly:
 ```bash
@@ -136,6 +136,8 @@ paper-compass sync \
 4. `build_index.py --wiki`
 
 并额外提供：
+- `paper-compass sync --dry-run` 预览同步命令与论文索引差异；其中 Zotero 阶段只解析路径，不创建输出目录或读取 SQLite
+- 论文增量索引以 PDF/文本内容 fingerprint 为核心，metadata-only / path-only 变化只更新元数据或 manifest，不触发重嵌入
 - `data/vectordb/` 健康检查（journal / wal / manifest / Chroma 可读性）
 - `data/state/last_sync.json` 状态记录
 - 损坏时阻断写入并给出恢复建议

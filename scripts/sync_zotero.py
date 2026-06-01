@@ -55,6 +55,7 @@ def main():
     )
     parser.add_argument("--snapshot-keep", type=int, default=5, help="Number of runtime Zotero sqlite snapshots to keep")
     parser.add_argument("--snapshot-max-age-days", type=int, default=0, help="Delete runtime snapshots older than N days; 0 disables age-based cleanup")
+    parser.add_argument("--dry-run", action="store_true", help="Resolve Zotero paths and read policy without creating outputs or reading SQLite")
     parser.add_argument(
         "--allow-live-zotero-read",
         action="store_true",
@@ -70,6 +71,17 @@ def main():
     except ZoteroSourceNotFoundError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
+
+    if args.dry_run:
+        print()
+        print("── Zotero Source Plan ──")
+        print(f"  Database:     {source.db_path}")
+        print(f"  Storage:      {source.storage_path}")
+        print(f"  Source:       {source.source_kind}")
+        print(f"  Live DB:      {'yes' if source.is_live_candidate else 'no'}")
+        print(f"  Read policy:  snapshot-db={args.snapshot_db}")
+        print(f"  Tried:        {len(source.tried)} candidates")
+        return
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

@@ -61,14 +61,18 @@ def _looks_like_live_zotero_sqlite(db_candidate: Path) -> bool:
 def _default_root_candidates() -> List[Path]:
     candidates: List[Path] = [Path("~/Zotero").expanduser()]
 
-    windows_users_root = Path("/mnt/c/Users")
-    if windows_users_root.exists():
-        for user_dir in sorted(p for p in windows_users_root.iterdir() if p.is_dir()):
-            candidates.append(user_dir / "Zotero")
-            roaming_profiles = user_dir / "AppData" / "Roaming" / "Zotero" / "Zotero" / "Profiles"
-            if roaming_profiles.exists():
-                for profile_dir in sorted(p for p in roaming_profiles.iterdir() if p.is_dir()):
-                    candidates.append(profile_dir)
+    userprofile = os.environ.get("USERPROFILE", "").strip()
+    if userprofile:
+        candidates.append(Path(userprofile) / "Zotero")
+
+    for windows_users_root in (Path("/c/Users"), Path("/mnt/c/Users")):
+        if windows_users_root.exists():
+            for user_dir in sorted(p for p in windows_users_root.iterdir() if p.is_dir()):
+                candidates.append(user_dir / "Zotero")
+                roaming_profiles = user_dir / "AppData" / "Roaming" / "Zotero" / "Zotero" / "Profiles"
+                if roaming_profiles.exists():
+                    for profile_dir in sorted(p for p in roaming_profiles.iterdir() if p.is_dir()):
+                        candidates.append(profile_dir)
 
     return _dedupe_paths(candidates)
 

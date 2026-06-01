@@ -269,6 +269,23 @@ class VectorStore:
         self._invalidate_bm25()
         return len(chunk_ids)
 
+    def update_item_metadata(self, item_key: str, metadata_patch: Dict[str, Any]) -> int:
+        """Update metadata for all chunks belonging to one paper item key."""
+        chunk_ids = self.get_chunk_ids_for_item(item_key)
+        if not chunk_ids:
+            return 0
+        results = self.collection.get(ids=chunk_ids, include=["metadatas"])
+        metadatas: List[Dict[str, Any]] = []
+        for existing in results.get("metadatas", []) or []:
+            merged = dict(existing or {})
+            merged.update(metadata_patch)
+            metadatas.append(merged)
+        if not metadatas:
+            return 0
+        self.collection.update(ids=chunk_ids, metadatas=metadatas)
+        self._invalidate_bm25()
+        return len(chunk_ids)
+
     # ── wiki page deletion ────────────────────────────────────────────────────
 
     def delete_by_page_path(self, page_path: str) -> int:

@@ -36,6 +36,9 @@ rag:
     auto_reuse_existing_index: true
     rebuild_on_manifest_change: false
     embedding_batch_size: null
+    large_incremental_change_ratio: 0.30
+    large_incremental_change_minimum: 3
+    require_dry_run_for_large_incremental: true
 
   output:
     include_evidence_snippets: true

@@ -9,6 +9,7 @@ import argparse
 import shlex
 
 from paper_compass.pipeline_sync import SyncOptions, VectordbHealthError, run_sync_pipeline
+from paper_compass.config import resolve_path_settings
 from paper_compass.env_utils import PROJECT_ROOT
 
 
@@ -18,7 +19,7 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
         help="Run incremental data sync for Zotero, vector index, and wiki",
         description="Execute the paper-compass data sync pipeline with health checks and rebuild controls.",
     )
-    parser.add_argument("--db-path", default="data/vectordb", help="Path to ChromaDB persistent directory")
+    parser.add_argument("--db-path", default="", help="Path to ChromaDB persistent directory")
     parser.add_argument(
         "--db-source-path",
         default="",
@@ -30,8 +31,8 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
     parser.add_argument("--snapshot-keep", type=int, default=5, help="Number of runtime Zotero sqlite snapshots to keep")
     parser.add_argument("--snapshot-max-age-days", type=int, default=0, help="Delete runtime snapshots older than N days; 0 disables age-based cleanup")
     parser.add_argument("--allow-live-zotero-read", action="store_true", help="Allow direct reads from a live Zotero sqlite when snapshotting is disabled")
-    parser.add_argument("--library", default="data/zotero-export/library.json", help="Path to library.json")
-    parser.add_argument("--wiki-root", default="./wiki", help="Wiki root directory")
+    parser.add_argument("--library", default="", help="Path to library.json")
+    parser.add_argument("--wiki-root", default="", help="Wiki root directory")
     parser.add_argument("--workers", type=int, default=10, help="Worker count for wiki generation")
     parser.add_argument("--skip-zotero-sync", action="store_true", help="Skip sync_zotero stage")
     parser.add_argument("--skip-paper-index", action="store_true", help="Skip paper index stage")
@@ -44,20 +45,29 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
 
 
 def execute_sync(args: argparse.Namespace) -> int:
+    path_settings = resolve_path_settings(
+        overrides={
+            "library_json_path": args.library,
+            "wiki_root": args.wiki_root,
+            "vectordb_path": args.db_path,
+            "zotero_sqlite_path": args.db_source_path,
+            "zotero_storage_path": args.storage_path,
+        }
+    )
     try:
         result = run_sync_pipeline(
             SyncOptions(
                 project_root=PROJECT_ROOT,
-                db_path=PROJECT_ROOT / args.db_path,
-                db_source_path=args.db_source_path or None,
-                storage_path=args.storage_path or None,
+                db_path=PROJECT_ROOT / path_settings.vectordb_path,
+                db_source_path=path_settings.zotero_sqlite_path or None,
+                storage_path=path_settings.zotero_storage_path or None,
                 snapshot_db=args.snapshot_db,
                 snapshot_dir=args.snapshot_dir,
                 snapshot_keep=args.snapshot_keep,
                 snapshot_max_age_days=args.snapshot_max_age_days,
                 allow_live_zotero_read=args.allow_live_zotero_read,
-                library_path=args.library,
-                wiki_root=args.wiki_root,
+                library_path=path_settings.library_json_path,
+                wiki_root=path_settings.wiki_root,
                 workers=args.workers,
                 dry_run=args.dry_run,
                 rebuild=args.rebuild,

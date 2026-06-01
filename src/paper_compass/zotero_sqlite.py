@@ -18,6 +18,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from paper_compass.sqlite_readonly import connect_readonly
+
 
 class ZoteroLibrary:
     """Read-only access to a Zotero SQLite database.
@@ -37,12 +39,7 @@ class ZoteroLibrary:
         if not hasattr(self._local, "conn") or self._local.conn is None:
             # Always open Zotero databases in SQLite read-only mode. Do not replace
             # this with sqlite3.connect(path), which could create/write sidecar files.
-            self._local.conn = sqlite3.connect(
-                f"file:{self.db_path}?mode=ro",
-                uri=True,
-                check_same_thread=True,
-            )
-            self._local.conn.isolation_level = None
+            self._local.conn = connect_readonly(self.db_path)
         return self._local.conn
 
     @contextmanager

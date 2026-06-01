@@ -2,11 +2,38 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from importlib.resources import files
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 import yaml
+
+@dataclass(frozen=True)
+class PathSettings:
+    library_json_path: str = "data/zotero-export/library.json"
+    text_dir: str = "data/texts"
+    wiki_root: str = "wiki"
+    vectordb_path: str = "data/vectordb"
+    zotero_sqlite_path: str = ""
+    zotero_storage_path: str = ""
+
+
+@dataclass(frozen=True)
+class IndexingSettings:
+    large_incremental_change_ratio: float = 0.30
+    large_incremental_change_minimum: int = 3
+    require_dry_run_for_large_incremental: bool = True
+
+
+PATH_SETTINGS_ENV_MAP = {
+    "library_json_path": "PAPER_COMPASS_LIBRARY_PATH",
+    "text_dir": "PAPER_COMPASS_TEXT_DIR",
+    "wiki_root": "PAPER_COMPASS_WIKI_ROOT",
+    "vectordb_path": "PAPER_COMPASS_VECTORDB_PATH",
+    "zotero_sqlite_path": "ZOTERO_SQLITE_PATH",
+    "zotero_storage_path": "ZOTERO_STORAGE_PATH",
+}
 
 
 def _resolve_env(value: str) -> str:
@@ -104,6 +131,54 @@ def load_all_configs(config_dir: str = "configs") -> Dict[str, Any]:
         configs[stem] = load_yaml_config(str(yaml_file))
 
     return configs
+
+
+def _nonempty(value: Any) -> str:
+    return str(value).strip() if value is not None else ""
+
+
+def resolve_path_settings(
+    configs: Optional[Dict[str, Any]] = None,
+    *,
+    overrides: Optional[Dict[str, str | None]] = None,
+) -> PathSettings:
+    """Resolve common user paths with CLI > environment > YAML > safe defaults precedence."""
+    import os
+
+    if configs is None:
+        configs = load_all_configs()
+    overrides = overrides or {}
+    yaml_paths = configs.get("paths", {}).get("paths", {})
+    defaults = PathSettings()
+    resolved: dict[str, str] = {}
+
+    for field_name, env_name in PATH_SETTINGS_ENV_MAP.items():
+        cli_value = _nonempty(overrides.get(field_name))
+        env_value = _nonempty(os.environ.get(env_name))
+        config_value = _nonempty(yaml_paths.get(field_name))
+        default_value = getattr(defaults, field_name)
+        resolved[field_name] = cli_value or env_value or config_value or default_value
+
+    return PathSettings(**resolved)
+
+
+def resolve_indexing_settings(configs: Optional[Dict[str, Any]] = None) -> IndexingSettings:
+    """Resolve indexing safety thresholds from rag.indexing with safe defaults."""
+    if configs is None:
+        configs = load_all_configs()
+    indexing = configs.get("rag", {}).get("rag", {}).get("indexing", {})
+    defaults = IndexingSettings()
+    return IndexingSettings(
+        large_incremental_change_ratio=float(
+            indexing.get("large_incremental_change_ratio", defaults.large_incremental_change_ratio)
+        ),
+        large_incremental_change_minimum=int(
+            indexing.get("large_incremental_change_minimum", defaults.large_incremental_change_minimum)
+        ),
+        require_dry_run_for_large_incremental=bool(
+            indexing.get("require_dry_run_for_large_incremental", defaults.require_dry_run_for_large_incremental)
+        ),
+    )
 
 
 def get_provider_config(

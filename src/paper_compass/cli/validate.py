@@ -256,7 +256,7 @@ def execute_validate(args: argparse.Namespace) -> int:
     resolved_provider = embedding_runtime.get("resolved_provider") or "local"
 
     print(f"  config: project_root={PROJECT_ROOT}")
-    print(f"  config: env_path={Path(env_path)}")
+    print(f"  config: env_path={Path(env_path).as_posix()}")
     print(
         f"  config: llm={llm_provider.get('provider', 'n.a.')} | {llm_provider.get('base_url', 'n.a.')} | {llm_provider.get('model', 'n.a.') or 'n.a.'}"
     )

@@ -185,3 +185,31 @@ def test_build_stage_command_passes_snapshot_flags(tmp_path):
     assert "--snapshot-max-age-days" in command
     assert command[command.index("--snapshot-max-age-days") + 1] == "0"
     assert "--allow-live-zotero-read" in command
+
+
+def test_build_stage_command_adds_sync_zotero_dry_run_flag(tmp_path):
+    from paper_compass.pipeline_sync import SyncOptions, _build_stage_command
+
+    options = SyncOptions(
+        project_root=tmp_path,
+        db_path=tmp_path / "data" / "vectordb",
+        dry_run=True,
+    )
+
+    command = _build_stage_command(options, "sync_zotero")
+
+    assert "--dry-run" in command
+
+
+def test_build_stage_command_adds_paper_index_dry_run_flag(tmp_path):
+    from paper_compass.pipeline_sync import SyncOptions, _build_stage_command
+
+    options = SyncOptions(
+        project_root=tmp_path,
+        db_path=tmp_path / "data" / "vectordb",
+        dry_run=True,
+    )
+
+    command = _build_stage_command(options, "index_papers")
+
+    assert "--dry-run" in command

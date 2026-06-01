@@ -124,20 +124,23 @@ paper-compass init
 paper-compass validate
 
 # 4. 准备数据
+python scripts/sync_zotero.py --dry-run
 python scripts/sync_zotero.py --extract-text
 # → 自动按以下顺序探索：显式 --db-path > ZOTERO_SQLITE_PATH > 默认 Zotero 目录 > 可选备份目录（如配置了 ZOTERO_BACKUP_ROOT）
 # → data/zotero-export/library.json + data/texts/*.txt
 
-自动发现只会选择 Zotero 官方数据库文件 `zotero.sqlite`。旧的 `zotero_readonly.sqlite` 不再自动发现，因为长期手动快照可能变成过期副本；如确需短期兼容，可通过 `--db-source-path` / `--db-path` 显式指定。当自动发现命中默认 Zotero profile 时，`--snapshot-db auto` 会在 `data/state/zotero-snapshots/` 下创建运行时 SQLite 快照，并读取该快照而不是直接读取 live Zotero profile。
+自动发现只会选择 Zotero 官方数据库文件 `zotero.sqlite`。旧的 `zotero_readonly.sqlite` 不再自动发现，因为长期手动快照可能变成过期副本；如确需短期兼容，可通过 `--db-source-path` / `--db-path` 显式指定。读取 Zotero SQLite 时会使用 `mode=ro + query_only` 的只读连接；当自动发现命中默认 Zotero profile 时，`--snapshot-db auto` 会在 `data/state/zotero-snapshots/` 下创建运行时 SQLite 快照，并读取该快照而不是直接读取 live Zotero profile。上述行为不会写入或修改 Zotero 原始 SQLite 数据库。
 
 #    若数据库与 storage/ 不在同一目录：
 #    python scripts/sync_zotero.py --db-path /path/to/zotero.sqlite --storage-path /path/to/storage --extract-text
 
 # 5. 日常数据增量更新（推荐）
+paper-compass sync --dry-run
 paper-compass sync \
   --db-source-path /path/to/zotero.sqlite \
   --storage-path /path/to/storage
 # → 顺序执行 Zotero 同步、论文增量索引、wiki 增量生成、wiki 索引
+# → 增量索引以 PDF/文本内容 fingerprint 为核心；metadata-only / path-only 变化不会触发重嵌入
 # → 自动写入 data/state/last_sync.json
 # → 若检测到 vectordb 脏状态，会阻断并给出 rebuild 建议
 

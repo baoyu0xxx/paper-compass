@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 import time
 
+from paper_compass.sqlite_readonly import connect_readonly
 from paper_compass.zotero_paths import ZoteroSourceResolution
 
 
@@ -29,7 +30,7 @@ def create_sqlite_snapshot(src: Path, snapshot_dir: Path) -> Path:
     snapshot_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d-%H%M%S")
     dst = snapshot_dir / f"zotero.{ts}.sqlite"
-    with sqlite3.connect(f"file:{src}?mode=ro", uri=True) as source:
+    with connect_readonly(src) as source:
         with sqlite3.connect(dst) as target:
             source.backup(target)
     return dst

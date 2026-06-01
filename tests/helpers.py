@@ -12,8 +12,10 @@ class FakeEmbedder:
     def __init__(self, model_id: str = "fake:model"):
         self.model_id = model_id
         self.dimension = 1
+        self.embed_calls = 0
 
     def embed(self, texts, batch_size=32):
+        self.embed_calls += 1
         return [[float(len(text))] for text in texts]
 
     def embed_single(self, text):
@@ -61,6 +63,12 @@ class FakeStore:
         ids = self.get_chunk_ids_for_item(item_key)
         for doc_id in ids:
             self.docs.pop(doc_id, None)
+        return len(ids)
+
+    def update_item_metadata(self, item_key, metadata_patch):
+        ids = self.get_chunk_ids_for_item(item_key)
+        for doc_id in ids:
+            self.docs[doc_id]["metadata"].update(metadata_patch)
         return len(ids)
 
     def clear(self):

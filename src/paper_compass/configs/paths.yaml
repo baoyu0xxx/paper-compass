@@ -3,10 +3,12 @@ version: 1
 paths:
   zotero_pdf_root: $ZOTERO_PDF_ROOT
   zotero_sqlite_path: $ZOTERO_SQLITE_PATH
+  zotero_storage_path: $ZOTERO_STORAGE_PATH
 
   export_dir: ./data/zotero-export
   manifest_path: ./data/zotero-export/manifest.csv
   library_json_path: ./data/zotero-export/library.json
+  text_dir: ./data/texts
 
   wiki_root: ./wiki
   wiki_index_path: ./wiki/index.md
@@ -18,4 +20,5 @@ paths:
   log_dir: ./data/logs
   query_trace_path: ./data/logs/query-trace.jsonl
   pqa_home: ./.pqa
+  vectordb_path: ./data/vectordb
   temp_dir: ./tmp

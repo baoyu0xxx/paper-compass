@@ -111,6 +111,39 @@ class TestSyncExecute:
         assert "state file: /tmp/last_sync.json" in output
         assert "summary: planned" in output
 
+    def test_execute_sync_uses_configured_path_defaults(self):
+        from paper_compass.cli import sync_data
+        from paper_compass.config import PathSettings
+
+        args = _make_parser().parse_args(["--dry-run"])
+        result = SyncResult(
+            status="dry_run",
+            summary="planned",
+            planned_stages=[],
+            completed_stages=[],
+            state_path="/tmp/last_sync.json",
+        )
+        settings = PathSettings(
+            library_json_path="configured/library.json",
+            text_dir="configured/texts",
+            wiki_root="configured/wiki",
+            vectordb_path="configured/vectordb",
+            zotero_sqlite_path="configured/zotero.sqlite",
+            zotero_storage_path="configured/storage",
+        )
+
+        with mock.patch.object(sync_data, "resolve_path_settings", return_value=settings):
+            with mock.patch.object(sync_data, "run_sync_pipeline", return_value=result) as mocked:
+                with mock.patch("sys.stdout", io.StringIO()):
+                    assert sync_data.execute_sync(args) == 0
+
+        called_options = mocked.call_args.args[0]
+        assert called_options.db_path == sync_data.PROJECT_ROOT / "configured/vectordb"
+        assert called_options.db_source_path == "configured/zotero.sqlite"
+        assert called_options.storage_path == "configured/storage"
+        assert called_options.library_path == "configured/library.json"
+        assert called_options.wiki_root == "configured/wiki"
+
     def test_execute_sync_returns_one_on_health_error(self):
         from paper_compass.cli import sync_data
         from paper_compass.pipeline_sync import VectordbHealthError
