@@ -56,13 +56,15 @@ class ZoteroLibrary:
 
     # ── queries ───────────────────────────────────────────────────────────
 
-    def get_all_items_with_pdfs(self) -> List[Dict[str, Any]]:
-        """Return all Zotero items that have PDF attachments with metadata.
+    def _query_items(self, pdf_only: bool) -> List[Dict[str, Any]]:
+        """Return Zotero items with metadata, optionally restricting to PDF-backed items.
 
         Returns list of dicts: item_id, key, title, date, authors, tags,
         collections, attachment_key, attachment_path, item_type, pdf_path.
         """
-        query = """
+        pdf_clause = "WHERE (att_mime.value = 'application/pdf' OR att_path.path LIKE '%.pdf')" if pdf_only else ""
+
+        query = f"""
         SELECT
             i.itemID,
             i.key,
@@ -94,7 +96,7 @@ class ZoteroLibrary:
             AND att_data.fieldID = (SELECT fieldID FROM fields WHERE fieldName = 'mimeType')
         LEFT JOIN itemDataValues att_mime ON att_data.valueID = att_mime.valueID
         LEFT JOIN itemAttachments att_path ON att.itemID = att_path.itemID
-        WHERE (att_mime.value = 'application/pdf' OR att_path.path LIKE '%.pdf')
+        {pdf_clause}
         GROUP BY i.itemID
         """
 
@@ -118,6 +120,14 @@ class ZoteroLibrary:
                 items.append(item)
 
         return items
+
+    def get_all_items_with_pdfs(self) -> List[Dict[str, Any]]:
+        """Backward-compatible helper returning only items that have PDF attachments."""
+        return self._query_items(pdf_only=True)
+
+    def get_all_items(self) -> List[Dict[str, Any]]:
+        """Return all Zotero parent items, even if they currently have no PDF attachment."""
+        return self._query_items(pdf_only=False)
 
     def get_all_tags(self) -> List[str]:
         """Return all unique tags from items with PDFs."""

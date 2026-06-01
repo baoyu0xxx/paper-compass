@@ -14,6 +14,7 @@ from typing import Any
 from paper_compass.config import get_provider_config, load_all_configs, resolve_embedding_runtime
 from paper_compass.env_utils import DEFAULT_ENV_PATH, PROJECT_ROOT, load_project_env
 from paper_compass.index_health import inspect_index_health
+from paper_compass.paper_coverage import inspect_paper_coverage
 from paper_compass.resources import project_root
 from paper_compass.wiki_gen import describe_wiki_prompt_bundle
 
@@ -136,6 +137,13 @@ def collect_status() -> dict[str, Any]:
     db_path = PROJECT_ROOT / "data" / "vectordb"
 
     health = inspect_index_health(db_path)
+    coverage = inspect_paper_coverage(
+        "Feature augmentations for high-dimensional learning",
+        library_path=str(library_path),
+        text_dir=str(PROJECT_ROOT / "data" / "texts"),
+        db_path=str(db_path),
+        wiki_root=str(wiki_root),
+    )
 
     return {
         "project_root": str(repo_root),
@@ -162,6 +170,11 @@ def collect_status() -> dict[str, Any]:
         "library": {
             "path": str(library_path),
             "record_count": _read_library_count(library_path),
+        },
+        "coverage": {
+            "query": coverage.query,
+            "diagnosis": coverage.diagnosis,
+            "recommendations": coverage.recommendations,
         },
         "wiki": {
             "root": str(wiki_root),
@@ -227,6 +240,9 @@ def _print_status_report(status: dict[str, Any]) -> None:
     print("  library")
     print(f"    path: {library['path']}")
     print(f"    records: {library['record_count'] if library['record_count'] is not None else 'unavailable'}")
+    coverage = status.get("coverage", {})
+    if coverage:
+        print(f"    coverage[{coverage.get('query', '')}]: {coverage.get('diagnosis', 'unknown')}")
     print()
 
     wiki = status["wiki"]
