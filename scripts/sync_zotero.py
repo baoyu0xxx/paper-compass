@@ -116,6 +116,9 @@ def main():
 
     for item in items:
         pdf_path = item.get("pdf_path", "")
+        existing_text = text_dir / f"{item['key']}.txt"
+        if existing_text.exists():
+            item["text_file"] = str(existing_text)
         if not pdf_path or not Path(pdf_path).exists():
             missing_pdf += 1
             continue

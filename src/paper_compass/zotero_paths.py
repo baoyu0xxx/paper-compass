@@ -54,6 +54,10 @@ def _candidate_db_paths(root: Path) -> List[Path]:
     return [root / "zotero.sqlite"]
 
 
+def _looks_like_live_zotero_sqlite(db_candidate: Path) -> bool:
+    return db_candidate.name.lower() == "zotero.sqlite"
+
+
 def _default_root_candidates() -> List[Path]:
     candidates: List[Path] = [Path("~/Zotero").expanduser()]
 
@@ -94,6 +98,14 @@ def _resolve_candidate(
 
     if not db_candidate.is_file():
         tried.append(ZoteroPathAttempt(path=str(db_candidate), reason="database path exists but is not a file"))
+        return None
+
+    try:
+        if db_candidate.stat().st_size <= 0:
+            tried.append(ZoteroPathAttempt(path=str(db_candidate), reason="database file is empty"))
+            return None
+    except OSError as exc:
+        tried.append(ZoteroPathAttempt(path=str(db_candidate), reason=f"unable to stat database file: {exc}"))
         return None
 
     storage_path = storage_override.expanduser() if storage_override else db_candidate.parent / "storage"
@@ -138,7 +150,7 @@ def resolve_zotero_source(
             storage_override=storage_override,
             source_kind="explicit",
             tried=tried,
-            is_live_candidate=False,
+            is_live_candidate=_looks_like_live_zotero_sqlite(Path(explicit_db_path)),
         )
         if resolved is not None:
             return resolved
@@ -151,7 +163,7 @@ def resolve_zotero_source(
             storage_override=storage_override,
             source_kind="env",
             tried=tried,
-            is_live_candidate=False,
+            is_live_candidate=_looks_like_live_zotero_sqlite(Path(env_db_path)),
         )
         if resolved is not None:
             return resolved

@@ -42,6 +42,7 @@ def test_explicit_db_path_wins_over_auto_candidates(tmp_path):
     assert resolved.db_path == explicit_root / "zotero.sqlite"
     assert resolved.storage_path == explicit_root / "storage"
     assert resolved.source_kind == "explicit"
+    assert resolved.is_live_candidate is True
 
 
 def test_env_path_used_when_no_explicit_db_path(tmp_path, monkeypatch):
@@ -185,6 +186,22 @@ def test_invalid_env_db_path_falls_through_to_default_candidates(tmp_path, monke
 
     assert resolved.db_path == good_default_root / "zotero.sqlite"
     assert any("not a file" in attempt.reason for attempt in resolved.tried)
+
+
+def test_empty_default_sqlite_falls_through_to_backup_root(tmp_path):
+    empty_default = tmp_path / "default"
+    empty_default.mkdir(parents=True, exist_ok=True)
+    (empty_default / "zotero.sqlite").write_bytes(b"")
+    (empty_default / "storage").mkdir(parents=True, exist_ok=True)
+    backup_root = _make_zotero_dir(tmp_path / "backup", readonly=True, writable=True, storage=True)
+
+    resolved = resolve_zotero_source(
+        default_roots=[empty_default],
+        backup_roots=[backup_root],
+    )
+
+    assert resolved.db_path == backup_root / "zotero.sqlite"
+    assert any("database file is empty" in attempt.reason for attempt in resolved.tried)
 
 
 def test_incomplete_default_root_falls_back_to_backup_root(tmp_path):
