@@ -3,9 +3,11 @@
 Tests the interactive and non-interactive configuration modes.
 """
 
+import argparse
 import os
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -13,6 +15,7 @@ from paper_compass.cli.configure import (
     _embed_args_to_env,
     _llm_args_to_env,
     _write_dotenv,
+    execute_init,
 )
 
 
@@ -147,3 +150,78 @@ class TestWriteDotenv:
         # New keys appended
         assert "EMBED_BASE_URL=https://embed.example.com" in content
         assert "EMBED_API_KEY=sk-embed" in content
+
+
+def test_execute_init_ensures_runtime_before_writing_env(monkeypatch, tmp_path):
+    env_path = tmp_path / ".env"
+    calls = []
+    state = SimpleNamespace(
+        managed_exists=True,
+        managed_active=True,
+        managed_python=tmp_path / ".venv" / "Scripts" / "python.exe",
+        status="active",
+        reasons=[],
+    )
+
+    monkeypatch.setattr(
+        "paper_compass.cli.configure.ensure_managed_runtime",
+        lambda **kwargs: calls.append(kwargs) or state,
+    )
+    monkeypatch.setattr(
+        "paper_compass.cli.configure.runtime_state",
+        lambda **kwargs: state,
+    )
+    monkeypatch.setattr(
+        "paper_compass.cli.configure._write_dotenv",
+        lambda *args, **kwargs: calls.append({"write": args[0]}),
+    )
+
+    args = argparse.Namespace(
+        llm_args={"base_url": "https://api.example.com", "api_key": "sk-test", "model": "gpt-4o"},
+        embed_args={"base_url": "https://embed.example.com", "api_key": "sk-embed", "model": "text-embedding-3-small"},
+        wiki_prompt=None,
+        force=True,
+        env_path=str(env_path),
+        python=None,
+        without_dev=False,
+    )
+
+    rc = execute_init(args)
+
+    assert rc == 0
+    assert calls[0]["with_dev"] is True
+    assert calls[1] == {"write": str(env_path)}
+
+
+def test_execute_init_fails_when_managed_runtime_exists_but_current_python_is_wrong(monkeypatch, tmp_path):
+    env_path = tmp_path / ".env"
+    state = SimpleNamespace(
+        managed_exists=True,
+        managed_active=False,
+        managed_python=tmp_path / ".venv" / "Scripts" / "python.exe",
+        status="inactive",
+        reasons=["current interpreter does not match managed runtime"],
+        current_python=tmp_path / "external" / "python.exe",
+    )
+
+    monkeypatch.setattr(
+        "paper_compass.cli.configure.runtime_state",
+        lambda **kwargs: state,
+    )
+    monkeypatch.setattr(
+        "paper_compass.cli.configure.ensure_managed_runtime",
+        lambda **kwargs: state,
+    )
+
+    args = argparse.Namespace(
+        llm_args={"base_url": "https://api.example.com", "api_key": "sk-test", "model": "gpt-4o"},
+        embed_args={"base_url": "https://embed.example.com", "api_key": "sk-embed", "model": "text-embedding-3-small"},
+        wiki_prompt=None,
+        force=True,
+        env_path=str(env_path),
+        python=None,
+        without_dev=False,
+    )
+
+    with pytest.raises(RuntimeError, match="managed runtime"):
+        execute_init(args)

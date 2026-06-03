@@ -7,6 +7,7 @@ Detects breaking changes (new env vars, config schema changes) and guides the us
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import subprocess
 import sys
@@ -14,6 +15,7 @@ from pathlib import Path
 from typing import Optional
 
 from paper_compass.env_utils import DEFAULT_ENV_PATH, PROJECT_ROOT
+from paper_compass.runtime_env import ManagedRuntimeError, ensure_managed_runtime
 
 _ENV_VAR_RE = re.compile(r"^(#\s*)?([A-Z][A-Z0-9_]+)=", re.MULTILINE)
 
@@ -264,7 +266,7 @@ def _get_changelog(old_ref: str, new_ref: str) -> str:
 # ── Update execution ──────────────────────────────────────────────────────
 
 def _perform_update(target_ref: str) -> bool:
-    """Fetch + checkout target ref, reinstall package. Returns True on success."""
+    """Fetch + checkout target ref, sync the managed runtime. Returns True on success."""
     print(f"\n  Fetching updates from origin...")
     result = _git("fetch", "origin", "--tags")
     if result.returncode != 0:
@@ -274,49 +276,45 @@ def _perform_update(target_ref: str) -> bool:
     print(f"  Switching to {target_ref}...")
     result = _git("checkout", target_ref)
     if result.returncode != 0:
-        # Try with origin/ prefix for branches
         result2 = _git("checkout", f"origin/{target_ref}")
         if result2.returncode != 0:
             print(f"  ✗ git checkout failed: {result.stderr.strip()}")
             return False
 
-    print(f"  Reinstalling paper-compass...")
-    pip_result = subprocess.run(
-        [sys.executable, "-m", "pip", "install", "-e", "."],
-        capture_output=True,
-        text=True,
-        cwd=str(PROJECT_ROOT),
-    )
-    if pip_result.returncode != 0:
-        print(f"  ✗ pip install failed:\n{pip_result.stderr.strip()}")
+    print("  Syncing managed runtime (.venv)...")
+    try:
+        state = ensure_managed_runtime(
+            project_root=PROJECT_ROOT,
+            bootstrap_python=Path(sys.executable),
+            with_dev=(PROJECT_ROOT / "tests").exists(),
+        )
+    except ManagedRuntimeError as exc:
+        print(f"  ✗ managed runtime sync failed:\n{exc}")
         return False
 
-    # Also install dev deps if tests directory exists
-    if (PROJECT_ROOT / "tests").exists():
-        subprocess.run(
-            [sys.executable, "-m", "pip", "install", "-e", ".[dev]"],
-            capture_output=True,
-            text=True,
-            cwd=str(PROJECT_ROOT),
-        )
-
-    print(f"  ✓ Update complete")
+    print(f"  ✓ Managed runtime ready: {state.managed_python}")
     return True
 
 
 # ── Post-update verification ──────────────────────────────────────────────
 
 def _run_post_checks() -> None:
-    """Run paper-compass validate + quick pytest smoke."""
+    """Run paper-compass validate + quick pytest smoke inside the managed runtime."""
     print()
 
-    # Run paper-compass validate as a subprocess (package may have changed)
+    state = ensure_managed_runtime(
+        project_root=PROJECT_ROOT,
+        bootstrap_python=Path(sys.executable),
+        with_dev=(PROJECT_ROOT / "tests").exists(),
+    )
+    managed_python = str(state.managed_python)
+
     result = subprocess.run(
-        [sys.executable, "-m", "paper_compass.cli.validate"],
+        [managed_python, "-m", "paper_compass.cli.validate"],
         capture_output=True,
         text=True,
         cwd=str(PROJECT_ROOT),
-        env={**__import__("os").environ, "PYTHONPATH": str(PROJECT_ROOT / "src")},
+        env={**os.environ, "PYTHONPATH": str(PROJECT_ROOT / "src")},
     )
     if result.returncode == 0:
         print("  ✓ paper-compass validate: OK")
@@ -326,10 +324,9 @@ def _run_post_checks() -> None:
             print(result.stdout.strip())
         print("\n  Try: paper-compass init --force  to reconfigure.")
 
-    # Quick test smoke (exit early on first failure)
     if (PROJECT_ROOT / "tests").exists():
         test_result = subprocess.run(
-            [sys.executable, "-m", "pytest", "tests/", "-x", "--tb=short", "-q"],
+            [managed_python, "-m", "pytest", "tests/", "-x", "--tb=short", "-q"],
             capture_output=True,
             text=True,
             cwd=str(PROJECT_ROOT),
@@ -338,7 +335,6 @@ def _run_post_checks() -> None:
             print("  ✓ pytest: all tests pass")
         else:
             print("  ⚠ pytest: some tests failed (may be environment-specific)")
-            # Show last few lines
             lines = test_result.stdout.strip().splitlines()
             for line in lines[-5:]:
                 print(f"    {line}")

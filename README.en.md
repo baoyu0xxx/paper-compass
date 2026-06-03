@@ -4,9 +4,9 @@
 
 **Turn your Zotero library into a dual-engine knowledge base for AI agents — RAG full-text retrieval + LLM wiki knowledge compilation**
 
-[![version](https://img.shields.io/badge/version-1.3.0-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.4.0-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
-[![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
+[![python](https://img.shields.io/badge/Python-3.12+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
 
 </div>
@@ -60,7 +60,7 @@ The recommended path is to install the published wheel from GitHub Release direc
 
 ```bash
 python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.3.0/paper_compass-1.3.0-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.0/paper_compass-1.4.0-py3-none-any.whl
 
 # Interactive setup
 paper-compass init
@@ -86,14 +86,14 @@ Copy the following prompt to your AI agent — it will handle the full paper-com
 > Please deploy paper-compass under `$HOME/projects/` (create the directory if it doesn't exist). Follow these steps:
 >
 > 1. Clone the repo: `git clone https://github.com/baoyu0xxx/paper-compass.git` into `$HOME/projects/paper-compass`
-> 2. Install dependencies: `cd $HOME/projects/paper-compass && pip install -e .`
-> 3. Run `paper-compass init` for interactive LLM and Embedding API configuration using the credentials you know
+> 2. Bootstrap the repo-local managed runtime: `cd $HOME/projects/paper-compass && python3 scripts/bootstrap_runtime.py`
+> 3. Activate `.venv` (Windows: `.venv\\Scripts\\activate`; POSIX: `source .venv/bin/activate`), then run `paper-compass init` for interactive LLM and Embedding API configuration
 > 4. Run `paper-compass validate` to verify connectivity
 > 5. Export your Zotero SQLite database path as `ZOTERO_SQLITE_PATH` env var, then run `python scripts/sync_zotero.py --extract-text`
 > 6. Run `python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild`
 > 7. (Optional) Run `python scripts/ingest_to_wiki.py --limit 3 --workers 1` to test wiki generation
 > 8. Run `paper-compass-healthcheck --smoke` to verify all subsystems
-> 9. Finally, add the MCP config to your current agent framework (for Hermes, prefer an absolute script path and explicitly set `PYTHONPATH=$HOME/projects/paper-compass/src`)
+> 9. Finally, add the MCP config to your current agent framework (for Hermes, point `command` directly at the repo-local `.venv` Python and `args` at `scripts/run_mcp_server.py --mcp`; do not keep using legacy WSL `/mnt/d/...` paths or a system Python)
 >
 > Confirm each step before proceeding to the next.
 
@@ -102,7 +102,7 @@ Copy the following prompt to your AI agent — it will handle the full paper-com
 For more capable agents, a one-line instruction is also enough:
 
 ```text
-Please clone https://github.com/baoyu0xxx/paper-compass.git, install dependencies, run paper-compass init for interactive configuration, verify the setup, and sync my Zotero library.
+Please clone https://github.com/baoyu0xxx/paper-compass.git, bootstrap the repo-local .venv, run paper-compass init for interactive configuration, verify the setup, and sync my Zotero library.
 ```
 
 ### Option C: From Source (Developers)
@@ -111,19 +111,25 @@ Please clone https://github.com/baoyu0xxx/paper-compass.git, install dependencie
 # 1. Clone the repository
 git clone https://github.com/baoyu0xxx/paper-compass.git
 cd paper-compass
-python3 -m pip install -e .
+python3 scripts/bootstrap_runtime.py
 
-# 2. Configure environment variables — interactive (recommended)
+# 2. Activate the repo-local .venv (choose one)
+# Windows:
+# .venv\\Scripts\\activate
+# POSIX:
+# source .venv/bin/activate
+
+# 3. Configure environment variables — interactive (recommended)
 paper-compass init
 
 #    Or edit manually:
 #    cp .env.example .env
 #    Edit .env — fill in the API keys for the LLM and embedding provider
 
-# 3. Verify configuration connectivity
+# 4. Verify configuration connectivity
 paper-compass validate
 
-# 4. Prepare data
+# 5. Prepare data
 python scripts/sync_zotero.py --extract-text
 # → auto-discovery order: explicit --db-path > ZOTERO_SQLITE_PATH > default Zotero dirs > backup dirs
 # → data/zotero-export/library.json + data/texts/*.txt
@@ -133,7 +139,7 @@ Auto-discovery only selects Zotero's official `zotero.sqlite`. The legacy `zoter
 #    If the database and storage/ are not in the same directory:
 #    python scripts/sync_zotero.py --db-path /path/to/zotero.sqlite --storage-path /path/to/storage --extract-text
 
-# 5. Routine incremental data sync (recommended)
+# 6. Routine incremental data sync (recommended)
 paper-compass sync \
   --db-source-path /path/to/zotero.sqlite \
   --storage-path /path/to/storage
@@ -141,18 +147,18 @@ paper-compass sync \
 # → writes data/state/last_sync.json automatically
 # → blocks writes and suggests a rebuild if vectordb is dirty or corrupted
 
-# 6. Run individual stages manually (only when you need finer control)
+# 7. Run individual stages manually (only when you need finer control)
 scripts/pc-index-full.sh
 scripts/pc-index-incremental.sh
 scripts/pc-wiki-build.sh --limit 3
 scripts/pc-wiki-index.sh
 
-# 7. Long-running wiki generation (optional; hundreds of papers often take hours)
+# 8. Long-running wiki generation (optional; hundreds of papers often take hours)
 scripts/pc-wiki-ingest-bg.sh
 # View logs:
 tail -f data/logs/wiki_gen.log
 
-# 8. Verify
+# 9. Verify
 paper-compass-healthcheck --smoke
 python eval/run_eval.py -v
 ```
@@ -160,7 +166,7 @@ python eval/run_eval.py -v
 These `scripts/pc-*.sh` wrappers are intentionally thin: they pin repo root, provide sane default paths, and reduce long-command typing errors.
 If you prefer direct Python entrypoints, `scripts/build_index.py` and `scripts/ingest_to_wiki.py` remain supported.
 
-Starting with v1.3.0, installed `paper-compass-mcp` and `paper-compass-healthcheck` entrypoints point directly to package-resident implementations. The historical packaged `scripts.*` compatibility shims have been removed; use the current console scripts or the repository `scripts/` files directly.
+Starting with v1.4.0, installed `paper-compass-mcp` and `paper-compass-healthcheck` entrypoints point directly to package-resident implementations. The historical packaged `scripts.*` compatibility shims have been removed; use the current console scripts or the repository `scripts/` files directly.
 
 ## Updating
 
@@ -176,7 +182,7 @@ If you installed paper-compass from GitHub Release, point pip directly to the ta
 
 ```bash
 python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.3.0/paper_compass-1.3.0-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.0/paper_compass-1.4.0-py3-none-any.whl
 ```
 
 To install another published version later, replace the version in the URL accordingly. Published releases can be listed with:
@@ -241,7 +247,7 @@ paper-compass update --check
 paper-compass update
 
 # Update to a specific version
-paper-compass update --version v1.3.0
+paper-compass update --version v1.4.0
 
 # Simulate an update (preview without executing)
 paper-compass update --dry-run
@@ -249,7 +255,7 @@ paper-compass update --dry-run
 
 `paper-compass update` automatically:
 - fetches the latest code and switches to the target version
-- reinstalls Python dependencies
+- syncs the repo-local `.venv` so editable installs and dependencies follow the checked-out code
 - detects breaking changes (new required env vars, config-format changes, etc.) and warns you
 - runs `paper-compass validate` to verify API connectivity
 - runs a smoke-test check
@@ -262,8 +268,8 @@ If automatic update is unavailable, you can update manually:
 
 ```bash
 git fetch origin --tags
-git checkout v1.3.0         # or git pull origin main
-pip install -e .
+git checkout v1.4.0         # or git pull origin main
+python3 scripts/bootstrap_runtime.py
 paper-compass validate        # verify that the configuration still works
 python3 -m pytest tests/ -x   # ensure tests pass
 ```
@@ -290,7 +296,7 @@ The three main paths have already been introduced in Quick Start: Release instal
 
 | Requirement | Notes |
 |-------------|-------|
-| Python ≥ 3.11 | Check with `python3 --version` |
+| Python ≥ 3.12 | Check with `python3 --version` |
 | Zotero library | Optional — pre-extracted text files are also supported |
 | LLM API key | Wiki generation requires an OpenAI-compatible endpoint (`LLM_BASE_URL` + `LLM_API_KEY`) |
 | Embedding API key | OpenAI-compatible and Volcengine multimodal embedding are supported |
@@ -432,7 +438,7 @@ After installation, the `paper-compass` command is available directly:
 # Interactive configuration of the LLM and embedding provider
 paper-compass init
 
-# Unified local retrieval entrypoint (v1.3.0 was smoke-tested on a local library with 417 records and 406 wiki pages)
+# Unified local retrieval entrypoint (v1.4.0 was smoke-tested on a local library with 417 records and 406 wiki pages)
 paper-compass search wiki --query "family-firm succession" --limit 3
 # → returns relevant wiki pages such as intergenerational succession and family-firm diversification/risk-taking
 
@@ -510,20 +516,20 @@ python scripts/ingest_to_wiki.py --skip-existing --workers 10
 
 #### Configure Hermes Agent
 
-Add the following to `config.yaml`:
+Point the `paper-compass` MCP server directly at the repo-local managed `.venv` in `config.yaml`:
 
 ```yaml
 mcp_servers:
   paper-compass:
-    command: python3
-    args: ["/path/to/paper-compass/scripts/run_mcp_server.py", "--mcp"]
-    env:
-      PYTHONPATH: "/path/to/paper-compass/src"
+    command: /path/to/paper-compass/.venv/bin/python
+    args:
+      - /path/to/paper-compass/scripts/run_mcp_server.py
+      - --mcp
     connect_timeout: 60
     timeout: 120
 ```
 
-`scripts/run_mcp_server.py` now proactively adds the repository's `src/` directory to `sys.path` at startup to reduce differences between editable installs and direct script execution, but explicitly setting `PYTHONPATH` on the MCP client side is still usually more robust.
+Before configuring MCP, run `python3 scripts/bootstrap_runtime.py` once. The MCP entrypoint now explicitly checks that the current interpreter is the repository-local `.venv`; if it still points at a system Python, it fails fast instead of silently falling back.
 
 #### Configure Claude Desktop
 
@@ -531,13 +537,17 @@ mcp_servers:
 {
   "mcpServers": {
     "paper-compass": {
-      "command": "python3",
-      "args": ["scripts/run_mcp_server.py", "--mcp"],
-      "cwd": "/path/to/paper-compass"
+      "command": "D:\\pyproject\\paper-compass\\.venv\\Scripts\\python.exe",
+      "args": [
+        "D:\\pyproject\\paper-compass\\scripts\\run_mcp_server.py",
+        "--mcp"
+      ]
     }
   }
 }
 ```
+
+If you run on POSIX / WSL instead, replace those paths with the corresponding `.venv/bin/python` and absolute script path.
 
 #### CLI Tool Mode
 
@@ -629,9 +639,15 @@ paper-compass/
 ### Run tests
 
 ```bash
-pip install -e ".[dev]"
-python3 -m pytest tests/ -v
-python3 -m pytest tests/ -x
+python3 scripts/bootstrap_runtime.py
+
+# Windows:
+.venv/Scripts/python.exe -m pytest tests/ -v
+.venv/Scripts/python.exe -m pytest tests/ -x
+
+# POSIX:
+.venv/bin/python -m pytest tests/ -v
+.venv/bin/python -m pytest tests/ -x
 ```
 
 ### Run evaluation
@@ -663,6 +679,7 @@ Major additions on top of those foundations:
 
 | Version | Date | Notes |
 |---------|------|-------|
+| v1.4.0 | 2026-06-03 | **Repo-local managed runtime + fail-fast MCP startup** — added `scripts/bootstrap_runtime.py` and `src/paper_compass/runtime_env.py` to manage a repository-local `.venv`; wired runtime status into `paper-compass init / update / status / healthcheck`; made MCP entrypoints and shell wrappers validate the interpreter explicitly and fail fast on misconfiguration; raised the Python baseline to `>=3.12`; updated README and MCP configuration guidance to the managed-runtime model |
 | v1.2.7 | 2026-05-15 | **Data sync command + vectordb health guard** — added `paper-compass sync`, integrating `sync_zotero.py`, incremental paper indexing, incremental wiki generation, and wiki vectorization into one command; added `data/state/last_sync.json` and `data/state/sync.lock`; checks journal/WAL/manifest/readability before writes; supports `--rebuild {papers,wiki,all}` and `--backup-corrupted-db` recovery paths |
 | v1.2.6 | 2026-05-13 | **MCP cold-start optimization** — removed `clear_system_cache()`-triggered double loading; introduced a shared `PersistentClient`; prewarms wiki and paper collections after MCP handshake |
 

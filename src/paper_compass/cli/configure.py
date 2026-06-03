@@ -19,6 +19,7 @@ from typing import Any
 from paper_compass.cli.arg_utils import MergeDictAction
 from paper_compass.env_utils import PROJECT_ROOT, DEFAULT_ENV_PATH, load_project_env
 from paper_compass.resources import resolve_package_path
+from paper_compass.runtime_env import ensure_managed_runtime, runtime_state
 
 # ── Default values ──────────────────────────────────────────────────────────
 
@@ -443,6 +444,15 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
         ),
     )
 
+    parser.add_argument(
+        "--python",
+        help="Bootstrap interpreter to use for the repo-local .venv (default: current Python)",
+    )
+    parser.add_argument(
+        "--without-dev",
+        action="store_true",
+        help="Install only runtime dependencies into the managed .venv",
+    )
     parser.set_defaults(func=execute_init)
 
 
@@ -451,6 +461,22 @@ def execute_init(args: argparse.Namespace) -> int:
     env_path = args.env_path
     path = Path(env_path)
     has_env_file = path.exists()
+    runtime_project_root = path.parent.resolve(strict=False)
+
+    existing_runtime = runtime_state(project_root=runtime_project_root, current_python=Path(sys.executable))
+    if existing_runtime.managed_exists and not existing_runtime.managed_active:
+        raise RuntimeError(
+            "managed runtime exists but current interpreter is not the repo-local runtime.\n"
+            f"current python: {existing_runtime.current_python}\n"
+            f"managed python: {existing_runtime.managed_python}\n"
+            "run python scripts/bootstrap_runtime.py or invoke paper-compass from the managed .venv"
+        )
+
+    ensure_managed_runtime(
+        project_root=runtime_project_root,
+        bootstrap_python=Path(args.python) if getattr(args, "python", None) else None,
+        with_dev=not getattr(args, "without_dev", False),
+    )
 
     # Always load existing .env into os.environ first, so config detection works
     if has_env_file:

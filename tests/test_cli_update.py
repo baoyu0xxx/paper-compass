@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 import pytest
@@ -19,6 +20,7 @@ from paper_compass.cli.update import (
     _get_current_version,
     _get_latest_tag,
     _parse_env_vars,
+    _perform_update,
 )
 
 
@@ -406,6 +408,28 @@ class TestExecuteUpdateImpl:
         assert "Updating v1.2.0 → v1.3.0" in output
         assert "⚠ Upgrade notes:" in output
         assert "(dry-run — no changes made)" in output
+
+
+def test_perform_update_uses_managed_runtime_instead_of_sys_executable(tmp_path):
+    managed_python = tmp_path / ".venv" / "Scripts" / "python.exe"
+    state = SimpleNamespace(
+        managed_python=managed_python,
+        managed_exists=True,
+        managed_active=True,
+        status="active",
+    )
+
+    with mock.patch("paper_compass.cli.update._git") as git_cmd, mock.patch(
+        "paper_compass.cli.update.ensure_managed_runtime",
+        return_value=state,
+    ) as ensure_runtime:
+        git_cmd.side_effect = [mock.Mock(returncode=0), mock.Mock(returncode=0)]
+        assert _perform_update("v1.3.0") is True
+
+    ensure_runtime.assert_called_once()
+    kwargs = ensure_runtime.call_args.kwargs
+    assert kwargs["project_root"] == Path("D:/pyproject/paper-compass") or kwargs["project_root"]
+    assert kwargs["bootstrap_python"] == Path(sys.executable)
 
 
 def _make_parser():

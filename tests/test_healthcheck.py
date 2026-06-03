@@ -96,6 +96,7 @@ def test_healthcheck_deps_only_skips_project_state_checks(monkeypatch, capsys):
     monkeypatch.setattr(healthcheck, "_check_bm25_dep", lambda: calls.append("bm25") or ("bm25", "OK"))
     monkeypatch.setattr(healthcheck, "_check_pdf_fallback_dep", lambda: calls.append("pdf") or ("pdf_fallback", "OK"))
     monkeypatch.setattr(healthcheck, "_check_local_embedding_dep", lambda: calls.append("local") or ("local_embed", "SKIP: cloud embedding configured"))
+    monkeypatch.setattr(healthcheck, "_check_runtime", lambda: calls.append("runtime") or ("runtime", "OK"))
     monkeypatch.setattr(healthcheck, "_check_env", lambda: calls.append("env") or ("env_vars", "OK"))
     monkeypatch.setattr(healthcheck, "_check_library", lambda: calls.append("library") or ("library.json", "OK"))
     monkeypatch.setattr(healthcheck, "_check_vectordb", lambda: calls.append("vectordb") or ("vectordb", "OK"))
@@ -109,8 +110,33 @@ def test_healthcheck_deps_only_skips_project_state_checks(monkeypatch, capsys):
     assert calls == ["core", "bm25", "pdf", "local"]
     output = capsys.readouterr().out
     assert "core_deps" in output
+    assert "runtime" not in output
     assert "library.json" not in output
     assert "vectordb" not in output
+
+
+def test_healthcheck_includes_runtime_check_in_normal_mode(monkeypatch, capsys):
+    from paper_compass import healthcheck
+
+    calls = []
+
+    monkeypatch.setattr(healthcheck, "_check_core_deps", lambda: ("core_deps", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_bm25_dep", lambda: ("bm25", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_pdf_fallback_dep", lambda: ("pdf_fallback", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_local_embedding_dep", lambda: ("local_embed", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_runtime", lambda: calls.append("runtime") or ("runtime", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_env", lambda: ("env_vars", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_library", lambda: ("library.json", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_vectordb", lambda: ("vectordb", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_wiki", lambda: ("wiki", "OK"))
+    monkeypatch.setattr(healthcheck, "_check_mcp_contracts", lambda: ("mcp_contracts", "OK"))
+    monkeypatch.setattr("sys.argv", ["paper-compass-healthcheck"])
+
+    rc = healthcheck.main()
+
+    assert rc == 0
+    assert calls == ["runtime"]
+    assert "runtime: OK" in capsys.readouterr().out
 
 
 def test_vectordb_healthcheck_reports_index_health_corruption(monkeypatch):

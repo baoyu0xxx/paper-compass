@@ -174,23 +174,7 @@ def test_wrapper_scripts_forward_expected_defaults_and_args(
     assert lines[1:] == expected_args
 
 
-def test_run_mcp_prefers_package_command_when_available(fake_mcp_cmd: Path):
-    result = _run_script(
-        "run_mcp.sh",
-        "--inspect",
-        env={
-            "PAPER_COMPASS_ROOT": _bash_path(REPO_ROOT),
-            "PATH": f"{_bash_path(fake_mcp_cmd.parent)}:{os.environ['PATH']}",
-        },
-    )
-
-    assert result.returncode == 0, result.stderr
-    lines = result.stdout.strip().splitlines()
-    assert lines[0] == _bash_path(fake_mcp_cmd)
-    assert lines[1:] == ["--mcp", "--inspect"]
-
-
-def test_run_mcp_falls_back_to_python_script(fake_python: Path):
+def test_run_mcp_uses_explicit_python_override(fake_python: Path):
     result = _run_script(
         "run_mcp.sh",
         "--inspect",
@@ -207,24 +191,36 @@ def test_run_mcp_falls_back_to_python_script(fake_python: Path):
     assert lines[1:] == ["scripts/run_mcp_server.py", "--mcp", "--inspect"]
 
 
-def test_run_mcp_falls_back_when_package_command_is_broken(
-    fake_python: Path,
+def test_run_mcp_does_not_use_global_package_command_when_no_managed_runtime(fake_mcp_cmd: Path, tmp_path: Path):
+    result = _run_script(
+        "run_mcp.sh",
+        "--inspect",
+        env={
+            "PAPER_COMPASS_ROOT": _bash_path(tmp_path),
+            "PATH": f"{_bash_path(fake_mcp_cmd.parent)}:/usr/bin:/bin",
+        },
+    )
+
+    assert result.returncode != 0
+    assert "managed runtime" in result.stderr.lower()
+    assert "bootstrap_runtime.py" in result.stderr
+
+
+def test_run_mcp_does_not_silently_fallback_from_broken_global_command(
     broken_mcp_cmd: Path,
+    tmp_path: Path,
 ):
     result = _run_script(
         "run_mcp.sh",
         "--inspect",
         env={
-            "PAPER_COMPASS_ROOT": _bash_path(REPO_ROOT),
-            "PAPER_COMPASS_PYTHON": _bash_path(fake_python),
+            "PAPER_COMPASS_ROOT": _bash_path(tmp_path),
             "PATH": f"{_bash_path(broken_mcp_cmd.parent)}:/usr/bin:/bin",
         },
     )
 
-    assert result.returncode == 0, result.stderr
-    lines = result.stdout.strip().splitlines()
-    assert lines[0] == _bash_path(fake_python)
-    assert lines[1:] == ["scripts/run_mcp_server.py", "--mcp", "--inspect"]
+    assert result.returncode != 0
+    assert "managed runtime" in result.stderr.lower()
 
 
 def test_wiki_ingest_bg_reports_log_path_and_creates_log_dir(fake_python: Path):

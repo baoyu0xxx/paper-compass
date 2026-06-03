@@ -1,9 +1,9 @@
 """Protocol-level MCP stdio smoke tests using real JSON-RPC interactions.
-
 Tests the full MCP lifecycle: initialize → initialized → tools/list → tools/call.
 """
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -14,6 +14,8 @@ SCRIPT = ROOT / "scripts" / "run_mcp_server.py"
 
 
 def _start_server():
+    env = os.environ.copy()
+    env["PAPER_COMPASS_SKIP_RUNTIME_CHECK"] = "1"
     proc = subprocess.Popen(
         [sys.executable, str(SCRIPT), "--mcp"],
         stdin=subprocess.PIPE,
@@ -21,6 +23,7 @@ def _start_server():
         stderr=subprocess.PIPE,
         text=True,
         cwd=str(ROOT),
+        env=env,
     )
     assert proc.stdout is not None
     assert proc.stdin is not None

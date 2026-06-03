@@ -4,9 +4,9 @@
 
 **将 Zotero 论文库转化为 AI Agent 可直接检索的双引擎知识库（RAG 原文检索 + LLM Wiki 知识编译）**
 
-[![version](https://img.shields.io/badge/version-1.3.0-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.4.0-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
-[![python](https://img.shields.io/badge/Python-3.11+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
+[![python](https://img.shields.io/badge/Python-3.12+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
 
 </div>
@@ -60,7 +60,7 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
 ```bash
 python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.3.0/paper_compass-1.3.0-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.0/paper_compass-1.4.0-py3-none-any.whl
 
 # 交互式配置
 paper-compass init
@@ -86,14 +86,14 @@ paper-compass sync \
 > 请帮忙在 `$HOME/projects/` 下部署 paper-compass（若目录不存在则创建）。执行以下步骤：
 >
 > 1. 克隆仓库：`git clone https://github.com/baoyu0xxx/paper-compass.git` 到 `$HOME/projects/paper-compass`
-> 2. 安装依赖：`cd $HOME/projects/paper-compass && pip install -e .`
-> 3. 运行 `paper-compass init`，使用你已知的 LLM 和 Embedding API 配置信息进行交互式配置
+> 2. 初始化仓库内独立虚拟环境：`cd $HOME/projects/paper-compass && python3 scripts/bootstrap_runtime.py`
+> 3. 激活 `.venv`（Windows: `.venv\\Scripts\\activate`；POSIX: `source .venv/bin/activate`），再运行 `paper-compass init` 做交互式配置
 > 4. 运行 `paper-compass validate` 验证连通性
 > 5. 将你的 Zotero SQLite 数据库路径导出到 `ZOTERO_SQLITE_PATH` 环境变量，然后运行 `python scripts/sync_zotero.py --extract-text`
 > 6. 运行 `python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild`
 > 7. （可选）运行 `python scripts/ingest_to_wiki.py --limit 3 --workers 1` 测试 wiki 生成
 > 8. 运行 `python scripts/healthcheck.py --smoke` 验证所有子系统
-> 9. 最后将 MCP 配置添加到当前对话框架的配置中（Hermes 推荐使用绝对脚本路径，并显式设置 `PYTHONPATH=$HOME/projects/paper-compass/src`）
+> 9. 最后将 MCP 配置添加到当前对话框架的配置中（Hermes 推荐直接把 `command` 指向仓库内 `.venv` 的 Python，并把 `args` 指向 `scripts/run_mcp_server.py --mcp`；不要再使用旧的 WSL `/mnt/d/...` 路径或系统 Python）
 >
 > 每一步完成后确认结果再继续下一步。
 
@@ -102,7 +102,7 @@ paper-compass sync \
 根据 Agent 能力不同，也可以简化为一句话指令：
 
 ```text
-请帮我克隆 https://github.com/baoyu0xxx/paper-compass.git，安装依赖后运行 paper-compass init 做交互式配置，完成后验证安装并同步我的 Zotero 论文库。
+请帮我克隆 https://github.com/baoyu0xxx/paper-compass.git，初始化仓库内独立 .venv 后运行 paper-compass init 做交互式配置，完成后验证安装并同步我的 Zotero 论文库。
 ```
 
 ### 方式三：从源码安装（开发）
@@ -111,9 +111,15 @@ paper-compass sync \
 # 1. 克隆仓库
 git clone https://github.com/baoyu0xxx/paper-compass.git
 cd paper-compass
-python3 -m pip install -e .
+python3 scripts/bootstrap_runtime.py
 
-# 2. 配置环境变量 — 交互式（推荐）
+# 2. 激活仓库内 .venv（Windows / POSIX 二选一）
+# Windows:
+# .venv\Scripts\activate
+# POSIX:
+# source .venv/bin/activate
+
+# 3. 配置环境变量 — 交互式（推荐）
 paper-compass init
 
 #    或手动编辑：
@@ -163,7 +169,7 @@ python eval/run_eval.py -v
 这些 `scripts/pc-*.sh` 都是薄包装：负责固定 repo root、补默认路径、减少长命令手输错误；
 如果你更偏好直接调 Python 脚本，也仍然可以继续使用 `scripts/build_index.py` / `scripts/ingest_to_wiki.py`。
 
-自 v1.3.0 起，安装态 `paper-compass-mcp` 与 `paper-compass-healthcheck` 入口已直接指向包内实现；历史打包用的 `scripts.*` 兼容层已移除，请使用当前 console script 或仓库内 `scripts/` 文件。
+自 v1.4.0 起，安装态 `paper-compass-mcp` 与 `paper-compass-healthcheck` 入口已直接指向包内实现；历史打包用的 `scripts.*` 兼容层已移除，请使用当前 console script 或仓库内 `scripts/` 文件。
 
 ## 更新
 
@@ -179,7 +185,7 @@ python eval/run_eval.py -v
 
 ```bash
 python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.3.0/paper_compass-1.3.0-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.0/paper_compass-1.4.0-py3-none-any.whl
 ```
 
 如需安装其他已发布版本，可将上面 URL 中的版本号替换为对应 release。发布版本列表可用：
@@ -244,7 +250,7 @@ paper-compass update --check
 paper-compass update
 
 # 更新到指定版本
-paper-compass update --version v1.3.0
+paper-compass update --version v1.4.0
 
 # 模拟更新（查看变更但不执行）
 paper-compass update --dry-run
@@ -252,7 +258,7 @@ paper-compass update --dry-run
 
 `paper-compass update` 会自动：
 - 拉取最新代码并切换到目标版本
-- 重新安装 Python 依赖
+- 同步仓库内 `.venv`，确保 editable install 与依赖版本跟随当前代码更新
 - 检测断点变更（新增的必填环境变量、配置格式变化等）并给出提示
 - 运行 `paper-compass validate` 验证配置连通性
 - 运行测试冒烟检查
@@ -265,8 +271,8 @@ paper-compass update --dry-run
 
 ```bash
 git fetch origin --tags
-git checkout v1.3.0         # 或 git pull origin main
-pip install -e .
+git checkout v1.4.0         # 或 git pull origin main
+python3 scripts/bootstrap_runtime.py
 paper-compass validate        # 验证配置仍然可用
 python3 -m pytest tests/ -x   # 确认测试通过
 ```
@@ -293,7 +299,7 @@ python3 -m pytest tests/ -x   # 确认测试通过
 
 | 要求 | 说明 |
 |------|------|
-| Python ≥ 3.11 | 使用 `python3 --version` 检查 |
+| Python ≥ 3.12 | 使用 `python3 --version` 检查 |
 | Zotero 论文库 | 可选 — 支持使用预提取的文本文件 |
 | LLM API 密钥 | Wiki 生成需要 OpenAI 兼容端点（`LLM_BASE_URL` + `LLM_API_KEY`） |
 | 嵌入服务 API 密钥 | 支持 OpenAI-compatible 及火山引擎多模态嵌入 |
@@ -442,7 +448,7 @@ LLM 模型、Chroma 集合命名、MCP 跟踪等配置位于 `configs/` 目录�
 # 交互式配置 LLM 和嵌入服务
 paper-compass init
 
-# 本地检索统一入口（v1.3.0 发布前已用本地 417 条文献、406 个 wiki 页面实测）
+# 本地检索统一入口（v1.4.0 发布前已用本地 417 条文献、406 个 wiki 页面实测）
 paper-compass search wiki --query "家族企业代际传承" --limit 3
 # → 返回“代际传承与家族企业多元化经营”“代际传承对家族企业风险承担的影响”等 wiki 页面
 
@@ -520,20 +526,47 @@ python scripts/ingest_to_wiki.py --skip-existing --workers 10
 
 #### 配置 Hermes Agent
 
-在 `config.yaml` 中添加：
+在 `config.yaml` 中把 `paper-compass` MCP 服务直接指向仓库内受管 `.venv`。下面给出两个常见示例。
+
+**Windows / Hermes 本机运行：**
 
 ```yaml
 mcp_servers:
   paper-compass:
-    command: python3
-    args: ["/path/to/paper-compass/scripts/run_mcp_server.py", "--mcp"]
-    env:
-      PYTHONPATH: "/path/to/paper-compass/src"
+    command: D:\pyproject\paper-compass\.venv\Scripts\python.exe
+    args:
+      - D:\pyproject\paper-compass\scripts\run_mcp_server.py
+      - --mcp
     connect_timeout: 60
     timeout: 120
 ```
 
-`scripts/run_mcp_server.py` 现在会在启动时主动把仓库内 `src/` 加入 `sys.path`，以减少 editable install 与脚本直跑之间的差异；但在 MCP 客户端侧显式补 `PYTHONPATH`，通常仍然更稳。
+**POSIX / WSL：**
+
+```yaml
+mcp_servers:
+  paper-compass:
+    command: /path/to/paper-compass/.venv/bin/python
+    args:
+      - /path/to/paper-compass/scripts/run_mcp_server.py
+      - --mcp
+    connect_timeout: 60
+    timeout: 120
+```
+
+在配置 MCP 之前，请先运行一次 `python3 scripts/bootstrap_runtime.py`。MCP 入口现在会显式校验当前解释器是否就是仓库内 `.venv`；如果仍然指向系统 Python，会直接报错，而不会再悄悄 fallback 到别的解释器。
+
+如果你之前的 Hermes 配置仍然是：
+
+```yaml
+command: wsl
+args:
+  - bash
+  - -lc
+  - exec /bin/bash '/mnt/d/pyproject/paper-compass/scripts/run_mcp.sh'
+```
+
+而你的当前 `paper-compass` 实际运行在 Windows 本机仓库（例如 `D:\pyproject\paper-compass`），请改成上面的 Windows 原生 `.venv` 配置；否则 Hermes 会继续尝试走旧的 WSL 路径。
 
 #### 配置 Claude Desktop
 
@@ -541,13 +574,17 @@ mcp_servers:
 {
   "mcpServers": {
     "paper-compass": {
-      "command": "python3",
-      "args": ["scripts/run_mcp_server.py", "--mcp"],
-      "cwd": "/path/to/paper-compass"
+      "command": "D:\\pyproject\\paper-compass\\.venv\\Scripts\\python.exe",
+      "args": [
+        "D:\\pyproject\\paper-compass\\scripts\\run_mcp_server.py",
+        "--mcp"
+      ]
     }
   }
 }
 ```
+
+若在 POSIX / WSL 环境下运行，请把上面的路径替换为对应的 `.venv/bin/python` 与脚本绝对路径。
 
 #### CLI 工具模式
 
@@ -652,9 +689,15 @@ paper-compass/
 ### 运行测试
 
 ```bash
-pip install -e ".[dev]"
-python3 -m pytest tests/ -v         # 运行所有测试
-python3 -m pytest tests/ -x         # 遇错即停
+python3 scripts/bootstrap_runtime.py
+
+# Windows:
+.venv/Scripts/python.exe -m pytest tests/ -v
+.venv/Scripts/python.exe -m pytest tests/ -x
+
+# POSIX:
+.venv/bin/python -m pytest tests/ -v
+.venv/bin/python -m pytest tests/ -x
 ```
 
 ### 运行评估
@@ -686,6 +729,7 @@ paper-compass 基于以下开源项目构建：
 
 | 版本 | 日期 | 内容 |
 |------|------|------|
+| v1.4.0 | 2026-06-03 | **Repo-local managed runtime + MCP fail-fast 启动** — 新增 `scripts/bootstrap_runtime.py` 与 `src/paper_compass/runtime_env.py`，统一管理仓库内 `.venv`；`paper-compass init / update / status / healthcheck` 接入 runtime 状态；MCP 入口与 shell wrapper 显式校验解释器并在配置错误时直接报错；Python 基线提升到 `>=3.12`，README / MCP 配置同步更新到 managed runtime 模型。 |
 | v1.2.7 | 2026-05-15 | **数据同步命令 + vectordb 健康守卫** — 新增 `paper-compass sync`，将 `sync_zotero.py`、论文增量索引、wiki 增量生成与 wiki 向量化整合为一条命令；新增 `data/state/last_sync.json` 与 `data/state/sync.lock` 记录运行状态并阻止重叠执行；在写入前检测 Chroma journal/WAL/manifest/可读性，发现脏状态或损坏时阻断增量写入，并支持 `--rebuild {papers,wiki,all}` 与 `--backup-corrupted-db` 恢复路径。 |
 | v1.2.6 | 2026-05-13 | **MCP cold-start 优化** — 消除 ChromaDB `clear_system_cache()` 导致的段文件二次加载；全局共享 `PersistentClient` 实例避免双 client 问题；MCP 握手后后台预加载 wiki 和 papers 集合。首次语义检索工具调用从 22-50s 降至 16-29s，MCP 模式下预加载后亚秒级响应。 |
 
