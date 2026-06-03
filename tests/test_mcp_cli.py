@@ -23,6 +23,8 @@ def _load_script_module():
 def test_package_mcp_cli_passes_search_passages_extra_params(monkeypatch, capsys):
     captured = {}
 
+    monkeypatch.setattr(mcp_cli, "assert_managed_runtime_active", lambda *args, **kwargs: None)
+
     def fake_handle_tool(tool_name, params):
         captured["tool_name"] = tool_name
         captured["params"] = params
@@ -62,6 +64,8 @@ def test_package_mcp_cli_passes_search_passages_extra_params(monkeypatch, capsys
 def test_package_mcp_cli_passes_ask_research_extra_params(monkeypatch):
     captured = {}
 
+    monkeypatch.setattr(mcp_cli, "assert_managed_runtime_active", lambda *args, **kwargs: None)
+
     def fake_handle_tool(tool_name, params):
         captured["tool_name"] = tool_name
         captured["params"] = params
@@ -93,6 +97,8 @@ def test_package_mcp_cli_passes_ask_research_extra_params(monkeypatch):
 def test_script_wrapper_accepts_new_args_and_forwards(monkeypatch, capsys):
     module = _load_script_module()
     captured = {}
+
+    monkeypatch.setattr(module, "assert_managed_runtime_active", lambda *args, **kwargs: None)
 
     def fake_handle_tool(tool_name, params):
         captured["tool_name"] = tool_name
@@ -148,3 +154,32 @@ def test_script_wrapper_help_mentions_new_params(capsys):
     assert "--text-dir" in out
     assert "--library-path" in out
     assert "--max-sources" in out
+
+
+def test_package_mcp_cli_fails_fast_on_runtime_mismatch(monkeypatch, capsys):
+    def fail(*args, **kwargs):
+        raise RuntimeError("MCP server runtime error: managed runtime mismatch")
+
+    monkeypatch.setattr(mcp_cli, "assert_managed_runtime_active", fail)
+    monkeypatch.setattr("sys.argv", ["paper-compass-mcp", "--help"])
+
+    rc = mcp_cli.main()
+
+    assert rc == 1
+    assert "managed runtime mismatch" in capsys.readouterr().err
+
+
+
+def test_script_wrapper_fails_fast_on_runtime_mismatch(monkeypatch, capsys):
+    module = _load_script_module()
+
+    def fail(*args, **kwargs):
+        raise RuntimeError("MCP server runtime error: managed runtime mismatch")
+
+    monkeypatch.setattr(module, "assert_managed_runtime_active", fail)
+    monkeypatch.setattr("sys.argv", ["run_mcp_server.py", "--help"])
+
+    rc = module.main()
+
+    assert rc == 1
+    assert "managed runtime mismatch" in capsys.readouterr().err

@@ -11,6 +11,7 @@ from typing import List, Tuple
 from paper_compass.config import resolve_embedding_runtime
 from paper_compass.env_utils import PROJECT_ROOT, load_project_env
 from paper_compass.index_health import inspect_index_health
+from paper_compass.runtime_env import runtime_state
 
 
 Status = Tuple[str, str]
@@ -162,6 +163,15 @@ def _check_local_embedding_dep() -> Status:
         )
 
 
+def _check_runtime() -> Status:
+    state = runtime_state(project_root=PROJECT_ROOT)
+    if state.status == "active":
+        return ("runtime", f"OK ({state.managed_python})")
+    if state.status == "missing":
+        return ("runtime", "WARN: managed runtime not initialized; run python scripts/bootstrap_runtime.py")
+    return ("runtime", f"ERROR: {'; '.join(state.reasons)}")
+
+
 def _check_mcp_contracts() -> Status:
     try:
         from paper_compass.mcp_contracts import list_tools, required_params
@@ -261,6 +271,7 @@ def main() -> int:
     checks.append(_check_local_embedding_dep())
 
     if not args.deps_only:
+        checks.append(_check_runtime())
         checks.append(_check_env())
         checks.append(_check_library())
         checks.append(_check_vectordb())

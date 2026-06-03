@@ -15,6 +15,7 @@ from paper_compass.config import get_provider_config, load_all_configs, resolve_
 from paper_compass.env_utils import DEFAULT_ENV_PATH, PROJECT_ROOT, load_project_env
 from paper_compass.index_health import inspect_index_health
 from paper_compass.resources import project_root
+from paper_compass.runtime_env import runtime_state
 from paper_compass.wiki_gen import describe_wiki_prompt_bundle
 
 
@@ -136,12 +137,21 @@ def collect_status() -> dict[str, Any]:
     db_path = PROJECT_ROOT / "data" / "vectordb"
 
     health = inspect_index_health(db_path)
+    runtime = runtime_state(project_root=PROJECT_ROOT)
 
     return {
         "project_root": str(repo_root),
         "package_project_root": str(PROJECT_ROOT),
         "env_path": str(env_path),
         "env_loaded": env_loaded,
+        "runtime": {
+            "status": runtime.status,
+            "managed_venv": str(runtime.managed_venv),
+            "managed_python": str(runtime.managed_python),
+            "current_python": str(runtime.current_python),
+            "python_version": runtime.current_python_version,
+            "reasons": runtime.reasons,
+        },
         "llm": {
             "provider": llm_cfg.get("provider", ""),
             "base_url": llm_cfg.get("base_url", ""),
@@ -186,6 +196,17 @@ def _print_status_report(status: dict[str, Any]) -> None:
     print(f"  project root: {status['project_root']}")
     print(f"  package root: {status['package_project_root']}")
     print(f"  env path: {status['env_path']} ({'present' if status['env_loaded'] else 'missing'})")
+    print()
+
+    runtime = status["runtime"]
+    print("  runtime")
+    print(f"    status: {runtime['status']}")
+    print(f"    managed venv: {runtime['managed_venv']}")
+    print(f"    managed python: {runtime['managed_python']}")
+    print(f"    current python: {runtime['current_python']}")
+    print(f"    python version: {runtime['python_version'] or 'unknown'}")
+    for reason in runtime.get("reasons", []):
+        print(f"    note: {reason}")
     print()
 
     llm = status["llm"]

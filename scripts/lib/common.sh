@@ -67,6 +67,30 @@ pc_default_python() {
   pc_die "no runnable Python interpreter found (tried ${repo_root}/.venv/bin/python, python, python3)"
 }
 
+pc_managed_python() {
+  if [[ -n "${PAPER_COMPASS_PYTHON:-}" ]]; then
+    pc_can_run_python "${PAPER_COMPASS_PYTHON}" || pc_die "configured PAPER_COMPASS_PYTHON is not runnable: ${PAPER_COMPASS_PYTHON}"
+    printf '%s\n' "${PAPER_COMPASS_PYTHON}"
+    return
+  fi
+
+  local repo_root
+  repo_root="$(pc_repo_root)"
+
+  local candidate
+  for candidate in \
+    "${repo_root}/.venv/bin/python" \
+    "${repo_root}/.venv/Scripts/python.exe"
+  do
+    if pc_can_run_python "$candidate"; then
+      printf '%s\n' "$candidate"
+      return
+    fi
+  done
+
+  pc_die "managed runtime is missing; run python scripts/bootstrap_runtime.py from ${repo_root}"
+}
+
 pc_default_library_path() {
   printf '%s\n' "${PAPER_COMPASS_LIBRARY_PATH:-data/zotero-export/library.json}"
 }

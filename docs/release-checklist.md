@@ -6,6 +6,7 @@ Use this checklist before publishing a new `paper-compass` version. The goal is 
 
 ```bash
 rtk git status --short
+rtk python3 scripts/bootstrap_runtime.py
 rtk python3 -m paper_compass --help
 rtk python3 -m paper_compass sync --help
 rtk python3 scripts/healthcheck.py --deps-only
@@ -29,7 +30,7 @@ rtk pytest tests/ -q
 ```bash
 rtk grep "zotero_readonly.sqlite over zotero.sqlite\|prefers zotero_readonly" README.md README.en.md AGENTS.md
 rtk grep "pdf_embedding\|wiki_embedding\|PAPERQA_\|paperqa_answer" README.md README.en.md AGENTS.md configs src/paper_compass/configs tests
-rtk grep "v1.3.0\|1.3.0" README.md README.en.md pyproject.toml
+rtk grep "v1.4.0\|1.4.0" README.md README.en.md pyproject.toml
 ```
 
 Expected:

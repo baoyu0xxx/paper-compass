@@ -38,6 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from paper_compass import __version__
 from paper_compass.mcp_server import handle_tool
 from paper_compass.mcp_contracts import list_tools, tool_names
+from paper_compass.runtime_env import ManagedRuntimeError, assert_managed_runtime_active
 
 
 def _parse_filters(args) -> dict:
@@ -236,6 +237,12 @@ def mcp_stdio_mode():
 
 
 def main():
+    try:
+        assert_managed_runtime_active(context="MCP server")
+    except (ManagedRuntimeError, RuntimeError) as exc:
+        print(exc, file=sys.stderr)
+        return 1
+
     parser = argparse.ArgumentParser(
         description="paper-compass MCP server"
     )

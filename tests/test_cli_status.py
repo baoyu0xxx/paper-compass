@@ -14,6 +14,14 @@ def fake_status_payload():
         "package_project_root": "/repo",
         "env_path": "/repo/.env",
         "env_loaded": True,
+        "runtime": {
+            "status": "active",
+            "managed_venv": "/repo/.venv",
+            "managed_python": "/repo/.venv/bin/python",
+            "current_python": "/repo/.venv/bin/python",
+            "python_version": "3.12.7",
+            "reasons": [],
+        },
         "llm": {
             "provider": "openai",
             "base_url": "https://api.openai.com/v1",
@@ -98,6 +106,7 @@ def test_status_cli_json(monkeypatch, capsys, fake_status_payload):
     assert '"project_root": "/repo"' in out
     assert '"record_count": 12' in out
     assert '"severity": "ok"' in out
+    assert '"managed_python": "/repo/.venv/bin/python"' in out
 
 
 def test_status_cli_text(monkeypatch, capsys, fake_status_payload):
@@ -111,6 +120,9 @@ def test_status_cli_text(monkeypatch, capsys, fake_status_payload):
     assert "project root: /repo" in out
     assert "records: 12" in out
     assert "health: ok" in out
+    assert "runtime" in out.lower()
+    assert "managed python: /repo/.venv/bin/python" in out
+    assert "status: active" in out
     assert "embedding role: embedding | source=shared | selected=embedding_volcengine | active=embedding_volcengine" in out
     assert "prompt bundle: normal | selection=default | dir=prompts" in out
     assert "papers_openai_text-embedding-3-small" in out
