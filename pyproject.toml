@@ -32,7 +32,7 @@ Issues = "https://github.com/baoyu0xxx/paper-compass/issues"
 [project.scripts]
 paper-compass = "paper_compass.cli:main"
 paper-compass-healthcheck = "paper_compass.healthcheck:main"
-paper-compass-mcp = "paper_compass.mcp_cli:main"
+paper-compass-mcp = "paper_compass.mcp_entrypoint:main"
 
 [project.optional-dependencies]
 dev = [

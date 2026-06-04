@@ -45,7 +45,7 @@ The agent locates relevant passages in your paper library and returns quoted evi
 
 | Feature | Description |
 |---------|-------------|
-| 🔌 **MCP toolset** | 6 standard MCP tools: `search_wiki`, `search_library`, `search_passages`, `ask_research`, `get_paper_metadata`, `save_to_wiki`, following MCP 2024-11-05 |
+| 🔌 **MCP toolset** | 7 public MCP tools — `search_library`, `search_passages`, `ask_research`, `get_paper_metadata`, `get_passage_context`, `get_wiki_page_section`, `save_to_wiki` — plus `search_wiki` as an advanced probing entrypoint, following MCP 2024-11-05 |
 | 📝 **LLM wiki generation** | Automatically generates structured knowledge pages for papers (research question, core findings, methods and data, theoretical framework) with a two-stage classifier and customizable prompts |
 | 🔍 **Dual-mode passage retrieval** | Dense semantic vectors and BM25 keyword retrieval run in parallel, balancing conceptual similarity and exact-term matching |
 | 📊 **Incremental indexing** | Manifest-based change detection updates only added or modified papers instead of rebuilding everything |
@@ -93,7 +93,7 @@ Copy the following prompt to your AI agent — it will handle the full paper-com
 > 6. Run `python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild`
 > 7. (Optional) Run `python scripts/ingest_to_wiki.py --limit 3 --workers 1` to test wiki generation
 > 8. Run `paper-compass-healthcheck --smoke` to verify all subsystems
-> 9. Finally, add the MCP config to your current agent framework (for Hermes, point `command` directly at the repo-local `.venv` Python and `args` at `scripts/run_mcp_server.py --mcp`; do not keep using legacy WSL `/mnt/d/...` paths or a system Python)
+> 9. Finally, add the MCP config to your current agent framework (for Hermes, point `command` directly at the repo-local `.venv` `paper-compass-mcp` console script and pass `--mcp`; do not keep using legacy WSL `/mnt/d/...` paths or a system Python)
 >
 > Confirm each step before proceeding to the next.
 
@@ -483,7 +483,7 @@ paper-compass validate --help
 | `scripts/sync_zotero.py` | Zotero SQLite → `library.json` + text extraction | `--extract-text` |
 | `scripts/build_index.py` | Build ChromaDB vector indexes (papers + wiki) | `--full-rebuild`, `--incremental`, `--prune-deleted`, `--wiki` |
 | `scripts/ingest_to_wiki.py` | Batch LLM wiki generation | `--skip-existing`, `--workers 10`, `--limit N` |
-| `scripts/run_mcp_server.py` | MCP service (stdio / tool mode / interactive mode) | `--mcp`, `--tool <name> --query "..."` |
+| `scripts/run_mcp_server.py` | MCP repo-local compatibility shim (delegates to `paper_compass.mcp_entrypoint:main`) | `--mcp`, `--tool <name> --query "..."` |
 | `scripts/healthcheck.py` | Subsystem health check | `--smoke` |
 
 #### Build Indexes
@@ -516,20 +516,18 @@ python scripts/ingest_to_wiki.py --skip-existing --workers 10
 
 #### Configure Hermes Agent
 
-Point the `paper-compass` MCP server directly at the repo-local managed `.venv` in `config.yaml`:
+Point the `paper-compass` MCP server directly at the repo-local managed `.venv` **console script** in `config.yaml`:
 
 ```yaml
 mcp_servers:
   paper-compass:
-    command: /path/to/paper-compass/.venv/bin/python
-    args:
-      - /path/to/paper-compass/scripts/run_mcp_server.py
-      - --mcp
+    command: /path/to/paper-compass/.venv/bin/paper-compass-mcp
+    args: ["--mcp"]
     connect_timeout: 60
     timeout: 120
 ```
 
-Before configuring MCP, run `python3 scripts/bootstrap_runtime.py` once. The MCP entrypoint now explicitly checks that the current interpreter is the repository-local `.venv`; if it still points at a system Python, it fails fast instead of silently falling back.
+Before configuring MCP, run `python3 scripts/bootstrap_runtime.py` once. `paper-compass-mcp --mcp` now explicitly checks that the current interpreter is the repository-local `.venv`; if it still points at a system Python, it fails fast instead of silently falling back.
 
 #### Configure Claude Desktop
 
@@ -537,26 +535,40 @@ Before configuring MCP, run `python3 scripts/bootstrap_runtime.py` once. The MCP
 {
   "mcpServers": {
     "paper-compass": {
-      "command": "D:\\pyproject\\paper-compass\\.venv\\Scripts\\python.exe",
-      "args": [
-        "D:\\pyproject\\paper-compass\\scripts\\run_mcp_server.py",
-        "--mcp"
-      ]
+      "command": "D:\\pyproject\\paper-compass\\.venv\\Scripts\\paper-compass-mcp.exe",
+      "args": ["--mcp"]
     }
   }
 }
 ```
 
-If you run on POSIX / WSL instead, replace those paths with the corresponding `.venv/bin/python` and absolute script path.
+If you run on POSIX / WSL instead, replace those paths with the corresponding `.venv/bin/paper-compass-mcp`.
 
 #### CLI Tool Mode
 
+Prefer the package entrypoint `paper-compass-mcp --tool ...` for local CLI usage. It shares the same `mcp_entrypoint` logic as the compatibility wrapper `python scripts/run_mcp_server.py --tool ...`; the package entrypoint is the recommended form, while the script wrapper is kept for older workflows.
+
 ```bash
-python scripts/run_mcp_server.py --tool search_wiki --query "family business succession"
-python scripts/run_mcp_server.py --tool search_library --query "author name"
-python scripts/run_mcp_server.py --tool search_passages --query "specific passage content"
-python scripts/run_mcp_server.py --tool ask_research --query "research question"
-python scripts/run_mcp_server.py --tool get_paper_metadata --key ZOTERO_KEY
+# Common public workflow
+paper-compass-mcp --tool search_library --query "author name"
+paper-compass-mcp --tool search_passages --query "specific passage content" --search-mode keyword
+paper-compass-mcp --tool ask_research --query "research question" --max-sources 7 --db-path data/vectordb
+
+# Handle-first / drill-down workflow
+paper-compass-mcp --tool search_passages --query "specific passage content" --search-mode hybrid --db-path data/vectordb --text-dir data/texts --library-path data/zotero-export/library.json
+paper-compass-mcp --tool get_passage_context --passage-handle passage:ABC123:p12:hybrid:0 --window section
+paper-compass-mcp --tool get_wiki_page_section --wiki-handle wiki:wiki/topics/family-succession.md#section=mechanism
+paper-compass-mcp --tool get_paper_metadata --paper-handle paper:ZOTERO_KEY
+
+# Two-phase writeback: preview first, then commit
+paper-compass-mcp --tool save_to_wiki --title "Research note" --content "Draft content" --dry-run
+paper-compass-mcp --tool save_to_wiki --title "Research note" --content "Draft content" --commit
+
+# Advanced / diagnostic use: probe the wiki index directly (not exposed in default MCP tools/list)
+paper-compass-mcp --tool search_wiki --query "family business succession"
+
+# Compatibility wrapper (non-preferred, but delegates to the same main)
+python scripts/run_mcp_server.py --tool search_passages --query "specific passage content" --search-mode keyword
 ```
 
 #### NumPy 2.x Compatibility
@@ -579,19 +591,21 @@ Zotero SQLite + PDF
   → build_index.py → ChromaDB vector collections (papers + wiki)
   → ingest_to_wiki.py → LLM → wiki/papers/*.md
   → build_index.py --wiki → ChromaDB wiki collection
-  → run_mcp_server.py → expose 6 MCP tools to AI agents
+  → paper-compass-mcp (canonical) / run_mcp_server.py (repo-local shim) → expose 7 public MCP tools + 1 advanced wiki probing entrypoint to AI agents
 ```
 
 ### MCP Tools
 
 | Tool | Description | Retrieval mode |
 |------|-------------|----------------|
-| `search_wiki` | Semantic search over LLM-generated wiki knowledge pages | vector |
-| `search_library` | Keyword + Chinese segmentation + fuzzy matching over paper metadata | text |
-| `search_passages` | Dual-mode search over original paper text chunks | vector + BM25 |
-| `ask_research` | Multi-layer routing: wiki → escalate to PDF evidence | hybrid |
-| `get_paper_metadata` | Lookup a single paper by key, DOI, or title | exact |
-| `save_to_wiki` | Write LLM-generated content back into the wiki | — |
+| `search_library` | Returns compact paper candidates (`paper_handle` + minimal metadata) and serves as the default paper discovery entrypoint | text |
+| `search_passages` | Returns compact evidence candidates (`passage_handle` + snippet) for later expansion | vector + BM25 |
+| `ask_research` | Default research QA entrypoint; returns an answer plus `evidence_digest` for follow-up drill-down | hybrid |
+| `get_passage_context` | Expands a `passage_handle` into longer local context | exact readback |
+| `get_wiki_page_section` | Reads the full wiki page or section addressed by a `wiki_handle` | exact readback |
+| `get_paper_metadata` | Looks up a single paper by `paper_handle`, key, DOI, or exact title | exact |
+| `save_to_wiki` | Preview first (dry-run by default), then write with `commit=true` | — |
+| `search_wiki` (advanced) | Probes the wiki semantic index directly; callable from local CLI but hidden from default MCP `tools/list` | vector |
 
 ### Project Structure
 
@@ -668,7 +682,7 @@ paper-compass builds on the following open-source projects:
 - [llm-wiki](https://github.com/karpathy/llm-wiki) (Andrej Karpathy) — the methodology of "compile knowledge once, maintain it continuously"
 
 Major additions on top of those foundations:
-- MCP protocol integration (6 standard tools, MCP 2024-11-05)
+- MCP protocol integration (7 public tools + 1 advanced `search_wiki` entrypoint, MCP 2024-11-05)
 - Incremental indexing (fingerprint-based change detection)
 - Chinese academic retrieval adaptation and discipline-specific prompt presets
 - Multi-provider embedding cascade fallback

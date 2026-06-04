@@ -14,8 +14,16 @@ import threading
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-from paper_compass.env_utils import load_project_env
+from paper_compass.env_utils import PROJECT_ROOT, load_project_env
 from paper_compass.config import load_all_configs, get_provider_config
+
+DEFAULT_LIBRARY_PATH = PROJECT_ROOT / "data" / "zotero-export" / "library.json"
+DEFAULT_TEXT_DIR = PROJECT_ROOT / "data" / "texts"
+DEFAULT_VECTORDB_PATH = PROJECT_ROOT / "data" / "vectordb"
+
+
+def _resolved_path(path: str | None, default: Path) -> str:
+    return str(Path(path)) if path else str(default)
 
 # ── Shared PersistentClient singleton ────────────────────────────────────────
 # Avoids creating multiple PersistentClient instances for the same db_path,
@@ -50,8 +58,8 @@ def _get_client(db_path: str) -> Any:
 
 # ── library.json access ──────────────────────────────────────────────────────
 
-def _load_library(library_path: str = "data/zotero-export/library.json") -> List[Dict[str, Any]]:
-    path = Path(library_path)
+def _load_library(library_path: str | None = None) -> List[Dict[str, Any]]:
+    path = Path(_resolved_path(library_path, DEFAULT_LIBRARY_PATH))
     if not path.exists():
         return []
     with open(path, "r", encoding="utf-8") as f:
@@ -69,7 +77,7 @@ def _normalize_text(text: str) -> str:
 
 def search_library(
     query: str,
-    library_path: str = "data/zotero-export/library.json",
+    library_path: str | None = None,
     filters: Optional[Dict[str, Any]] = None,
     limit: int = 10,
 ) -> List[Dict[str, Any]]:
@@ -230,7 +238,7 @@ def _passes_filters(rec: Dict[str, Any], filters: Dict[str, Any]) -> bool:
 
 def get_paper_metadata(
     id_or_doi: str,
-    library_path: str = "data/zotero-export/library.json",
+    library_path: str | None = None,
 ) -> Optional[Dict[str, Any]]:
     """Look up a single paper by Zotero key, doc_id, or DOI."""
     records = _load_library(library_path)
@@ -254,13 +262,14 @@ def get_paper_metadata(
 
 def get_vector_collection_info(
     collection: str = "papers",
-    db_path: str = "data/vectordb",
+    db_path: str | None = None,
 ) -> Optional[Dict[str, Any]]:
     """Return metadata for the first matching Chroma collection.
 
     Uses the module-level shared ``PersistentClient`` so that HNSW
     segment data stays warm for subsequent ``vector_search`` calls.
     """
+    db_path = _resolved_path(db_path, DEFAULT_VECTORDB_PATH)
     db_dir = Path(db_path)
     if not db_dir.exists():
         return None
@@ -406,7 +415,7 @@ def vector_search(
     query: str,
     collection: str = "papers",
     k: int = 10,
-    db_path: str = "data/vectordb",
+    db_path: str | None = None,
 ) -> List[Dict[str, Any]]:
     """Semantic vector search using ChromaDB.
 
@@ -416,6 +425,7 @@ def vector_search(
 
     load_project_env()
 
+    db_path = _resolved_path(db_path, DEFAULT_VECTORDB_PATH)
     info = get_vector_collection_info(collection=collection, db_path=db_path)
     if info is None:
         return []
@@ -474,9 +484,9 @@ def search_passages(
     search_mode: str = "semantic",
     limit: int = 10,
     filters: Optional[Dict[str, Any]] = None,
-    db_path: str = "data/vectordb",
-    text_dir: str = "data/texts",
-    library_path: str = "data/zotero-export/library.json",
+    db_path: str | None = None,
+    text_dir: str | None = None,
+    library_path: str | None = None,
 ) -> List[Dict[str, Any]]:
     """Search for original passages matching a keyword or brief expression.
 
@@ -505,6 +515,9 @@ def search_passages(
           - passage (original text paragraph)
           - score, search_mode, match_type
     """
+    db_path = _resolved_path(db_path, DEFAULT_VECTORDB_PATH)
+    text_dir = _resolved_path(text_dir, DEFAULT_TEXT_DIR)
+    library_path = _resolved_path(library_path, DEFAULT_LIBRARY_PATH)
     results: List[Dict[str, Any]] = []
 
     if search_mode in ("semantic", "hybrid"):
@@ -570,7 +583,7 @@ def search_passages(
 
 def _keyword_search_passages(
     query: str,
-    text_dir: str = "data/texts",
+    text_dir: str | None = None,
     limit: int = 20,
 ) -> List[Dict[str, Any]]:
     """Full-text keyword search over extracted .txt files.
@@ -581,7 +594,7 @@ def _keyword_search_passages(
     from pathlib import Path
     import re
 
-    txt_root = Path(text_dir)
+    txt_root = Path(_resolved_path(text_dir, DEFAULT_TEXT_DIR))
     if not txt_root.exists():
         return []
 

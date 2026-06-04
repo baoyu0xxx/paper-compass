@@ -8,5 +8,5 @@ from paper_compass.mcp_server import handle_tool
 def test_handle_tool_reports_unsupported_parameters():
     result = handle_tool("search_library", {"query": "test", "bogus": 1})
 
-    assert result["ok"] is True
+    assert result["ok"] is False
     assert any("Unsupported" in warning or "unsupported" in warning for warning in result["warnings"])

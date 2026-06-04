@@ -82,9 +82,12 @@ def test_mcp_full_lifecycle_smoke():
     })
     tools = tools_resp["result"]["tools"]
     names = [t["name"] for t in tools]
+    assert "search_wiki" not in names
     assert "search_library" in names
     assert "search_passages" in names
     assert "ask_research" in names
+    assert "get_passage_context" in names
+    assert "get_wiki_page_section" in names
 
     # 4. tools/call
     call_resp = _send_receive(proc, {

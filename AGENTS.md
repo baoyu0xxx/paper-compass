@@ -203,12 +203,9 @@ All 12 evaluation queries should pass. Healthcheck should show green across all 
 scripts/run_mcp.sh
 ```
 
-`run_mcp_server.py` now inserts the repo's `src/` directory into `sys.path` at startup,
-so editable installs and direct script invocation behave consistently. In practice,
-adding `PYTHONPATH=/absolute/path/to/paper-compass/src` on the client side is still a
-useful defense-in-depth measure for MCP subprocess launches.
+`run_mcp_server.py` is now a **repo-local compatibility shim**: it inserts the repo's `src/` directory into `sys.path` and then delegates to the shared `paper_compass.mcp_entrypoint.main`. The canonical installed/runtime entrypoint is `paper-compass-mcp --mcp`.
 
-如果要绕过 shell 直接调底层脚本，也仍可使用 `python scripts/run_mcp_server.py --mcp`。
+如果要绕过 shell 直接调底层 shim，也仍可使用 `python scripts/run_mcp_server.py --mcp`。
 
 **Test individual tools:**
 ```bash
@@ -217,7 +214,11 @@ paper-compass search library --query "succession"
 paper-compass search passages --query "劳动力结构" --search-mode hybrid
 paper-compass search ask --query "家族企业代际传承对劳动力结构的影响"
 paper-compass status
+
+# 首选 MCP CLI 入口
 paper-compass-mcp --tool search_passages --query "劳动力结构" --search-mode keyword --db-path data/vectordb --text-dir data/texts --library-path data/zotero-export/library.json
+
+# 兼容旧脚本入口（与 paper-compass-mcp 共享同一 mcp_entrypoint.main）
 python scripts/run_mcp_server.py --tool ask_research --query "家族企业代际传承对劳动力结构的影响" --max-sources 7 --db-path data/vectordb
 ```
 
@@ -227,10 +228,8 @@ python scripts/run_mcp_server.py --tool ask_research --query "家族企业代际
 ```yaml
 mcp_servers:
   paper-compass:
-    command: python3
-    args: ["/absolute/path/to/paper-compass/scripts/run_mcp_server.py", "--mcp"]
-    env:
-      PYTHONPATH: "/absolute/path/to/paper-compass/src"
+    command: /absolute/path/to/paper-compass/.venv/bin/paper-compass-mcp
+    args: ["--mcp"]
     connect_timeout: 60
     timeout: 120
 ```
@@ -240,9 +239,8 @@ mcp_servers:
 {
   "mcpServers": {
     "paper-compass": {
-      "command": "python3",
-      "args": ["scripts/run_mcp_server.py", "--mcp"],
-      "cwd": "/absolute/path/to/paper-compass"
+      "command": "/absolute/path/to/paper-compass/.venv/bin/paper-compass-mcp",
+      "args": ["--mcp"]
     }
   }
 }
@@ -308,6 +306,6 @@ All declared in `pyproject.toml`:
 | `scripts/sync_zotero.py` | Zotero → library.json + text extraction |
 | `scripts/build_index.py` | ChromaDB index builder |
 | `scripts/ingest_to_wiki.py` | Batch wiki generator |
-| `scripts/run_mcp_server.py` | MCP server entry point |
+| `scripts/run_mcp_server.py` | MCP repo-local compatibility shim |
 | `scripts/healthcheck.py` | Health verification |
 | `eval/run_eval.py` | Evaluation benchmark runner |

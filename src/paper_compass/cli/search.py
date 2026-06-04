@@ -79,9 +79,34 @@ def _format_passage_matches(matches: list[dict[str, Any]]) -> None:
         print(
             f"     doc_id: {match.get('doc_id', '')}{page_part} | mode: {match.get('search_mode', '')} | match: {match.get('match_type', '')}"
         )
-        passage = (match.get("passage", "") or "").strip().replace("\n", " ")
-        if passage:
-            print(f"     passage: {passage[:240]}")
+        if match.get("passage_handle"):
+            print(f"     passage_handle: {match.get('passage_handle', '')}")
+        snippet = (match.get("snippet", "") or match.get("passage", "") or "").strip().replace("\n", " ")
+        if snippet:
+            print(f"     snippet: {snippet[:240]}")
+
+
+def _format_passage_context(result: dict[str, Any]) -> None:
+    data = result.get("data", {})
+    print(f"  title: {data.get('title', '')}")
+    print(f"  paper_handle: {data.get('paper_handle', '')}")
+    print(f"  passage_handle: {data.get('passage_handle', '')}")
+    if data.get("page_num") is not None:
+        print(f"  page_num: {data.get('page_num')}")
+    print()
+    text = (data.get("text", "") or "").strip()
+    print(text or "  (no text)")
+
+
+def _format_wiki_section(result: dict[str, Any]) -> None:
+    data = result.get("data", {})
+    print(f"  title: {data.get('title', '')}")
+    print(f"  wiki_handle: {data.get('wiki_handle', '')}")
+    if data.get("section"):
+        print(f"  section: {data.get('section')}")
+    print()
+    content = (data.get("content", "") or "").strip()
+    print(content or "  (no content)")
 
 
 def _format_ask_result(result: dict[str, Any]) -> None:
@@ -122,6 +147,10 @@ def _dispatch_and_render(tool_name: str, params: dict[str, Any], output_json: bo
         _format_wiki_matches(data.get("matches", []))
     elif tool_name == "search_passages":
         _format_passage_matches(data.get("matches", []))
+    elif tool_name == "get_passage_context":
+        _format_passage_context(result)
+    elif tool_name == "get_wiki_page_section":
+        _format_wiki_section(result)
     elif tool_name == "ask_research":
         _format_ask_result(result)
     else:
@@ -172,6 +201,32 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
     )
     passages_parser.set_defaults(func=execute_search)
 
+    passage_context_parser = search_subparsers.add_parser(
+        "passage-context",
+        help="Expand a passage handle into longer local context",
+    )
+    passage_context_parser.add_argument("--passage-handle", required=True, help="Passage handle returned by search_passages")
+    passage_context_parser.add_argument(
+        "--window",
+        default="paragraph",
+        choices=["match_only", "paragraph", "section", "page"],
+        help="Context window to retrieve",
+    )
+    passage_context_parser.add_argument("--max-chars", type=int, default=2000, help="Maximum context characters")
+    passage_context_parser.set_defaults(func=execute_search)
+
+    wiki_section_parser = search_subparsers.add_parser(
+        "wiki-section",
+        help="Read the full content of a wiki handle or wiki section handle",
+    )
+    wiki_section_parser.add_argument("--wiki-handle", required=True, help="Wiki handle returned by search_wiki or ask_research")
+    wiki_section_parser.add_argument(
+        "--include-frontmatter",
+        action="store_true",
+        help="Include YAML frontmatter in the output",
+    )
+    wiki_section_parser.set_defaults(func=execute_search)
+
     ask_parser = search_subparsers.add_parser("ask", help="Ask a research question via wiki + PDF retrieval")
     ask_parser.add_argument("--query", required=True, help="Research question")
     ask_parser.add_argument(
@@ -220,6 +275,21 @@ def execute_search(args: argparse.Namespace) -> int:
         if filters:
             params["filters"] = filters
         return _dispatch_and_render("search_passages", params, output_json)
+
+    if target == "passage-context":
+        params = {
+            "passage_handle": args.passage_handle,
+            "window": args.window,
+            "max_chars": args.max_chars,
+        }
+        return _dispatch_and_render("get_passage_context", params, output_json)
+
+    if target == "wiki-section":
+        params = {
+            "wiki_handle": args.wiki_handle,
+            "include_frontmatter": args.include_frontmatter,
+        }
+        return _dispatch_and_render("get_wiki_page_section", params, output_json)
 
     if target == "ask":
         params = {

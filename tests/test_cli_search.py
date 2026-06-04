@@ -74,6 +74,37 @@ from paper_compass.cli import main
                 "db_path": "data/vectordb",
             },
         ),
+        (
+            [
+                "paper-compass",
+                "search",
+                "passage-context",
+                "--passage-handle",
+                "passage:ABC123:p12:hybrid:0",
+                "--window",
+                "section",
+            ],
+            "get_passage_context",
+            {
+                "passage_handle": "passage:ABC123:p12:hybrid:0",
+                "window": "section",
+                "max_chars": 2000,
+            },
+        ),
+        (
+            [
+                "paper-compass",
+                "search",
+                "wiki-section",
+                "--wiki-handle",
+                "wiki:wiki/topics/family-succession.md#section=mechanism",
+            ],
+            "get_wiki_page_section",
+            {
+                "wiki_handle": "wiki:wiki/topics/family-succession.md#section=mechanism",
+                "include_frontmatter": False,
+            },
+        ),
     ],
 )
 def test_search_cli_dispatches_to_expected_tool(monkeypatch, argv, expected_tool, expected_params):
@@ -123,7 +154,8 @@ def test_search_cli_text_output_for_passages(monkeypatch, capsys):
                         "page_num": 5,
                         "search_mode": "keyword",
                         "match_type": "fulltext",
-                        "passage": "This paper studies labor structure changes.",
+                        "passage_handle": "passage:ABC123:p5:keyword:0",
+                        "snippet": "This paper studies labor structure changes.",
                     }
                 ]
             },
@@ -142,4 +174,5 @@ def test_search_cli_text_output_for_passages(monkeypatch, capsys):
     assert "search_passages" in out
     assert "Succession Study" in out
     assert "ABC123" in out
+    assert "passage:ABC123:p5:keyword:0" in out
     assert "labor structure changes" in out

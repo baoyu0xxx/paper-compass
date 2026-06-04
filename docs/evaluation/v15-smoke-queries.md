@@ -33,10 +33,12 @@ Purpose: quick human checks after ranking/router/contract changes.
 ## D. writeback contract
 
 7) Tool: `save_to_wiki` with explicit `wiki_root`
-- Expectation: page is created under provided wiki_root.
-- Failure signal: path always falls back to default `./wiki`.
+- Preview expectation: with `dry_run=true`, response only returns preview metadata and does not write files.
+- Commit expectation: with `commit=true` and `dry_run=false`, page is created under the provided `wiki_root`.
+- Failure signal: path always falls back to default `./wiki`, or preview mode already mutates disk.
 
 ## E. MCP protocol
 
 8) JSON-RPC `tools/list` then `tools/call(search_library)`
-- Expectation: tools/list schema matches actual handler params; call returns UnifiedResponse envelope with `trace_id`.
+- Expectation: `tools/list` returns only the public toolset, schema matches actual handler params, and call returns UnifiedResponse envelope with `trace_id`.
+- Failure signal: `search_wiki` or infra-only knobs (`db_path`, `wiki_root`, etc.) leak into the default public schema.

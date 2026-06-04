@@ -45,7 +45,7 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
 | 能力 | 说明 |
 |------|------|
-| 🔌 **MCP 工具集** | 6 个标准 MCP 工具：`search_wiki`、`search_library`、`search_passages`、`ask_research`、`get_paper_metadata`、`save_to_wiki`，遵循 MCP 2024-11-05 协议 |
+| 🔌 **MCP 工具集** | 7 个公开 MCP 工具：`search_library`、`search_passages`、`ask_research`、`get_paper_metadata`、`get_passage_context`、`get_wiki_page_section`、`save_to_wiki`；另保留 `search_wiki` 作为高级检索入口，遵循 MCP 2024-11-05 协议 |
 | 📝 **LLM wiki 生成** | 自动为论文生成结构化知识页面（研究问题、核心发现、方法与数据、理论框架），两阶段分类器 + 可定制提示词 |
 | 🔍 **双模式段落检索** | 语义向量（dense）和 BM25 关键词（sparse）并行，兼顾概念相似性与精确术语匹配 |
 | 📊 **增量索引** | 基于指纹清单（manifest）的变更检测，新增或修改论文后只更新变化部分，无需全量重建 |
@@ -93,7 +93,7 @@ paper-compass sync \
 > 6. 运行 `python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild`
 > 7. （可选）运行 `python scripts/ingest_to_wiki.py --limit 3 --workers 1` 测试 wiki 生成
 > 8. 运行 `python scripts/healthcheck.py --smoke` 验证所有子系统
-> 9. 最后将 MCP 配置添加到当前对话框架的配置中（Hermes 推荐直接把 `command` 指向仓库内 `.venv` 的 Python，并把 `args` 指向 `scripts/run_mcp_server.py --mcp`；不要再使用旧的 WSL `/mnt/d/...` 路径或系统 Python）
+> 9. 最后将 MCP 配置添加到当前对话框架的配置中（Hermes 推荐直接把 `command` 指向仓库内 `.venv` 的 `paper-compass-mcp` console script，并传入 `--mcp`；不要再使用旧的 WSL `/mnt/d/...` 路径或系统 Python）
 >
 > 每一步完成后确认结果再继续下一步。
 
@@ -493,7 +493,7 @@ paper-compass validate --help
 | `scripts/sync_zotero.py` | Zotero SQLite → library.json + 文本提取 | `--extract-text` |
 | `scripts/build_index.py` | 构建 ChromaDB 向量索引（论文 + wiki） | `--full-rebuild`、`--incremental`、`--prune-deleted`、`--wiki` |
 | `scripts/ingest_to_wiki.py` | 批量 LLM wiki 生成 | `--skip-existing`、`--workers 10`、`--limit N` |
-| `scripts/run_mcp_server.py` | MCP 服务（stdio / 工具调用 / 交互模式） | `--mcp`、`--tool <name> --query "..."` |
+| `scripts/run_mcp_server.py` | MCP repo-local 兼容 shim（委托 `paper_compass.mcp_entrypoint:main`） | `--mcp`、`--tool <name> --query "..."` |
 | `scripts/healthcheck.py` | 子系统健康检查 | `--deps-only`、`--smoke`（含 API 连通性探测） |
 
 #### 构建索引
@@ -526,17 +526,15 @@ python scripts/ingest_to_wiki.py --skip-existing --workers 10
 
 #### 配置 Hermes Agent
 
-在 `config.yaml` 中把 `paper-compass` MCP 服务直接指向仓库内受管 `.venv`。下面给出两个常见示例。
+在 `config.yaml` 中把 `paper-compass` MCP 服务直接指向仓库内受管 `.venv` 里的 **console script**。下面给出两个常见示例。
 
 **Windows / Hermes 本机运行：**
 
 ```yaml
 mcp_servers:
   paper-compass:
-    command: D:\pyproject\paper-compass\.venv\Scripts\python.exe
-    args:
-      - D:\pyproject\paper-compass\scripts\run_mcp_server.py
-      - --mcp
+    command: D:\pyproject\paper-compass\.venv\Scripts\paper-compass-mcp.exe
+    args: ["--mcp"]
     connect_timeout: 60
     timeout: 120
 ```
@@ -546,15 +544,13 @@ mcp_servers:
 ```yaml
 mcp_servers:
   paper-compass:
-    command: /path/to/paper-compass/.venv/bin/python
-    args:
-      - /path/to/paper-compass/scripts/run_mcp_server.py
-      - --mcp
+    command: /path/to/paper-compass/.venv/bin/paper-compass-mcp
+    args: ["--mcp"]
     connect_timeout: 60
     timeout: 120
 ```
 
-在配置 MCP 之前，请先运行一次 `python3 scripts/bootstrap_runtime.py`。MCP 入口现在会显式校验当前解释器是否就是仓库内 `.venv`；如果仍然指向系统 Python，会直接报错，而不会再悄悄 fallback 到别的解释器。
+在配置 MCP 之前，请先运行一次 `python3 scripts/bootstrap_runtime.py`。`paper-compass-mcp --mcp` 现在会显式校验当前解释器是否就是仓库内 `.venv`；如果仍然指向系统 Python，会直接报错，而不会再悄悄 fallback 到别的解释器。
 
 如果你之前的 Hermes 配置仍然是：
 
@@ -574,29 +570,39 @@ args:
 {
   "mcpServers": {
     "paper-compass": {
-      "command": "D:\\pyproject\\paper-compass\\.venv\\Scripts\\python.exe",
-      "args": [
-        "D:\\pyproject\\paper-compass\\scripts\\run_mcp_server.py",
-        "--mcp"
-      ]
+      "command": "D:\\pyproject\\paper-compass\\.venv\\Scripts\\paper-compass-mcp.exe",
+      "args": ["--mcp"]
     }
   }
 }
 ```
 
-若在 POSIX / WSL 环境下运行，请把上面的路径替换为对应的 `.venv/bin/python` 与脚本绝对路径。
+若在 POSIX / WSL 环境下运行，请把上面的路径替换为对应的 `.venv/bin/paper-compass-mcp`。
 
 #### CLI 工具模式
 
+首选使用包内入口 `paper-compass-mcp --tool ...`。它与兼容脚本入口 `python scripts/run_mcp_server.py --tool ...` 共享同一套 `mcp_entrypoint` 逻辑；前者是推荐写法，后者主要用于兼容旧脚本调用。
+
 ```bash
-paper-compass-mcp --tool search_wiki --query "家族企业代际传承"
+# 常用 public workflow
 paper-compass-mcp --tool search_library --query "作者姓名"
 paper-compass-mcp --tool search_passages --query "具体段落内容" --search-mode keyword
-paper-compass-mcp --tool search_passages --query "具体段落内容" --search-mode hybrid --db-path data/vectordb --text-dir data/texts --library-path data/zotero-export/library.json
 paper-compass-mcp --tool ask_research --query "研究问题" --max-sources 7 --db-path data/vectordb
-paper-compass-mcp --tool get_paper_metadata --id-or-doi ZOTERO_KEY
 
-# 兼容原脚本入口
+# handle-first / drill-down workflow
+paper-compass-mcp --tool search_passages --query "具体段落内容" --search-mode hybrid --db-path data/vectordb --text-dir data/texts --library-path data/zotero-export/library.json
+paper-compass-mcp --tool get_passage_context --passage-handle passage:ABC123:p12:hybrid:0 --window section
+paper-compass-mcp --tool get_wiki_page_section --wiki-handle wiki:wiki/topics/family-succession.md#section=mechanism
+paper-compass-mcp --tool get_paper_metadata --paper-handle paper:ZOTERO_KEY
+
+# writeback 两阶段：先预览，再确认写入
+paper-compass-mcp --tool save_to_wiki --title "研究摘要" --content "待写回内容" --dry-run
+paper-compass-mcp --tool save_to_wiki --title "研究摘要" --content "待写回内容" --commit
+
+# 高级 / 诊断用途：直接探测 wiki 索引（默认不在 MCP tools/list 暴露）
+paper-compass-mcp --tool search_wiki --query "家族企业代际传承"
+
+# 兼容原脚本入口（非首选，但与 paper-compass-mcp 共享同一 main）
 python scripts/run_mcp_server.py --tool search_passages --query "具体段落内容" --search-mode keyword
 ```
 
@@ -620,19 +626,21 @@ Zotero SQLite + PDF
   → build_index.py → ChromaDB 向量集合（论文 + wiki）
   → ingest_to_wiki.py → LLM → wiki/papers/*.md
   → build_index.py --wiki → ChromaDB wiki 集合
-  → run_mcp_server.py → 6 个 MCP 工具暴露给 AI Agent
+  → paper-compass-mcp（canonical） / run_mcp_server.py（repo-local shim）→ 7 个公开 MCP 工具 + 1 个高级 wiki 检索入口暴露给 AI Agent
 ```
 
 ### MCP 工具
 
 | 工具 | 描述 | 检索模式 |
 |------|------|----------|
-| `search_wiki` | 在 LLM 生成的 wiki 知识页面中进行语义搜索 | 向量 |
-| `search_library` | 关键词 + 中文分词 + 模糊匹配，搜索论文元数据 | 文本 |
-| `search_passages` | 双模式搜索原始论文文本块 | 向量 + BM25 |
-| `ask_research` | 多层路由：wiki → 传递到 PDF 证据 | 混合 |
-| `get_paper_metadata` | 按 key、DOI 或标题查找单篇论文 | 精确 |
-| `save_to_wiki` | 将 LLM 生成的内容写回 wiki | — |
+| `search_library` | 返回候选论文列表（`paper_handle` + 精简元数据），作为默认 paper discovery 入口 | 文本 |
+| `search_passages` | 返回候选证据片段（`passage_handle` + snippet），用于后续展开 | 向量 + BM25 |
+| `ask_research` | 默认研究问答入口，返回答案 + `evidence_digest`，按需再 drill-down | 混合 |
+| `get_passage_context` | 根据 `passage_handle` 展开更长上下文 | 精确读取 |
+| `get_wiki_page_section` | 根据 `wiki_handle` 读取 wiki 页面或章节全文 | 精确读取 |
+| `get_paper_metadata` | 按 `paper_handle`、key、DOI 或标题查找单篇论文 | 精确 |
+| `save_to_wiki` | 先 preview（默认 dry-run），再 `commit=true` 写回 wiki | — |
+| `search_wiki`（高级） | 直接探测 wiki 语义索引；本地 CLI 可调用，但默认不在 MCP `tools/list` 暴露 | 向量 |
 
 ### 项目结构
 
@@ -718,7 +726,7 @@ paper-compass 基于以下开源项目构建：
 - [llm-wiki](https://github.com/karpathy/llm-wiki)（Andrej Karpathy） — wiki 知识"编译一次、持续维护"的方法论
 
 在继承基础上新增的主要功能：
-- MCP 协议集成（6 个标准工具，遵循 MCP 2024-11-05 协议）
+- MCP 协议集成（7 个公开工具 + 1 个高级 `search_wiki` 入口，遵循 MCP 2024-11-05 协议）
 - 增量索引（基于指纹的变更检测）
 - 中文学术检索适配与学科预设提示词
 - 多提供方嵌入级联回退
