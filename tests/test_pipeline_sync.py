@@ -138,6 +138,73 @@ def test_run_sync_pipeline_writes_state_file(tmp_path, monkeypatch):
     assert payload["stage"] == "completed"
     assert payload["planned_stages"] == ["sync_zotero", "index_papers"]
     assert payload["completed_stages"] == ["sync_zotero", "index_papers"]
+    assert payload["run_id"]
+    assert payload["updated_at"]
+    assert payload["started_at"]
+    assert payload["started_at"] <= payload["updated_at"]
+
+
+def test_run_sync_pipeline_preserves_started_at_across_stage_updates(tmp_path, monkeypatch):
+    from paper_compass import pipeline_sync
+    from paper_compass.pipeline_sync import SyncOptions, run_sync_pipeline
+
+    timestamps = iter(
+        [
+            "2026-06-23T01:00:00Z",
+            "2026-06-23T01:00:01Z",
+            "2026-06-23T01:00:02Z",
+            "2026-06-23T01:00:03Z",
+            "2026-06-23T01:00:04Z",
+            "2026-06-23T01:00:05Z",
+            "2026-06-23T01:00:06Z",
+            "2026-06-23T01:00:07Z",
+            ]
+    )
+    monkeypatch.setattr(pipeline_sync, "_utc_now_iso", lambda: next(timestamps))
+    monkeypatch.setattr(pipeline_sync, "inspect_index_health", lambda path: _report())
+    monkeypatch.setattr(pipeline_sync, "_run_stage_command", lambda *args, **kwargs: None)
+
+    run_sync_pipeline(
+        SyncOptions(
+            project_root=tmp_path,
+            db_path=tmp_path / "vectordb",
+            skip_wiki_ingest=True,
+            skip_wiki_index=True,
+        )
+    )
+
+    payload = json.loads((tmp_path / "data" / "state" / "last_sync.json").read_text(encoding="utf-8"))
+    assert payload["started_at"] == "2026-06-23T01:00:01Z"
+    assert payload["updated_at"] == "2026-06-23T01:00:06Z"
+    assert payload["finished_at"] == "2026-06-23T01:00:05Z"
+
+
+def test_run_sync_pipeline_remembers_last_successful_zotero_source_after_success(tmp_path, monkeypatch):
+    from paper_compass import pipeline_sync
+    from paper_compass.pipeline_sync import SyncOptions, run_sync_pipeline
+
+    monkeypatch.setattr(pipeline_sync, "inspect_index_health", lambda path: _report())
+    monkeypatch.setattr(pipeline_sync, "_run_stage_command", lambda *args, **kwargs: None)
+
+    result = run_sync_pipeline(
+        SyncOptions(
+            project_root=tmp_path,
+            db_path=tmp_path / "vectordb",
+            db_source_path="D:/zotero_backup/zotero.sqlite",
+            storage_path="D:/zotero_backup/storage",
+            skip_wiki_ingest=True,
+            skip_wiki_index=True,
+        )
+    )
+
+    source_state_path = tmp_path / "data" / "state" / "source_config.json"
+    assert result.status == "ok"
+    assert source_state_path.exists()
+    payload = json.loads(source_state_path.read_text(encoding="utf-8"))
+    assert payload["zotero"]["db_path"] == "D:/zotero_backup/zotero.sqlite"
+    assert payload["zotero"]["storage_path"] == "D:/zotero_backup/storage"
+    assert payload["zotero"]["source_kind"] == "explicit"
+    assert payload["zotero"]["is_live_candidate"] is False
 
 
 def test_run_sync_pipeline_creates_and_removes_lock(tmp_path, monkeypatch):
@@ -158,6 +225,94 @@ def test_run_sync_pipeline_creates_and_removes_lock(tmp_path, monkeypatch):
     )
 
     assert result.status == "ok"
+    assert not lock_path.exists()
+
+
+def test_run_sync_pipeline_rejects_active_lock(tmp_path, monkeypatch):
+    from paper_compass import pipeline_sync
+    from paper_compass.pipeline_sync import SyncOptions, run_sync_pipeline
+
+    monkeypatch.setattr(pipeline_sync, "inspect_index_health", lambda path: _report())
+    lock_path = tmp_path / "data" / "state" / "sync.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path.write_text(
+        json.dumps(
+            {
+                "pid": 9999,
+                "started_at": "2026-06-23T01:00:00Z",
+                "process_start_time": 123.0,
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(pipeline_sync, "_process_is_active", lambda pid, process_start_time=None: True)
+
+    with pytest.raises(RuntimeError, match="appears active"):
+        run_sync_pipeline(
+            SyncOptions(
+                project_root=tmp_path,
+                db_path=tmp_path / "vectordb",
+                skip_wiki_ingest=True,
+                skip_wiki_index=True,
+            )
+        )
+
+
+def test_run_sync_pipeline_removes_stale_lock_and_continues(tmp_path, monkeypatch):
+    from paper_compass import pipeline_sync
+    from paper_compass.pipeline_sync import SyncOptions, run_sync_pipeline
+
+    monkeypatch.setattr(pipeline_sync, "inspect_index_health", lambda path: _report())
+    monkeypatch.setattr(pipeline_sync, "_run_stage_command", lambda *args, **kwargs: None)
+    monkeypatch.setattr(pipeline_sync, "_process_is_active", lambda pid, process_start_time=None: False)
+
+    lock_path = tmp_path / "data" / "state" / "sync.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path.write_text(
+        json.dumps(
+            {
+                "pid": 9999,
+                "started_at": "2026-06-23T01:00:00Z",
+                "process_start_time": 123.0,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    result = run_sync_pipeline(
+        SyncOptions(
+            project_root=tmp_path,
+            db_path=tmp_path / "vectordb",
+            skip_wiki_ingest=True,
+            skip_wiki_index=True,
+        )
+    )
+
+    assert result.status == "ok"
+    assert not lock_path.exists()
+
+
+def test_run_sync_pipeline_force_unlock_removes_lock_and_exits(tmp_path, monkeypatch):
+    from paper_compass import pipeline_sync
+    from paper_compass.pipeline_sync import SyncOptions, run_sync_pipeline
+
+    monkeypatch.setattr(pipeline_sync, "inspect_index_health", lambda path: _report())
+    lock_path = tmp_path / "data" / "state" / "sync.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path.write_text(json.dumps({"pid": 9999, "started_at": "2026-06-23T01:00:00Z"}), encoding="utf-8")
+    monkeypatch.setattr(pipeline_sync, "_process_is_active", lambda pid, process_start_time=None: False)
+
+    result = run_sync_pipeline(
+        SyncOptions(
+            project_root=tmp_path,
+            db_path=tmp_path / "vectordb",
+            force_unlock=True,
+        )
+    )
+
+    assert result.status == "unlocked"
+    assert result.planned_stages == []
+    assert result.completed_stages == []
     assert not lock_path.exists()
 
 

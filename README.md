@@ -4,7 +4,7 @@
 
 **将 Zotero 论文库转化为 AI Agent 可直接检索的双引擎知识库（RAG 原文检索 + LLM Wiki 知识编译）**
 
-[![version](https://img.shields.io/badge/version-1.4.0-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.4.1-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.12+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
@@ -60,7 +60,7 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
 ```bash
 python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.0/paper_compass-1.4.0-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.1/paper_compass-1.4.1-py3-none-any.whl
 
 # 交互式配置
 paper-compass init
@@ -185,7 +185,7 @@ python eval/run_eval.py -v
 
 ```bash
 python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.0/paper_compass-1.4.0-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.1/paper_compass-1.4.1-py3-none-any.whl
 ```
 
 如需安装其他已发布版本，可将上面 URL 中的版本号替换为对应 release。发布版本列表可用：
@@ -250,7 +250,7 @@ paper-compass update --check
 paper-compass update
 
 # 更新到指定版本
-paper-compass update --version v1.4.0
+paper-compass update --version v1.4.1
 
 # 模拟更新（查看变更但不执行）
 paper-compass update --dry-run
@@ -271,7 +271,7 @@ paper-compass update --dry-run
 
 ```bash
 git fetch origin --tags
-git checkout v1.4.0         # 或 git pull origin main
+git checkout v1.4.1         # 或 git pull origin main
 python3 scripts/bootstrap_runtime.py
 paper-compass validate        # 验证配置仍然可用
 python3 -m pytest tests/ -x   # 确认测试通过
@@ -464,6 +464,7 @@ paper-compass search ask --query "家族企业代际传承对劳动力结构有�
 # 查看当前解析后的配置 / 数据 / 向量库状态
 paper-compass status
 # → 包括 embedding role / active provider / cascade，以及 wiki prompt bundle 是否 degraded
+# → 也包括 sync.last_sync / sync.lock / last_successful_zotero_source 等同步诊断信息
 
 # 一键执行 Zotero / 向量库 / wiki 数据同步
 paper-compass sync --db-source-path /path/to/zotero.sqlite --storage-path /path/to/storage
@@ -490,9 +491,9 @@ paper-compass validate --help
 
 | 脚本 | 用途 | 关键参数 |
 |------|------|----------|
-| `scripts/sync_zotero.py` | Zotero SQLite → library.json + 文本提取 | `--extract-text` |
-| `scripts/build_index.py` | 构建 ChromaDB 向量索引（论文 + wiki） | `--full-rebuild`、`--incremental`、`--prune-deleted`、`--wiki` |
-| `scripts/ingest_to_wiki.py` | 批量 LLM wiki 生成 | `--skip-existing`、`--workers 10`、`--limit N` |
+| `scripts/sync_zotero.py` | Zotero SQLite → library.json + 文本提取 | `--extract-text`、失败报告 `data/logs/pdf_extract_failures.jsonl` |
+| `scripts/build_index.py` | 构建 ChromaDB 向量索引（论文 + wiki） | `--full-rebuild`、`--incremental`、`--prune-deleted`、`--wiki`、`--dry-run --explain-changes --sample-size N` |
+| `scripts/ingest_to_wiki.py` | 批量 LLM wiki 生成 | `--skip-existing`、`--workers 10`、`--limit N`、`--wiki-upsert-mode` |
 | `scripts/run_mcp_server.py` | MCP repo-local 兼容 shim（委托 `paper_compass.mcp_entrypoint:main`） | `--mcp`、`--tool <name> --query "..."` |
 | `scripts/healthcheck.py` | 子系统健康检查 | `--deps-only`、`--smoke`（含 API 连通性探测） |
 
@@ -505,9 +506,19 @@ python scripts/build_index.py --library data/zotero-export/library.json --full-r
 # 增量更新（仅更新有变化的论文）
 python scripts/build_index.py --library data/zotero-export/library.json --incremental
 
+# 只做本地 dry-run，并解释 metadata-only / path-only 变化原因
+python scripts/build_index.py \
+  --library data/zotero-export/library.json \
+  --incremental \
+  --dry-run \
+  --explain-changes \
+  --sample-size 5
+
 # 索引 wiki 页面
 python scripts/build_index.py --wiki --wiki-root ./wiki
 ```
+
+`--explain-changes` 会输出 metadata-only 变化的 top reasons（如 `tags changed`、`collections changed`），并在启用 `--sample-size` 时给出抽样 diff，便于在真正消耗 embedding 额度前先做本地判断。
 
 #### 生成 Wiki 页面
 
@@ -515,12 +526,36 @@ python scripts/build_index.py --wiki --wiki-root ./wiki
 # 处理所有未生成的页面（10 个并发 worker）
 python scripts/ingest_to_wiki.py --skip-existing --workers 10
 
+# 标题可能冲突时，优先用 key-aware 唯一写回
+python scripts/ingest_to_wiki.py --skip-existing --workers 10 --wiki-upsert-mode create_unique
+
 # 先试 3 篇
 python scripts/ingest_to_wiki.py --limit 3 --workers 1
 
 # 中断后继续运行
 python scripts/ingest_to_wiki.py --skip-existing --workers 10
 ```
+
+`--wiki-upsert-mode` 支持：
+- `create`：遇到同 slug 冲突时报错
+- `create_unique`：同 slug 不同 Zotero key 自动生成 `YYYY-MM-DD-slug-key.md`
+- `replace_if_same_key`：仅覆盖同一 Zotero key 的已有页面
+- `replace_if_same_slug`：按 slug 直接覆盖（仅在明确需要时使用）
+
+### 恢复与诊断建议
+
+```bash
+# 查看同步状态、lock 是否 stale、上次成功使用的 Zotero 源
+paper-compass status --json
+
+# 如果 sync.lock 因异常退出残留，可先只清锁，不立刻跑阶段
+paper-compass sync --force-unlock
+
+# 查看 PDF 文本抽取 / chunk 准备失败报告
+cat data/logs/pdf_extract_failures.jsonl
+```
+
+当 `paper-compass sync --dry-run` 或 `build_index.py --dry-run` 显示大量 metadata-only 变化时，建议优先使用 `--explain-changes` 做本地解释，而不是直接允许大规模重嵌入。
 
 ### MCP 集成
 
@@ -737,6 +772,7 @@ paper-compass 基于以下开源项目构建：
 
 | 版本 | 日期 | 内容 |
 |------|------|------|
+| v1.4.1 | 2026-06-23 | **增量同步硬化第二阶段** — wiki 写回改为 key-aware slug/upsert（新增 `--wiki-upsert-mode`）；增量 dry-run 支持 `--explain-changes --sample-size N`，可解释 metadata-only 变化原因；`sync_zotero.py` 与 `build_index.py` 统一写入 `data/logs/pdf_extract_failures.jsonl`；`paper-compass status` / `sync --force-unlock` 提供更清晰的同步恢复指引。 |
 | v1.4.0 | 2026-06-03 | **Repo-local managed runtime + MCP fail-fast 启动** — 新增 `scripts/bootstrap_runtime.py` 与 `src/paper_compass/runtime_env.py`，统一管理仓库内 `.venv`；`paper-compass init / update / status / healthcheck` 接入 runtime 状态；MCP 入口与 shell wrapper 显式校验解释器并在配置错误时直接报错；Python 基线提升到 `>=3.12`，README / MCP 配置同步更新到 managed runtime 模型。 |
 | v1.2.7 | 2026-05-15 | **数据同步命令 + vectordb 健康守卫** — 新增 `paper-compass sync`，将 `sync_zotero.py`、论文增量索引、wiki 增量生成与 wiki 向量化整合为一条命令；新增 `data/state/last_sync.json` 与 `data/state/sync.lock` 记录运行状态并阻止重叠执行；在写入前检测 Chroma journal/WAL/manifest/可读性，发现脏状态或损坏时阻断增量写入，并支持 `--rebuild {papers,wiki,all}` 与 `--backup-corrupted-db` 恢复路径。 |
 | v1.2.6 | 2026-05-13 | **MCP cold-start 优化** — 消除 ChromaDB `clear_system_cache()` 导致的段文件二次加载；全局共享 `PersistentClient` 实例避免双 client 问题；MCP 握手后后台预加载 wiki 和 papers 集合。首次语义检索工具调用从 22-50s 降至 16-29s，MCP 模式下预加载后亚秒级响应。 |

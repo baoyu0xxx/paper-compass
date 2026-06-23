@@ -24,6 +24,24 @@ from paper_compass.zotero_snapshot import cleanup_sqlite_snapshots, prepare_zote
 from paper_compass.zotero_sqlite import ZoteroLibrary
 
 
+def _failure_report_path(out_dir: Path) -> Path:
+    return out_dir.parent / "logs" / "pdf_extract_failures.jsonl"
+
+
+def _append_failure_report(report_path: Path, *, stage: str, key: str, pdf_path: str, reason: str, exception: str = "") -> None:
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "stage": stage,
+        "key": key,
+        "pdf_path": pdf_path,
+        "reason": reason,
+    }
+    if exception:
+        payload["exception"] = exception
+    with report_path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(payload, ensure_ascii=False) + "\n")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Sync Zotero metadata and PDFs for paper-compass")
     parser.add_argument(
@@ -125,6 +143,8 @@ def main():
     # ── Enrich: extract text if requested ──
     missing_pdf = 0
     extracted = 0
+    failure_counts: dict[str, int] = {}
+    report_path = _failure_report_path(out_dir)
 
     for item in items:
         pdf_path = item.get("pdf_path", "")
@@ -144,8 +164,26 @@ def main():
                     text_file.write_text(full_text, encoding="utf-8")
                     item["text_file"] = str(text_file)
                     extracted += 1
+                else:
+                    failure_counts["empty text"] = failure_counts.get("empty text", 0) + 1
+                    _append_failure_report(
+                        report_path,
+                        stage="sync_zotero",
+                        key=item["key"],
+                        pdf_path=pdf_path,
+                        reason="empty text",
+                    )
             except Exception as e:
                 print(f"  WARNING: text extraction failed for {item['key']}: {e}", file=sys.stderr)
+                failure_counts["extract error"] = failure_counts.get("extract error", 0) + 1
+                _append_failure_report(
+                    report_path,
+                    stage="sync_zotero",
+                    key=item["key"],
+                    pdf_path=pdf_path,
+                    reason="extract error",
+                    exception=str(e),
+                )
 
         # Add derived fields
         date_str = item.get("date", "")
@@ -175,6 +213,11 @@ def main():
     print(f"  Unique collections:    {len(collections_set)}")
     if args.extract_text:
         print(f"  Texts extracted:       {extracted}")
+        if failure_counts:
+            print(f"  PDF text warnings:     {sum(failure_counts.values())}")
+            for reason, count in sorted(failure_counts.items()):
+                print(f"    {reason}: {count}")
+            print(f"  Failure report:        {report_path}")
     print(f"  Output:                {library_path}")
     print("Sync complete.")
 

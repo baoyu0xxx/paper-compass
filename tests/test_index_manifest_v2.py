@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from paper_compass.index_manifest import build_paper_fingerprint, diff_manifest_v2
+from paper_compass.index_manifest import (
+    build_paper_fingerprint,
+    diff_manifest_v2,
+    explain_fingerprint_diff,
+)
 
 
 def _item(tmp_path: Path, *, key="A1", title="Title", tags=None, pdf_name="A1.pdf", text_file=""):
@@ -100,3 +104,63 @@ def test_manifest_v2_keeps_old_manifest_content_compatible(tmp_path):
 
     assert diff["requires_embedding"] == []
     assert diff["content_changed"] == []
+
+
+def test_manifest_v2_ignores_tag_order_drift(tmp_path):
+    text = "same extracted text" * 200
+    old_item = _item(tmp_path, tags=["beta", "alpha"])
+    new_item = {**old_item, "tags": ["alpha", "beta"]}
+
+    previous = {"A1": build_paper_fingerprint(old_item, text, "chunks-v1", "embed-v1", chunk_count=2)}
+    current = {"A1": build_paper_fingerprint(new_item, text, "chunks-v1", "embed-v1", chunk_count=2)}
+
+    diff = diff_manifest_v2(current, previous)
+
+    assert diff["metadata_only"] == []
+    assert diff["unchanged"] == ["A1"]
+
+
+def test_manifest_v2_ignores_collection_order_drift(tmp_path):
+    text = "same extracted text" * 200
+    old_item = _item(tmp_path)
+    old_item["collections"] = ["B", "A"]
+    new_item = {**old_item, "collections": ["A", "B"]}
+
+    previous = {"A1": build_paper_fingerprint(old_item, text, "chunks-v1", "embed-v1", chunk_count=2)}
+    current = {"A1": build_paper_fingerprint(new_item, text, "chunks-v1", "embed-v1", chunk_count=2)}
+
+    diff = diff_manifest_v2(current, previous)
+
+    assert diff["metadata_only"] == []
+    assert diff["unchanged"] == ["A1"]
+
+
+def test_manifest_v2_keeps_author_order_semantic(tmp_path):
+    text = "same extracted text" * 200
+    old_item = _item(tmp_path)
+    old_item["authors"] = ["A", "B"]
+    new_item = {**old_item, "authors": ["B", "A"]}
+
+    previous = {"A1": build_paper_fingerprint(old_item, text, "chunks-v1", "embed-v1", chunk_count=2)}
+    current = {"A1": build_paper_fingerprint(new_item, text, "chunks-v1", "embed-v1", chunk_count=2)}
+
+    diff = diff_manifest_v2(current, previous)
+
+    assert diff["metadata_only"] == ["A1"]
+    assert diff["requires_embedding"] == []
+
+
+def test_explain_fingerprint_diff_reports_changed_fields(tmp_path):
+    text = "same extracted text" * 200
+    old_item = _item(tmp_path, title="Old title", tags=["old"])
+    new_item = {**old_item, "title": "New title", "tags": ["new"]}
+
+    previous = build_paper_fingerprint(old_item, text, "chunks-v1", "embed-v1", chunk_count=2)
+    current = build_paper_fingerprint(new_item, text, "chunks-v1", "embed-v1", chunk_count=2)
+
+    explanation = explain_fingerprint_diff(current, previous)
+
+    assert "title changed" in explanation["reasons"]
+    assert "tags changed" in explanation["reasons"]
+    assert explanation["details"]["title"]["before"] == "Old title"
+    assert explanation["details"]["tags"]["after"] == ["new"]

@@ -31,8 +31,10 @@ from paper_compass.index_health import inspect_index_health
 from paper_compass.index_manifest import (
     build_paper_fingerprint,
     diff_manifest,
+    explain_fingerprint_diff,
     load_manifest,
     save_manifest,
+    utc_now_iso,
 )
 from paper_compass.index_planner import plan_paper_index
 from paper_compass.vector_store import VectorStore
@@ -279,13 +281,50 @@ def _index_single_paper(store: VectorStore, embedder: Any, item: Dict[str, Any],
     )
 
 
-def _prepare_index_inputs(items: List[Dict[str, Any]], args, embedder_model_id: str) -> tuple[Dict[str, Dict[str, Any]], Dict[str, str], List[str]]:
+def _resolve_failure_report_path(args) -> Path:
+    text_dir = Path(args.text_dir)
+    log_root = text_dir.parent if text_dir.name.lower() == "texts" else text_dir
+    return log_root / "logs" / "pdf_extract_failures.jsonl"
+
+
+def _append_failure_report(report_path: Path, *, stage: str, key: str, pdf_path: str, reason: str, exception: str = "") -> None:
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "stage": stage,
+        "key": key,
+        "pdf_path": pdf_path,
+        "reason": reason,
+        "timestamp": utc_now_iso(),
+    }
+    if exception:
+        payload["exception"] = exception
+    with report_path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(payload, ensure_ascii=False) + "\n")
+
+
+def _prepare_index_inputs(items: List[Dict[str, Any]], args, embedder_model_id: str) -> tuple[Dict[str, Dict[str, Any]], Dict[str, str], List[str], Dict[str, Any]]:
     fingerprints: Dict[str, Dict[str, Any]] = {}
     full_texts: Dict[str, str] = {}
     skipped: List[str] = []
+    failure_counts: Dict[str, int] = {}
+    report_path = _resolve_failure_report_path(args)
+
+    def record_failure(*, key: str, pdf_path: str, reason: str, exception: str = "") -> None:
+        skipped.append(f"{key}: {reason}")
+        failure_counts[reason] = failure_counts.get(reason, 0) + 1
+        if not _get_bool_arg(args, "dry_run"):
+            _append_failure_report(
+                report_path,
+                stage="build_index",
+                key=key,
+                pdf_path=pdf_path,
+                reason=reason,
+                exception=exception,
+            )
 
     for item in items:
         key = item.get("key", "")
+        pdf_path = item.get("pdf_path", "")
         if not key:
             skipped.append("missing key")
             continue
@@ -293,22 +332,25 @@ def _prepare_index_inputs(items: List[Dict[str, Any]], args, embedder_model_id: 
         # Allow indexing from text_file alone (no PDF required).
         # PDF is only needed for on-the-fly extraction when text_file is missing.
         text_file = item.get("text_file", "")
-        pdf_path = item.get("pdf_path", "")
         has_text = text_file and Path(text_file).exists()
         has_pdf = pdf_path and Path(pdf_path).exists()
 
         if not has_text and not has_pdf:
-            skipped.append(f"{key}: missing text file and PDF")
+            record_failure(key=key, pdf_path=pdf_path, reason="missing text file and PDF")
             continue
 
-        full_text = _load_paper_text(item, extract_text=args.extract_text)
+        try:
+            full_text = _load_paper_text(item, extract_text=args.extract_text)
+        except Exception as exc:
+            record_failure(key=key, pdf_path=pdf_path, reason="extract error", exception=str(exc))
+            continue
         if not full_text.strip():
-            skipped.append(f"{key}: missing text")
+            record_failure(key=key, pdf_path=pdf_path, reason="missing text")
             continue
 
         chunk_count = sum(1 for _ in _iter_paper_chunks(full_text, item))
         if chunk_count == 0:
-            skipped.append(f"{key}: no valid chunks")
+            record_failure(key=key, pdf_path=pdf_path, reason="no valid chunks")
             continue
 
         full_texts[key] = full_text
@@ -320,7 +362,10 @@ def _prepare_index_inputs(items: List[Dict[str, Any]], args, embedder_model_id: 
             chunk_count=chunk_count,
         )
 
-    return fingerprints, full_texts, skipped
+    return fingerprints, full_texts, skipped, {
+        "counts": failure_counts,
+        "report_path": str(report_path) if failure_counts else "",
+    }
 
 
 def _get_bool_arg(args: Any, name: str, default: bool = False) -> bool:
@@ -369,6 +414,20 @@ def _print_paper_index_plan(summary: Dict[str, Any], process_keys: list[str]) ->
     print(f"  Manifest:                   {summary['manifest_path']}")
     if process_keys:
         print(f"  Sample embedding keys:      {', '.join(process_keys[:10])}")
+    reason_counts = summary.get("metadata_reason_counts") or {}
+    if reason_counts:
+        print()
+        print("  Top metadata-only reasons:")
+        for reason, count in sorted(reason_counts.items(), key=lambda item: (-item[1], item[0])):
+            print(f"    {reason}: {count}")
+    samples = summary.get("metadata_reason_samples") or []
+    if samples:
+        print()
+        print("  Sample metadata-only diffs:")
+        for sample in samples:
+            print(f"    {sample['key']}")
+            for reason in sample.get("reasons", []):
+                print(f"      {reason}")
 
 
 def _store_item_keys_or_abort(store: Any) -> set[str]:
@@ -452,7 +511,7 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         manifest["schema_version"] = 2
         manifest.setdefault("items", {})
 
-    current_items, full_texts, skipped = _prepare_index_inputs(items, args, embedder.model_id)
+    current_items, full_texts, skipped, failure_report = _prepare_index_inputs(items, args, embedder.model_id)
     manifest_items = manifest.get("items", {})
     missing_vector_keys: list[str] = []
     orphan_vector_keys: list[str] = []
@@ -511,6 +570,22 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         repair_keys = changed_keys
         orphan_delete_keys = []
 
+    metadata_reason_counts: Dict[str, int] = {}
+    metadata_reason_samples: List[Dict[str, Any]] = []
+    if metadata_only_keys:
+        sample_size = max(0, int(getattr(args, "sample_size", 5) or 0))
+        include_samples = _get_bool_arg(args, "explain_changes") and sample_size > 0
+        for key in metadata_only_keys:
+            explanation = explain_fingerprint_diff(current_items[key], manifest_items[key])
+            for reason in explanation["reasons"]:
+                metadata_reason_counts[reason] = metadata_reason_counts.get(reason, 0) + 1
+            if include_samples and len(metadata_reason_samples) < sample_size:
+                metadata_reason_samples.append({
+                    "key": key,
+                    "reasons": explanation["reasons"],
+                    "details": explanation["details"],
+                })
+
     summary = {
         "dry_run": dry_run,
         "new": len(new_keys),
@@ -531,6 +606,10 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         "deleted_chunks": 0,
         "manifest_path": manifest_path,
         "collection": store.collection_name,
+        "metadata_reason_counts": metadata_reason_counts,
+        "metadata_reason_samples": metadata_reason_samples,
+        "failure_reason_counts": failure_report["counts"],
+        "failure_report_path": failure_report["report_path"],
     }
 
     if dry_run:
@@ -687,6 +766,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--manifest-path", default="", help="Optional override for the incremental manifest path")
     parser.add_argument("--dry-run", action="store_true", help="Plan paper index changes without embedding or writing")
+    parser.add_argument("--explain-changes", action="store_true", help="Show metadata-only change reasons during dry-run")
+    parser.add_argument("--sample-size", type=int, default=5, help="Max metadata-only samples to show in dry-run explanations")
     return parser
 
 

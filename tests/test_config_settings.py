@@ -50,6 +50,43 @@ def test_path_settings_uses_safe_defaults_for_missing_config(monkeypatch):
     assert settings.zotero_storage_path == ""
 
 
+def test_path_settings_uses_local_state_before_safe_defaults(monkeypatch):
+    monkeypatch.delenv("PAPER_COMPASS_LIBRARY_PATH", raising=False)
+    monkeypatch.delenv("PAPER_COMPASS_TEXT_DIR", raising=False)
+    monkeypatch.delenv("PAPER_COMPASS_WIKI_ROOT", raising=False)
+    monkeypatch.delenv("PAPER_COMPASS_VECTORDB_PATH", raising=False)
+    monkeypatch.delenv("ZOTERO_SQLITE_PATH", raising=False)
+    monkeypatch.delenv("ZOTERO_STORAGE_PATH", raising=False)
+
+    settings = resolve_path_settings(
+        configs={},
+        local_paths={
+            "zotero_sqlite_path": "local/zotero.sqlite",
+            "zotero_storage_path": "local/storage",
+        },
+    )
+
+    assert settings.zotero_sqlite_path == "local/zotero.sqlite"
+    assert settings.zotero_storage_path == "local/storage"
+    assert settings.library_json_path == "data/zotero-export/library.json"
+
+
+def test_path_settings_env_still_overrides_local_state(monkeypatch):
+    monkeypatch.setenv("ZOTERO_SQLITE_PATH", "env/zotero.sqlite")
+    monkeypatch.delenv("ZOTERO_STORAGE_PATH", raising=False)
+
+    settings = resolve_path_settings(
+        configs={},
+        local_paths={
+            "zotero_sqlite_path": "local/zotero.sqlite",
+            "zotero_storage_path": "local/storage",
+        },
+    )
+
+    assert settings.zotero_sqlite_path == "env/zotero.sqlite"
+    assert settings.zotero_storage_path == "local/storage"
+
+
 def test_indexing_settings_reads_large_incremental_thresholds_from_rag_config():
     configs = {
         "rag": {

@@ -30,16 +30,29 @@ class ZoteroLibrary:
                       Defaults to <db_parent>/storage.
     """
 
-    def __init__(self, db_path: str, storage_path: Optional[str] = None):
+    def __init__(
+        self,
+        db_path: str,
+        storage_path: Optional[str] = None,
+        *,
+        immutable: bool = False,
+        timeout: float = 30.0,
+    ):
         self.db_path = db_path
         self.storage_path = storage_path or str(Path(db_path).parent / "storage")
+        self.immutable = immutable
+        self.timeout = timeout
         self._local = threading.local()
 
     def _get_connection(self) -> sqlite3.Connection:
         if not hasattr(self._local, "conn") or self._local.conn is None:
             # Always open Zotero databases in SQLite read-only mode. Do not replace
             # this with sqlite3.connect(path), which could create/write sidecar files.
-            self._local.conn = connect_readonly(self.db_path)
+            self._local.conn = connect_readonly(
+                self.db_path,
+                immutable=self.immutable,
+                timeout=self.timeout,
+            )
         return self._local.conn
 
     @contextmanager

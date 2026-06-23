@@ -141,13 +141,15 @@ def resolve_path_settings(
     configs: Optional[Dict[str, Any]] = None,
     *,
     overrides: Optional[Dict[str, str | None]] = None,
+    local_paths: Optional[Dict[str, str | None]] = None,
 ) -> PathSettings:
-    """Resolve common user paths with CLI > environment > YAML > safe defaults precedence."""
+    """Resolve common user paths with CLI > environment > YAML > local state > safe defaults precedence."""
     import os
 
     if configs is None:
         configs = load_all_configs()
     overrides = overrides or {}
+    local_paths = local_paths or {}
     yaml_paths = configs.get("paths", {}).get("paths", {})
     defaults = PathSettings()
     resolved: dict[str, str] = {}
@@ -156,8 +158,9 @@ def resolve_path_settings(
         cli_value = _nonempty(overrides.get(field_name))
         env_value = _nonempty(os.environ.get(env_name))
         config_value = _nonempty(yaml_paths.get(field_name))
+        local_value = _nonempty(local_paths.get(field_name))
         default_value = getattr(defaults, field_name)
-        resolved[field_name] = cli_value or env_value or config_value or default_value
+        resolved[field_name] = cli_value or env_value or config_value or local_value or default_value
 
     return PathSettings(**resolved)
 

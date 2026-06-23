@@ -4,7 +4,7 @@
 
 **Turn your Zotero library into a dual-engine knowledge base for AI agents — RAG full-text retrieval + LLM wiki knowledge compilation**
 
-[![version](https://img.shields.io/badge/version-1.4.0-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.4.1-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.12+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
@@ -60,7 +60,7 @@ The recommended path is to install the published wheel from GitHub Release direc
 
 ```bash
 python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.0/paper_compass-1.4.0-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.1/paper_compass-1.4.1-py3-none-any.whl
 
 # Interactive setup
 paper-compass init
@@ -182,7 +182,7 @@ If you installed paper-compass from GitHub Release, point pip directly to the ta
 
 ```bash
 python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.0/paper_compass-1.4.0-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.1/paper_compass-1.4.1-py3-none-any.whl
 ```
 
 To install another published version later, replace the version in the URL accordingly. Published releases can be listed with:
@@ -247,7 +247,7 @@ paper-compass update --check
 paper-compass update
 
 # Update to a specific version
-paper-compass update --version v1.4.0
+paper-compass update --version v1.4.1
 
 # Simulate an update (preview without executing)
 paper-compass update --dry-run
@@ -268,7 +268,7 @@ If automatic update is unavailable, you can update manually:
 
 ```bash
 git fetch origin --tags
-git checkout v1.4.0         # or git pull origin main
+git checkout v1.4.1         # or git pull origin main
 python3 scripts/bootstrap_runtime.py
 paper-compass validate        # verify that the configuration still works
 python3 -m pytest tests/ -x   # ensure tests pass
@@ -454,6 +454,7 @@ paper-compass search ask --query "How does family-firm succession affect labor s
 # Inspect resolved configuration / data / vectordb state
 paper-compass status
 # → includes embedding role / active provider / cascade, plus whether the wiki prompt bundle is degraded
+# → also includes sync.last_sync / sync.lock / last_successful_zotero_source for sync diagnostics
 
 # One-command sync for Zotero / vector index / wiki data
 paper-compass sync --db-source-path /path/to/zotero.sqlite --storage-path /path/to/storage
@@ -480,9 +481,9 @@ paper-compass validate --help
 
 | Script | Purpose | Key arguments |
 |--------|---------|---------------|
-| `scripts/sync_zotero.py` | Zotero SQLite → `library.json` + text extraction | `--extract-text` |
-| `scripts/build_index.py` | Build ChromaDB vector indexes (papers + wiki) | `--full-rebuild`, `--incremental`, `--prune-deleted`, `--wiki` |
-| `scripts/ingest_to_wiki.py` | Batch LLM wiki generation | `--skip-existing`, `--workers 10`, `--limit N` |
+| `scripts/sync_zotero.py` | Zotero SQLite → `library.json` + text extraction | `--extract-text`; failure report at `data/logs/pdf_extract_failures.jsonl` |
+| `scripts/build_index.py` | Build ChromaDB vector indexes (papers + wiki) | `--full-rebuild`, `--incremental`, `--prune-deleted`, `--wiki`, `--dry-run --explain-changes --sample-size N` |
+| `scripts/ingest_to_wiki.py` | Batch LLM wiki generation | `--skip-existing`, `--workers 10`, `--limit N`, `--wiki-upsert-mode` |
 | `scripts/run_mcp_server.py` | MCP repo-local compatibility shim (delegates to `paper_compass.mcp_entrypoint:main`) | `--mcp`, `--tool <name> --query "..."` |
 | `scripts/healthcheck.py` | Subsystem health check | `--smoke` |
 
@@ -495,9 +496,19 @@ python scripts/build_index.py --library data/zotero-export/library.json --full-r
 # Incremental update (only update changed papers)
 python scripts/build_index.py --library data/zotero-export/library.json --incremental
 
+# Dry-run locally and explain metadata-only / path-only changes before embedding
+python scripts/build_index.py \
+  --library data/zotero-export/library.json \
+  --incremental \
+  --dry-run \
+  --explain-changes \
+  --sample-size 5
+
 # Index wiki pages
 python scripts/build_index.py --wiki --wiki-root ./wiki
 ```
+
+`--explain-changes` reports top metadata-only reasons (for example `tags changed` or `collections changed`) and, with `--sample-size`, provides sampled diffs before any embedding-heavy run.
 
 #### Generate Wiki Pages
 
@@ -505,12 +516,36 @@ python scripts/build_index.py --wiki --wiki-root ./wiki
 # Process all pages that have not yet been generated (10 concurrent workers)
 python scripts/ingest_to_wiki.py --skip-existing --workers 10
 
+# Prefer key-aware unique writeback when titles may collide
+python scripts/ingest_to_wiki.py --skip-existing --workers 10 --wiki-upsert-mode create_unique
+
 # Try 3 papers first
 python scripts/ingest_to_wiki.py --limit 3 --workers 1
 
 # Resume after interruption
 python scripts/ingest_to_wiki.py --skip-existing --workers 10
 ```
+
+`--wiki-upsert-mode` supports:
+- `create`: fail on same-slug conflicts
+- `create_unique`: same slug + different Zotero key becomes `YYYY-MM-DD-slug-key.md`
+- `replace_if_same_key`: overwrite only when the existing page belongs to the same Zotero key
+- `replace_if_same_slug`: overwrite by slug directly (use only when intentional)
+
+### Recovery and diagnostics
+
+```bash
+# Inspect sync state, stale lock detection, and the last successful Zotero source
+paper-compass status --json
+
+# Remove a leftover sync.lock without running stages yet
+paper-compass sync --force-unlock
+
+# Review structured PDF extraction / chunk-preparation failures
+cat data/logs/pdf_extract_failures.jsonl
+```
+
+When `paper-compass sync --dry-run` or `build_index.py --dry-run` shows unexpectedly large metadata-only churn, prefer `--explain-changes` first instead of immediately allowing a large embedding run.
 
 ### MCP Integration
 
@@ -693,6 +728,7 @@ Major additions on top of those foundations:
 
 | Version | Date | Notes |
 |---------|------|-------|
+| v1.4.1 | 2026-06-23 | **Incremental sync hardening, stage 2** — wiki writeback is now key-aware (`--wiki-upsert-mode`); incremental dry-run can explain metadata-only churn via `--explain-changes --sample-size N`; both `sync_zotero.py` and `build_index.py` write structured failures to `data/logs/pdf_extract_failures.jsonl`; `paper-compass status` and `sync --force-unlock` provide clearer recovery guidance |
 | v1.4.0 | 2026-06-03 | **Repo-local managed runtime + fail-fast MCP startup** — added `scripts/bootstrap_runtime.py` and `src/paper_compass/runtime_env.py` to manage a repository-local `.venv`; wired runtime status into `paper-compass init / update / status / healthcheck`; made MCP entrypoints and shell wrappers validate the interpreter explicitly and fail fast on misconfiguration; raised the Python baseline to `>=3.12`; updated README and MCP configuration guidance to the managed-runtime model |
 | v1.2.7 | 2026-05-15 | **Data sync command + vectordb health guard** — added `paper-compass sync`, integrating `sync_zotero.py`, incremental paper indexing, incremental wiki generation, and wiki vectorization into one command; added `data/state/last_sync.json` and `data/state/sync.lock`; checks journal/WAL/manifest/readability before writes; supports `--rebuild {papers,wiki,all}` and `--backup-corrupted-db` recovery paths |
 | v1.2.6 | 2026-05-13 | **MCP cold-start optimization** — removed `clear_system_cache()`-triggered double loading; introduced a shared `PersistentClient`; prewarms wiki and paper collections after MCP handshake |

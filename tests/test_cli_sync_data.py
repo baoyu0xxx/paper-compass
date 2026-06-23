@@ -28,6 +28,8 @@ class TestSyncCliArgParsing:
                 assert "--snapshot-db" in output
                 assert "--snapshot-dir" in output
                 assert "--allow-live-zotero-read" in output
+                assert "--force-unlock" in output
+                assert "--lock-timeout-minutes" in output
 
     def test_rebuild_choices_and_defaults(self):
         parser = _make_parser()
@@ -69,10 +71,13 @@ class TestSyncCliArgParsing:
             "3",
             "--snapshot-max-age-days",
             "14",
+            "--lock-timeout-minutes",
+            "90",
         ])
 
         assert args.snapshot_keep == 3
         assert args.snapshot_max_age_days == 14
+        assert args.lock_timeout_minutes == 90
 
 
 class TestSyncExecute:
@@ -104,6 +109,8 @@ class TestSyncExecute:
         assert called_options.snapshot_keep == 5
         assert called_options.snapshot_max_age_days == 0
         assert called_options.allow_live_zotero_read is False
+        assert called_options.force_unlock is False
+        assert called_options.lock_timeout_minutes == 360
         output = fake_out.getvalue()
         assert "sync status: dry_run" in output
         assert "planned stages: sync_zotero, index_papers" in output
@@ -132,17 +139,39 @@ class TestSyncExecute:
             zotero_storage_path="configured/storage",
         )
 
-        with mock.patch.object(sync_data, "resolve_path_settings", return_value=settings):
-            with mock.patch.object(sync_data, "run_sync_pipeline", return_value=result) as mocked:
-                with mock.patch("sys.stdout", io.StringIO()):
-                    assert sync_data.execute_sync(args) == 0
+        with mock.patch.object(sync_data, "load_last_successful_zotero_source", return_value={}) as load_local:
+            with mock.patch.object(sync_data, "resolve_path_settings", return_value=settings) as resolve_settings:
+                with mock.patch.object(sync_data, "run_sync_pipeline", return_value=result) as mocked:
+                    with mock.patch("sys.stdout", io.StringIO()):
+                        assert sync_data.execute_sync(args) == 0
 
+        load_local.assert_called_once_with(sync_data.source_config_path(sync_data.PROJECT_ROOT))
+        assert resolve_settings.call_args.kwargs["local_paths"] == {}
         called_options = mocked.call_args.args[0]
         assert called_options.db_path == sync_data.PROJECT_ROOT / "configured/vectordb"
         assert called_options.db_source_path == "configured/zotero.sqlite"
         assert called_options.storage_path == "configured/storage"
         assert called_options.library_path == "configured/library.json"
         assert called_options.wiki_root == "configured/wiki"
+
+    def test_execute_sync_passes_force_unlock_and_timeout(self):
+        from paper_compass.cli import sync_data
+
+        args = _make_parser().parse_args(["--force-unlock", "--lock-timeout-minutes", "42"])
+        result = SyncResult(
+            status="unlocked",
+            summary="removed stale lock",
+            planned_stages=[],
+            completed_stages=[],
+            state_path="/tmp/last_sync.json",
+        )
+        with mock.patch.object(sync_data, "run_sync_pipeline", return_value=result) as mocked:
+            with mock.patch("sys.stdout", io.StringIO()):
+                assert sync_data.execute_sync(args) == 0
+
+        called_options = mocked.call_args.args[0]
+        assert called_options.force_unlock is True
+        assert called_options.lock_timeout_minutes == 42
 
     def test_execute_sync_returns_one_on_health_error(self):
         from paper_compass.cli import sync_data

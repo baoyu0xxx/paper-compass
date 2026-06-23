@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from paper_compass.zotero_paths import ZoteroSourceResolution, ZoteroPathAttempt
+from paper_compass.zotero_paths import ZoteroPathAttempt, ZoteroSourceResolution
 
 
 def _make_sqlite(path: Path) -> Path:
@@ -106,6 +106,40 @@ def test_prepare_zotero_database_refuses_live_direct_read_without_override(tmp_p
         )
 
 
+def test_prepare_zotero_database_reports_locked_snapshot_context(tmp_path, monkeypatch):
+    from paper_compass import zotero_snapshot
+    from paper_compass.zotero_snapshot import prepare_zotero_database_for_read
+
+    source_db = _make_sqlite(tmp_path / "live" / "zotero.sqlite")
+    journal = source_db.with_name(source_db.name + "-journal")
+    journal.write_text("busy", encoding="utf-8")
+    source = ZoteroSourceResolution(
+        db_path=source_db,
+        storage_path=tmp_path / "live" / "storage",
+        source_kind="default",
+        tried=[ZoteroPathAttempt(path=str(source_db), reason="ok")],
+        is_live_candidate=True,
+    )
+
+    def fake_snapshot(src: Path, snapshot_dir: Path, *, timeout: float = 30.0) -> Path:
+        raise sqlite3.OperationalError("database is locked")
+
+    monkeypatch.setattr(zotero_snapshot, "create_sqlite_snapshot", fake_snapshot)
+
+    with pytest.raises(RuntimeError, match="database is locked") as exc_info:
+        prepare_zotero_database_for_read(
+            source,
+            snapshot_policy="always",
+            snapshot_dir=tmp_path / "data" / "state" / "zotero-snapshots",
+            sqlite_timeout=15.0,
+        )
+
+    message = str(exc_info.value)
+    assert "zotero.sqlite-journal" in message
+    assert "snapshot-db never" in message
+    assert "sqlite-timeout 15.0" in message
+
+
 def test_cleanup_sqlite_snapshots_keeps_newest_n(tmp_path):
     from paper_compass.zotero_snapshot import cleanup_sqlite_snapshots
 
@@ -115,8 +149,8 @@ def test_cleanup_sqlite_snapshots_keeps_newest_n(tmp_path):
     for idx in range(4):
         path = snapshot_dir / f"zotero.20260521-180{idx}00.sqlite"
         path.write_text(str(idx), encoding="utf-8")
-        # Make ordering deterministic on filesystems with coarse timestamp resolution.
         import os
+
         os.utime(path, (idx, idx))
         files.append(path)
 

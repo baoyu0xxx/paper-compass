@@ -154,7 +154,7 @@ def resolve_zotero_source(
             storage_override=storage_override,
             source_kind="explicit",
             tried=tried,
-            is_live_candidate=_looks_like_live_zotero_sqlite(Path(explicit_db_path)),
+            is_live_candidate=False,
         )
         if resolved is not None:
             return resolved
@@ -167,7 +167,7 @@ def resolve_zotero_source(
             storage_override=storage_override,
             source_kind="env",
             tried=tried,
-            is_live_candidate=_looks_like_live_zotero_sqlite(Path(env_db_path)),
+            is_live_candidate=False,
         )
         if resolved is not None:
             return resolved

@@ -8,10 +8,10 @@ and should not be treated as a long-lived source such as zotero_readonly.sqlite.
 from __future__ import annotations
 
 import sqlite3
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-import time
 
 from paper_compass.sqlite_readonly import connect_readonly
 from paper_compass.zotero_paths import ZoteroSourceResolution
@@ -24,16 +24,40 @@ class PreparedZoteroDatabase:
     used_snapshot: bool
     snapshot_path: Path | None
     reason: str
+    use_immutable: bool = False
 
 
-def create_sqlite_snapshot(src: Path, snapshot_dir: Path) -> Path:
+@dataclass(frozen=True)
+class SnapshotCleanupResult:
+    scanned_count: int
+    deleted_count: int
+    deleted_paths: list[Path]
+    dry_run: bool
+
+
+def create_sqlite_snapshot(src: Path, snapshot_dir: Path, *, timeout: float = 30.0) -> Path:
     snapshot_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d-%H%M%S")
     dst = snapshot_dir / f"zotero.{ts}.sqlite"
-    with connect_readonly(src) as source:
+    with connect_readonly(src, timeout=timeout) as source:
         with sqlite3.connect(dst) as target:
             source.backup(target)
     return dst
+
+
+def _snapshot_error_context(source: ZoteroSourceResolution, sqlite_timeout: float) -> str:
+    sidecars = []
+    for suffix in ("-journal", "-wal", "-shm"):
+        sidecar = source.db_path.with_name(source.db_path.name + suffix)
+        if sidecar.exists():
+            sidecars.append(str(sidecar))
+    sidecar_text = ", ".join(sidecars) if sidecars else "none"
+    return (
+        f"Failed to prepare Zotero database for read: {source.db_path}\n"
+        f"Detected SQLite sidecars: {sidecar_text}\n"
+        f"If this is a live or unclean backup DB, close Zotero or copy a clean backup, or try --snapshot-db never with a stable backup source.\n"
+        f"Current retry settings: --sqlite-timeout {sqlite_timeout}"
+    )
 
 
 def prepare_zotero_database_for_read(
@@ -42,6 +66,7 @@ def prepare_zotero_database_for_read(
     snapshot_policy: str = "auto",
     snapshot_dir: Path,
     allow_live_zotero_read: bool = False,
+    sqlite_timeout: float = 30.0,
 ) -> PreparedZoteroDatabase:
     if snapshot_policy not in {"auto", "always", "never"}:
         raise ValueError("snapshot_policy must be auto, always, or never")
@@ -50,13 +75,19 @@ def prepare_zotero_database_for_read(
         snapshot_policy == "auto" and source.is_live_candidate
     )
     if should_snapshot:
-        snapshot = create_sqlite_snapshot(source.db_path, snapshot_dir)
+        try:
+            snapshot = create_sqlite_snapshot(source.db_path, snapshot_dir, timeout=sqlite_timeout)
+        except sqlite3.OperationalError as exc:
+            if "locked" in str(exc).lower():
+                raise RuntimeError(f"{exc}\n{_snapshot_error_context(source, sqlite_timeout)}") from exc
+            raise
         return PreparedZoteroDatabase(
             read_db_path=snapshot,
             original_db_path=source.db_path,
             used_snapshot=True,
             snapshot_path=snapshot,
             reason="snapshot",
+            use_immutable=False,
         )
 
     if source.is_live_candidate and snapshot_policy == "never" and not allow_live_zotero_read:
@@ -70,15 +101,8 @@ def prepare_zotero_database_for_read(
         used_snapshot=False,
         snapshot_path=None,
         reason="direct",
+        use_immutable=not source.is_live_candidate,
     )
-
-
-@dataclass(frozen=True)
-class SnapshotCleanupResult:
-    scanned_count: int
-    deleted_count: int
-    deleted_paths: list[Path]
-    dry_run: bool
 
 
 def cleanup_sqlite_snapshots(

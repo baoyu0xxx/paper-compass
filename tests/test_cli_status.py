@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from paper_compass.cli import main
@@ -93,6 +95,28 @@ def fake_status_payload():
                 }
             ],
         },
+        "sync": {
+            "last_sync": {
+                "status": "ok",
+                "stage": "completed",
+                "started_at": "2026-06-23T01:47:27Z",
+                "updated_at": "2026-06-23T01:48:59Z",
+                "finished_at": "2026-06-23T01:49:00Z",
+                "run_id": "20260623-014727-1234",
+            },
+            "lock": {
+                "exists": True,
+                "stale": True,
+                "reason": "pid not running",
+                "path": "/repo/data/state/sync.lock",
+            },
+            "last_successful_zotero_source": {
+                "db_path": "D:/zotero_backup/zotero.sqlite",
+                "storage_path": "D:/zotero_backup/storage",
+                "source_kind": "explicit",
+                "is_live_candidate": False,
+            },
+        },
     }
 
 
@@ -107,6 +131,9 @@ def test_status_cli_json(monkeypatch, capsys, fake_status_payload):
     assert '"record_count": 12' in out
     assert '"severity": "ok"' in out
     assert '"managed_python": "/repo/.venv/bin/python"' in out
+    assert '"last_successful_zotero_source"' in out
+    assert '"stale": true' in out
+    assert '"updated_at": "2026-06-23T01:48:59Z"' in out
 
 
 def test_status_cli_text(monkeypatch, capsys, fake_status_payload):
@@ -126,3 +153,7 @@ def test_status_cli_text(monkeypatch, capsys, fake_status_payload):
     assert "embedding role: embedding | source=shared | selected=embedding_volcengine | active=embedding_volcengine" in out
     assert "prompt bundle: normal | selection=default | dir=prompts" in out
     assert "papers_openai_text-embedding-3-small" in out
+    assert "last status: ok" in out
+    assert "updated at: 2026-06-23T01:48:59Z" in out
+    assert "lock: stale=yes" in out
+    assert "zotero source: D:/zotero_backup/zotero.sqlite" in out

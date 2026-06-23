@@ -14,12 +14,19 @@ def sqlite_readonly_uri(path: str | Path, *, immutable: bool = False) -> str:
     return uri
 
 
-def connect_readonly(path: str | Path, *, immutable: bool = False) -> sqlite3.Connection:
+def connect_readonly(
+    path: str | Path,
+    *,
+    immutable: bool = False,
+    timeout: float = 30.0,
+) -> sqlite3.Connection:
     conn = sqlite3.connect(
         sqlite_readonly_uri(path, immutable=immutable),
         uri=True,
         check_same_thread=True,
+        timeout=timeout,
     )
     conn.isolation_level = None
     conn.execute("PRAGMA query_only=ON")
+    conn.execute(f"PRAGMA busy_timeout={int(timeout * 1000)}")
     return conn

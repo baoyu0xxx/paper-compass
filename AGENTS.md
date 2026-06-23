@@ -137,11 +137,13 @@ paper-compass sync \
 
 并额外提供：
 - `paper-compass sync --dry-run` 预览同步命令与论文索引差异；其中 Zotero 阶段只解析路径，不创建输出目录或读取 SQLite
+- 如需解释 dry-run 中为什么出现大量 metadata-only 变化，可单独运行 `python scripts/build_index.py --library data/zotero-export/library.json --incremental --dry-run --explain-changes --sample-size 5`
 - 论文增量索引以 PDF/文本内容 fingerprint 为核心，metadata-only / path-only 变化只更新元数据或 manifest，不触发重嵌入
 - `data/vectordb/` 健康检查（journal / wal / manifest / Chroma 可读性）
 - `data/state/last_sync.json` 状态记录
 - 损坏时阻断写入并给出恢复建议
 - `--rebuild papers|wiki|all` + `--backup-corrupted-db` 恢复路径
+- 若 `status` 显示 sync lock 卡住，可先用 `paper-compass status --json` 查看 `sync.lock` / `last_sync`，再按需执行 `paper-compass sync --force-unlock`
 
 ### 6. 手动执行各阶段（仅在需要细粒度控制时）
 
@@ -166,15 +168,32 @@ scripts/pc-wiki-index.sh
 1. `text_file` paths in `library.json` are valid
 2. You have the latest code (v1.0.1+ fixed the PDF-first check)
 
+If text extraction or chunk preparation partially fails, inspect:
+
+```bash
+cat data/logs/pdf_extract_failures.jsonl
+```
+
+该报告会记录 `sync_zotero.py` / `build_index.py` 遇到的 `empty text`、`extract error`、`missing text`、`no valid chunks` 等失败项。
+
 ### 6. Generate wiki pages (optional but recommended)
 
 ```bash
 # Test with 3 papers first
 python scripts/ingest_to_wiki.py --limit 3 --workers 1
 
+# Prefer key-aware unique writeback when titles may collide
+python scripts/ingest_to_wiki.py --skip-existing --wiki-upsert-mode create_unique
+
 # Full run (400 papers ~5h, safe to interrupt and resume)
 scripts/pc-wiki-ingest-bg.sh
 ```
+
+`--wiki-upsert-mode` 支持：
+- `create`：遇到同 slug 冲突时报错
+- `create_unique`：同 slug 不同 Zotero key 自动写成 `YYYY-MM-DD-slug-key.md`
+- `replace_if_same_key`：仅覆盖同一 Zotero key 的已有页面
+- `replace_if_same_slug`：按 slug 直接覆盖（仅在明确需要时使用）
 
 Monitor progress:
 ```bash
@@ -257,10 +276,13 @@ mcp_servers:
 | NumPy 2.x alias removal | MCP tool call fails with `np.NaN was removed in the NumPy 2.0 release` | Upgrade to v1.2.5+; search code now uses `np.nan` |
 | Wiki chunk ID collision | Fewer vectors than sections | Same-stem pages in different wiki subdirs |
 | `build_index.py` skips papers | "missing PDF" | Ensure text file paths are correct |
-|| ChromaDB dual-client | Weird errors | Never create 2 PersistentClient for same path |
-|| Mac: multiple Python installs | `pip3 show pkg` says "not found" but `python3` can import it | Always use `python3 -m pip install ...` and `python3 -m pip show ...` instead of bare `pip` / `pip3` |
-|| Shell env var pollution | API call uses wrong URL | `unset LLM_BASE_URL LLM_API_KEY EMBED_BASE_URL EMBED_API_KEY VOLC_EMBED_BASE_URL VOLC_EMBED_API_KEY` before running |
-|| $ENV_VAR not resolved | "unauthorized" errors | Ensure the referenced env var is actually set in your shell |
+| Metadata-only churn in dry-run | `--dry-run` shows many metadata-only papers | Re-run `build_index.py --incremental --dry-run --explain-changes --sample-size 5` before allowing any embedding-heavy run |
+| Wiki title collision during ingest | `save:` / slug conflict errors during `ingest_to_wiki.py` | Prefer `--wiki-upsert-mode create_unique`; use `replace_if_same_key` only when replacing the same paper |
+| Partial PDF extraction failures | Some papers silently miss text / chunks | Inspect `data/logs/pdf_extract_failures.jsonl` for `empty text`, `extract error`, `missing text`, `no valid chunks` |
+| ChromaDB dual-client | Weird errors | Never create 2 PersistentClient for same path |
+| Mac: multiple Python installs | `pip3 show pkg` says "not found" but `python3` can import it | Always use `python3 -m pip install ...` and `python3 -m pip show ...` instead of bare `pip` / `pip3` |
+| Shell env var pollution | API call uses wrong URL | `unset LLM_BASE_URL LLM_API_KEY EMBED_BASE_URL EMBED_API_KEY VOLC_EMBED_BASE_URL VOLC_EMBED_API_KEY` before running |
+| $ENV_VAR not resolved | "unauthorized" errors | Ensure the referenced env var is actually set in your shell |
 
 Before publishing a new version, follow `docs/release-checklist.md` to keep code, docs, tests, tags, and release assets aligned.
 
@@ -281,6 +303,11 @@ New test files:
 - `tests/test_cli_configure.py` — interactive + non-interactive init
 - `tests/test_cli_update.py` — update command tests
 - `tests/test_config.py` — $ENV_VAR resolution
+- `tests/test_wiki_store.py` — key-aware wiki slug / upsert behavior
+- `tests/test_ingest_to_wiki.py` — wiki ingest parameter pass-through
+- `tests/test_index_manifest_v2.py` — metadata diff normalization + explain helpers
+- `tests/test_incremental_index.py` — incremental dry-run explanations + failure reporting
+- `tests/test_pdf_extract_reporting.py` — structured PDF extraction failure reports
 
 ## Dependencies
 

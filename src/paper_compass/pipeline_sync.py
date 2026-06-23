@@ -8,9 +8,10 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Sequence
+from typing import Any, Sequence
 
 from paper_compass.index_health import inspect_index_health
+from paper_compass.local_state import save_last_successful_zotero_source, source_config_path
 
 
 class VectordbHealthError(RuntimeError):
@@ -38,6 +39,8 @@ class SyncOptions:
     skip_paper_index: bool = False
     skip_wiki_ingest: bool = False
     skip_wiki_index: bool = False
+    lock_timeout_minutes: int = 360
+    force_unlock: bool = False
 
 
 @dataclass
@@ -49,6 +52,17 @@ class SyncResult:
     state_path: str
     planned_commands: list[list[str]] | None = None
     health_summary: str = ""
+
+
+@dataclass(frozen=True)
+class LockStatus:
+    path: Path
+    exists: bool
+    stale: bool
+    reason: str
+    pid: int | None = None
+    started_at: str | None = None
+    payload: dict[str, Any] | None = None
 
 
 def _utc_now_iso() -> str:
@@ -76,20 +90,35 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _read_json(path: Path) -> dict[str, Any]:
+    if not path.exists() or not path.is_file():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
 def _write_state(
     state_path: Path,
     *,
+    run_id: str,
+    started_at: str,
     status: str,
     stage: str,
     planned_stages: list[str],
     completed_stages: list[str],
     error: str = "",
     finished_at: str | None = None,
+    updated_at: str | None = None,
 ) -> None:
     _write_json(
         state_path,
         {
-            "started_at": _utc_now_iso(),
+            "run_id": run_id,
+            "started_at": started_at,
+            "updated_at": updated_at or _utc_now_iso(),
             "finished_at": finished_at,
             "status": status,
             "stage": stage,
@@ -200,12 +229,52 @@ def _planned_stages(options: SyncOptions) -> list[str]:
     return stages
 
 
-def _acquire_lock(project_root: Path) -> Path:
+def _process_is_active(pid: int | None, process_start_time: float | None = None) -> bool:
+    return pid == os.getpid()
+
+
+def inspect_sync_lock(project_root: Path, *, timeout_minutes: int = 360) -> LockStatus:
+    lock = _lock_path(project_root)
+    if not lock.exists():
+        return LockStatus(path=lock, exists=False, stale=False, reason="")
+
+    payload = _read_json(lock)
+    if not payload:
+        return LockStatus(path=lock, exists=True, stale=True, reason="invalid lock payload", payload={})
+
+    pid_raw = payload.get("pid")
+    pid = int(pid_raw) if isinstance(pid_raw, int) or (isinstance(pid_raw, str) and str(pid_raw).isdigit()) else None
+    process_start_time = payload.get("process_start_time")
+    started_at = str(payload.get("started_at", "") or "") or None
+
+    if pid is None:
+        return LockStatus(path=lock, exists=True, stale=True, reason="missing pid", payload=payload)
+
+    if _process_is_active(pid, process_start_time):
+        return LockStatus(path=lock, exists=True, stale=False, reason="pid active", pid=pid, started_at=started_at, payload=payload)
+
+    return LockStatus(path=lock, exists=True, stale=True, reason="pid not running", pid=pid, started_at=started_at, payload=payload)
+
+
+def _remove_lock(path: Path) -> None:
+    if path.exists():
+        path.unlink()
+
+
+def _acquire_lock(project_root: Path, *, timeout_minutes: int = 360) -> Path:
     lock = _lock_path(project_root)
     lock.parent.mkdir(parents=True, exist_ok=True)
-    if lock.exists():
-        raise RuntimeError(f"sync lock already exists: {lock}")
-    payload = {"pid": os.getpid(), "started_at": _utc_now_iso()}
+    status = inspect_sync_lock(project_root, timeout_minutes=timeout_minutes)
+    if status.exists and not status.stale:
+        raise RuntimeError(f"sync lock already exists and appears active: {status.path} ({status.reason})")
+    if status.exists and status.stale:
+        _remove_lock(status.path)
+    payload = {
+        "pid": os.getpid(),
+        "started_at": _utc_now_iso(),
+        "process_start_time": 0.0,
+        "command": "paper-compass sync",
+    }
     _write_json(lock, payload)
     return lock
 
@@ -235,6 +304,25 @@ def run_sync_pipeline(options: SyncOptions) -> SyncResult:
             health_summary=health_summary,
         )
 
+    if options.force_unlock:
+        status = inspect_sync_lock(options.project_root, timeout_minutes=options.lock_timeout_minutes)
+        if status.exists:
+            _remove_lock(status.path)
+            return SyncResult(
+                status="unlocked",
+                summary=f"Removed {'stale' if status.stale else 'existing'} sync lock.",
+                planned_stages=[],
+                completed_stages=[],
+                state_path=str(state_path),
+            )
+        return SyncResult(
+            status="unlocked",
+            summary="No sync lock present.",
+            planned_stages=[],
+            completed_stages=[],
+            state_path=str(state_path),
+        )
+
     report = inspect_index_health(options.db_path)
     if report.severity in {"warning", "corrupted"}:
         if options.rebuild in {"papers", "all"} and options.backup_corrupted_db:
@@ -242,10 +330,14 @@ def run_sync_pipeline(options: SyncOptions) -> SyncResult:
         else:
             raise VectordbHealthError(f"{report.summary}\n{report.recommended_action}")
 
-    lock = _acquire_lock(options.project_root)
+    run_id = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-{os.getpid()}"
+    lock = _acquire_lock(options.project_root, timeout_minutes=options.lock_timeout_minutes)
     completed_stages: list[str] = []
+    started_at = _utc_now_iso()
     _write_state(
         state_path,
+        run_id=run_id,
+        started_at=started_at,
         status="running",
         stage=planned[0] if planned else "completed",
         planned_stages=planned,
@@ -256,6 +348,8 @@ def run_sync_pipeline(options: SyncOptions) -> SyncResult:
         for stage in planned:
             _write_state(
                 state_path,
+                run_id=run_id,
+                started_at=started_at,
                 status="running",
                 stage=stage,
                 planned_stages=planned,
@@ -265,14 +359,27 @@ def run_sync_pipeline(options: SyncOptions) -> SyncResult:
             _run_stage_command(options.project_root, command)
             completed_stages.append(stage)
 
+        finished_at = _utc_now_iso()
         _write_state(
             state_path,
+            run_id=run_id,
+            started_at=started_at,
             status="ok",
             stage="completed",
             planned_stages=planned,
             completed_stages=completed_stages,
-            finished_at=_utc_now_iso(),
+            finished_at=finished_at,
+            updated_at=_utc_now_iso(),
         )
+        if options.db_source_path and options.storage_path:
+            save_last_successful_zotero_source(
+                source_config_path(options.project_root),
+                db_path=options.db_source_path,
+                storage_path=options.storage_path,
+                source_kind="explicit",
+                is_live_candidate=False,
+                last_success_at=_utc_now_iso(),
+            )
         return SyncResult(
             status="ok",
             summary="Sync completed successfully.",
@@ -283,6 +390,8 @@ def run_sync_pipeline(options: SyncOptions) -> SyncResult:
     except Exception as exc:
         _write_state(
             state_path,
+            run_id=run_id,
+            started_at=started_at,
             status="failed",
             stage=completed_stages[-1] if completed_stages else (planned[0] if planned else "completed"),
             planned_stages=planned,

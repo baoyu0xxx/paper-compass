@@ -73,13 +73,26 @@ def stable_json_sha256(payload: Dict[str, Any]) -> str:
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
+def _normalize_string_list(values: list[Any]) -> list[str]:
+    normalized = []
+    for value in values:
+        text = str(value or "").strip()
+        if text:
+            normalized.append(text)
+    return normalized
+
+
+def _normalize_people_list(values: list[Any]) -> list[str]:
+    return _normalize_string_list(values)
+
+
 def _normalized_metadata(item: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "title": item.get("title", "") or "",
         "year": item.get("year") or 0,
-        "authors": list(item.get("authors", []) or []),
-        "collections": list(item.get("collections", []) or []),
-        "tags": list(item.get("tags", []) or []),
+        "authors": _normalize_people_list(list(item.get("authors", []) or [])),
+        "collections": sorted(_normalize_string_list(list(item.get("collections", []) or []))),
+        "tags": sorted(_normalize_string_list(list(item.get("tags", []) or []))),
     }
 
 
@@ -222,6 +235,21 @@ def _legacy_content_matches(current: Dict[str, Any], previous: Dict[str, Any]) -
 
 def _content_matches(current: Dict[str, Any], previous: Dict[str, Any]) -> bool:
     return _content_fingerprint(current) == _content_fingerprint(previous) or _legacy_content_matches(current, previous)
+
+
+def explain_fingerprint_diff(current: Dict[str, Any], previous: Dict[str, Any]) -> Dict[str, Any]:
+    current_meta = current.get("metadata") if isinstance(current.get("metadata"), dict) else {}
+    previous_meta = previous.get("metadata") if isinstance(previous.get("metadata"), dict) else {}
+    reasons: list[str] = []
+    details: Dict[str, Dict[str, Any]] = {}
+    for field in ("title", "year", "authors", "collections", "tags"):
+        before = previous_meta.get(field)
+        after = current_meta.get(field)
+        if before != after:
+            reason = f"{field} changed"
+            reasons.append(reason)
+            details[field] = {"before": before, "after": after}
+    return {"reasons": reasons, "details": details}
 
 
 def diff_manifest_v2(current_items: Dict[str, Dict[str, Any]], manifest_items: Dict[str, Dict[str, Any]]) -> Dict[str, list[str]]:

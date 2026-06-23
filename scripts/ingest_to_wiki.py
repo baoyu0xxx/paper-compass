@@ -110,6 +110,7 @@ def _process_one(
             confidence=result.get("confidence", "medium"),
             tags=result.get("tags", []),
             wiki_root=args.wiki_root,
+            upsert_mode=getattr(args, "wiki_upsert_mode", "create"),
         )
         return {
             "key": key,
@@ -139,6 +140,12 @@ def main() -> None:
                         help="Max chars from PDF to send to LLM")
     parser.add_argument("--workers", type=int, default=10,
                         help="Number of concurrent workers (default: 10)")
+    parser.add_argument(
+        "--wiki-upsert-mode",
+        default="create_unique",
+        choices=["create", "create_unique", "replace_if_same_slug", "replace_if_same_key"],
+        help="Upsert strategy for wiki page writeback",
+    )
     args = parser.parse_args()
 
     # ── load library ──

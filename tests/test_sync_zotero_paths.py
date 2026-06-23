@@ -42,7 +42,7 @@ def test_explicit_db_path_wins_over_auto_candidates(tmp_path):
     assert resolved.db_path == explicit_root / "zotero.sqlite"
     assert resolved.storage_path == explicit_root / "storage"
     assert resolved.source_kind == "explicit"
-    assert resolved.is_live_candidate is True
+    assert resolved.is_live_candidate is False
 
 
 def test_env_path_used_when_no_explicit_db_path(tmp_path, monkeypatch):
@@ -54,6 +54,7 @@ def test_env_path_used_when_no_explicit_db_path(tmp_path, monkeypatch):
     assert resolved.db_path == env_root / "zotero.sqlite"
     assert resolved.storage_path == env_root / "storage"
     assert resolved.source_kind == "env"
+    assert resolved.is_live_candidate is False
 
 
 def test_default_root_uses_official_sqlite_over_backup_root(tmp_path):

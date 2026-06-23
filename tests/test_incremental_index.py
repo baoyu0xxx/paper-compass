@@ -58,6 +58,8 @@ def make_args(tmp_path: Path, library_path: Path, **overrides):
         manifest_path=str(tmp_path / "manifest.json"),
         dry_run=False,
         allow_large_incremental=False,
+        explain_changes=False,
+        sample_size=5,
     )
     defaults.update(overrides)
     return SimpleNamespace(**defaults)
@@ -270,6 +272,48 @@ def test_incremental_dry_run_does_not_write_manifest_or_vectors(tmp_path):
     assert embedder.embed_calls == 0
     assert store.count() == 0
     assert not manifest_path.exists()
+
+
+def test_incremental_dry_run_exposes_metadata_change_reasons(tmp_path):
+    module = load_build_index()
+    item = make_paper(tmp_path, "A1", "a" * 2200)
+    library_path = write_library(tmp_path, [item])
+    store = FakeStore()
+    embedder = FakeEmbedder()
+
+    module.index_papers(make_args(tmp_path, library_path), embedder=embedder, store=store)
+    updated_item = {**item, "tags": ["updated"]}
+    library_path.write_text(json.dumps([updated_item], ensure_ascii=False, indent=2), encoding="utf-8")
+
+    summary = module.index_papers(
+        make_args(tmp_path, library_path, dry_run=True, explain_changes=True, sample_size=5),
+        embedder=embedder,
+        store=store,
+    )
+
+    assert summary["metadata_only"] == 1
+    assert summary["metadata_reason_counts"]["tags changed"] == 1
+    assert summary["metadata_reason_samples"][0]["key"] == "A1"
+
+
+def test_index_papers_reports_missing_text_failures(tmp_path):
+    module = load_build_index()
+    item = make_paper(tmp_path, "A1", "a" * 2200)
+    Path(item["text_file"]).write_text("", encoding="utf-8")
+    library_path = write_library(tmp_path, [item])
+
+    module.index_papers(
+        make_args(tmp_path, library_path),
+        embedder=FakeEmbedder(),
+        store=FakeStore(),
+    )
+
+    report_path = tmp_path / "logs" / "pdf_extract_failures.jsonl"
+    assert report_path.exists()
+    payload = json.loads(report_path.read_text(encoding="utf-8").splitlines()[0])
+    assert payload["stage"] == "build_index"
+    assert payload["key"] == "A1"
+    assert payload["reason"] == "missing text"
 
 
 def test_wiki_reindex_is_idempotent(tmp_path):

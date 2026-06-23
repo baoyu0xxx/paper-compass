@@ -1,6 +1,6 @@
 """paper-compass status subcommand.
 
-Summarize resolved config, local data assets, and vector index state.
+Summarize resolved config, local data assets, vector index state, and sync runtime state.
 """
 
 from __future__ import annotations
@@ -11,9 +11,16 @@ import os
 from pathlib import Path
 from typing import Any
 
-from paper_compass.config import get_provider_config, load_all_configs, resolve_embedding_runtime
+from paper_compass.config import (
+    get_embedding_provider_order,
+    get_provider_config,
+    load_all_configs,
+    resolve_embedding_runtime,
+)
 from paper_compass.env_utils import DEFAULT_ENV_PATH, PROJECT_ROOT, load_project_env
 from paper_compass.index_health import inspect_index_health
+from paper_compass.local_state import source_config_path
+from paper_compass.pipeline_sync import _state_path, inspect_sync_lock
 from paper_compass.resources import project_root
 from paper_compass.runtime_env import runtime_state
 from paper_compass.wiki_gen import describe_wiki_prompt_bundle
@@ -78,6 +85,45 @@ def _list_vectordb_collections(db_path: Path) -> list[dict[str, Any]]:
         return [{"name": "<error>", "count": 0, "embedding_model": str(exc)}]
 
 
+def _read_json_file(path: Path) -> dict[str, Any]:
+    if not path.exists() or not path.is_file():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _read_sync_status() -> dict[str, Any]:
+    last_sync = _read_json_file(_state_path(PROJECT_ROOT))
+    lock_status = inspect_sync_lock(PROJECT_ROOT)
+    source_payload = _read_json_file(source_config_path(PROJECT_ROOT))
+    zotero_source = source_payload.get("zotero") if isinstance(source_payload.get("zotero"), dict) else {}
+    return {
+        "last_sync": {
+            "status": str(last_sync.get("status", "") or ""),
+            "stage": str(last_sync.get("stage", "") or ""),
+            "run_id": str(last_sync.get("run_id", "") or ""),
+            "started_at": last_sync.get("started_at"),
+            "updated_at": last_sync.get("updated_at"),
+            "finished_at": last_sync.get("finished_at"),
+        },
+        "lock": {
+            "exists": lock_status.exists,
+            "stale": lock_status.stale,
+            "reason": lock_status.reason,
+            "path": str(lock_status.path),
+        },
+        "last_successful_zotero_source": {
+            "db_path": str(zotero_source.get("db_path", "") or ""),
+            "storage_path": str(zotero_source.get("storage_path", "") or ""),
+            "source_kind": str(zotero_source.get("source_kind", "") or ""),
+            "is_live_candidate": bool(zotero_source.get("is_live_candidate", False)),
+        },
+    }
+
+
 def _detect_embed_cascade(configs: dict[str, Any]) -> list[str]:
     cascade: list[str] = []
     try:
@@ -123,12 +169,7 @@ def collect_status() -> dict[str, Any]:
 
     masked_candidates = []
     for entry in embedding_runtime.get("configured_candidates", []):
-        masked_candidates.append(
-            {
-                **entry,
-                "api_key": _mask_secret(entry.get("api_key", "")),
-            }
-        )
+        masked_candidates.append({**entry, "api_key": _mask_secret(entry.get("api_key", ""))})
 
     prompt_bundle = describe_wiki_prompt_bundle()
 
@@ -138,6 +179,7 @@ def collect_status() -> dict[str, Any]:
 
     health = inspect_index_health(db_path)
     runtime = runtime_state(project_root=PROJECT_ROOT)
+    sync_status = _read_sync_status()
 
     return {
         "project_root": str(repo_root),
@@ -186,6 +228,7 @@ def collect_status() -> dict[str, Any]:
             },
             "collections": _list_vectordb_collections(db_path),
         },
+        "sync": sync_status,
     }
 
 
@@ -272,6 +315,33 @@ def _print_status_report(status: dict[str, Any]) -> None:
             )
     else:
         print("    - no collections")
+    print()
+
+    sync = status["sync"]
+    print("  sync")
+    print(
+        f"    last status: {sync['last_sync'].get('status') or 'unknown'} | stage={sync['last_sync'].get('stage') or 'unknown'}"
+    )
+    if sync["last_sync"].get("run_id"):
+        print(f"    run id: {sync['last_sync']['run_id']}")
+    if sync["last_sync"].get("started_at"):
+        print(f"    started at: {sync['last_sync']['started_at']}")
+    if sync["last_sync"].get("updated_at"):
+        print(f"    updated at: {sync['last_sync']['updated_at']}")
+    if sync["last_sync"].get("finished_at"):
+        print(f"    finished at: {sync['last_sync']['finished_at']}")
+    print(
+        f"    lock: stale={'yes' if sync['lock'].get('stale') else 'no'} | exists={'yes' if sync['lock'].get('exists') else 'no'} | path={sync['lock'].get('path') or 'n.a.'}"
+    )
+    if sync["lock"].get("reason"):
+        print(f"    lock reason: {sync['lock']['reason']}")
+    source = sync["last_successful_zotero_source"]
+    if source.get("db_path"):
+        print(f"    zotero source: {source['db_path']}")
+        print(f"    storage: {source.get('storage_path') or 'n.a.'}")
+        print(f"    source kind: {source.get('source_kind') or 'unknown'} | live candidate={'yes' if source.get('is_live_candidate') else 'no'}")
+    else:
+        print("    zotero source: unavailable")
 
 
 def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
