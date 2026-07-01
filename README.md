@@ -152,6 +152,7 @@ paper-compass sync \
 
 # 6. 手动执行单个阶段（仅在需要细粒度控制时）
 scripts/pc-index-full.sh
+# 完整增量更新便捷包装（实际转发到 `paper-compass sync`）
 scripts/pc-index-incremental.sh
 scripts/pc-wiki-build.sh --limit 3
 scripts/pc-wiki-index.sh
@@ -166,7 +167,7 @@ paper-compass-healthcheck --smoke
 python eval/run_eval.py -v
 ```
 
-这些 `scripts/pc-*.sh` 都是薄包装：负责固定 repo root、补默认路径、减少长命令手输错误；
+这些 `scripts/pc-*.sh` 都是薄包装：负责固定 repo root、补默认路径、减少长命令手输错误；其中 `scripts/pc-index-incremental.sh` 现在表示**完整增量更新**，会转发到 `paper-compass sync`，而不再只是 papers-only 索引入口。
 如果你更偏好直接调 Python 脚本，也仍然可以继续使用 `scripts/build_index.py` / `scripts/ingest_to_wiki.py`。
 
 自 v1.4.0 起，安装态 `paper-compass-mcp` 与 `paper-compass-healthcheck` 入口已直接指向包内实现；历史打包用的 `scripts.*` 兼容层已移除，请使用当前 console script 或仓库内 `scripts/` 文件。
@@ -219,13 +220,13 @@ paper-compass sync \
 - 写入 `data/state/last_sync.json` 记录最近一次运行状态
 - 在检测到向量库损坏时停止写入，并给出 rebuild 建议
 
-如果你只想手动执行某一个阶段，可使用仓库内 shell 包装：
+如果你只想手动执行某一个阶段，或想使用完整增量同步的便捷包装，可使用仓库内 shell 包装：
 
 ```bash
 # papers 全量索引
 scripts/pc-index-full.sh
 
-# papers 增量索引
+# 完整增量更新便捷包装（转发到 `paper-compass sync`）
 scripts/pc-index-incremental.sh
 
 # wiki 页面生成（前台）
@@ -238,7 +239,7 @@ scripts/pc-wiki-ingest-bg.sh
 scripts/pc-wiki-index.sh
 ```
 
-这些 shell 只做阶段级 convenience wrapper，不负责重写底层参数逻辑；如需特殊参数，可直接继续在命令末尾追加传给底层脚本。
+这些 shell 只做轻量包装：`scripts/pc-index-incremental.sh` 走完整 `sync` 语义，其余脚本仍是对应单阶段的 convenience wrapper；如需特殊参数，可直接继续在命令末尾追加传给底层脚本或 `paper-compass sync`。
 
 ### 自动更新代码（仅适用于 git clone 安装）
 
@@ -503,7 +504,7 @@ paper-compass validate --help
 # 全量重建（清空并重新嵌入所有论文）
 python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
 
-# 增量更新（仅更新有变化的论文）
+# 低层 papers 增量索引（仅在你明确只想消费现有 `library.json` 时使用）
 python scripts/build_index.py --library data/zotero-export/library.json --incremental
 
 # 只做本地 dry-run，并解释 metadata-only / path-only 变化原因

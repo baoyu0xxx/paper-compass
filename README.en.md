@@ -149,6 +149,7 @@ paper-compass sync \
 
 # 7. Run individual stages manually (only when you need finer control)
 scripts/pc-index-full.sh
+# full incremental sync convenience wrapper (forwards to `paper-compass sync`)
 scripts/pc-index-incremental.sh
 scripts/pc-wiki-build.sh --limit 3
 scripts/pc-wiki-index.sh
@@ -163,7 +164,7 @@ paper-compass-healthcheck --smoke
 python eval/run_eval.py -v
 ```
 
-These `scripts/pc-*.sh` wrappers are intentionally thin: they pin repo root, provide sane default paths, and reduce long-command typing errors.
+These `scripts/pc-*.sh` wrappers are intentionally thin: they pin repo root, provide sane default paths, and reduce long-command typing errors. In particular, `scripts/pc-index-incremental.sh` now means **full incremental sync** and forwards to `paper-compass sync`, rather than acting as a papers-only indexing shortcut.
 If you prefer direct Python entrypoints, `scripts/build_index.py` and `scripts/ingest_to_wiki.py` remain supported.
 
 Starting with v1.4.0, installed `paper-compass-mcp` and `paper-compass-healthcheck` entrypoints point directly to package-resident implementations. The historical packaged `scripts.*` compatibility shims have been removed; use the current console scripts or the repository `scripts/` files directly.
@@ -216,13 +217,13 @@ paper-compass sync \
 - write `data/state/last_sync.json` to record the latest run status
 - stop writes and suggest a rebuild if vector-store corruption is detected
 
-If you only want one stage manually, use the shell wrappers from the repo:
+If you only want one stage manually, or want a convenience wrapper for the full incremental sync path, use the shell wrappers from the repo:
 
 ```bash
 # full papers index rebuild
 scripts/pc-index-full.sh
 
-# incremental papers index
+# full incremental sync convenience wrapper (forwards to `paper-compass sync`)
 scripts/pc-index-incremental.sh
 
 # wiki generation in foreground
@@ -235,7 +236,7 @@ scripts/pc-wiki-ingest-bg.sh
 scripts/pc-wiki-index.sh
 ```
 
-These wrappers are stage-level convenience commands only; append extra arguments when needed and pass them through to the underlying Python scripts.
+These wrappers are lightweight conveniences: `scripts/pc-index-incremental.sh` uses the full `sync` semantics, while the others remain single-stage wrappers. Append extra arguments when needed and pass them through to the underlying Python scripts or to `paper-compass sync`.
 
 ### Automatic Code Update (git-clone installs only)
 
@@ -493,7 +494,7 @@ paper-compass validate --help
 # Full rebuild (clear and re-embed all papers)
 python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
 
-# Incremental update (only update changed papers)
+# Low-level incremental papers index (only when you explicitly want to consume the current `library.json` snapshot)
 python scripts/build_index.py --library data/zotero-export/library.json --incremental
 
 # Dry-run locally and explain metadata-only / path-only changes before embedding
