@@ -30,13 +30,16 @@ from paper_compass.env_utils import load_project_env
 from paper_compass.index_health import inspect_index_health
 from paper_compass.index_manifest import (
     build_paper_fingerprint,
+    compute_text_sha1,
     diff_manifest,
     explain_fingerprint_diff,
     load_manifest,
     save_manifest,
+    stable_json_sha256,
     utc_now_iso,
 )
 from paper_compass.index_planner import plan_paper_index
+from paper_compass.pipeline_sync import write_standalone_stage_state
 from paper_compass.vector_store import VectorStore
 
 
@@ -145,6 +148,48 @@ def _iter_wiki_sections(md_file: Path, wiki_root: Path) -> Iterable[Tuple[str, s
         }
 
         yield chunk_id, text, metadata
+
+
+def _load_wiki_page_content(md_file: Path) -> str:
+    try:
+        return md_file.read_text(encoding="utf-8")
+    except Exception:
+        return ""
+
+
+def _build_wiki_page_fingerprint(md_file: Path, wiki_root: Path) -> Dict[str, Any]:
+    content = _load_wiki_page_content(md_file)
+    body = _strip_yaml_frontmatter(content)
+    rel_page_id = md_file.relative_to(wiki_root).as_posix()
+    section_count = sum(1 for _ in _iter_wiki_sections(md_file, wiki_root))
+    stat = md_file.stat()
+    payload = {
+        "page_path": rel_page_id,
+        "text_sha1": compute_text_sha1(body),
+        "section_count": section_count,
+        "page_type": _get_wiki_page_type(md_file, wiki_root),
+    }
+    return {
+        "schema_version": 1,
+        "page_path": rel_page_id,
+        "page_type": payload["page_type"],
+        "source": {
+            "path": str(md_file),
+            "mtime": int(stat.st_mtime),
+            "size": stat.st_size,
+            "text_sha1": payload["text_sha1"],
+        },
+        "indexing": {
+            "section_count": section_count,
+            "content_fingerprint": stable_json_sha256(payload),
+        },
+        "updated_at": utc_now_iso(),
+    }
+
+
+def _wiki_content_fingerprint(data: Dict[str, Any]) -> str:
+    indexing = data.get("indexing") if isinstance(data.get("indexing"), dict) else {}
+    return str(indexing.get("content_fingerprint", ""))
 
 
 def _init_embedder() -> Embedder:
@@ -700,12 +745,18 @@ def index_wiki(args, embedder: Any | None = None, store: VectorStore | None = No
         collection_name="wiki",
         embedding_model_id=embedder.model_id,
     )
+    manifest_path = _resolve_manifest_path(args, store)
+    manifest = load_manifest(manifest_path)
+    manifest_items = manifest.get("items", {})
+    dry_run = _get_bool_arg(args, "dry_run")
 
     batch_size = 32
     chunk_ids: List[str] = []
     chunk_texts: List[str] = []
     chunk_metas: List[Dict[str, Any]] = []
     excluded_count = 0
+    current_items: Dict[str, Dict[str, Any]] = {}
+    page_files: Dict[str, Path] = {}
 
     for md_file in sorted(wiki_root.rglob("*.md")):
         if md_file.name.startswith("."):
@@ -713,7 +764,56 @@ def index_wiki(args, embedder: Any | None = None, store: VectorStore | None = No
         if not _should_index_wiki_page(md_file, wiki_root):
             excluded_count += 1
             continue
+        rel_page_id = md_file.relative_to(wiki_root).as_posix()
+        page_files[rel_page_id] = md_file
+        current_items[rel_page_id] = _build_wiki_page_fingerprint(md_file, wiki_root)
 
+    new_pages = sorted(set(current_items) - set(manifest_items))
+    deleted_pages = sorted(set(manifest_items) - set(current_items))
+    changed_pages = sorted(
+        key
+        for key in (set(current_items) & set(manifest_items))
+        if _wiki_content_fingerprint(current_items[key]) != _wiki_content_fingerprint(manifest_items[key])
+    )
+    unchanged_pages = sorted(
+        key
+        for key in (set(current_items) & set(manifest_items))
+        if _wiki_content_fingerprint(current_items[key]) == _wiki_content_fingerprint(manifest_items[key])
+    )
+    process_pages = sorted(set(new_pages) | set(changed_pages))
+
+    summary = {
+        "indexed_sections": 0,
+        "deleted_sections": 0,
+        "new_pages": len(new_pages),
+        "changed_pages": len(changed_pages),
+        "unchanged_pages": len(unchanged_pages),
+        "deleted_pages": len(deleted_pages),
+        "manifest_path": manifest_path,
+        "collection": store.collection_name,
+    }
+
+    if dry_run:
+        estimated_sections = sum(current_items[key].get("indexing", {}).get("section_count", 0) for key in process_pages)
+        print()
+        print("── Wiki Index Plan ──")
+        print(f"  New pages:             {summary['new_pages']}")
+        print(f"  Changed pages:         {summary['changed_pages']}")
+        print(f"  Unchanged pages:       {summary['unchanged_pages']}")
+        print(f"  Deleted pages:         {summary['deleted_pages']}")
+        print(f"  Sections to index:     {estimated_sections}")
+        print(f"  Manifest:              {manifest_path}")
+        return summary
+
+    for rel_page_id in deleted_pages:
+        source_path = manifest_items.get(rel_page_id, {}).get("source", {}).get("path", str(wiki_root / rel_page_id))
+        summary["deleted_sections"] += store.delete_by_page_path(source_path)
+        manifest_items.pop(rel_page_id, None)
+
+    for rel_page_id in process_pages:
+        md_file = page_files[rel_page_id]
+        if rel_page_id in changed_pages:
+            summary["deleted_sections"] += store.delete_by_page_path(str(md_file))
         for chunk_id, text, metadata in _iter_wiki_sections(md_file, wiki_root):
             chunk_ids.append(chunk_id)
             chunk_texts.append(text)
@@ -730,11 +830,30 @@ def index_wiki(args, embedder: Any | None = None, store: VectorStore | None = No
         progress_every=320,
         progress_label="Indexed wiki sections",
     )
+    summary["indexed_sections"] = pages_indexed
+
+    for rel_page_id in process_pages:
+        manifest_items[rel_page_id] = current_items[rel_page_id]
+
+    manifest.update(
+        {
+            "collection_name": store.collection_name,
+            "embedding_model_id": embedder.model_id,
+            "chunking_version": "wiki_v1_sections",
+            "items": manifest_items,
+        }
+    )
+    save_manifest(manifest_path, manifest)
 
     bm25_result = store.build_bm25(force=True)
     print()
     print("── Wiki Index Summary ──")
     print(f"  Wiki sections indexed: {pages_indexed}")
+    print(f"  Deleted wiki sections: {summary['deleted_sections']}")
+    print(f"  New pages:             {summary['new_pages']}")
+    print(f"  Changed pages:         {summary['changed_pages']}")
+    print(f"  Unchanged pages:       {summary['unchanged_pages']}")
+    print(f"  Deleted pages:         {summary['deleted_pages']}")
     if excluded_count:
         print(f"  Excluded files:         {excluded_count} (log.md, index.md, non-knowledge dirs)")
     bm25_available = getattr(bm25_result, "available", None)
@@ -744,8 +863,9 @@ def index_wiki(args, embedder: Any | None = None, store: VectorStore | None = No
         print(f"  BM25:                  WARN ({bm25_result.reason}; semantic search still available)")
     else:
         print("  BM25:                  OK (status unavailable from store backend)")
+    print(f"  Manifest:              {manifest_path}")
     print(f"  Collection:            {store.collection_name} ({store.count()} vectors)")
-    return {"indexed_sections": pages_indexed, "collection": store.collection_name}
+    return summary
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -774,16 +894,23 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
+    project_root = Path(__file__).resolve().parent.parent
 
     if args.incremental and args.full_rebuild:
         parser.error("--incremental and --full-rebuild cannot be used together")
-    if args.wiki and (args.incremental or args.full_rebuild or args.prune_deleted or args.extract_text or args.allow_large_incremental or args.dry_run):
+    if args.wiki and (args.incremental or args.full_rebuild or args.prune_deleted or args.extract_text or args.allow_large_incremental):
         print("WARNING: paper-only flags are ignored in --wiki mode")
 
-    if args.wiki:
-        index_wiki(args)
-    else:
-        index_papers(args)
+    stage_name = "index_wiki" if args.wiki else "index_papers"
+    try:
+        if args.wiki:
+            index_wiki(args)
+        else:
+            index_papers(args)
+        write_standalone_stage_state(project_root, stage=stage_name, status="dry_run" if args.dry_run else "ok", dry_run=bool(args.dry_run))
+    except Exception as exc:
+        write_standalone_stage_state(project_root, stage=stage_name, status="failed", error=str(exc))
+        raise
 
 
 if __name__ == "__main__":

@@ -91,6 +91,42 @@ pc_managed_python() {
   pc_die "managed runtime is missing; run python scripts/bootstrap_runtime.py from ${repo_root}"
 }
 
+pc_can_run_cmd() {
+  local candidate="$1"
+  [[ -n "$candidate" ]] || return 1
+
+  if [[ "$candidate" == */* || "$candidate" == *\\* ]]; then
+    [[ -x "$candidate" ]] || return 1
+  else
+    command -v "$candidate" >/dev/null 2>&1 || return 1
+  fi
+}
+
+pc_managed_cli() {
+  if [[ -n "${PAPER_COMPASS_CLI:-}" ]]; then
+    pc_can_run_cmd "${PAPER_COMPASS_CLI}" || pc_die "configured PAPER_COMPASS_CLI is not runnable: ${PAPER_COMPASS_CLI}"
+    printf '%s\n' "${PAPER_COMPASS_CLI}"
+    return
+  fi
+
+  local repo_root
+  repo_root="$(pc_repo_root)"
+
+  local candidate
+  for candidate in \
+    "${repo_root}/.venv/bin/paper-compass" \
+    "${repo_root}/.venv/Scripts/paper-compass.exe" \
+    "${repo_root}/.venv/Scripts/paper-compass"
+  do
+    if pc_can_run_cmd "$candidate"; then
+      printf '%s\n' "$candidate"
+      return
+    fi
+  done
+
+  pc_die "managed paper-compass CLI is missing; run python scripts/bootstrap_runtime.py from ${repo_root}"
+}
+
 pc_default_library_path() {
   printf '%s\n' "${PAPER_COMPASS_LIBRARY_PATH:-data/zotero-export/library.json}"
 }

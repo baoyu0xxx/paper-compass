@@ -65,6 +65,16 @@ class FakeStore:
             self.docs.pop(doc_id, None)
         return len(ids)
 
+    def delete_by_page_path(self, page_path):
+        ids = [
+            doc_id
+            for doc_id, payload in self.docs.items()
+            if payload["metadata"].get("page_path") == page_path
+        ]
+        for doc_id in ids:
+            self.docs.pop(doc_id, None)
+        return len(ids)
+
     def update_item_metadata(self, item_key, metadata_patch):
         ids = self.get_chunk_ids_for_item(item_key)
         for doc_id in ids:

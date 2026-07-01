@@ -100,19 +100,34 @@ def _read_sync_status() -> dict[str, Any]:
     lock_status = inspect_sync_lock(PROJECT_ROOT)
     source_payload = _read_json_file(source_config_path(PROJECT_ROOT))
     zotero_source = source_payload.get("zotero") if isinstance(source_payload.get("zotero"), dict) else {}
+
+    last_status = str(last_sync.get("status", "") or "")
+    last_stage = str(last_sync.get("stage", "") or "")
+    lock_exists = lock_status.exists
+    lock_stale = lock_status.stale
+    lock_reason = lock_status.reason
+
+    if last_status == "running" and (not lock_exists or lock_stale):
+        last_status = "stale"
+        if not lock_exists:
+            lock_stale = True
+            lock_reason = lock_reason or "missing lock for running last_sync state"
+        elif lock_stale:
+            lock_reason = lock_reason or "stale lock for running last_sync state"
+
     return {
         "last_sync": {
-            "status": str(last_sync.get("status", "") or ""),
-            "stage": str(last_sync.get("stage", "") or ""),
+            "status": last_status,
+            "stage": last_stage,
             "run_id": str(last_sync.get("run_id", "") or ""),
             "started_at": last_sync.get("started_at"),
             "updated_at": last_sync.get("updated_at"),
             "finished_at": last_sync.get("finished_at"),
         },
         "lock": {
-            "exists": lock_status.exists,
-            "stale": lock_status.stale,
-            "reason": lock_status.reason,
+            "exists": lock_exists,
+            "stale": lock_stale,
+            "reason": lock_reason,
             "path": str(lock_status.path),
         },
         "last_successful_zotero_source": {

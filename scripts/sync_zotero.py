@@ -19,6 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from paper_compass.pdf_extract import PDFExtractor
+from paper_compass.pipeline_sync import write_standalone_stage_state
 from paper_compass.zotero_paths import ZoteroSourceNotFoundError, resolve_zotero_source
 from paper_compass.zotero_snapshot import cleanup_sqlite_snapshots, prepare_zotero_database_for_read
 from paper_compass.zotero_sqlite import ZoteroLibrary
@@ -59,6 +60,11 @@ def main():
     )
     parser.add_argument("--out-dir", default="./data/zotero-export")
     parser.add_argument("--extract-text", action="store_true", help="Extract and cache PDF full text")
+    parser.add_argument(
+        "--force-reextract-text",
+        action="store_true",
+        help="Re-extract PDF text even when a non-empty cached text file already exists",
+    )
     parser.add_argument("--text-dir", default="./data/texts")
     parser.add_argument(
         "--snapshot-db",
@@ -80,6 +86,7 @@ def main():
         help="Allow direct reads from a live Zotero sqlite when snapshotting is disabled",
     )
     args = parser.parse_args()
+    project_root = Path(__file__).resolve().parent.parent
 
     try:
         source = resolve_zotero_source(
@@ -87,6 +94,7 @@ def main():
             storage_path=args.storage_path,
         )
     except ZoteroSourceNotFoundError as exc:
+        write_standalone_stage_state(project_root, stage="sync_zotero", status="failed", error=str(exc))
         print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
 
@@ -99,6 +107,7 @@ def main():
         print(f"  Live DB:      {'yes' if source.is_live_candidate else 'no'}")
         print(f"  Read policy:  snapshot-db={args.snapshot_db}")
         print(f"  Tried:        {len(source.tried)} candidates")
+        write_standalone_stage_state(project_root, stage="sync_zotero", status="dry_run", dry_run=True)
         return
 
     out_dir = Path(args.out_dir)
@@ -122,7 +131,11 @@ def main():
     print(f"  Read database:     {prepared.read_db_path}")
     if prepared.used_snapshot:
         print(f"  Snapshot source:   {prepared.original_db_path}")
-    lib = ZoteroLibrary(str(prepared.read_db_path), storage_path=str(source.storage_path))
+    lib = ZoteroLibrary(
+        str(prepared.read_db_path),
+        storage_path=str(source.storage_path),
+        immutable=prepared.use_immutable,
+    )
     items = lib.get_all_items_with_pdfs()
     lib.close()
 
@@ -138,24 +151,34 @@ def main():
 
     if not items:
         print("WARNING: No items with PDFs found.")
+        write_standalone_stage_state(project_root, stage="sync_zotero", status="ok")
         sys.exit(0)
 
     # ── Enrich: extract text if requested ──
     missing_pdf = 0
     extracted = 0
+    reused_text = 0
     failure_counts: dict[str, int] = {}
     report_path = _failure_report_path(out_dir)
 
     for item in items:
         pdf_path = item.get("pdf_path", "")
         existing_text = text_dir / f"{item['key']}.txt"
+        existing_text_usable = False
         if existing_text.exists():
             item["text_file"] = str(existing_text)
+            try:
+                existing_text_usable = bool(existing_text.read_text(encoding="utf-8").strip())
+            except Exception:
+                existing_text_usable = False
         if not pdf_path or not Path(pdf_path).exists():
             missing_pdf += 1
             continue
 
         if args.extract_text:
+            if existing_text_usable and not args.force_reextract_text:
+                reused_text += 1
+                continue
             try:
                 extractor = PDFExtractor(pdf_path)
                 full_text = extractor.extract_all_text()
@@ -212,6 +235,7 @@ def main():
     print(f"  Unique tags:           {len(tags_set)}")
     print(f"  Unique collections:    {len(collections_set)}")
     if args.extract_text:
+        print(f"  Texts reused:          {reused_text}")
         print(f"  Texts extracted:       {extracted}")
         if failure_counts:
             print(f"  PDF text warnings:     {sum(failure_counts.values())}")
@@ -220,6 +244,7 @@ def main():
             print(f"  Failure report:        {report_path}")
     print(f"  Output:                {library_path}")
     print("Sync complete.")
+    write_standalone_stage_state(project_root, stage="sync_zotero", status="ok")
 
 
 if __name__ == "__main__":

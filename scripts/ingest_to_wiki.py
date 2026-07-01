@@ -35,6 +35,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from paper_compass.env_utils import load_project_env
+from paper_compass.pipeline_sync import write_standalone_stage_state
 from paper_compass.wiki_gen import WikiGenerator
 from paper_compass.wiki_store import save_query_to_wiki
 
@@ -147,11 +148,14 @@ def main() -> None:
         help="Upsert strategy for wiki page writeback",
     )
     args = parser.parse_args()
+    project_root = Path(__file__).resolve().parent.parent
 
     # ── load library ──
     library_path = Path(args.library)
     if not library_path.exists():
-        print(f"ERROR: library.json not found: {library_path}")
+        message = f"library.json not found: {library_path}"
+        write_standalone_stage_state(project_root, stage="ingest_wiki", status="failed", error=message)
+        print(f"ERROR: {message}")
         print("Run sync_zotero.py --extract-text first.")
         sys.exit(1)
 
@@ -161,7 +165,9 @@ def main() -> None:
     if args.key:
         items = [i for i in items if i.get("key") == args.key]
         if not items:
-            print(f"ERROR: No item found with key: {args.key}")
+            message = f"No item found with key: {args.key}"
+            write_standalone_stage_state(project_root, stage="ingest_wiki", status="failed", error=message)
+            print(f"ERROR: {message}")
             sys.exit(1)
 
     # ── pre-filter ──
@@ -192,6 +198,7 @@ def main() -> None:
 
     if total == 0:
         print("Nothing to do.")
+        write_standalone_stage_state(project_root, stage="ingest_wiki", status="ok")
         return
 
     if args.dry_run:
@@ -200,6 +207,7 @@ def main() -> None:
             print(f"  - {item.get('title','')[:80]}")
         if total > 5:
             print(f"  ... and {total-5} more")
+        write_standalone_stage_state(project_root, stage="ingest_wiki", status="dry_run", dry_run=True)
         return
 
     # ── concurrent processing ──
@@ -252,6 +260,10 @@ def main() -> None:
     print(f"  Throughput:         {stats['done']/elapsed_min:.1f} papers/min"
           if elapsed_min > 0 else "")
     print(f"{'='*55}")
+
+    final_status = "ok" if stats["error"] == 0 else "failed"
+    final_error = "" if final_status == "ok" else f"wiki generation completed with {stats['error']} errors"
+    write_standalone_stage_state(project_root, stage="ingest_wiki", status=final_status, error=final_error)
 
 
 if __name__ == "__main__":
