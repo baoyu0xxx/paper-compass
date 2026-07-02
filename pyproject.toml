@@ -46,9 +46,13 @@ local-embed = [
 pdf-fallback = [
   "pdfplumber>=0.7.0",
 ]
+doc-extract = [
+  "markitdown[all]>=0.1.0",
+]
 full = [
   "sentence-transformers>=2.2.0",
   "pdfplumber>=0.7.0",
+  "markitdown[all]>=0.1.0",
 ]
 paperqa = [
   "paper-qa>=5",

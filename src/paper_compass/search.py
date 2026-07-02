@@ -8,7 +8,6 @@ Uses ChromaDB vector_store + library.json metadata.
 from __future__ import annotations
 
 import json
-import os
 import re
 import threading
 from pathlib import Path
@@ -16,6 +15,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from paper_compass.env_utils import PROJECT_ROOT, load_project_env
 from paper_compass.config import load_all_configs, get_provider_config
+from paper_compass.tokenization import tokenize_for_sparse_search
 
 DEFAULT_LIBRARY_PATH = PROJECT_ROOT / "data" / "zotero-export" / "library.json"
 DEFAULT_TEXT_DIR = PROJECT_ROOT / "data" / "texts"
@@ -563,6 +563,7 @@ def search_passages(
             "doi": rec.get("doi", ""),
             "passage": r["passage"],
             "page_num": r.get("page_num"),
+            "paragraph_index": r.get("paragraph_index"),
             "score": r.get("score", 0.0),
             "search_mode": r.get("search_mode", ""),
             "match_type": r.get("match_type", ""),
@@ -598,7 +599,7 @@ def _keyword_search_passages(
     if not txt_root.exists():
         return []
 
-    keywords = [kw.lower() for kw in re.split(r"\s+", query.strip()) if kw]
+    keywords = tokenize_for_sparse_search(query)
     if not keywords:
         return []
 
@@ -615,23 +616,27 @@ def _keyword_search_passages(
 
         # Split into paragraphs (blank line boundaries)
         paragraphs = re.split(r"\n\s*\n", text)
+        valid_paragraph_index = 0
         for para in paragraphs:
             para = para.strip()
             if len(para) < 30:  # skip very short fragments
                 continue
             para_lower = para.lower()
+            para_tokens = set(tokenize_for_sparse_search(para))
             # Count distinct keywords found
-            hits = sum(1 for kw in keywords if kw in para_lower)
+            hits = sum(1 for kw in keywords if kw in para_tokens or kw in para_lower)
+            current_index = valid_paragraph_index
+            valid_paragraph_index += 1
             if hits == 0:
                 continue
             # Density score: hits per 100 chars
             density = hits / max(len(para), 1) * 100
-            scored.append((density + hits, doc_id, para[:800]))
+            scored.append((density + hits, doc_id, para[:800], current_index))
 
     scored.sort(key=lambda x: x[0], reverse=True)
     results = []
     seen = set()
-    for _, doc_id, passage in scored:
+    for _, doc_id, passage, paragraph_index in scored:
         # Dedupe by (doc_id, passage_prefix)
         dedup_key = (doc_id, passage[:120])
         if dedup_key in seen:
@@ -643,6 +648,7 @@ def _keyword_search_passages(
             "passage": passage,
             "score": round(_, 4),
             "page_num": None,
+            "paragraph_index": paragraph_index,
         })
         if len(results) >= limit:
             break

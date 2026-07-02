@@ -16,9 +16,9 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
+from paper_compass.tokenization import tokenize_for_sparse_search
 
 logger = logging.getLogger(__name__)
 
@@ -186,7 +186,7 @@ class VectorStore:
         if self._bm25_index is None:
             return _format_results(semantic)[:k]
 
-        bm25_scores = self._bm25_index.get_scores(query_text.split())
+        bm25_scores = self._bm25_index.get_scores(tokenize_for_sparse_search(query_text))
         bm25_by_id = {
             chunk_id: float(bm25_scores[i])
             for i, chunk_id in enumerate(self._bm25_ids)
@@ -355,7 +355,7 @@ class VectorStore:
             all_data = self.collection.get(include=["documents"])
             self._bm25_ids = all_data.get("ids", [])
             corpus = all_data.get("documents", [])
-            self._bm25_corpus = [doc.split() for doc in corpus]
+            self._bm25_corpus = [tokenize_for_sparse_search(doc) for doc in corpus]
             if not self._bm25_corpus:
                 self._bm25_index = None
                 return BM25BuildResult(False, 0, "empty corpus")

@@ -25,6 +25,36 @@ class _FakeGenerator:
         }
 
 
+def test_process_one_uses_document_extract_when_cached_text_missing(monkeypatch, tmp_path):
+    module = _load_ingest_module()
+    monkeypatch.chdir(tmp_path)
+
+    pdf_path = tmp_path / "paper.pdf"
+    pdf_path.write_text("pdf", encoding="utf-8")
+    captured = {}
+
+    def fake_extract_document(path):
+        captured["extract_path"] = path
+        return SimpleNamespace(text="fresh extracted text" * 50)
+
+    def fake_save_query_to_wiki(**kwargs):
+        captured.update(kwargs)
+        return {"page_path": str(tmp_path / "wiki" / "papers" / "page.md")}
+
+    monkeypatch.setattr(module, "extract_document", fake_extract_document)
+    monkeypatch.setattr(module, "save_query_to_wiki", fake_save_query_to_wiki)
+
+    result = module._process_one(
+        {"key": "A1", "title": "Same Title", "pdf_path": str(pdf_path)},
+        _FakeGenerator(),
+        SimpleNamespace(max_chars=12000, wiki_root=str(tmp_path / "wiki"), wiki_upsert_mode="create"),
+    )
+
+    assert result["status"] == "ok"
+    assert captured["extract_path"] == str(pdf_path)
+    assert captured["content"] == "generated for A1"
+
+
 def test_process_one_passes_wiki_upsert_mode_to_save(monkeypatch, tmp_path):
     module = _load_ingest_module()
     monkeypatch.chdir(tmp_path)

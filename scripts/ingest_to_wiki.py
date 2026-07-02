@@ -34,6 +34,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from paper_compass.document_extract import extract_document
 from paper_compass.env_utils import load_project_env
 from paper_compass.pipeline_sync import write_standalone_stage_state
 from paper_compass.wiki_gen import WikiGenerator
@@ -83,9 +84,7 @@ def _process_one(
         paper_text = text_file.read_text(encoding="utf-8")
     else:
         try:
-            from paper_compass.pdf_extract import PDFExtractor
-            extractor = PDFExtractor(pdf_path)
-            paper_text = extractor.extract_all_text()
+            paper_text = extract_document(pdf_path).text
         except Exception as e:
             return {"key": key, "status": "error", "detail": f"text: {e}"}
 

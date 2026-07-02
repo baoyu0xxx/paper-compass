@@ -305,6 +305,21 @@ class TestKeywordSearchPassagesHelper:
         # Deduplication should prevent duplicate passages
         assert len(results) <= 2
 
+    def test_cjk_keyword_search_matches_unsegmented_paragraph(self, tmp_path):
+        text_dir = tmp_path / "texts"
+        text_dir.mkdir()
+        (text_dir / "CJK123.txt").write_text(
+            "摘要\n\n"
+            "本文研究家族企业代际传承影响劳动力结构，并进一步讨论CEO继任后的治理变化。"
+        )
+
+        results = _keyword_search_passages("代际传承", str(text_dir), limit=5)
+
+        assert results
+        assert results[0]["doc_id"] == "CJK123"
+        assert "代际传承" in results[0]["passage"]
+        assert results[0]["paragraph_index"] == 0
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # Search module — edge-case smoke tests (moved from old test_mcp_backend)

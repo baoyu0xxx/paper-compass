@@ -83,12 +83,46 @@ def test_build_bm25_uses_corpus_only(monkeypatch):
     assert store._bm25_ids == ["a", "b"]
 
 
-def test_hybrid_search_orders_by_combined_score(monkeypatch):
+def test_build_bm25_tokenizes_cjk_bigrams(monkeypatch):
     class FakeBM25:
         def __init__(self, corpus):
             self.corpus = corpus
 
         def get_scores(self, tokens):
+            return [0.1 for _ in self.corpus]
+
+    monkeypatch.setitem(
+        __import__("sys").modules,
+        "rank_bm25",
+        SimpleNamespace(BM25Okapi=FakeBM25),
+    )
+
+    store = object.__new__(VectorStore)
+    store.collection = DummyCollection(
+        ids=["cjk"],
+        documents=["家族企业代际传承影响劳动力结构 CEO继任 DID"],
+    )
+    store._bm25_index = None
+    store._bm25_corpus = []
+    store._bm25_ids = []
+
+    store.build_bm25(force=True)
+
+    assert "代际" in store._bm25_index.corpus[0]
+    assert "际传" in store._bm25_index.corpus[0]
+    assert "传承" in store._bm25_index.corpus[0]
+    assert "ceo" in store._bm25_index.corpus[0]
+    assert "did" in store._bm25_index.corpus[0]
+
+
+def test_hybrid_search_orders_by_combined_score(monkeypatch):
+    class FakeBM25:
+        def __init__(self, corpus):
+            self.corpus = corpus
+            self.last_tokens = None
+
+        def get_scores(self, tokens):
+            self.last_tokens = tokens
             return [0.1, 1.0]
 
     monkeypatch.setitem(
@@ -113,8 +147,9 @@ def test_hybrid_search_orders_by_combined_score(monkeypatch):
 
     store.search = fake_search
 
-    results = store.hybrid_search("gamma", [0.1], k=2, bm25_weight=0.5)
+    results = store.hybrid_search("CEO 继任", [0.1], k=2, bm25_weight=0.5)
 
+    assert store._bm25_index.last_tokens == ["ceo", "继任"]
     assert [r["id"] for r in results] == ["b", "a"]
 
 
