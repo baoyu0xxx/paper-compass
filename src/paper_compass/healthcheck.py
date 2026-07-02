@@ -145,6 +145,17 @@ def _check_pdf_fallback_dep() -> Status:
         )
 
 
+def _check_markitdown_dep() -> Status:
+    try:
+        __import__("markitdown")
+        return ("markitdown", "OK")
+    except ImportError:
+        return (
+            "markitdown",
+            "WARN: markitdown missing; non-PDF document extraction is unavailable",
+        )
+
+
 def _check_local_embedding_dep() -> Status:
     runtime = resolve_embedding_runtime()
     if runtime.get("resolved_cloud_config"):
@@ -268,6 +279,7 @@ def main() -> int:
     checks.append(_check_core_deps())
     checks.append(_check_bm25_dep())
     checks.append(_check_pdf_fallback_dep())
+    checks.append(_check_markitdown_dep())
     checks.append(_check_local_embedding_dep())
 
     if not args.deps_only:

@@ -30,10 +30,13 @@ def shape_passage_matches(raw_results: List[Dict[str, Any]]) -> List[Dict[str, A
         doc_id = item.get("doc_id", "")
         page_num = item.get("page_num")
         search_mode = item.get("search_mode", "") or "semantic"
+        handle_ordinal = item.get("paragraph_index") if search_mode == "keyword" else idx
+        if handle_ordinal is None:
+            handle_ordinal = idx
         snippet = (item.get("passage") or "")[:240]
         shaped.append(
             {
-                "passage_handle": make_passage_handle(doc_id, page_num, search_mode, idx),
+                "passage_handle": make_passage_handle(doc_id, page_num, search_mode, int(handle_ordinal)),
                 "paper_handle": make_paper_handle(doc_id) if doc_id else "",
                 "doc_id": doc_id,
                 "title": item.get("title", ""),

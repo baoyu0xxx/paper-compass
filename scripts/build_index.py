@@ -237,11 +237,11 @@ def _load_paper_text(item: Dict[str, Any], extract_text: bool = False) -> str:
         return Path(text_file).read_text(encoding="utf-8")
 
     if extract_text:
-        from paper_compass.pdf_extract import PDFExtractor
+        from paper_compass.document_extract import extract_document
 
         pdf_path = item.get("pdf_path", "")
         if pdf_path and Path(pdf_path).exists():
-            return PDFExtractor(pdf_path).extract_all_text()
+            return extract_document(pdf_path).text
 
     return ""
 

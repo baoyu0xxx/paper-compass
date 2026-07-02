@@ -6,7 +6,7 @@ This document guides an AI agent (Claude Code, Codex, Hermes, etc.) through depl
 
 `paper-compass` is a personal academic paper retrieval infrastructure. It takes a Zotero PDF library, generates structured wiki pages via LLM, builds vector search indices, and exposes 6 MCP tools for AI agent consumption.
 
-**Tech stack**: Python ≥3.11, ChromaDB, PyMuPDF, Volcengine/OpenAI-compatible embeddings with local fallback, OpenAI-compatible LLM endpoint.
+**Tech stack**: Python ≥3.11, ChromaDB, PyMuPDF/pdfplumber PDF extraction, optional MarkItDown document extraction, Volcengine/OpenAI-compatible embeddings with local fallback, OpenAI-compatible LLM endpoint.
 
 ## Step-by-Step Deployment
 
@@ -314,7 +314,7 @@ New test files:
 
 All declared in `pyproject.toml`:
 - **Runtime**: pyyaml, chromadb, pymupdf, rank-bm25
-- **Optional**: sentence-transformers (`local-embed`), pdfplumber (`pdf-fallback`)
+- **Optional**: sentence-transformers (`local-embed`), pdfplumber (`pdf-fallback`), MarkItDown (`doc-extract`; included in `full`)
 - **Dev**: pytest
 
 ## Key Files

@@ -48,9 +48,22 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 | 🔌 **MCP 工具集** | 7 个公开 MCP 工具：`search_library`、`search_passages`、`ask_research`、`get_paper_metadata`、`get_passage_context`、`get_wiki_page_section`、`save_to_wiki`；另保留 `search_wiki` 作为高级检索入口，遵循 MCP 2024-11-05 协议 |
 | 📝 **LLM wiki 生成** | 自动为论文生成结构化知识页面（研究问题、核心发现、方法与数据、理论框架），两阶段分类器 + 可定制提示词 |
 | 🔍 **双模式段落检索** | 语义向量（dense）和 BM25 关键词（sparse）并行，兼顾概念相似性与精确术语匹配 |
+| 📄 **统一文档提取** | 通过 `extract_document()` 统一 PDF 与可选 MarkItDown 文档提取入口；PDF 继续使用 PyMuPDF + pdfplumber fallback |
 | 📊 **增量索引** | 基于指纹清单（manifest）的变更检测，新增或修改论文后只更新变化部分，无需全量重建 |
-| 🇨🇳 **中文学术支持** | 中文分词感知的检索与评分，经济学预设 wiki 提示词，适配中文学术文献 |
+| 🇨🇳 **中文学术支持** | CJK-aware sparse tokenizer 改善未分词中文查询与中英混合术语召回，经济学预设 wiki 提示词适配中文学术文献 |
 | 🔄 **嵌入级联回退** | OpenAI-compatible (`EMBED_*`) → 火山引擎 (`VOLC_EMBED_*`) → 本地模型（默认 `bge-base`，可用 `LOCAL_EMBED_MODEL` 改为 `specter` / `minilm`） |
+
+<details>
+<summary>近期优化摘要</summary>
+
+本轮更新主要集中在文档提取、检索读回、中文 sparse 召回与测试质量四个方面：
+
+- **文档提取层**：新增 `paper_compass.document_extract.extract_document()` 作为统一入口；`sync_zotero.py`、`build_index.py`、`ingest_to_wiki.py` 已切换到该入口。MarkItDown 作为可选依赖用于扩展非 PDF 文档提取，PDF 仍保留 PyMuPDF + pdfplumber fallback。
+- **检索结果读回**：`get_passage_context` 对 keyword passage handle 采用稳定的本地段落读回，不再通过二次搜索猜测原段落；keyword 检索结果会携带 `paragraph_index`，便于后续精确回读。
+- **中文与中英混合召回**：新增共享 `tokenize_for_sparse_search()`，在 keyword 检索与 VectorStore BM25 中统一使用；中文连续片段生成重叠 bigram，同时保留英文、数字和下划线变量名 token。
+- **清理与测试**：移除部分遗留/未使用引用，更新 README 结构说明；补充 `test_document_extract.py`、`test_passage_resolution.py`、`test_tokenization.py` 等测试，并减少 MCP 协议测试中的固定等待。
+
+</details>
 
 ## 快速开始
 
@@ -492,7 +505,7 @@ paper-compass validate --help
 
 | 脚本 | 用途 | 关键参数 |
 |------|------|----------|
-| `scripts/sync_zotero.py` | Zotero SQLite → library.json + 文本提取 | `--extract-text`、失败报告 `data/logs/pdf_extract_failures.jsonl` |
+| `scripts/sync_zotero.py` | Zotero SQLite → library.json + 文档文本提取 | `--extract-text`、失败报告 `data/logs/pdf_extract_failures.jsonl` |
 | `scripts/build_index.py` | 构建 ChromaDB 向量索引（论文 + wiki） | `--full-rebuild`、`--incremental`、`--prune-deleted`、`--wiki`、`--dry-run --explain-changes --sample-size N` |
 | `scripts/ingest_to_wiki.py` | 批量 LLM wiki 生成 | `--skip-existing`、`--workers 10`、`--limit N`、`--wiki-upsert-mode` |
 | `scripts/run_mcp_server.py` | MCP repo-local 兼容 shim（委托 `paper_compass.mcp_entrypoint:main`） | `--mcp`、`--tool <name> --query "..."` |
@@ -552,9 +565,11 @@ paper-compass status --json
 # 如果 sync.lock 因异常退出残留，可先只清锁，不立刻跑阶段
 paper-compass sync --force-unlock
 
-# 查看 PDF 文本抽取 / chunk 准备失败报告
+# 查看文档文本抽取 / chunk 准备失败报告
 cat data/logs/pdf_extract_failures.jsonl
 ```
+
+PDF 仍使用 PyMuPDF + pdfplumber fallback；如需处理非 PDF 附件或更广泛的文档格式，可额外安装 MarkItDown：`python -m pip install "markitdown[all]>=0.1.0"`。
 
 当 `paper-compass sync --dry-run` 或 `build_index.py --dry-run` 显示大量 metadata-only 变化时，建议优先使用 `--explain-changes` 做本地解释，而不是直接允许大规模重嵌入。
 
@@ -704,6 +719,7 @@ paper-compass/
 │   ├── index_health.py      # vectordb 健康检查与损坏检测
 │   ├── logging.py           # JSONL 跟踪日志
 │   ├── pipeline_sync.py     # 一键数据同步流水线编排
+│   ├── document_extract.py   # MarkItDown + PDF fallback 统一文本抽取
 │   ├── pdf_extract.py       # PyMuPDF + pdfplumber 文本提取
 │   └── zotero_sqlite.py     # Zotero SQLite 读取
 ├── scripts/                # CLI 入口与独立脚本

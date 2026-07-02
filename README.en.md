@@ -48,9 +48,22 @@ The agent locates relevant passages in your paper library and returns quoted evi
 | 🔌 **MCP toolset** | 7 public MCP tools — `search_library`, `search_passages`, `ask_research`, `get_paper_metadata`, `get_passage_context`, `get_wiki_page_section`, `save_to_wiki` — plus `search_wiki` as an advanced probing entrypoint, following MCP 2024-11-05 |
 | 📝 **LLM wiki generation** | Automatically generates structured knowledge pages for papers (research question, core findings, methods and data, theoretical framework) with a two-stage classifier and customizable prompts |
 | 🔍 **Dual-mode passage retrieval** | Dense semantic vectors and BM25 keyword retrieval run in parallel, balancing conceptual similarity and exact-term matching |
+| 📄 **Unified document extraction** | `extract_document()` provides a shared extraction entrypoint for PDF and optional MarkItDown-backed document formats; PDFs continue to use PyMuPDF + pdfplumber fallback |
 | 📊 **Incremental indexing** | Manifest-based change detection updates only added or modified papers instead of rebuilding everything |
-| 🇨🇳 **Chinese academic support** | Chinese segmentation-aware retrieval and scoring, plus economics preset wiki prompts for Chinese-language research |
+| 🇨🇳 **Chinese academic support** | CJK-aware sparse tokenization improves unsegmented Chinese queries and mixed Chinese-English academic terms, with economics preset wiki prompts for Chinese-language research |
 | 🔄 **Embedding cascade fallback** | OpenAI-compatible (`EMBED_*`) → Volcengine (`VOLC_EMBED_*`) → local model (`bge-base` by default, configurable via `LOCAL_EMBED_MODEL`) |
+
+<details>
+<summary>Recent optimization summary</summary>
+
+This round of updates focuses on document extraction, passage readback, Chinese sparse recall, and test quality:
+
+- **Document extraction**: added `paper_compass.document_extract.extract_document()` as a unified entrypoint. `sync_zotero.py`, `build_index.py`, and `ingest_to_wiki.py` now use this seam. MarkItDown is optional for broader non-PDF extraction, while PDFs retain the PyMuPDF + pdfplumber fallback path.
+- **Passage readback**: `get_passage_context` now resolves keyword passage handles directly from local text paragraphs instead of guessing the original passage via a second search. Keyword results carry `paragraph_index` for stable follow-up reads.
+- **Chinese and mixed-term recall**: added shared `tokenize_for_sparse_search()` for keyword search and VectorStore BM25. It emits overlapping CJK bigrams while preserving English, numeric, and underscore-style variable tokens.
+- **Cleanup and tests**: removed narrow stale/unused references, updated README structure notes, added focused tests for document extraction, stable passage resolution, and tokenization, and reduced fixed waits in MCP protocol tests.
+
+</details>
 
 ## Quick Start
 
@@ -669,6 +682,7 @@ paper-compass/
 │   ├── index_health.py      # vectordb health checks and corruption detection
 │   ├── logging.py           # JSONL trace logging
 │   ├── pipeline_sync.py     # one-command data-sync orchestration
+│   ├── document_extract.py   # unified MarkItDown + PDF fallback text extraction
 │   ├── pdf_extract.py       # PyMuPDF + pdfplumber text extraction
 │   └── zotero_sqlite.py     # Zotero SQLite reading
 ├── scripts/                 # CLI entry points and standalone scripts

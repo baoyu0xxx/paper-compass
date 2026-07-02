@@ -38,9 +38,8 @@ def _send_receive(proc, payload: dict, timeout: float = 5.0) -> dict:
     while time.time() < deadline:
         line = proc.stdout.readline()
         if not line:
-            time.sleep(0.05)
             continue
-        line = line.strip()
+
         if line:
             return json.loads(line)
     raise TimeoutError(f"No response for {payload.get('method', '?')} within {timeout}s")
@@ -71,7 +70,6 @@ def test_mcp_full_lifecycle_smoke():
         "method": "notifications/initialized",
     }) + "\n")
     proc.stdin.flush()
-    time.sleep(0.1)  # Small delay to let server process
 
     # 3. tools/list
     tools_resp = _send_receive(proc, {
@@ -138,7 +136,6 @@ def test_mcp_rejects_request_before_initialized():
         "method": "notifications/initialized",
     }) + "\n")
     proc.stdin.flush()
-    time.sleep(0.1)
 
     # tools/list should now work
     resp = _send_receive(proc, {
@@ -169,7 +166,6 @@ def test_mcp_unknown_method_returns_error():
         "method": "notifications/initialized",
     }) + "\n")
     proc.stdin.flush()
-    time.sleep(0.1)
 
     resp = _send_receive(proc, {
         "jsonrpc": "2.0",

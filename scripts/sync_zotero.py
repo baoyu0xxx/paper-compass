@@ -18,7 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from paper_compass.pdf_extract import PDFExtractor
+from paper_compass.document_extract import extract_document
 from paper_compass.pipeline_sync import write_standalone_stage_state
 from paper_compass.zotero_paths import ZoteroSourceNotFoundError, resolve_zotero_source
 from paper_compass.zotero_snapshot import cleanup_sqlite_snapshots, prepare_zotero_database_for_read
@@ -180,8 +180,7 @@ def main():
                 reused_text += 1
                 continue
             try:
-                extractor = PDFExtractor(pdf_path)
-                full_text = extractor.extract_all_text()
+                full_text = extract_document(pdf_path).text
                 if full_text.strip():
                     text_file = text_dir / f"{item['key']}.txt"
                     text_file.write_text(full_text, encoding="utf-8")

@@ -80,14 +80,7 @@ def test_sync_zotero_writes_report_for_empty_extracted_text(monkeypatch, tmp_pat
     )
     monkeypatch.setattr(module, "ZoteroLibrary", lambda *args, **kwargs: _FakeLibrary(items))
 
-    class FakeExtractor:
-        def __init__(self, filepath):
-            self.filepath = filepath
-
-        def extract_all_text(self):
-            return ""
-
-    monkeypatch.setattr(module, "PDFExtractor", FakeExtractor)
+    monkeypatch.setattr(module, "extract_document", lambda filepath: SimpleNamespace(text=""))
     monkeypatch.setattr(
         "sys.argv",
         [
@@ -131,14 +124,10 @@ def test_sync_zotero_writes_report_for_extract_exception(monkeypatch, tmp_path):
     )
     monkeypatch.setattr(module, "ZoteroLibrary", lambda *args, **kwargs: _FakeLibrary(items))
 
-    class FakeExtractor:
-        def __init__(self, filepath):
-            self.filepath = filepath
+    def fake_extract_document(filepath):
+        raise RuntimeError("boom")
 
-        def extract_all_text(self):
-            raise RuntimeError("boom")
-
-    monkeypatch.setattr(module, "PDFExtractor", FakeExtractor)
+    monkeypatch.setattr(module, "extract_document", fake_extract_document)
     monkeypatch.setattr(
         "sys.argv",
         [
@@ -225,11 +214,10 @@ def test_sync_zotero_reuses_nonempty_cached_text_by_default(monkeypatch, tmp_pat
     )
     monkeypatch.setattr(module, "ZoteroLibrary", lambda *args, **kwargs: _FakeLibrary(items))
 
-    class FakeExtractor:
-        def __init__(self, filepath):
-            raise AssertionError("extractor should not be constructed when cached text is reused")
+    def fake_extract_document(filepath):
+        raise AssertionError("extract_document should not be called when cached text is reused")
 
-    monkeypatch.setattr(module, "PDFExtractor", FakeExtractor)
+    monkeypatch.setattr(module, "extract_document", fake_extract_document)
     monkeypatch.setattr(
         "sys.argv",
         [
@@ -273,14 +261,7 @@ def test_sync_zotero_force_reextract_text_ignores_cached_text(monkeypatch, tmp_p
     )
     monkeypatch.setattr(module, "ZoteroLibrary", lambda *args, **kwargs: _FakeLibrary(items))
 
-    class FakeExtractor:
-        def __init__(self, filepath):
-            self.filepath = filepath
-
-        def extract_all_text(self):
-            return "fresh extracted text"
-
-    monkeypatch.setattr(module, "PDFExtractor", FakeExtractor)
+    monkeypatch.setattr(module, "extract_document", lambda filepath: SimpleNamespace(text="fresh extracted text"))
     monkeypatch.setattr(
         "sys.argv",
         [
