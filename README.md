@@ -1,3 +1,5 @@
+
+
 # paper-compass · 论文罗盘
 
 <div align="center">
@@ -333,7 +335,7 @@ paper-compass-mcp --help
 | `VOLC_EMBED_BASE_URL` | 否 | 火山引擎多模态嵌入端点（备选方案） |
 | `VOLC_EMBED_API_KEY` | 否 | 火山引擎 API 密钥 |
 | `VOLC_EMBED_MODEL` | 否 | 火山引擎嵌入模型端点 ID |
-| `LOCAL_EMBED_MODEL` | 否 | 本地 embedding fallback 模型：`bge-base`（默认）/ `specter` / `minilm` |
+| `LOCAL_EMBED_MODEL` | 否 | 本地 embedding fallback 模型：`bge-base`（默认）/ `specter` / `minilm`；本地回退需可选依赖 `local-embed` |
 | `WIKI_PROMPT` | 否 | Wiki 提示词风格：`default`（通用学术）、`economics`（经济学预设）、或自定义路径 |
 
 
@@ -675,6 +677,7 @@ Zotero SQLite + PDF
 | `get_wiki_page_section` | 根据 `wiki_handle` 读取 wiki 页面或章节全文 | 精确读取 |
 | `get_paper_metadata` | 按 `paper_handle`、key、DOI 或标题查找单篇论文 | 精确 |
 | `save_to_wiki` | 先 preview（默认 dry-run），再 `commit=true` 写回 wiki | — |
+| ` |
 | `search_wiki`（高级） | 直接探测 wiki 语义索引；本地 CLI 可调用，但默认不在 MCP `tools/list` 暴露 | 向量 |
 
 ### 项目结构
