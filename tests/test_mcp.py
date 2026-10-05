@@ -27,7 +27,12 @@ class TestContract:
             "save_to_wiki",
         ]
 
-    def test_search_wiki_is_not_in_default_public_tool_list(self):
+    def test_incremental_index_is_advanced_and_declared(self):
+        tool = get_tool_contract("index_incremental")
+        assert tool["visibility"] == "advanced"
+        assert "dry_run" in accepted_params("index_incremental")
+        assert "db_path" in accepted_params("index_incremental")
+
         names = [t["name"] for t in list_tools()]
         assert "search_wiki" not in names
 
@@ -130,6 +135,22 @@ class TestHandleTool:
 
         assert result["ok"] is True
         assert result["data"]["matches"][0]["doc_id"] == "ABC123"
+
+    def test_index_incremental_defaults_to_dry_run(self, monkeypatch):
+        captured = {}
+
+        def fake_index(**kwargs):
+            captured.update(kwargs)
+            return {"dry_run": kwargs["dry_run"], "embedding_required": 0}
+
+        monkeypatch.setattr("paper_compass.mcp_server.index_incremental", fake_index)
+        result = handle_tool(
+            "index_incremental",
+            {},
+        )
+        assert result["ok"] is True
+        assert captured["dry_run"] is True
+        assert result["data"]["dry_run"] is True
 
     def test_search_library_no_errors(self, tmp_path):
         """search_library should not crash even without library.json."""

@@ -15,6 +15,7 @@ from paper_compass.mcp_views import (
     shape_library_matches,
     shape_passage_matches,
 )
+from paper_compass.index_service import index_incremental
 from paper_compass.passage_reader import get_passage_context
 from paper_compass.router import ask_research
 from paper_compass.search import (
@@ -278,6 +279,53 @@ def _tool_save_to_wiki(
     ).to_dict()
 
 
+
+
+def _tool_index_incremental(
+    dry_run: bool = True,
+    prune_deleted: bool = False,
+    allow_large_incremental: bool = False,
+    explain_changes: bool = False,
+    sample_size: int = 5,
+    db_path: str | None = None,
+    text_dir: str | None = None,
+    library_path: str | None = None,
+    manifest_path: str = "",
+) -> Dict[str, Any]:
+    try:
+        summary = index_incremental(
+            library_path=library_path or str(DEFAULT_LIBRARY_PATH),
+            db_path=db_path or str(DEFAULT_VECTORDB_PATH),
+            text_dir=text_dir or str(DEFAULT_TEXT_DIR),
+            manifest_path=manifest_path,
+            dry_run=dry_run,
+            prune_deleted=prune_deleted,
+            allow_large_incremental=allow_large_incremental,
+            explain_changes=explain_changes,
+            sample_size=sample_size,
+        )
+    except SystemExit as exc:
+        return UnifiedResponse.error(
+            "index_incremental",
+            [f"Incremental index refused (exit code {exc.code})"],
+            "Review the dry-run plan or use the CLI recovery workflow",
+        ).to_dict()
+    except Exception as exc:
+        return UnifiedResponse.error("index_incremental", [str(exc)]).to_dict()
+
+    return UnifiedResponse.success(
+        tool="index_incremental",
+        data=summary,
+        mode_used="dry_run" if dry_run else "incremental",
+        confidence="high",
+        next_action=(
+            "Set dry_run=false to apply this incremental index plan"
+            if dry_run and summary.get("embedding_required", 0)
+            else "No embedding changes required"
+        ),
+    ).to_dict()
+
+
 def _tool_search_passages(
     query: str,
     search_mode: str = "semantic",
@@ -318,6 +366,7 @@ def _tool_search_passages(
 
 
 _HANDLERS = {
+    "index_incremental": _tool_index_incremental,
     "search_wiki": _tool_search_wiki,
     "ask_research": _tool_ask_research,
     "search_library": _tool_search_library,

@@ -14,7 +14,18 @@ from paper_compass.search import (
 )
 
 
-# ── Text file helper (passage search needs real text files) ──────────────
+
+
+def test_library_cache_invalidates_when_file_changes(tmp_path):
+    from paper_compass import search as module
+
+    path = tmp_path / "library.json"
+    path.write_text(json.dumps([{"key": "A", "title": "Old"}]), encoding="utf-8")
+    first = module._load_library(str(path))
+    path.write_text(json.dumps([{"key": "A", "title": "New title"}]), encoding="utf-8")
+    second = module._load_library(str(path))
+    assert first[0]["title"] == "Old"
+    assert second[0]["title"] == "New title"
 
 
 def _write_text_files(text_dir: Path):
