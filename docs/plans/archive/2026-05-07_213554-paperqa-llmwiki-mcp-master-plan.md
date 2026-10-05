@@ -1,5 +1,7 @@
 # 基于 PaperQA + LLM Wiki + Zotero + MCP 的多层论文检索系统完整规划清单
 
+> **Archive note (current behavior wins):** 这是历史规划文档，用于保留当时的设计思路，不代表当前仓库的推荐入口或最新实现语义。当前日常“完整增量更新”应以 `paper-compass sync` 为标准入口；`scripts/pc-index-incremental.sh` 现在只是该完整 sync 语义的便捷包装，不应再被理解为 papers-only 增量索引。
+
 > **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task.
 
 **Goal:** 规划一套面向个人学术研究的多层论文检索系统：以 Zotero 作为上游文献源，以 LLM Wiki 作为广度检索与知识沉淀层，以 PaperQA/PDF RAG 作为深度检索层，并通过 MCP 服务把这些能力暴露给 Hermes 这类 agent，自主完成“检索—筛选—追问—总结—沉淀”的研究辅助流程。

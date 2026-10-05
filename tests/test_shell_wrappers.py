@@ -63,6 +63,18 @@ def fake_mcp_cmd(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
+def fake_cli_cmd(tmp_path: Path) -> Path:
+    script = tmp_path / "paper-compass"
+    script.write_text(
+        "#!/usr/bin/env bash\n"
+        "printf '%s\n' \"$0\" \"$@\"\n",
+        encoding="utf-8",
+    )
+    script.chmod(script.stat().st_mode | stat.S_IEXEC)
+    return script
+
+
+@pytest.fixture
 def broken_mcp_cmd(tmp_path: Path) -> Path:
     script = tmp_path / "paper-compass-mcp"
     script.write_text(
@@ -102,21 +114,6 @@ def _run_script(script_name: str, *args: str, env: dict[str, str] | None = None)
                 "--db-path",
                 "data/vectordb",
                 "--full-rebuild",
-                "--manifest-path",
-                "tmp/manifest.json",
-            ],
-        ),
-        (
-            "pc-index-incremental.sh",
-            ["--manifest-path", "tmp/manifest.json"],
-            [
-                "scripts/build_index.py",
-                "--library",
-                "data/zotero-export/library.json",
-                "--db-path",
-                "data/vectordb",
-                "--incremental",
-                "--prune-deleted",
                 "--manifest-path",
                 "tmp/manifest.json",
             ],
@@ -172,6 +169,22 @@ def test_wrapper_scripts_forward_expected_defaults_and_args(
     lines = result.stdout.strip().splitlines()
     assert lines[0] == _bash_path(fake_python)
     assert lines[1:] == expected_args
+
+
+def test_pc_index_incremental_wraps_full_sync(fake_cli_cmd: Path):
+    result = _run_script(
+        "pc-index-incremental.sh",
+        "--dry-run",
+        env={
+            "PAPER_COMPASS_ROOT": _bash_path(REPO_ROOT),
+            "PAPER_COMPASS_CLI": _bash_path(fake_cli_cmd),
+        },
+    )
+
+    assert result.returncode == 0, result.stderr
+    lines = result.stdout.strip().splitlines()
+    assert lines[0] == _bash_path(fake_cli_cmd)
+    assert lines[1:] == ["sync", "--dry-run"]
 
 
 def test_run_mcp_uses_explicit_python_override(fake_python: Path):

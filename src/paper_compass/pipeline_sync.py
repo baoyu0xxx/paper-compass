@@ -211,9 +211,57 @@ def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
 
 
 def _run_stage_command(project_root: Path, command: Sequence[str]) -> None:
-    completed = subprocess.run(list(command), cwd=str(project_root), text=True)
+    env = os.environ.copy()
+    env["PAPER_COMPASS_SYNC_PARENT"] = "1"
+    completed = subprocess.run(list(command), cwd=str(project_root), text=True, env=env)
     if completed.returncode != 0:
         raise RuntimeError(f"Command failed with exit code {completed.returncode}: {' '.join(command)}")
+
+
+def write_standalone_stage_state(
+    project_root: Path,
+    *,
+    stage: str,
+    status: str,
+    dry_run: bool = False,
+    error: str = "",
+) -> str | None:
+    if os.environ.get("PAPER_COMPASS_SYNC_PARENT"):
+        return None
+
+    started_at = _utc_now_iso()
+    run_id = f"manual-{stage}-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{os.getpid()}"
+    state_path = _state_path(project_root)
+
+    if dry_run:
+        _write_state(
+            state_path,
+            run_id=run_id,
+            started_at=started_at,
+            status="dry_run",
+            stage=stage,
+            planned_stages=[stage],
+            completed_stages=[],
+            error=error,
+            finished_at=None,
+            updated_at=_utc_now_iso(),
+        )
+        return str(state_path)
+
+    completed_stages = [stage] if status == "ok" else []
+    _write_state(
+        state_path,
+        run_id=run_id,
+        started_at=started_at,
+        status=status,
+        stage="completed" if status == "ok" else stage,
+        planned_stages=[stage],
+        completed_stages=completed_stages,
+        error=error,
+        finished_at=_utc_now_iso(),
+        updated_at=_utc_now_iso(),
+    )
+    return str(state_path)
 
 
 def _planned_stages(options: SyncOptions) -> list[str]:

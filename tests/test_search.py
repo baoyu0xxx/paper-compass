@@ -14,7 +14,18 @@ from paper_compass.search import (
 )
 
 
-# ── Text file helper (passage search needs real text files) ──────────────
+
+
+def test_library_cache_invalidates_when_file_changes(tmp_path):
+    from paper_compass import search as module
+
+    path = tmp_path / "library.json"
+    path.write_text(json.dumps([{"key": "A", "title": "Old"}]), encoding="utf-8")
+    first = module._load_library(str(path))
+    path.write_text(json.dumps([{"key": "A", "title": "New title"}]), encoding="utf-8")
+    second = module._load_library(str(path))
+    assert first[0]["title"] == "Old"
+    assert second[0]["title"] == "New title"
 
 
 def _write_text_files(text_dir: Path):
@@ -304,6 +315,21 @@ class TestKeywordSearchPassagesHelper:
         results = _keyword_search_passages("labor", str(text_dir), limit=10)
         # Deduplication should prevent duplicate passages
         assert len(results) <= 2
+
+    def test_cjk_keyword_search_matches_unsegmented_paragraph(self, tmp_path):
+        text_dir = tmp_path / "texts"
+        text_dir.mkdir()
+        (text_dir / "CJK123.txt").write_text(
+            "摘要\n\n"
+            "本文研究家族企业代际传承影响劳动力结构，并进一步讨论CEO继任后的治理变化。"
+        )
+
+        results = _keyword_search_passages("代际传承", str(text_dir), limit=5)
+
+        assert results
+        assert results[0]["doc_id"] == "CJK123"
+        assert "代际传承" in results[0]["passage"]
+        assert results[0]["paragraph_index"] == 0
 
 
 # ═══════════════════════════════════════════════════════════════════════

@@ -1,5 +1,7 @@
 # Zotero 同步层详细设计
 
+> **Archive note (current behavior wins):** 这是历史设计文档，反映当时的一期方案，不代表当前仓库的推荐同步入口或最新实现。当前实现中，Zotero sqlite 是上游源，`library.json` 是供索引与 wiki 生成消费的中间快照；日常完整增量更新应使用 `paper-compass sync`，而不是把某个低层 `build_index.py --incremental` 调用误当成标准更新路径。
+
 > **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task.
 
 **Goal:** 在“文献 PDF 都保存在 `D:\zotero_backup`（WSL: `/mnt/d/zotero_backup`）”的前提下，设计一个尽可能简单、稳定、可维护的 Zotero 同步层。该同步层不追求完整复制 Zotero 全能力，而只负责为 wiki 广度层和 PDF 深检索层提供统一、干净的中间数据。

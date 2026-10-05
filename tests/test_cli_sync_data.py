@@ -92,9 +92,10 @@ class TestSyncExecute:
             completed_stages=[],
             state_path="/tmp/last_sync.json",
         )
-        with mock.patch.object(sync_data, "run_sync_pipeline", return_value=result) as mocked:
-            with mock.patch("sys.stdout", io.StringIO()) as fake_out:
-                rc = sync_data.execute_sync(args)
+        with mock.patch.object(sync_data, "load_last_successful_zotero_source", return_value={}):
+            with mock.patch.object(sync_data, "run_sync_pipeline", return_value=result) as mocked:
+                with mock.patch("sys.stdout", io.StringIO()) as fake_out:
+                    rc = sync_data.execute_sync(args)
 
         assert rc == 0
         called_options = mocked.call_args.args[0]

@@ -48,9 +48,22 @@ The agent locates relevant passages in your paper library and returns quoted evi
 | 🔌 **MCP toolset** | 7 public MCP tools — `search_library`, `search_passages`, `ask_research`, `get_paper_metadata`, `get_passage_context`, `get_wiki_page_section`, `save_to_wiki` — plus `search_wiki` as an advanced probing entrypoint, following MCP 2024-11-05 |
 | 📝 **LLM wiki generation** | Automatically generates structured knowledge pages for papers (research question, core findings, methods and data, theoretical framework) with a two-stage classifier and customizable prompts |
 | 🔍 **Dual-mode passage retrieval** | Dense semantic vectors and BM25 keyword retrieval run in parallel, balancing conceptual similarity and exact-term matching |
+| 📄 **Unified document extraction** | `extract_document()` provides a shared extraction entrypoint for PDF and optional MarkItDown-backed document formats; PDFs continue to use PyMuPDF + pdfplumber fallback |
 | 📊 **Incremental indexing** | Manifest-based change detection updates only added or modified papers instead of rebuilding everything |
-| 🇨🇳 **Chinese academic support** | Chinese segmentation-aware retrieval and scoring, plus economics preset wiki prompts for Chinese-language research |
+| 🇨🇳 **Chinese academic support** | CJK-aware sparse tokenization improves unsegmented Chinese queries and mixed Chinese-English academic terms, with economics preset wiki prompts for Chinese-language research |
 | 🔄 **Embedding cascade fallback** | OpenAI-compatible (`EMBED_*`) → Volcengine (`VOLC_EMBED_*`) → local model (`bge-base` by default, configurable via `LOCAL_EMBED_MODEL`) |
+
+<details>
+<summary>Recent optimization summary</summary>
+
+This round of updates focuses on document extraction, passage readback, Chinese sparse recall, and test quality:
+
+- **Document extraction**: added `paper_compass.document_extract.extract_document()` as a unified entrypoint. `sync_zotero.py`, `build_index.py`, and `ingest_to_wiki.py` now use this seam. MarkItDown is optional for broader non-PDF extraction, while PDFs retain the PyMuPDF + pdfplumber fallback path.
+- **Passage readback**: `get_passage_context` now resolves keyword passage handles directly from local text paragraphs instead of guessing the original passage via a second search. Keyword results carry `paragraph_index` for stable follow-up reads.
+- **Chinese and mixed-term recall**: added shared `tokenize_for_sparse_search()` for keyword search and VectorStore BM25. It emits overlapping CJK bigrams while preserving English, numeric, and underscore-style variable tokens.
+- **Cleanup and tests**: removed narrow stale/unused references, updated README structure notes, added focused tests for document extraction, stable passage resolution, and tokenization, and reduced fixed waits in MCP protocol tests.
+
+</details>
 
 ## Quick Start
 
@@ -149,6 +162,7 @@ paper-compass sync \
 
 # 7. Run individual stages manually (only when you need finer control)
 scripts/pc-index-full.sh
+# full incremental sync convenience wrapper (forwards to `paper-compass sync`)
 scripts/pc-index-incremental.sh
 scripts/pc-wiki-build.sh --limit 3
 scripts/pc-wiki-index.sh
@@ -163,7 +177,7 @@ paper-compass-healthcheck --smoke
 python eval/run_eval.py -v
 ```
 
-These `scripts/pc-*.sh` wrappers are intentionally thin: they pin repo root, provide sane default paths, and reduce long-command typing errors.
+These `scripts/pc-*.sh` wrappers are intentionally thin: they pin repo root, provide sane default paths, and reduce long-command typing errors. In particular, `scripts/pc-index-incremental.sh` now means **full incremental sync** and forwards to `paper-compass sync`, rather than acting as a papers-only indexing shortcut.
 If you prefer direct Python entrypoints, `scripts/build_index.py` and `scripts/ingest_to_wiki.py` remain supported.
 
 Starting with v1.4.0, installed `paper-compass-mcp` and `paper-compass-healthcheck` entrypoints point directly to package-resident implementations. The historical packaged `scripts.*` compatibility shims have been removed; use the current console scripts or the repository `scripts/` files directly.
@@ -216,13 +230,13 @@ paper-compass sync \
 - write `data/state/last_sync.json` to record the latest run status
 - stop writes and suggest a rebuild if vector-store corruption is detected
 
-If you only want one stage manually, use the shell wrappers from the repo:
+If you only want one stage manually, or want a convenience wrapper for the full incremental sync path, use the shell wrappers from the repo:
 
 ```bash
 # full papers index rebuild
 scripts/pc-index-full.sh
 
-# incremental papers index
+# full incremental sync convenience wrapper (forwards to `paper-compass sync`)
 scripts/pc-index-incremental.sh
 
 # wiki generation in foreground
@@ -235,7 +249,7 @@ scripts/pc-wiki-ingest-bg.sh
 scripts/pc-wiki-index.sh
 ```
 
-These wrappers are stage-level convenience commands only; append extra arguments when needed and pass them through to the underlying Python scripts.
+These wrappers are lightweight conveniences: `scripts/pc-index-incremental.sh` uses the full `sync` semantics, while the others remain single-stage wrappers. Append extra arguments when needed and pass them through to the underlying Python scripts or to `paper-compass sync`.
 
 ### Automatic Code Update (git-clone installs only)
 
@@ -493,7 +507,7 @@ paper-compass validate --help
 # Full rebuild (clear and re-embed all papers)
 python scripts/build_index.py --library data/zotero-export/library.json --full-rebuild
 
-# Incremental update (only update changed papers)
+# Low-level incremental papers index (only when you explicitly want to consume the current `library.json` snapshot)
 python scripts/build_index.py --library data/zotero-export/library.json --incremental
 
 # Dry-run locally and explain metadata-only / path-only changes before embedding
@@ -668,6 +682,7 @@ paper-compass/
 │   ├── index_health.py      # vectordb health checks and corruption detection
 │   ├── logging.py           # JSONL trace logging
 │   ├── pipeline_sync.py     # one-command data-sync orchestration
+│   ├── document_extract.py   # unified MarkItDown + PDF fallback text extraction
 │   ├── pdf_extract.py       # PyMuPDF + pdfplumber text extraction
 │   └── zotero_sqlite.py     # Zotero SQLite reading
 ├── scripts/                 # CLI entry points and standalone scripts

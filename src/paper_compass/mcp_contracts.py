@@ -20,6 +20,29 @@ _FILTER_SCHEMA: Dict[str, Any] = {
 
 _ALL_TOOL_CONTRACTS: List[Dict[str, Any]] = [
     {
+        "name": "index_incremental",
+        "visibility": "advanced",
+        "description": "Plan or run an incremental paper vector-index update. Defaults to dry-run; set dry_run=false to persist changes.",
+        "internalProperties": {
+            "db_path": {"type": "string", "default": "data/vectordb"},
+            "text_dir": {"type": "string", "default": "data/texts"},
+            "library_path": {"type": "string", "default": "data/zotero-export/library.json"},
+            "manifest_path": {"type": "string", "default": ""},
+        },
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "dry_run": {"type": "boolean", "default": True},
+                "prune_deleted": {"type": "boolean", "default": False},
+                "allow_large_incremental": {"type": "boolean", "default": False},
+                "explain_changes": {"type": "boolean", "default": False},
+                "sample_size": {"type": "integer", "default": 5},
+            },
+            "required": [],
+            "additionalProperties": False,
+        },
+    },
+    {
         "name": "search_wiki",
         "visibility": "advanced",
         "description": "Advanced wiki-index search. Prefer ask_research for broad questions and get_wiki_page_section for reading a cited wiki section.",

@@ -6,7 +6,7 @@ This document guides an AI agent (Claude Code, Codex, Hermes, etc.) through depl
 
 `paper-compass` is a personal academic paper retrieval infrastructure. It takes a Zotero PDF library, generates structured wiki pages via LLM, builds vector search indices, and exposes 6 MCP tools for AI agent consumption.
 
-**Tech stack**: Python ≥3.11, ChromaDB, PyMuPDF, Volcengine/OpenAI-compatible embeddings with local fallback, OpenAI-compatible LLM endpoint.
+**Tech stack**: Python ≥3.11, ChromaDB, PyMuPDF/pdfplumber PDF extraction, optional MarkItDown document extraction, Volcengine/OpenAI-compatible embeddings with local fallback, OpenAI-compatible LLM endpoint.
 
 ## Step-by-Step Deployment
 
@@ -149,10 +149,11 @@ paper-compass sync \
 
 ```bash
 scripts/pc-index-full.sh
+# 完整增量更新便捷包装（实际转发到 `paper-compass sync`）
 scripts/pc-index-incremental.sh
 ```
 
-This creates ChromaDB collections under `data/vectordb/`.
+`scripts/pc-index-full.sh` 仍是 papers 全量重建；`scripts/pc-index-incremental.sh` 已改为完整增量更新入口，会刷新快照并继续推进 papers/wiki 各阶段同步。
 
 如果只是单独补 wiki 页面或重建 wiki 向量索引，可优先用：
 
@@ -161,7 +162,7 @@ scripts/pc-wiki-build.sh --limit 3
 scripts/pc-wiki-index.sh
 ```
 
-这些 shell 只负责：固定 repo root、补默认路径、透传附加参数；
+这些 shell 只负责：固定 repo root、补默认路径、透传附加参数；其中 `scripts/pc-index-incremental.sh` 代表完整 `sync` 语义，
 不要在 agent 操作里把它们当成新的复杂参数层。
 
 **Pitfall**: If `build_index.py` skips papers with "missing PDF" even when text files exist, check that:
@@ -313,7 +314,7 @@ New test files:
 
 All declared in `pyproject.toml`:
 - **Runtime**: pyyaml, chromadb, pymupdf, rank-bm25
-- **Optional**: sentence-transformers (`local-embed`), pdfplumber (`pdf-fallback`)
+- **Optional**: sentence-transformers (`local-embed`), pdfplumber (`pdf-fallback`), MarkItDown (`doc-extract`; included in `full`)
 - **Dev**: pytest
 
 ## Key Files

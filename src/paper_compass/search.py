@@ -8,14 +8,15 @@ Uses ChromaDB vector_store + library.json metadata.
 from __future__ import annotations
 
 import json
-import os
 import re
 import threading
+from collections import OrderedDict
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from paper_compass.env_utils import PROJECT_ROOT, load_project_env
 from paper_compass.config import load_all_configs, get_provider_config
+from paper_compass.tokenization import tokenize_for_sparse_search
 
 DEFAULT_LIBRARY_PATH = PROJECT_ROOT / "data" / "zotero-export" / "library.json"
 DEFAULT_TEXT_DIR = PROJECT_ROOT / "data" / "texts"
@@ -32,6 +33,18 @@ def _resolved_path(path: str | None, default: Path) -> str:
 _client: Any = None
 _client_path: Optional[str] = None
 _lock = threading.Lock()
+_LIBRARY_CACHE_MAX = 4
+_library_cache: OrderedDict[str, tuple[int, int, List[Dict[str, Any]]]] = OrderedDict()
+_KEYWORD_CACHE_MAX_FILES = 256
+_keyword_cache: OrderedDict[str, tuple[int, int, list[str]]] = OrderedDict()
+
+
+def _file_signature(path: Path) -> tuple[int, int]:
+    try:
+        stat = path.stat()
+    except OSError:
+        return (0, 0)
+    return (stat.st_mtime_ns, stat.st_size)
 
 
 def _get_client(db_path: str) -> Any:
@@ -59,11 +72,27 @@ def _get_client(db_path: str) -> Any:
 # ── library.json access ──────────────────────────────────────────────────────
 
 def _load_library(library_path: str | None = None) -> List[Dict[str, Any]]:
-    path = Path(_resolved_path(library_path, DEFAULT_LIBRARY_PATH))
+    path = Path(_resolved_path(library_path, DEFAULT_LIBRARY_PATH)).resolve()
     if not path.exists():
         return []
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+    key = str(path)
+    signature = _file_signature(path)
+    cached = _library_cache.get(key)
+    if cached and cached[:2] == signature:
+        _library_cache.move_to_end(key)
+        return cached[2]
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            records = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return []
+    if not isinstance(records, list):
+        return []
+    _library_cache[key] = (signature[0], signature[1], records)
+    _library_cache.move_to_end(key)
+    while len(_library_cache) > _LIBRARY_CACHE_MAX:
+        _library_cache.popitem(last=False)
+    return records
 
 
 # ── search_library ───────────────────────────────────────────────────────────
@@ -563,6 +592,7 @@ def search_passages(
             "doi": rec.get("doi", ""),
             "passage": r["passage"],
             "page_num": r.get("page_num"),
+            "paragraph_index": r.get("paragraph_index"),
             "score": r.get("score", 0.0),
             "search_mode": r.get("search_mode", ""),
             "match_type": r.get("match_type", ""),
@@ -598,40 +628,49 @@ def _keyword_search_passages(
     if not txt_root.exists():
         return []
 
-    keywords = [kw.lower() for kw in re.split(r"\s+", query.strip()) if kw]
+    keywords = tokenize_for_sparse_search(query)
     if not keywords:
         return []
 
     scored: List[tuple] = []
 
+    current_paths = set()
     for txt_path in txt_root.glob("*.txt"):
-        try:
-            text = txt_path.read_text(encoding="utf-8", errors="replace")
-        except Exception:
-            continue
-
-        # Derive a rough doc_id from filename (e.g. "ABC123.txt" -> "ABC123")
-        doc_id = txt_path.stem
-
-        # Split into paragraphs (blank line boundaries)
-        paragraphs = re.split(r"\n\s*\n", text)
-        for para in paragraphs:
-            para = para.strip()
-            if len(para) < 30:  # skip very short fragments
+        key = str(txt_path.resolve())
+        current_paths.add(key)
+        signature = _file_signature(txt_path)
+        cached = _keyword_cache.get(key)
+        if cached and cached[:2] == signature:
+            paragraphs = cached[2]
+            _keyword_cache.move_to_end(key)
+        else:
+            try:
+                text = txt_path.read_text(encoding="utf-8", errors="replace")
+            except OSError:
                 continue
+            paragraphs = [para.strip() for para in re.split(r"\n\s*\n", text) if len(para.strip()) >= 30]
+            _keyword_cache[key] = (signature[0], signature[1], paragraphs)
+            _keyword_cache.move_to_end(key)
+        doc_id = txt_path.stem
+        for current_index, para in enumerate(paragraphs):
             para_lower = para.lower()
-            # Count distinct keywords found
-            hits = sum(1 for kw in keywords if kw in para_lower)
+            para_tokens = set(tokenize_for_sparse_search(para))
+            hits = sum(1 for kw in keywords if kw in para_tokens or kw in para_lower)
             if hits == 0:
                 continue
-            # Density score: hits per 100 chars
             density = hits / max(len(para), 1) * 100
-            scored.append((density + hits, doc_id, para[:800]))
+            scored.append((density + hits, doc_id, para[:800], current_index))
+
+    for cached_path in list(_keyword_cache):
+        if cached_path not in current_paths:
+            _keyword_cache.pop(cached_path, None)
+    while len(_keyword_cache) > _KEYWORD_CACHE_MAX_FILES:
+        _keyword_cache.popitem(last=False)
 
     scored.sort(key=lambda x: x[0], reverse=True)
     results = []
     seen = set()
-    for _, doc_id, passage in scored:
+    for _, doc_id, passage, paragraph_index in scored:
         # Dedupe by (doc_id, passage_prefix)
         dedup_key = (doc_id, passage[:120])
         if dedup_key in seen:
@@ -643,6 +682,7 @@ def _keyword_search_passages(
             "passage": passage,
             "score": round(_, 4),
             "page_num": None,
+            "paragraph_index": paragraph_index,
         })
         if len(results) >= limit:
             break

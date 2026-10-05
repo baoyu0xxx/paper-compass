@@ -55,7 +55,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--passage-handle", help="passage_handle returned by search_passages")
     parser.add_argument("--wiki-handle", help="wiki_handle returned by ask_research or search_wiki")
     parser.add_argument("--window", default="paragraph", choices=["match_only", "paragraph", "section", "page"], help="Context window for get_passage_context")
-    parser.add_argument("--max-chars", type=int, default=2000, help="Maximum characters for get_passage_context")
+    parser.add_argument("--sample-size", type=int, default=5, help="Max metadata-only samples for index_incremental")
+    parser.add_argument("--prune-deleted", action="store_true", help="Remove vectors for deleted papers")
+    parser.add_argument("--allow-large-incremental", action="store_true", help="Allow large incremental embedding changes")
+    parser.add_argument("--explain-changes", action="store_true", help="Include metadata-only change explanations")
     parser.add_argument("--include-frontmatter", action="store_true", help="Include YAML frontmatter when reading a wiki page/section")
     parser.add_argument("--title", help="Wiki page title (for save_to_wiki)")
     parser.add_argument("--content", help="Wiki page content (for save_to_wiki)")
@@ -96,6 +99,11 @@ def build_tool_params(tool_name: str, args: argparse.Namespace) -> dict[str, Any
         "wiki_handle": getattr(args, "wiki_handle", None),
         "window": getattr(args, "window", None),
         "max_chars": getattr(args, "max_chars", None),
+        "dry_run": True if tool_name == "index_incremental" else None,
+        "prune_deleted": getattr(args, "prune_deleted", False),
+        "allow_large_incremental": getattr(args, "allow_large_incremental", False),
+        "explain_changes": getattr(args, "explain_changes", False),
+        "sample_size": getattr(args, "sample_size", None),
         "include_frontmatter": getattr(args, "include_frontmatter", None),
         "title": getattr(args, "title", None),
         "content": getattr(args, "content", None),

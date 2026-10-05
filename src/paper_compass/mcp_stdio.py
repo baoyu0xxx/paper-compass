@@ -14,11 +14,10 @@ ToolHandler = Callable[[str, dict[str, Any]], dict[str, Any]]
 
 
 def _prewarm_collections(db_path: str = DEFAULT_VECTORDB_PATH) -> None:
-    import chromadb as _cdb
-    from chromadb.config import Settings as _CSet
+    from paper_compass.search import _get_client
 
     try:
-        client = _cdb.PersistentClient(path=db_path, settings=_CSet(anonymized_telemetry=False))
+        client = _get_client(db_path)
     except Exception:
         return
 

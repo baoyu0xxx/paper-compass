@@ -368,3 +368,28 @@ def test_build_stage_command_adds_paper_index_dry_run_flag(tmp_path):
     command = _build_stage_command(options, "index_papers")
 
     assert "--dry-run" in command
+
+
+def test_run_stage_command_sets_parent_sync_env(tmp_path, monkeypatch):
+    from paper_compass import pipeline_sync
+
+    captured = {}
+
+    def fake_run(command, cwd=None, text=None, env=None):
+        captured["command"] = list(command)
+        captured["cwd"] = cwd
+        captured["text"] = text
+        captured["env_parent"] = env.get("PAPER_COMPASS_SYNC_PARENT") if env else None
+
+        class Result:
+            returncode = 0
+
+        return Result()
+
+    monkeypatch.setattr(pipeline_sync.subprocess, "run", fake_run)
+
+    pipeline_sync._run_stage_command(tmp_path, ["python", "scripts/build_index.py", "--wiki"])
+
+    assert captured["cwd"] == str(tmp_path)
+    assert captured["text"] is True
+    assert captured["env_parent"] == "1"
