@@ -36,7 +36,7 @@ _lock = threading.Lock()
 _LIBRARY_CACHE_MAX = 4
 _library_cache: OrderedDict[str, tuple[int, int, List[Dict[str, Any]]]] = OrderedDict()
 _KEYWORD_CACHE_MAX_FILES = 256
-_keyword_cache: OrderedDict[str, tuple[int, int, list[str]]] = OrderedDict()
+_keyword_cache: OrderedDict[str, tuple[int, int, list[tuple[str, str, set[str]]]]] = OrderedDict()
 
 
 def _file_signature(path: Path) -> tuple[int, int]:
@@ -648,13 +648,15 @@ def _keyword_search_passages(
                 text = txt_path.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
-            paragraphs = [para.strip() for para in re.split(r"\n\s*\n", text) if len(para.strip()) >= 30]
+            paragraphs = [
+                (para.strip(), para.strip().lower(), set(tokenize_for_sparse_search(para.strip())))
+                for para in re.split(r"\n\s*\n", text)
+                if len(para.strip()) >= 30
+            ]
             _keyword_cache[key] = (signature[0], signature[1], paragraphs)
             _keyword_cache.move_to_end(key)
         doc_id = txt_path.stem
-        for current_index, para in enumerate(paragraphs):
-            para_lower = para.lower()
-            para_tokens = set(tokenize_for_sparse_search(para))
+        for current_index, (para, para_lower, para_tokens) in enumerate(paragraphs):
             hits = sum(1 for kw in keywords if kw in para_tokens or kw in para_lower)
             if hits == 0:
                 continue
