@@ -65,7 +65,12 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
 </details>
 
-## 快速开始
+### Agent skill
+
+仓库提供一份面向 DSH/Agent 的 paper-compass skill：[skills/paper-compass/SKILL.md](skills/paper-compass/SKILL.md)。它约定了论文候选检索、PDF 原文证据回读、wiki 综合问答、增量索引、完整同步、诊断和 wiki 写回的安全流程，并明确区分元数据、编译后的 wiki 知识与原始 PDF 证据。
+
+在 DSH 中使用时，将该文件安装到全局技能目录 `C:\Users\<用户名>\.dsh\skills\paper-compass\SKILL.md`；项目仓库文件是版本化来源，全局副本是 DSH 的运行时副本。
+
 
 ### 方式一：通过 GitHub Release 安装（推荐）
 
