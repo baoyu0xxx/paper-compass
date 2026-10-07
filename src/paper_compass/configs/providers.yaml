@@ -12,16 +12,19 @@ providers:
     max_tokens: 4000
     timeout_seconds: 120
 
+  # Alibaba Cloud Bailian (Qwen, OpenAI-compatible)
   embedding_main:
     provider: openai
+    display_name: aliyun
     api_style: openai-compatible
     base_url_env: EMBED_BASE_URL
     api_key_env: EMBED_API_KEY
-    model: text-embedding-3-small
+    model: qwen3.7-text-embedding-flash
     model_env: EMBED_MODEL
-    dimension: 1536
+    dimension: 1024
     timeout_seconds: 120
 
+  # Volcengine (explicit alternative)
   embedding_volcengine:
     provider: volcengine
     api_style: openai-compatible

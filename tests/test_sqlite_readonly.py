@@ -45,5 +45,9 @@ def test_connect_readonly_passes_timeout_and_busy_timeout(monkeypatch, tmp_path)
     assert calls["timeout"] == 12.5
     assert calls["check_same_thread"] is True
     assert "immutable=1" in str(calls["path"])
-    assert fake_conn.executed == ["PRAGMA query_only=ON", "PRAGMA busy_timeout=12500"]
+    assert fake_conn.executed == [
+        "PRAGMA query_only=ON",
+        "PRAGMA temp_store=MEMORY",
+        "PRAGMA busy_timeout=12500",
+    ]
     assert fake_conn.isolation_level is None

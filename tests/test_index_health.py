@@ -33,6 +33,10 @@ def test_inspect_index_health_flags_journal_warning(tmp_path):
 def test_inspect_index_health_flags_corruption_when_client_open_fails(tmp_path, monkeypatch):
     from paper_compass import index_health
 
+    db_path = tmp_path / "vectordb"
+    db_path.mkdir()
+    (db_path / "chroma.sqlite3").write_bytes(b"")
+
     class BrokenClient:
         def __init__(self, *args, **kwargs):
             raise RuntimeError("metadata segment broken")
@@ -52,6 +56,7 @@ def test_inspect_index_health_collects_manifest_files(tmp_path, monkeypatch):
 
     db_path = tmp_path / "vectordb"
     db_path.mkdir()
+    (db_path / "chroma.sqlite3").write_bytes(b"")
     (db_path / "papers_fake.manifest.json").write_text('{"items": {}}', encoding="utf-8")
     (db_path / "wiki_fake.manifest.json").write_text('{"items": {}}', encoding="utf-8")
 
@@ -84,6 +89,7 @@ def test_inspect_index_health_marks_invalid_manifest_as_corrupted(tmp_path, monk
 
     db_path = tmp_path / "vectordb"
     db_path.mkdir()
+    (db_path / "chroma.sqlite3").write_bytes(b"")
     (db_path / "papers_fake.manifest.json").write_text("not-json", encoding="utf-8")
 
     class DummyClient:
@@ -107,6 +113,7 @@ def test_inspect_index_health_warns_on_paper_manifest_store_mismatch(tmp_path, m
 
     db_path = tmp_path / "vectordb"
     db_path.mkdir()
+    (db_path / "chroma.sqlite3").write_bytes(b"")
     (db_path / "papers_fake.manifest.json").write_text(
         '{"items": {"A1": {}, "B2": {}}}', encoding="utf-8"
     )

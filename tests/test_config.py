@@ -451,6 +451,39 @@ class TestResolveEmbeddingRuntime:
         assert runtime["configured_candidates"][0]["name"] == "embedding_volcengine"
         assert runtime["configured_candidates"][0]["api_key_configured"] is True
 
+    def test_explicit_provider_selection_is_strict_and_uses_local_fallback(self, monkeypatch):
+        from paper_compass.config import resolve_embedding_runtime
+
+        monkeypatch.setenv("EMBED_PROVIDER", "volcengine")
+        configs = {
+            "providers": {
+                "providers": {
+                    "embedding_main": {
+                        "provider": "openai",
+                        "base_url": "https://aliyun.example.com",
+                        "api_key": "aliyun-key",
+                        "model": "qwen3.7-text-embedding-flash",
+                    },
+                    "embedding_volcengine": {
+                        "provider": "volcengine",
+                        "model": "ep-123",
+                    },
+                },
+                "roles": {"embedding": "embedding_main"},
+            }
+        }
+
+        runtime = resolve_embedding_runtime(configs)
+
+        assert runtime["config_source"] == "env"
+        assert runtime["selected_provider"] == "embedding_volcengine"
+        assert runtime["resolved_provider"] is None
+        assert runtime["display_cascade"] == [
+            "embedding_volcengine",
+            "embedding_main",
+            "local (bge-base)",
+        ]
+
     def test_resolve_embedding_runtime_reports_local_only_when_no_cloud_provider_is_configured(self, monkeypatch):
         from paper_compass.config import resolve_embedding_runtime
 

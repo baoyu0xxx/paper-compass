@@ -59,6 +59,23 @@ def _load_existing_keys(wiki_root: str) -> set:
     return keys
 
 
+def _remove_deleted_generated_pages(wiki_root: str, active_keys: set[str]) -> int:
+    removed = 0
+    papers_dir = Path(wiki_root) / "papers"
+    if not papers_dir.exists():
+        return removed
+    for md_file in papers_dir.glob("*.md"):
+        try:
+            text = md_file.read_text(encoding="utf-8")
+            keys = set(re.findall(r"zotero:([A-Z0-9]+)", text))
+            if keys and keys.isdisjoint(active_keys):
+                md_file.unlink()
+                removed += 1
+        except OSError:
+            continue
+    return removed
+
+
 # ── per-paper worker ────────────────────────────────────────────────────
 
 def _process_one(
@@ -73,20 +90,22 @@ def _process_one(
     key = item.get("key", "")
     title = item.get("title", "")
 
-    # --- PDF check ---
+    # --- content source selection ---
     pdf_path = item.get("pdf_path", "")
-    if not pdf_path or not Path(pdf_path).exists():
-        return {"key": key, "status": "skip", "detail": "PDF not found"}
-
-    # --- text extraction ---
-    text_file = Path("data/texts") / f"{key}.txt"
-    if text_file.exists():
+    text_file_value = item.get("text_file", "")
+    text_file = Path(text_file_value) if text_file_value else Path("data/texts") / f"{key}.txt"
+    source_path = item.get("source_path", "")
+    if text_file is not None and text_file.exists():
         paper_text = text_file.read_text(encoding="utf-8")
-    else:
+    elif source_path and Path(source_path).exists() and item.get("source_kind") == "ft_cache":
+        paper_text = Path(source_path).read_text(encoding="utf-8")
+    elif pdf_path and Path(pdf_path).exists():
         try:
             paper_text = extract_document(pdf_path).text
         except Exception as e:
             return {"key": key, "status": "error", "detail": f"text: {e}"}
+    else:
+        return {"key": key, "status": "skip", "detail": "no cache or PDF"}
 
     if not paper_text.strip():
         return {"key": key, "status": "skip", "detail": "no extractable text"}
@@ -136,6 +155,7 @@ def main() -> None:
     parser.add_argument("--skip-existing", action="store_true",
                         help="Skip papers that already have a wiki page")
     parser.add_argument("--wiki-root", default="./wiki")
+    parser.add_argument("--text-dir", default="data/texts")
     parser.add_argument("--max-chars", type=int, default=12000,
                         help="Max chars from PDF to send to LLM")
     parser.add_argument("--workers", type=int, default=10,
@@ -161,6 +181,11 @@ def main() -> None:
     with open(library_path, "r", encoding="utf-8") as f:
         items = json.load(f)
 
+    active_keys = {str(item.get("key", "")) for item in items if item.get("key")}
+    removed_pages = _remove_deleted_generated_pages(args.wiki_root, active_keys)
+    if removed_pages:
+        print(f"Removed deleted generated wiki pages: {removed_pages}")
+
     if args.key:
         items = [i for i in items if i.get("key") == args.key]
         if not items:
@@ -180,7 +205,14 @@ def main() -> None:
     for item in items:
         key = item.get("key", "")
         pdf_path = item.get("pdf_path", "")
-        if not pdf_path or not Path(pdf_path).exists():
+        source_path = item.get("source_path", "")
+        text_path = item.get("text_file", "")
+        has_content = (
+            bool(text_path and Path(text_path).exists())
+            or bool(source_path and Path(source_path).exists())
+            or bool(pdf_path and Path(pdf_path).exists())
+        )
+        if not has_content:
             skipped_no_pdf += 1
             continue
         if args.skip_existing and key in existing:

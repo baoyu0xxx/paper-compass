@@ -22,6 +22,7 @@ from paper_compass.document_extract import extract_document
 from paper_compass.pipeline_sync import write_standalone_stage_state
 from paper_compass.zotero_paths import ZoteroSourceNotFoundError, resolve_zotero_source
 from paper_compass.zotero_snapshot import cleanup_sqlite_snapshots, prepare_zotero_database_for_read
+from paper_compass.source_scanner import normalize_storage_items, scan_storage
 from paper_compass.zotero_sqlite import ZoteroLibrary
 
 
@@ -136,7 +137,7 @@ def main():
         storage_path=str(source.storage_path),
         immutable=prepared.use_immutable,
     )
-    items = lib.get_all_items_with_pdfs()
+    metadata_items = lib.get_all_items_with_pdfs()
     lib.close()
 
     cleanup = cleanup_sqlite_snapshots(
@@ -147,67 +148,79 @@ def main():
     if cleanup.scanned_count:
         print(f"  Snapshot cleanup: scanned={cleanup.scanned_count}, deleted={cleanup.deleted_count}")
 
-    print(f"  Found {len(items)} items with PDFs")
+    candidates = scan_storage(source.storage_path)
+    items = normalize_storage_items(source.storage_path, metadata_items)
+    normalized_keys = {str(item.get("key", "")) for item in items}
+    for legacy in metadata_items:
+        key = str(legacy.get("key", ""))
+        pdf_path = str(legacy.get("pdf_path", "") or "")
+        if key and key not in normalized_keys and (pdf_path or legacy.get("text_file")):
+            item = dict(legacy)
+            item["source_kind"] = "pdf" if pdf_path else "text"
+            item["source_path"] = pdf_path or str(legacy.get("text_file", ""))
+            item["cache_path"] = ""
+            item["skipped_reason"] = ""
+            items.append(item)
+    skipped_missing_content = sum(1 for candidate in candidates if candidate.source_kind == "unavailable")
+    print(f"  Storage candidates: {len(candidates)}")
+    print(f"  Usable content sources: {len(items)}")
 
     if not items:
-        print("WARNING: No items with PDFs found.")
+        print("WARNING: No usable cache or PDF sources found.")
+        library_path = out_dir / "library.json"
+        library_path.write_text("[]", encoding="utf-8")
         write_standalone_stage_state(project_root, stage="sync_zotero", status="ok")
-        sys.exit(0)
+        return
 
-    # ── Enrich: extract text if requested ──
-    missing_pdf = 0
+    # ── Enrich: reuse Zotero cache, or extract PDF fallback ──
     extracted = 0
     reused_text = 0
+    reused_cache = 0
     failure_counts: dict[str, int] = {}
     report_path = _failure_report_path(out_dir)
 
     for item in items:
+        key = item["key"]
+        source_kind = item.get("source_kind", "")
+        source_path = Path(item.get("source_path", "")) if item.get("source_path") else None
         pdf_path = item.get("pdf_path", "")
-        existing_text = text_dir / f"{item['key']}.txt"
-        existing_text_usable = False
-        if existing_text.exists():
-            item["text_file"] = str(existing_text)
-            try:
-                existing_text_usable = bool(existing_text.read_text(encoding="utf-8").strip())
-            except Exception:
-                existing_text_usable = False
-        if not pdf_path or not Path(pdf_path).exists():
-            missing_pdf += 1
-            continue
-
-        if args.extract_text:
+        if source_kind == "ft_cache" and source_path and source_path.exists():
+            item["text_file"] = str(source_path)
+            reused_cache += 1
+        elif source_kind == "pdf" and pdf_path and Path(pdf_path).exists():
+            existing_text = text_dir / f"{key}.txt"
+            existing_text_usable = False
+            if existing_text.exists():
+                try:
+                    existing_text_usable = bool(existing_text.read_text(encoding="utf-8").strip())
+                except Exception:
+                    existing_text_usable = False
             if existing_text_usable and not args.force_reextract_text:
+                item["text_file"] = str(existing_text)
                 reused_text += 1
-                continue
-            try:
-                full_text = extract_document(pdf_path).text
-                if full_text.strip():
-                    text_file = text_dir / f"{item['key']}.txt"
-                    text_file.write_text(full_text, encoding="utf-8")
-                    item["text_file"] = str(text_file)
-                    extracted += 1
-                else:
-                    failure_counts["empty text"] = failure_counts.get("empty text", 0) + 1
+            elif args.extract_text:
+                try:
+                    full_text = extract_document(pdf_path).text
+                    if full_text.strip():
+                        text_file = text_dir / f"{key}.txt"
+                        text_file.write_text(full_text, encoding="utf-8")
+                        item["text_file"] = str(text_file)
+                        extracted += 1
+                    else:
+                        failure_counts["empty text"] = failure_counts.get("empty text", 0) + 1
+                        _append_failure_report(report_path, stage="sync_zotero", key=key, pdf_path=pdf_path, reason="empty text")
+                except Exception as exc:
+                    print(f"  WARNING: text extraction failed for {key}: {exc}", file=sys.stderr)
+                    failure_counts["extract error"] = failure_counts.get("extract error", 0) + 1
                     _append_failure_report(
                         report_path,
                         stage="sync_zotero",
-                        key=item["key"],
+                        key=key,
                         pdf_path=pdf_path,
-                        reason="empty text",
+                        reason="extract error",
+                        exception=str(exc),
                     )
-            except Exception as e:
-                print(f"  WARNING: text extraction failed for {item['key']}: {e}", file=sys.stderr)
-                failure_counts["extract error"] = failure_counts.get("extract error", 0) + 1
-                _append_failure_report(
-                    report_path,
-                    stage="sync_zotero",
-                    key=item["key"],
-                    pdf_path=pdf_path,
-                    reason="extract error",
-                    exception=str(e),
-                )
 
-        # Add derived fields
         date_str = item.get("date", "")
         item["year"] = int(date_str[:4]) if date_str and date_str[:4].isdigit() else None
 
@@ -229,13 +242,15 @@ def main():
 
     print()
     print("── Sync Report ──")
-    print(f"  Total items:           {len(items)}")
-    print(f"  Missing PDF files:     {missing_pdf}")
-    print(f"  Unique tags:           {len(tags_set)}")
-    print(f"  Unique collections:    {len(collections_set)}")
+    print(f"  Storage candidates:   {len(candidates)}")
+    print(f"  Usable content:       {len(items)}")
+    print(f"  Missing cache and PDF:{skipped_missing_content:4d}")
+    print(f"  Unique tags:          {len(tags_set)}")
+    print(f"  Unique collections:   {len(collections_set)}")
     if args.extract_text:
-        print(f"  Texts reused:          {reused_text}")
-        print(f"  Texts extracted:       {extracted}")
+        print(f"  Cache texts reused:   {reused_cache}")
+        print(f"  PDF texts reused:     {reused_text}")
+        print(f"  PDF texts extracted:  {extracted}")
         if failure_counts:
             print(f"  PDF text warnings:     {sum(failure_counts.values())}")
             for reason, count in sorted(failure_counts.items()):

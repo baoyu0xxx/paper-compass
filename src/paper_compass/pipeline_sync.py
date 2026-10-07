@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 from paper_compass.index_health import inspect_index_health
-from paper_compass.local_state import save_last_successful_zotero_source, source_config_path
+from paper_compass.local_state import save_last_successful_zotero_source
 
 
 class VectordbHealthError(RuntimeError):
@@ -30,6 +30,7 @@ class SyncOptions:
     snapshot_max_age_days: int = 0
     allow_live_zotero_read: bool = False
     library_path: str = "data/zotero-export/library.json"
+    text_dir: str = "data/texts"
     wiki_root: str = "./wiki"
     workers: int = 10
     dry_run: bool = False
@@ -73,16 +74,23 @@ def _timestamp_slug() -> str:
     return datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
-def _state_dir(project_root: Path) -> Path:
+def _state_dir(project_root: Path, runtime_root: str | Path | None = None) -> Path:
+    external_root = str(runtime_root or os.environ.get("PAPER_COMPASS_ROOT", "")).strip()
+    if external_root:
+        return Path(external_root) / "state"
     return project_root / "data" / "state"
 
 
-def _state_path(project_root: Path) -> Path:
-    return _state_dir(project_root) / "last_sync.json"
+def _state_path(project_root: Path, runtime_root: str | Path | None = None) -> Path:
+    return _state_dir(project_root, runtime_root) / "last_sync.json"
 
 
-def _lock_path(project_root: Path) -> Path:
-    return _state_dir(project_root) / "sync.lock"
+def _source_config_path(project_root: Path, runtime_root: str | Path | None = None) -> Path:
+    return _state_dir(project_root, runtime_root) / "source_config.json"
+
+
+def _lock_path(project_root: Path, runtime_root: str | Path | None = None) -> Path:
+    return _state_dir(project_root, runtime_root) / "sync.lock"
 
 
 def _write_json(path: Path, payload: dict) -> None:
@@ -153,6 +161,8 @@ def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
             cmd += ["--storage-path", options.storage_path]
         cmd += [
             "--extract-text",
+            "--text-dir",
+            options.text_dir,
             "--snapshot-db",
             options.snapshot_db,
             "--snapshot-dir",
@@ -191,6 +201,8 @@ def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
             options.library_path,
             "--wiki-root",
             options.wiki_root,
+            "--text-dir",
+            options.text_dir,
             "--skip-existing",
             "--workers",
             str(options.workers),
@@ -281,8 +293,13 @@ def _process_is_active(pid: int | None, process_start_time: float | None = None)
     return pid == os.getpid()
 
 
-def inspect_sync_lock(project_root: Path, *, timeout_minutes: int = 360) -> LockStatus:
-    lock = _lock_path(project_root)
+def inspect_sync_lock(
+    project_root: Path,
+    *,
+    timeout_minutes: int = 360,
+    runtime_root: str | Path | None = None,
+) -> LockStatus:
+    lock = _lock_path(project_root, runtime_root)
     if not lock.exists():
         return LockStatus(path=lock, exists=False, stale=False, reason="")
 
@@ -421,7 +438,7 @@ def run_sync_pipeline(options: SyncOptions) -> SyncResult:
         )
         if options.db_source_path and options.storage_path:
             save_last_successful_zotero_source(
-                source_config_path(options.project_root),
+                _source_config_path(options.project_root),
                 db_path=options.db_source_path,
                 storage_path=options.storage_path,
                 source_kind="explicit",

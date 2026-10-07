@@ -6,7 +6,7 @@ This document guides an AI agent (Claude Code, Codex, Hermes, etc.) through depl
 
 `paper-compass` is a personal academic paper retrieval infrastructure. It takes a Zotero PDF library, generates structured wiki pages via LLM, builds vector search indices, and exposes 6 MCP tools for AI agent consumption.
 
-**Tech stack**: Python ≥3.11, ChromaDB, PyMuPDF/pdfplumber PDF extraction, optional MarkItDown document extraction, Volcengine/OpenAI-compatible embeddings with local fallback, OpenAI-compatible LLM endpoint.
+**Tech stack**: Python ≥3.11, ChromaDB, PyMuPDF/pdfplumber PDF extraction, optional MarkItDown document extraction, Alibaba Cloud Bailian Qwen or Volcengine embeddings with local fallback, OpenAI-compatible LLM endpoint.
 
 ## Step-by-Step Deployment
 
@@ -48,21 +48,22 @@ Edit `.env` and fill in:
 LLM_BASE_URL=<your LLM endpoint>
 LLM_API_KEY=<your API key>           # or $OPENAI_API_KEY
 # LLM_MODEL=gpt-4o                   # optional, overrides providers.yaml default
-EMBED_BASE_URL=<your embedding endpoint>
+EMBED_PROVIDER=aliyun
+EMBED_BASE_URL=<your Alibaba Cloud Bailian endpoint>
 EMBED_API_KEY=<your embedding API key>  # or $MY_EMBED_KEY
-# EMBED_MODEL=text-embedding-3-small  # optional
+# EMBED_MODEL=qwen3.7-text-embedding-flash  # optional
 ```
 
 The LLM endpoint must be OpenAI-compatible (chat/completions format). Model is configured via the `LLM_MODEL` env var in `.env` (no hardcoded fallback — missing model raises an error).
 
-Embedding defaults to standard OpenAI-compatible format (`text-embedding-3-small`). To use Volcengine, set `VOLC_EMBED_*` variables instead. The runtime cascade is `EMBED_*` → `VOLC_EMBED_*` → local fallback (`bge-base` by default, override with `LOCAL_EMBED_MODEL`).
+Embedding defaults to Alibaba Cloud Bailian Qwen (`EMBED_PROVIDER=aliyun`, `EMBED_*`). To use Volcengine, set `EMBED_PROVIDER=volcengine` and provide `VOLC_EMBED_*` variables. Only the selected cloud provider is used; if it is unavailable, the runtime falls back to the local model (`bge-base` by default, override with `LOCAL_EMBED_MODEL`) rather than silently mixing cloud embedding spaces. Changing provider or model requires a full paper/wiki rebuild.
 
 **Option C — Non-interactive (scripted):**
 
 ```bash
 paper-compass init \
   --llm-args base_url=https://api.openai.com/v1,model=gpt-4o \
-  --embed-args api_style=volcengine,model=doubao-embedding-vision-250615
+  --embed-args provider=volcengine,model=doubao-embedding-vision-250615
 ```
 
 ### 3. Verify configuration

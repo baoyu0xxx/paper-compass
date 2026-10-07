@@ -4,7 +4,7 @@
 
 **将 Zotero 论文库转化为 AI Agent 可直接检索的双引擎知识库（RAG 原文检索 + LLM Wiki 知识编译）**
 
-[![version](https://img.shields.io/badge/version-1.4.1-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.5.0-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.12+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
@@ -51,7 +51,7 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 | 📄 **统一文档提取** | 通过 `extract_document()` 统一 PDF 与可选 MarkItDown 文档提取入口；PDF 继续使用 PyMuPDF + pdfplumber fallback |
 | 📊 **增量索引** | 基于指纹清单（manifest）的变更检测，新增或修改论文后只更新变化部分，无需全量重建 |
 | 🇨🇳 **中文学术支持** | CJK-aware sparse tokenizer 改善未分词中文查询与中英混合术语召回，经济学预设 wiki 提示词适配中文学术文献 |
-| 🔄 **嵌入级联回退** | OpenAI-compatible (`EMBED_*`) → 火山引擎 (`VOLC_EMBED_*`) → 本地模型（默认 `bge-base`，可用 `LOCAL_EMBED_MODEL` 改为 `specter` / `minilm`） |
+| 🔄 **嵌入供应商可选** | 阿里云百炼 Qwen（`EMBED_PROVIDER=aliyun`）或火山引擎（`EMBED_PROVIDER=volcengine`）；未配置所选云 provider 时回退本地模型（默认 `bge-base`） |
 
 <details>
 <summary>近期优化摘要</summary>
@@ -78,7 +78,7 @@ Agent 在论文库中定位相关段落，返回带来源和页码的引用。
 
 ```bash
 python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.1/paper_compass-1.4.1-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.5.0/paper_compass-1.5.0-py3-none-any.whl
 
 # 交互式配置
 paper-compass init
@@ -204,7 +204,7 @@ python eval/run_eval.py -v
 
 ```bash
 python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.1/paper_compass-1.4.1-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.5.0/paper_compass-1.5.0-py3-none-any.whl
 ```
 
 如需安装其他已发布版本，可将上面 URL 中的版本号替换为对应 release。发布版本列表可用：
@@ -269,7 +269,7 @@ paper-compass update --check
 paper-compass update
 
 # 更新到指定版本
-paper-compass update --version v1.4.1
+paper-compass update --version v1.5.0
 
 # 模拟更新（查看变更但不执行）
 paper-compass update --dry-run
@@ -290,7 +290,7 @@ paper-compass update --dry-run
 
 ```bash
 git fetch origin --tags
-git checkout v1.4.1         # 或 git pull origin main
+git checkout v1.5.0         # 或 git pull origin main
 python3 scripts/bootstrap_runtime.py
 paper-compass validate        # 验证配置仍然可用
 python3 -m pytest tests/ -x   # 确认测试通过
@@ -346,12 +346,13 @@ paper-compass-mcp --help
 | `LLM_BASE_URL` | 是 | LLM API 基础 URL |
 | `LLM_API_KEY` | 是 | LLM API 密钥（支持 `$ENV_VAR` 引用） |
 | `LLM_MODEL` | 否 | 模型名称（可选，默认见 `providers.yaml`） |
-| `EMBED_BASE_URL` | 是* | 嵌入 API 基础 URL（OpenAI-compatible） |
-| `EMBED_API_KEY` | 是* | 嵌入 API 密钥 |
-| `EMBED_MODEL` | 否 | 嵌入模型名称（可选，默认见 `providers.yaml`） |
-| `VOLC_EMBED_BASE_URL` | 否 | 火山引擎多模态嵌入端点（备选方案） |
-| `VOLC_EMBED_API_KEY` | 否 | 火山引擎 API 密钥 |
-| `VOLC_EMBED_MODEL` | 否 | 火山引擎嵌入模型端点 ID |
+| `EMBED_PROVIDER` | 否 | 云 embedding 选择：`aliyun`（默认）或 `volcengine` |
+| `EMBED_BASE_URL` | 是* | 阿里云百炼兼容 embedding endpoint |
+| `EMBED_API_KEY` | 是* | 阿里云百炼 API 密钥 |
+| `EMBED_MODEL` | 否 | 阿里云 embedding 模型，默认 Qwen 配置 |
+| `VOLC_EMBED_BASE_URL` | 是* | 火山引擎多模态 embedding endpoint |
+| `VOLC_EMBED_API_KEY` | 是* | 火山引擎 API 密钥 |
+| `VOLC_EMBED_MODEL` | 否 | 火山引擎 embedding 模型 endpoint ID |
 | `LOCAL_EMBED_MODEL` | 否 | 本地 embedding fallback 模型：`bge-base`（默认）/ `specter` / `minilm` |
 | `WIKI_PROMPT` | 否 | Wiki 提示词风格：`default`（通用学术）、`economics`（经济学预设）、或自定义路径 |
 
@@ -384,7 +385,7 @@ paper-compass validate
   config: embedding_candidates=embedding_main -> embedding_volcengine -> local (bge-base)
   ✓ dotenv: OK
   ✓ llm: OK (model: gpt-4o, 1.2s, response: 15 chars)
-  ✓ embed: OK (provider: embedding_main, model: text-embedding-3-small, dim=1536, 0.8s)
+  ✓ embed: OK (provider: embedding_main, model: qwen3.7-text-embedding-flash, dim=1024, 0.8s)
 ```
 
 `paper-compass validate` 现在会显式打印解析后的 embedding 运行时信息：共享 role、当前选中的 cloud provider、候选链路，以及在没有任何云端 provider 时将回退到的本地模型。这样 CLI 展示与 `build_index.py` 的真实运行时语义保持一致。
@@ -427,9 +428,11 @@ WIKI_PROMPT=/home/user/my-prompts  # 自定义提示词
 ### 嵌入提供方切换与级联回退
 
 嵌入服务支持**级联回退**机制：
-1. **首选** `embedding_main`（OpenAI-compatible，`EMBED_BASE_URL` + `EMBED_API_KEY`）
-2. **回退** `embedding_volcengine`（火山引擎多模态，`VOLC_EMBED_*` 系列变量）— [火山引擎快速入门指南](https://www.volcengine.com/docs/82379/1399008?lang=zh)
-3. **最终回退** 本地模型（默认 `bge-base`，可通过 `LOCAL_EMBED_MODEL` 设为 `specter` 或 `minilm`）
+1. **默认可选** `aliyun`：阿里云百炼 Qwen，使用 `EMBED_*`
+2. **默认可选** `volcengine`：火山引擎多模态 embedding，使用 `VOLC_EMBED_*`
+3. 未配置所选云 provider 时回退本地模型（默认 `bge-base`，可通过 `LOCAL_EMBED_MODEL` 设为 `specter` 或 `minilm`）
+
+切换 provider 或模型后必须 full rebuild，不能复用另一 provider 的向量 collection。
 
 `paper-compass validate` 在没有任何云端嵌入 provider 时，会显式报告将使用本地 fallback；实际构建索引时，`build_index.py` 也会按同一顺序执行。`paper-compass status` 也会展示相同的 embedding runtime 视图，包括 shared role、selected provider、active provider、候选链路与已解析的 provider registry，避免 CLI 展示与真实运行时漂移。
 
@@ -794,7 +797,8 @@ paper-compass 基于以下开源项目构建：
 
 | 版本 | 日期 | 内容 |
 |------|------|------|
-| v1.4.1 | 2026-06-23 | **增量同步硬化第二阶段** — wiki 写回改为 key-aware slug/upsert（新增 `--wiki-upsert-mode`）；增量 dry-run 支持 `--explain-changes --sample-size N`，可解释 metadata-only 变化原因；`sync_zotero.py` 与 `build_index.py` 统一写入 `data/logs/pdf_extract_failures.jsonl`；`paper-compass status` / `sync --force-unlock` 提供更清晰的同步恢复指引。 |
+| v1.5.0 | 2026-10-07 | **Embedding provider selection + Qwen indexing reliability** — 阿里云百炼与火山引擎改为显式可选 provider；Qwen 1024 维、批次上限 20；Chroma 元数据分页读取；Windows watcher/runtime 与 skill 文档更新。 |
+| v1.4.1 | 2026-06-23 | **增量同步硬化第二阶段** — wiki 写回改为 key-aware slug/upsert；增量 dry-run 支持解释 metadata-only 变化；同步和索引阶段统一写入 PDF 失败报告。 |
 | v1.4.0 | 2026-06-03 | **Repo-local managed runtime + MCP fail-fast 启动** — 新增 `scripts/bootstrap_runtime.py` 与 `src/paper_compass/runtime_env.py`，统一管理仓库内 `.venv`；`paper-compass init / update / status / healthcheck` 接入 runtime 状态；MCP 入口与 shell wrapper 显式校验解释器并在配置错误时直接报错；Python 基线提升到 `>=3.12`，README / MCP 配置同步更新到 managed runtime 模型。 |
 | v1.2.7 | 2026-05-15 | **数据同步命令 + vectordb 健康守卫** — 新增 `paper-compass sync`，将 `sync_zotero.py`、论文增量索引、wiki 增量生成与 wiki 向量化整合为一条命令；新增 `data/state/last_sync.json` 与 `data/state/sync.lock` 记录运行状态并阻止重叠执行；在写入前检测 Chroma journal/WAL/manifest/可读性，发现脏状态或损坏时阻断增量写入，并支持 `--rebuild {papers,wiki,all}` 与 `--backup-corrupted-db` 恢复路径。 |
 | v1.2.6 | 2026-05-13 | **MCP cold-start 优化** — 消除 ChromaDB `clear_system_cache()` 导致的段文件二次加载；全局共享 `PersistentClient` 实例避免双 client 问题；MCP 握手后后台预加载 wiki 和 papers 集合。首次语义检索工具调用从 22-50s 降至 16-29s，MCP 模式下预加载后亚秒级响应。 |

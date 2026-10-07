@@ -20,13 +20,14 @@ from paper_compass.cli.arg_utils import MergeDictAction
 from paper_compass.env_utils import PROJECT_ROOT, DEFAULT_ENV_PATH, load_project_env
 from paper_compass.resources import resolve_package_path
 from paper_compass.runtime_env import ensure_managed_runtime, runtime_state
+from paper_compass.windows_integrity import ensure_runtime_root_integrity
 
 # ── Default values ──────────────────────────────────────────────────────────
 
 DEFAULT_LLM_BASE_URL = "https://api.openai.com/v1"
 DEFAULT_LLM_MODEL = "gpt-4o"
-DEFAULT_EMBED_BASE_URL = "https://api.openai.com/v1"
-DEFAULT_EMBED_MODEL = "text-embedding-3-small"
+DEFAULT_EMBED_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+DEFAULT_EMBED_MODEL = "qwen3.7-text-embedding-flash"
 
 DEFAULT_VOLC_EMBED_BASE_URL = (
     "https://ark.cn-beijing.volces.com/api/v3/embeddings/multimodal"
@@ -107,9 +108,9 @@ def _interactive_llm() -> dict[str, str]:
 def _interactive_embedding() -> dict[str, str]:
     """Interactive step: configure embedding provider."""
     print("  ┌─ Step 2: Embedding ──────────────────────────────────────────┐")
-    print("  API style:")
-    print("    1) OpenAI-compatible  (standard text-embedding API)")
-    print("    2) Volcengine         (doubao-embedding-vision, multimodal)")
+    print("  Provider:")
+    print("    1) Alibaba Cloud Bailian (Qwen, OpenAI-compatible)")
+    print("    2) Volcengine (doubao-embedding-vision, multimodal)")
     style = _prompt("Choose [1]", "1")
 
     if style.strip() == "2":
@@ -127,6 +128,7 @@ def _interactive_openai_embedding() -> dict[str, str]:
     print()
 
     return {
+        "EMBED_PROVIDER": "aliyun",
         "EMBED_BASE_URL": base_url,
         "EMBED_API_KEY": api_key,
         "EMBED_MODEL": model,
@@ -143,6 +145,7 @@ def _interactive_volcengine_embedding() -> dict[str, str]:
     print()
 
     return {
+        "EMBED_PROVIDER": "volcengine",
         "VOLC_EMBED_BASE_URL": base_url,
         "VOLC_EMBED_API_KEY": api_key,
         "VOLC_EMBED_MODEL": model,
@@ -322,18 +325,21 @@ def _llm_args_to_env(llm_args: dict[str, Any]) -> dict[str, str]:
 def _embed_args_to_env(embed_args: dict[str, Any]) -> dict[str, str]:
     """Convert --embed-args dict to .env key-value pairs.
 
-    Accepted keys: api_style (openai|volcengine), base_url, api_key, model
+    Accepted keys: provider (aliyun|volcengine), api_style (openai|volcengine), base_url, api_key, model
     Maps to:
-      OpenAI: EMBED_BASE_URL, EMBED_API_KEY, EMBED_MODEL
-      Volcengine: VOLC_EMBED_BASE_URL, VOLC_EMBED_API_KEY, VOLC_EMBED_MODEL
+      Alibaba Cloud Bailian: EMBED_PROVIDER=aliyun, EMBED_BASE_URL, EMBED_API_KEY, EMBED_MODEL
+      Volcengine: EMBED_PROVIDER=volcengine, VOLC_EMBED_BASE_URL, VOLC_EMBED_API_KEY, VOLC_EMBED_MODEL
     """
-    env = {}
     api_style = str(embed_args.get("api_style", "openai")).lower().strip()
-
-    if api_style == "volcengine":
+    provider = str(embed_args.get("provider", "")).lower().strip()
+    if provider in {"volc", "volcengine"} or api_style == "volcengine":
         prefix = "VOLC_EMBED"
+        selected_provider = "volcengine"
     else:
         prefix = "EMBED"
+        selected_provider = "aliyun"
+
+    env = {"EMBED_PROVIDER": selected_provider} if embed_args else {}
 
     if "base_url" in embed_args:
         env[f"{prefix}_BASE_URL"] = str(embed_args["base_url"])
@@ -362,6 +368,8 @@ def _build_config_from_env() -> tuple[dict[str, str], dict[str, str]]:
         llm["LLM_MODEL"] = os.environ["LLM_MODEL"]
 
     embed = {}
+    if os.environ.get("EMBED_PROVIDER"):
+        embed["EMBED_PROVIDER"] = os.environ["EMBED_PROVIDER"]
     # Prefer OpenAI-style embed config
     if os.environ.get("EMBED_BASE_URL") or os.environ.get("EMBED_API_KEY"):
         if os.environ.get("EMBED_BASE_URL"):
@@ -420,7 +428,8 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
         metavar="<arg>",
         help=(
             "Embedding configuration as 'key=val,key2=val2'. "
-            "Accepted keys: api_style (openai|volcengine), base_url, api_key, model"
+            "Accepted keys: provider (aliyun|volcengine), api_style (openai|volcengine), "
+            "base_url, api_key, model"
         ),
     )
     parser.add_argument(
@@ -477,6 +486,7 @@ def execute_init(args: argparse.Namespace) -> int:
         bootstrap_python=Path(args.python) if getattr(args, "python", None) else None,
         with_dev=not getattr(args, "without_dev", False),
     )
+    ensure_runtime_root_integrity(Path.home() / ".paper-compass")
 
     # Always load existing .env into os.environ first, so config detection works
     if has_env_file:

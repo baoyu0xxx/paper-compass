@@ -51,6 +51,7 @@ class TestEmbedArgsToEnv:
             "model": "text-embedding-3-small",
         })
         assert result == {
+            "EMBED_PROVIDER": "aliyun",
             "EMBED_BASE_URL": "https://api.openai.com/v1",
             "EMBED_API_KEY": "$OPENAI_API_KEY",
             "EMBED_MODEL": "text-embedding-3-small",
@@ -64,6 +65,7 @@ class TestEmbedArgsToEnv:
             "model": "doubao-embedding-vision-250615",
         })
         assert result == {
+            "EMBED_PROVIDER": "volcengine",
             "VOLC_EMBED_BASE_URL": "https://ark.cn-beijing.volces.com/api/v3/embeddings/multimodal",
             "VOLC_EMBED_API_KEY": "$VOLC_API_KEY",
             "VOLC_EMBED_MODEL": "doubao-embedding-vision-250615",
@@ -175,6 +177,10 @@ def test_execute_init_ensures_runtime_before_writing_env(monkeypatch, tmp_path):
         "paper_compass.cli.configure._write_dotenv",
         lambda *args, **kwargs: calls.append({"write": args[0]}),
     )
+    monkeypatch.setattr(
+        "paper_compass.cli.configure.ensure_runtime_root_integrity",
+        lambda root: None,
+    )
 
     args = argparse.Namespace(
         llm_args={"base_url": "https://api.example.com", "api_key": "sk-test", "model": "gpt-4o"},
@@ -223,5 +229,41 @@ def test_execute_init_fails_when_managed_runtime_exists_but_current_python_is_wr
         without_dev=False,
     )
 
-    with pytest.raises(RuntimeError, match="managed runtime"):
-        execute_init(args)
+
+
+def test_execute_init_initializes_default_runtime_integrity(monkeypatch, tmp_path):
+    env_path = tmp_path / ".env"
+    state = SimpleNamespace(
+        managed_exists=True,
+        managed_active=True,
+        managed_python=tmp_path / ".venv" / "Scripts" / "python.exe",
+        status="active",
+        reasons=[],
+    )
+    calls = []
+    monkeypatch.setattr("paper_compass.cli.configure.runtime_state", lambda **kwargs: state)
+    monkeypatch.setattr(
+        "paper_compass.cli.configure.ensure_managed_runtime",
+        lambda **kwargs: state,
+    )
+    monkeypatch.setattr(
+        "paper_compass.cli.configure.ensure_runtime_root_integrity",
+        lambda root: calls.append(root),
+    )
+    monkeypatch.setattr(
+        "paper_compass.cli.configure._write_dotenv",
+        lambda *args, **kwargs: None,
+    )
+
+    args = argparse.Namespace(
+        llm_args={"base_url": "https://api.example.com", "api_key": "sk-test", "model": "gpt-4o"},
+        embed_args={"base_url": "https://embed.example.com", "api_key": "sk-embed", "model": "text-embedding-3-small"},
+        wiki_prompt=None,
+        force=True,
+        env_path=str(env_path),
+        python=None,
+        without_dev=False,
+    )
+
+    assert execute_init(args) == 0
+    assert calls == [Path.home() / ".paper-compass"]

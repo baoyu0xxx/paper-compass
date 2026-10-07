@@ -6,7 +6,9 @@ One-command data sync for Zotero metadata, paper index, wiki generation, and wik
 from __future__ import annotations
 
 import argparse
+import os
 import shlex
+from pathlib import Path
 
 from paper_compass.config import resolve_path_settings
 from paper_compass.env_utils import PROJECT_ROOT
@@ -35,8 +37,8 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
     )
     parser.add_argument(
         "--snapshot-dir",
-        default="data/state/zotero-snapshots",
-        help="Directory for temporary Zotero sqlite snapshots",
+        default="",
+        help="Directory for temporary Zotero sqlite snapshots (defaults under PAPER_COMPASS_ROOT/state)",
     )
     parser.add_argument(
         "--snapshot-keep",
@@ -89,7 +91,8 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
 
 
 def execute_sync(args: argparse.Namespace) -> int:
-    local_paths = load_last_successful_zotero_source(source_config_path(PROJECT_ROOT))
+    local_source = Path(os.environ["PAPER_COMPASS_ROOT"]) / "state" / "source_config.json" if os.environ.get("PAPER_COMPASS_ROOT") else source_config_path(PROJECT_ROOT)
+    local_paths = load_last_successful_zotero_source(local_source)
     path_settings = resolve_path_settings(
         overrides={
             "library_json_path": args.library,
@@ -100,20 +103,28 @@ def execute_sync(args: argparse.Namespace) -> int:
         },
         local_paths=local_paths,
     )
+    def project_path(value: str) -> Path:
+        path = Path(value)
+        return path if path.is_absolute() else PROJECT_ROOT / path
+
+    previous_root = os.environ.get("PAPER_COMPASS_ROOT")
     try:
+        if path_settings.compass_root:
+            os.environ["PAPER_COMPASS_ROOT"] = path_settings.compass_root
         result = run_sync_pipeline(
             SyncOptions(
                 project_root=PROJECT_ROOT,
-                db_path=PROJECT_ROOT / path_settings.vectordb_path,
+                db_path=project_path(path_settings.vectordb_path),
                 db_source_path=path_settings.zotero_sqlite_path or None,
                 storage_path=path_settings.zotero_storage_path or None,
                 snapshot_db=args.snapshot_db,
-                snapshot_dir=args.snapshot_dir,
+                snapshot_dir=args.snapshot_dir or str(project_path(path_settings.compass_root or "data") / "state" / "zotero-snapshots"),
                 snapshot_keep=args.snapshot_keep,
                 snapshot_max_age_days=args.snapshot_max_age_days,
                 allow_live_zotero_read=args.allow_live_zotero_read,
-                library_path=path_settings.library_json_path,
-                wiki_root=path_settings.wiki_root,
+                library_path=str(project_path(path_settings.library_json_path)),
+                text_dir=str(project_path(path_settings.text_dir)),
+                wiki_root=str(project_path(path_settings.wiki_root)),
                 workers=args.workers,
                 dry_run=args.dry_run,
                 rebuild=args.rebuild,
@@ -127,11 +138,16 @@ def execute_sync(args: argparse.Namespace) -> int:
             )
         )
     except VectordbHealthError as exc:
-        print(f"\n  ✗ {exc}")
+        print(f"\n  ERROR: {exc}")
         return 1
     except RuntimeError as exc:
-        print(f"\n  ✗ {exc}")
+        print(f"\n  ERROR: {exc}")
         return 1
+    finally:
+        if previous_root is None:
+            os.environ.pop("PAPER_COMPASS_ROOT", None)
+        else:
+            os.environ["PAPER_COMPASS_ROOT"] = previous_root
 
     print()
     print(f"  sync status: {result.status}")

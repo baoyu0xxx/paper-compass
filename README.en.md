@@ -4,7 +4,7 @@
 
 **Turn your Zotero library into a dual-engine knowledge base for AI agents — RAG full-text retrieval + LLM wiki knowledge compilation**
 
-[![version](https://img.shields.io/badge/version-1.4.1-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
+[![version](https://img.shields.io/badge/version-1.5.0-5a6e5c?style=flat-square&labelColor=3a3026&color=5a6e5c)](https://github.com/baoyu0xxx/paper-compass)
 ![license](https://img.shields.io/badge/license-MIT-7a96a6?style=flat-square&labelColor=3a3026)
 [![python](https://img.shields.io/badge/Python-3.12+-E8D5B5?style=flat-square&labelColor=3a3026&color=E8D5B5)](https://www.python.org/)
 ![MCP](https://img.shields.io/badge/protocol-MCP_2024--11--05-8db580?style=flat-square&labelColor=3a3026&color=8db580)
@@ -51,7 +51,7 @@ The agent locates relevant passages in your paper library and returns quoted evi
 | 📄 **Unified document extraction** | `extract_document()` provides a shared extraction entrypoint for PDF and optional MarkItDown-backed document formats; PDFs continue to use PyMuPDF + pdfplumber fallback |
 | 📊 **Incremental indexing** | Manifest-based change detection updates only added or modified papers instead of rebuilding everything |
 | 🇨🇳 **Chinese academic support** | CJK-aware sparse tokenization improves unsegmented Chinese queries and mixed Chinese-English academic terms, with economics preset wiki prompts for Chinese-language research |
-| 🔄 **Embedding cascade fallback** | OpenAI-compatible (`EMBED_*`) → Volcengine (`VOLC_EMBED_*`) → local model (`bge-base` by default, configurable via `LOCAL_EMBED_MODEL`) |
+| 🔄 **Selectable embedding providers** | Alibaba Cloud Bailian Qwen (`EMBED_PROVIDER=aliyun`) or Volcengine (`EMBED_PROVIDER=volcengine`); falls back to the local model (`bge-base` by default) when the selected cloud provider is unavailable |
 
 <details>
 <summary>Recent optimization summary</summary>
@@ -73,7 +73,7 @@ The recommended path is to install the published wheel from GitHub Release direc
 
 ```bash
 python3 -m pip install \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.1/paper_compass-1.4.1-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.5.0/paper_compass-1.5.0-py3-none-any.whl
 
 # Interactive setup
 paper-compass init
@@ -196,7 +196,7 @@ If you installed paper-compass from GitHub Release, point pip directly to the ta
 
 ```bash
 python3 -m pip install --upgrade \
-  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.4.1/paper_compass-1.4.1-py3-none-any.whl
+  https://github.com/baoyu0xxx/paper-compass/releases/download/v1.5.0/paper_compass-1.5.0-py3-none-any.whl
 ```
 
 To install another published version later, replace the version in the URL accordingly. Published releases can be listed with:
@@ -261,7 +261,7 @@ paper-compass update --check
 paper-compass update
 
 # Update to a specific version
-paper-compass update --version v1.4.1
+paper-compass update --version v1.5.0
 
 # Simulate an update (preview without executing)
 paper-compass update --dry-run
@@ -282,7 +282,7 @@ If automatic update is unavailable, you can update manually:
 
 ```bash
 git fetch origin --tags
-git checkout v1.4.1         # or git pull origin main
+git checkout v1.5.0         # or git pull origin main
 python3 scripts/bootstrap_runtime.py
 paper-compass validate        # verify that the configuration still works
 python3 -m pytest tests/ -x   # ensure tests pass
@@ -313,7 +313,7 @@ The three main paths have already been introduced in Quick Start: Release instal
 | Python ≥ 3.12 | Check with `python3 --version` |
 | Zotero library | Optional — pre-extracted text files are also supported |
 | LLM API key | Wiki generation requires an OpenAI-compatible endpoint (`LLM_BASE_URL` + `LLM_API_KEY`) |
-| Embedding API key | OpenAI-compatible and Volcengine multimodal embedding are supported |
+| Embedding API key | Alibaba Cloud Bailian Qwen and Volcengine multimodal embedding are supported |
 
 ### Available commands after installation
 
@@ -338,11 +338,12 @@ Copy `.env.example` to `.env` and fill in your values, or use `paper-compass ini
 | `LLM_BASE_URL` | Yes | LLM API base URL |
 | `LLM_API_KEY` | Yes | LLM API key (supports `$ENV_VAR` reference) |
 | `LLM_MODEL` | No | Model name (optional, defaults are defined in `providers.yaml`) |
-| `EMBED_BASE_URL` | Yes* | Embedding API base URL (OpenAI-compatible) |
-| `EMBED_API_KEY` | Yes* | Embedding API key |
-| `EMBED_MODEL` | No | Embedding model name (optional, defaults are defined in `providers.yaml`) |
-| `VOLC_EMBED_BASE_URL` | No | Volcengine multimodal embedding endpoint (alternative) |
-| `VOLC_EMBED_API_KEY` | No | Volcengine API key |
+| `EMBED_PROVIDER` | No | Cloud embedding choice: `aliyun` (default) or `volcengine` |
+| `EMBED_BASE_URL` | Yes* | Alibaba Cloud Bailian compatible embedding endpoint |
+| `EMBED_API_KEY` | Yes* | Alibaba Cloud Bailian API key |
+| `EMBED_MODEL` | No | Alibaba Cloud embedding model, default Qwen configuration |
+| `VOLC_EMBED_BASE_URL` | Yes* | Volcengine multimodal embedding endpoint |
+| `VOLC_EMBED_API_KEY` | Yes* | Volcengine API key |
 | `VOLC_EMBED_MODEL` | No | Volcengine embedding model endpoint ID |
 | `LOCAL_EMBED_MODEL` | No | Local embedding fallback model: `bge-base` (default), `specter`, or `minilm` |
 | `WIKI_PROMPT` | No | Wiki prompt style: `default` (general academic), `economics` (economics preset), or a custom path |
@@ -375,7 +376,7 @@ Example output:
   config: embedding_candidates=embedding_main -> embedding_volcengine -> local (bge-base)
   ✓ dotenv: OK
   ✓ llm: OK (model: gpt-4o, 1.2s, response: 15 chars)
-  ✓ embed: OK (provider: embedding_main, model: text-embedding-3-small, dim=1536, 0.8s)
+  ✓ embed: OK (provider: embedding_main, model: qwen3.7-text-embedding-flash, dim=1024, 0.8s)
 ```
 
 `paper-compass validate` now prints the resolved embedding runtime explicitly: the shared role, the selected cloud provider, the candidate chain, and the local fallback that will be used when no cloud provider is configured. This keeps CLI output aligned with the actual runtime semantics used by `build_index.py`.
@@ -415,23 +416,17 @@ If some prompt files are missing, the system no longer drifts into implicit fall
 
 </details>
 
-### Embedding Provider Switching and Cascade Fallback
+### Embedding Provider Selection
 
-The embedding layer supports **cascade fallback**:
-1. **Primary** `embedding_main` (OpenAI-compatible, `EMBED_BASE_URL` + `EMBED_API_KEY`)
-2. **Fallback** `embedding_volcengine` (Volcengine multimodal, `VOLC_EMBED_*`) — [Volcengine quick-start guide](https://www.volcengine.com/docs/82379/1399008?lang=zh)
-3. **Final fallback** local `bge-base` model (no API required)
+The embedding layer supports two explicit cloud providers:
 
-Configure the relevant environment variables to enable the cascade automatically. `paper-compass validate` reports the local fallback path explicitly when no cloud embedding provider is configured, and `paper-compass status` shows the same embedding runtime view (shared role, selected provider, active provider, candidate chain, and resolved provider registry) so the CLI no longer drifts from the real runtime behavior.
+1. **Alibaba Cloud Bailian** (`EMBED_PROVIDER=aliyun`, `EMBED_*` variables; Qwen is the default model)
+2. **Volcengine** (`EMBED_PROVIDER=volcengine`, `VOLC_EMBED_*` variables)
+3. **Local fallback** (`bge-base` by default, no API required)
 
-If you want to pin a cloud provider, point the single shared embedding role in `configs/providers.yaml` to that provider:
+Only the selected cloud provider is used. If it is unavailable or incomplete, the runtime falls back to the local model instead of silently mixing cloud embedding spaces. Changing provider, model, or dimension requires a full rebuild of both paper and wiki collections.
 
-```yaml
-roles:
-  embedding: embedding_volcengine   # papers and wiki share the same embedding provider
-```
-
-The legacy split embedding-role surface has been removed from default configs. Paper chunks and wiki chunks must remain in the same embedding space, so the config now exposes one shared `roles.embedding` entry.
+The single shared `roles.embedding` entry remains available for config-file deployments, and paper chunks and wiki chunks must remain in the same embedding space.
 
 ### Advanced Configuration
 
@@ -735,7 +730,7 @@ Major additions on top of those foundations:
 - MCP protocol integration (7 public tools + 1 advanced `search_wiki` entrypoint, MCP 2024-11-05)
 - Incremental indexing (fingerprint-based change detection)
 - Chinese academic retrieval adaptation and discipline-specific prompt presets
-- Multi-provider embedding cascade fallback
+- Explicit Alibaba Cloud Bailian and Volcengine provider selection
 - CLI configuration commands (`init` + `validate`)
 - Formal evaluation benchmark (12-query retrieval-quality evaluation)
 
@@ -743,7 +738,8 @@ Major additions on top of those foundations:
 
 | Version | Date | Notes |
 |---------|------|-------|
-| v1.4.1 | 2026-06-23 | **Incremental sync hardening, stage 2** — wiki writeback is now key-aware (`--wiki-upsert-mode`); incremental dry-run can explain metadata-only churn via `--explain-changes --sample-size N`; both `sync_zotero.py` and `build_index.py` write structured failures to `data/logs/pdf_extract_failures.jsonl`; `paper-compass status` and `sync --force-unlock` provide clearer recovery guidance |
+| v1.5.0 | 2026-10-07 | **Embedding provider selection + Qwen indexing reliability** — explicit Alibaba Cloud Bailian and Volcengine provider selection; Qwen 1024 dimensions and batch limit 20; paginated Chroma metadata reads; Windows watcher/runtime and skill documentation updates |
+| v1.4.1 | 2026-06-23 | **Incremental sync hardening, stage 2** — key-aware wiki writeback, explainable incremental dry-runs, and structured PDF extraction failure reports |
 | v1.4.0 | 2026-06-03 | **Repo-local managed runtime + fail-fast MCP startup** — added `scripts/bootstrap_runtime.py` and `src/paper_compass/runtime_env.py` to manage a repository-local `.venv`; wired runtime status into `paper-compass init / update / status / healthcheck`; made MCP entrypoints and shell wrappers validate the interpreter explicitly and fail fast on misconfiguration; raised the Python baseline to `>=3.12`; updated README and MCP configuration guidance to the managed-runtime model |
 | v1.2.7 | 2026-05-15 | **Data sync command + vectordb health guard** — added `paper-compass sync`, integrating `sync_zotero.py`, incremental paper indexing, incremental wiki generation, and wiki vectorization into one command; added `data/state/last_sync.json` and `data/state/sync.lock`; checks journal/WAL/manifest/readability before writes; supports `--rebuild {papers,wiki,all}` and `--backup-corrupted-db` recovery paths |
 | v1.2.6 | 2026-05-13 | **MCP cold-start optimization** — removed `clear_system_cache()`-triggered double loading; introduced a shared `PersistentClient`; prewarms wiki and paper collections after MCP handshake |

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import sys
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -100,13 +101,13 @@ class TestSyncExecute:
         assert rc == 0
         called_options = mocked.call_args.args[0]
         assert called_options.project_root == sync_data.PROJECT_ROOT
-        assert called_options.db_path == sync_data.PROJECT_ROOT / "data/vectordb"
-        assert called_options.db_source_path is None
-        assert called_options.storage_path is None
+        assert called_options.db_path == Path.home() / ".paper-compass" / "index" / "vectordb"
+        assert called_options.db_source_path == "D:/zotero_backup/zotero.sqlite"
+        assert called_options.storage_path == "D:/zotero_backup/storage"
         assert called_options.dry_run is True
         assert called_options.rebuild == "none"
         assert called_options.snapshot_db == "auto"
-        assert called_options.snapshot_dir == "data/state/zotero-snapshots"
+        assert called_options.snapshot_dir == str(Path.home() / ".paper-compass" / "state" / "zotero-snapshots")
         assert called_options.snapshot_keep == 5
         assert called_options.snapshot_max_age_days == 0
         assert called_options.allow_live_zotero_read is False
@@ -146,14 +147,14 @@ class TestSyncExecute:
                     with mock.patch("sys.stdout", io.StringIO()):
                         assert sync_data.execute_sync(args) == 0
 
-        load_local.assert_called_once_with(sync_data.source_config_path(sync_data.PROJECT_ROOT))
+        assert load_local.call_args.args[0] == sync_data.source_config_path(sync_data.PROJECT_ROOT)
         assert resolve_settings.call_args.kwargs["local_paths"] == {}
         called_options = mocked.call_args.args[0]
         assert called_options.db_path == sync_data.PROJECT_ROOT / "configured/vectordb"
         assert called_options.db_source_path == "configured/zotero.sqlite"
         assert called_options.storage_path == "configured/storage"
-        assert called_options.library_path == "configured/library.json"
-        assert called_options.wiki_root == "configured/wiki"
+        assert called_options.library_path == str(sync_data.PROJECT_ROOT / "configured/library.json")
+        assert called_options.wiki_root == str(sync_data.PROJECT_ROOT / "configured/wiki")
 
     def test_execute_sync_passes_force_unlock_and_timeout(self):
         from paper_compass.cli import sync_data

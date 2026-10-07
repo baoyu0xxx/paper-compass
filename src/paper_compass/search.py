@@ -17,6 +17,7 @@ from typing import Any, Callable, Dict, List, Optional
 from paper_compass.env_utils import PROJECT_ROOT, load_project_env
 from paper_compass.config import load_all_configs, get_provider_config
 from paper_compass.tokenization import tokenize_for_sparse_search
+from paper_compass.windows_integrity import prepare_runtime_temp
 
 DEFAULT_LIBRARY_PATH = PROJECT_ROOT / "data" / "zotero-export" / "library.json"
 DEFAULT_TEXT_DIR = PROJECT_ROOT / "data" / "texts"
@@ -62,6 +63,7 @@ def _get_client(db_path: str) -> Any:
             # Ensure .env is loaded before the first client creation so
             # that any env-dependent ChromaDB settings are respected.
             load_project_env()
+            prepare_runtime_temp(db_path)
             _client = _cdb.PersistentClient(
                 path=db_path, settings=_CSet(anonymized_telemetry=False)
             )
@@ -631,6 +633,7 @@ def _keyword_search_passages(
     keywords = tokenize_for_sparse_search(query)
     if not keywords:
         return []
+    normalized_query = (query or "").strip().lower()
 
     scored: List[tuple] = []
 
@@ -645,8 +648,12 @@ def _keyword_search_passages(
             _keyword_cache.move_to_end(key)
         else:
             try:
-                text = txt_path.read_text(encoding="utf-8", errors="replace")
-            except OSError:
+                raw_text = txt_path.read_bytes()
+                try:
+                    text = raw_text.decode("utf-8")
+                except UnicodeDecodeError:
+                    text = raw_text.decode("gb18030")
+            except (OSError, UnicodeDecodeError):
                 continue
             paragraphs = [
                 (para.strip(), para.strip().lower(), set(tokenize_for_sparse_search(para.strip())))
@@ -658,6 +665,8 @@ def _keyword_search_passages(
         doc_id = txt_path.stem
         for current_index, (para, para_lower, para_tokens) in enumerate(paragraphs):
             hits = sum(1 for kw in keywords if kw in para_tokens or kw in para_lower)
+            if normalized_query and normalized_query in para_lower:
+                hits = max(hits, len(keywords))
             if hits == 0:
                 continue
             density = hits / max(len(para), 1) * 100

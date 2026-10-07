@@ -28,5 +28,6 @@ def connect_readonly(
     )
     conn.isolation_level = None
     conn.execute("PRAGMA query_only=ON")
+    conn.execute("PRAGMA temp_store=MEMORY")
     conn.execute(f"PRAGMA busy_timeout={int(timeout * 1000)}")
     return conn

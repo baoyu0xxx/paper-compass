@@ -27,14 +27,20 @@ def _bash_executable() -> str:
 def _bash_path(path: Path) -> str:
     """Return a path format that Bash can consume on all supported hosts."""
     if os.name == "nt":
-        result = subprocess.run(
-            ["cygpath", "-u", str(path)],
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        if result.returncode == 0 and result.stdout.strip():
+        try:
+            result = subprocess.run(
+                ["cygpath", "-u", str(path)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        except OSError:
+            result = None
+        if result is not None and result.returncode == 0 and result.stdout.strip():
             return result.stdout.strip()
+        drive, tail = os.path.splitdrive(str(path))
+        if drive:
+            return f"/{drive.rstrip(':').lower()}{tail.replace(chr(92), '/') }"
     return path.as_posix()
 
 

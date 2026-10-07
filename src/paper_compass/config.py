@@ -17,6 +17,8 @@ class PathSettings:
     vectordb_path: str = "data/vectordb"
     zotero_sqlite_path: str = ""
     zotero_storage_path: str = ""
+    zotero_root: str = ""
+    compass_root: str = ""
 
 
 @dataclass(frozen=True)
@@ -33,6 +35,8 @@ PATH_SETTINGS_ENV_MAP = {
     "vectordb_path": "PAPER_COMPASS_VECTORDB_PATH",
     "zotero_sqlite_path": "ZOTERO_SQLITE_PATH",
     "zotero_storage_path": "ZOTERO_STORAGE_PATH",
+    "zotero_root": "PAPER_COMPASS_ZOTERO_ROOT",
+    "compass_root": "PAPER_COMPASS_ROOT",
 }
 
 
@@ -146,13 +150,34 @@ def resolve_path_settings(
     """Resolve common user paths with CLI > environment > YAML > local state > safe defaults precedence."""
     import os
 
-    if configs is None:
+    auto_load_configs = configs is None
+    if auto_load_configs:
         configs = load_all_configs()
     overrides = overrides or {}
     local_paths = local_paths or {}
     yaml_paths = configs.get("paths", {}).get("paths", {})
-    defaults = PathSettings()
+    external_root = _nonempty(os.environ.get("PAPER_COMPASS_ROOT"))
+    if not external_root and auto_load_configs:
+        default_root = Path.home() / ".paper-compass"
+        if (default_root / "config.yaml").exists():
+            external_root = str(default_root)
+    if external_root:
+        external_config = Path(external_root) / "config.yaml"
+        if external_config.exists():
+            try:
+                external_data = load_yaml_config(str(external_config))
+                yaml_paths = {**yaml_paths, **external_data.get("paths", {})}
+            except (OSError, ValueError, TypeError):
+                pass
     resolved: dict[str, str] = {}
+    user_root = Path.home() / ".paper-compass"
+    defaults = PathSettings(
+        library_json_path=str(user_root / "library" / "library.json"),
+        text_dir=str(user_root / "texts"),
+        wiki_root=str(user_root / "wiki"),
+        vectordb_path=str(user_root / "index" / "vectordb"),
+        compass_root=str(user_root),
+    )
 
     for field_name, env_name in PATH_SETTINGS_ENV_MAP.items():
         cli_value = _nonempty(overrides.get(field_name))
@@ -161,6 +186,30 @@ def resolve_path_settings(
         local_value = _nonempty(local_paths.get(field_name))
         default_value = getattr(defaults, field_name)
         resolved[field_name] = cli_value or env_value or config_value or local_value or default_value
+
+    explicit_compass_root = any([
+        _nonempty(overrides.get("compass_root")),
+        _nonempty(os.environ.get("PAPER_COMPASS_ROOT")),
+        _nonempty(yaml_paths.get("compass_root")),
+        _nonempty(local_paths.get("compass_root")),
+    ])
+    compass_root = Path(resolved["compass_root"]) if explicit_compass_root and resolved["compass_root"] else None
+    if compass_root:
+        derived = {
+            "library_json_path": str(compass_root / "library" / "library.json"),
+            "text_dir": str(compass_root / "texts"),
+            "wiki_root": str(compass_root / "wiki"),
+            "vectordb_path": str(compass_root / "index" / "vectordb"),
+        }
+        for field_name, value in derived.items():
+            if not (_nonempty(overrides.get(field_name)) or os.environ.get(PATH_SETTINGS_ENV_MAP[field_name])):
+                resolved[field_name] = value
+    if resolved["zotero_root"]:
+        root = Path(resolved["zotero_root"])
+        if not resolved["zotero_sqlite_path"]:
+            resolved["zotero_sqlite_path"] = str(root / "zotero.sqlite")
+        if not resolved["zotero_storage_path"]:
+            resolved["zotero_storage_path"] = str(root / "storage")
 
     return PathSettings(**resolved)
 
@@ -220,6 +269,22 @@ def get_provider_config(
     return provider
 
 
+def _normalize_embedding_provider(value: str) -> str:
+    aliases = {
+        "aliyun": "embedding_main",
+        "alibaba": "embedding_main",
+        "qwen": "embedding_main",
+        "embedding_main": "embedding_main",
+        "volcengine": "embedding_volcengine",
+        "volc": "embedding_volcengine",
+        "embedding_volcengine": "embedding_volcengine",
+    }
+    normalized = aliases.get(value.strip().lower())
+    if normalized is None:
+        raise ValueError("EMBED_PROVIDER must be one of: aliyun, volcengine")
+    return normalized
+
+
 def _resolve_embedding_role_selection(
     configs: Dict[str, Any],
 ) -> tuple[str, str, list[str], Dict[str, Any], Dict[str, Any]]:
@@ -245,8 +310,15 @@ def _resolve_embedding_role_selection(
             "use one shared roles.embedding so papers and wiki stay in the same embedding space"
         )
 
-    selected_provider = shared_provider or "embedding_main"
-    config_source = "shared" if shared_provider else "default"
+    import os
+
+    explicit_provider = os.environ.get("EMBED_PROVIDER", "").strip()
+    if explicit_provider:
+        selected_provider = _normalize_embedding_provider(explicit_provider)
+        config_source = "env"
+    else:
+        selected_provider = shared_provider or "embedding_main"
+        config_source = "shared" if shared_provider else "default"
 
     return selected_provider, config_source, legacy_fields, providers, roles
 
@@ -295,7 +367,10 @@ def resolve_embedding_runtime(configs: Optional[Dict[str, Any]] = None) -> Dict[
     resolved_provider: str | None = None
     resolved_cloud_config: Dict[str, Any] | None = None
 
+    explicit_selection = config_source == "env"
     for provider_name in candidate_order:
+        if explicit_selection and provider_name != selected_provider:
+            continue
         provider_cfg = get_provider_config(provider_name, configs)
         candidate_info = {
             "name": provider_name,

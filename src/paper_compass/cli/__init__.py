@@ -17,7 +17,7 @@ import argparse
 import sys
 
 from paper_compass import __version__
-from paper_compass.cli import configure, search, status, sync_data, update, validate
+from paper_compass.cli import configure, search, status, sync_data, update, validate, watch
 
 
 def main() -> int:
@@ -41,6 +41,7 @@ def main() -> int:
     search.add_subcommand_parser(subparsers)
     status.add_subcommand_parser(subparsers)
     sync_data.add_subcommand_parser(subparsers)
+    watch.add_subcommand_parser(subparsers)
     update.add_subcommand_parser(subparsers)
     validate.add_subcommand_parser(subparsers)
 

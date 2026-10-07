@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from paper_compass.windows_integrity import prepare_runtime_temp
 
 
 @dataclass
@@ -27,6 +27,7 @@ def _create_persistent_client(path: str):
     import chromadb
     from chromadb.config import Settings
 
+    prepare_runtime_temp(path)
     return chromadb.PersistentClient(path=path, settings=Settings(anonymized_telemetry=False))
 
 
@@ -61,11 +62,20 @@ def _paper_manifest_key_map(db_path: Path, manifest_files: list[str]) -> dict[st
 def _collection_item_keys(collection: Any, count: int) -> set[str]:
     if count <= 0 or not hasattr(collection, "get"):
         return set()
-    data = collection.get(limit=count, include=["metadatas"])
     keys: set[str] = set()
-    for metadata in data.get("metadatas", []) or []:
-        if metadata and metadata.get("item_key"):
-            keys.add(str(metadata["item_key"]))
+    page_size = 500
+    for offset in range(0, count, page_size):
+        if offset:
+            data = collection.get(
+                limit=min(page_size, count - offset),
+                offset=offset,
+                include=["metadatas"],
+            )
+        else:
+            data = collection.get(limit=min(page_size, count), include=["metadatas"])
+        for metadata in data.get("metadatas", []) or []:
+            if metadata and metadata.get("item_key"):
+                keys.add(str(metadata["item_key"]))
     return keys
 
 
@@ -82,25 +92,26 @@ def inspect_index_health(db_path: str | Path) -> IndexHealthReport:
     manifest_only_keys: dict[str, list[str]] = {}
     store_only_keys: dict[str, list[str]] = {}
     chroma_error = ""
-    try:
-        client = _create_persistent_client(str(db_root))
-        collections = client.list_collections()
-        manifest_key_map = _paper_manifest_key_map(db_root, manifest_files)
-        for collection in collections:
-            count = int(collection.count())
-            collection_counts[collection.name] = count
-            if collection.name.startswith("papers_") and collection.name in manifest_key_map:
-                store_keys = _collection_item_keys(collection, count)
-                manifest_keys = manifest_key_map[collection.name]
-                only_manifest = sorted(manifest_keys - store_keys)
-                only_store = sorted(store_keys - manifest_keys)
-                if only_manifest:
-                    manifest_only_keys[collection.name] = only_manifest
-                if only_store:
-                    store_only_keys[collection.name] = only_store
-    except Exception as exc:
-        chroma_openable = False
-        chroma_error = str(exc)
+    if (db_root / "chroma.sqlite3").exists():
+        try:
+            client = _create_persistent_client(str(db_root))
+            collections = client.list_collections()
+            manifest_key_map = _paper_manifest_key_map(db_root, manifest_files)
+            for collection in collections:
+                count = int(collection.count())
+                collection_counts[collection.name] = count
+                if collection.name.startswith("papers_") and collection.name in manifest_key_map:
+                    store_keys = _collection_item_keys(collection, count)
+                    manifest_keys = manifest_key_map[collection.name]
+                    only_manifest = sorted(manifest_keys - store_keys)
+                    only_store = sorted(store_keys - manifest_keys)
+                    if only_manifest:
+                        manifest_only_keys[collection.name] = only_manifest
+                    if only_store:
+                        store_only_keys[collection.name] = only_store
+        except Exception as exc:
+            chroma_openable = False
+            chroma_error = str(exc)
 
     severity = "ok"
     problems: list[str] = []
@@ -144,12 +155,20 @@ def inspect_index_health(db_path: str | Path) -> IndexHealthReport:
         )
 
     if not chroma_openable:
-        severity = "corrupted"
-        problems.append(f"ChromaDB open failed: {chroma_error}")
-        recommendation = (
-            "Chroma persistent state appears corrupted. Backup data/vectordb and rebuild via "
-            "paper-compass sync --rebuild papers --backup-corrupted-db (or --rebuild all if wiki is also affected)."
-        )
+        if "unable to open database file" in chroma_error.lower():
+            severity = "blocked"
+            problems.append(f"ChromaDB unavailable: {chroma_error}")
+            recommendation = (
+                "The Python SQLite/Chroma runtime cannot open a writable database file. "
+                "Verify SQLite file creation and Windows security policy before rebuilding the index."
+            )
+        else:
+            severity = "corrupted"
+            problems.append(f"ChromaDB open failed: {chroma_error}")
+            recommendation = (
+                "Chroma persistent state appears corrupted. Backup data/vectordb and rebuild via "
+                "paper-compass sync --rebuild papers --backup-corrupted-db (or --rebuild all if wiki is also affected)."
+            )
 
     if not problems:
         problems.append("vectordb health looks normal")

@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Set
 
 from paper_compass.tokenization import tokenize_for_sparse_search
+from paper_compass.windows_integrity import prepare_runtime_temp
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,7 @@ class VectorStore:
             self.chroma_client = chroma_client
             self._owns_client = False
         else:
+            prepare_runtime_temp(self.db_path)
             self.chroma_client = chromadb.PersistentClient(
                 path=self.db_path, settings=Settings(anonymized_telemetry=False)
             )
@@ -241,11 +243,17 @@ class VectorStore:
         if total_count == 0:
             return set()
 
-        all_data = self.collection.get(limit=total_count, include=["metadatas"])
         item_keys: Set[str] = set()
-        for metadata in all_data.get("metadatas", []) or []:
-            if metadata and metadata.get("item_key"):
-                item_keys.add(str(metadata["item_key"]))
+        page_size = 500
+        for offset in range(0, total_count, page_size):
+            all_data = self.collection.get(
+                limit=min(page_size, total_count - offset),
+                offset=offset,
+                include=["metadatas"],
+            )
+            for metadata in all_data.get("metadatas", []) or []:
+                if metadata and metadata.get("item_key"):
+                    item_keys.add(str(metadata["item_key"]))
         return item_keys
 
     def get_chunk_ids_for_item(self, item_key: str) -> List[str]:

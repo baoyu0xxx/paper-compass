@@ -15,6 +15,7 @@ from paper_compass.config import (
     get_embedding_provider_order,
     get_provider_config,
     load_all_configs,
+    resolve_path_settings,
     resolve_embedding_runtime,
 )
 from paper_compass.env_utils import DEFAULT_ENV_PATH, PROJECT_ROOT, load_project_env
@@ -24,6 +25,7 @@ from paper_compass.pipeline_sync import _state_path, inspect_sync_lock
 from paper_compass.resources import project_root
 from paper_compass.runtime_env import runtime_state
 from paper_compass.wiki_gen import describe_wiki_prompt_bundle
+from paper_compass.windows_integrity import prepare_runtime_temp
 
 
 def _mask_secret(value: str) -> str:
@@ -63,12 +65,13 @@ def _count_markdown_pages(wiki_root: Path) -> dict[str, int]:
 
 
 def _list_vectordb_collections(db_path: Path) -> list[dict[str, Any]]:
-    if not db_path.exists() or not db_path.is_dir():
+    if not (db_path / "chroma.sqlite3").exists():
         return []
     try:
         import chromadb
         from chromadb.config import Settings
 
+        prepare_runtime_temp(db_path)
         client = chromadb.PersistentClient(path=str(db_path), settings=Settings(anonymized_telemetry=False))
         collections = []
         for collection in client.list_collections():
@@ -95,10 +98,15 @@ def _read_json_file(path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
-def _read_sync_status() -> dict[str, Any]:
-    last_sync = _read_json_file(_state_path(PROJECT_ROOT))
-    lock_status = inspect_sync_lock(PROJECT_ROOT)
-    source_payload = _read_json_file(source_config_path(PROJECT_ROOT))
+def _read_sync_status(runtime_root: str | Path | None = None) -> dict[str, Any]:
+    last_sync = _read_json_file(_state_path(PROJECT_ROOT, runtime_root))
+    lock_status = (
+        inspect_sync_lock(PROJECT_ROOT, runtime_root=runtime_root)
+        if runtime_root
+        else inspect_sync_lock(PROJECT_ROOT)
+    )
+    source_path = Path(runtime_root) / "state" / "source_config.json" if runtime_root else source_config_path(PROJECT_ROOT)
+    source_payload = _read_json_file(source_path)
     zotero_source = source_payload.get("zotero") if isinstance(source_payload.get("zotero"), dict) else {}
 
     last_status = str(last_sync.get("status", "") or "")
@@ -157,6 +165,9 @@ def _detect_embed_cascade(configs: dict[str, Any]) -> list[str]:
 
 def collect_status() -> dict[str, Any]:
     load_project_env()
+    default_config = Path.home() / ".paper-compass" / "config.yaml"
+    if not os.environ.get("PAPER_COMPASS_ROOT") and default_config.exists():
+        os.environ["PAPER_COMPASS_ROOT"] = str(default_config.parent)
     configs = load_all_configs()
 
     repo_root = project_root()
@@ -188,13 +199,14 @@ def collect_status() -> dict[str, Any]:
 
     prompt_bundle = describe_wiki_prompt_bundle()
 
-    library_path = PROJECT_ROOT / "data" / "zotero-export" / "library.json"
-    wiki_root = PROJECT_ROOT / "wiki"
-    db_path = PROJECT_ROOT / "data" / "vectordb"
+    resolve_paths = resolve_path_settings(configs=load_all_configs())
+    library_path = Path(resolve_paths.library_json_path)
+    wiki_root = Path(resolve_paths.wiki_root)
+    db_path = Path(resolve_paths.vectordb_path)
 
     health = inspect_index_health(db_path)
     runtime = runtime_state(project_root=PROJECT_ROOT)
-    sync_status = _read_sync_status()
+    sync_status = _read_sync_status(resolve_paths.compass_root or None)
 
     return {
         "project_root": str(repo_root),

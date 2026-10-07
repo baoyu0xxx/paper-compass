@@ -30,8 +30,8 @@ rtk pytest tests/ -q
 ```bash
 rtk grep -e "zotero_readonly.sqlite over zotero.sqlite\|prefers zotero_readonly" README.md README.en.md AGENTS.md
 rtk grep -e "pdf_embedding\|wiki_embedding\|PAPERQA_\|paperqa_answer" README.md README.en.md AGENTS.md configs src/paper_compass/configs tests
-rtk grep -e "--wiki-upsert-mode\|--explain-changes\|pdf_extract_failures.jsonl" README.md README.en.md AGENTS.md docs/release-notes-v1.4.1.md
-rtk grep -e "v1.4.1\|1.4.1" README.md README.en.md pyproject.toml docs/release-notes-v1.4.1.md
+rtk grep -e "--wiki-upsert-mode\|--explain-changes\|pdf_extract_failures.jsonl" README.md README.en.md AGENTS.md docs/release-notes-v1.5.0.md CHANGELOG.md
+rtk grep -e "v1.5.0\|1.5.0" README.md README.en.md pyproject.toml docs/release-notes-v1.5.0.md CHANGELOG.md
 ```
 
 Expected:

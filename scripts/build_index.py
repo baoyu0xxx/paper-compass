@@ -281,7 +281,7 @@ def _write_index_batches(
     chunk_metas: List[Dict[str, Any]],
     *,
     write_mode: str,
-    batch_size: int = 32,
+    batch_size: int = 20,
     progress_every: int | None = None,
     progress_label: str = "Indexed chunks",
 ) -> int:
@@ -750,7 +750,7 @@ def index_wiki(args, embedder: Any | None = None, store: VectorStore | None = No
     manifest_items = manifest.get("items", {})
     dry_run = _get_bool_arg(args, "dry_run")
 
-    batch_size = 32
+    batch_size = 20
     chunk_ids: List[str] = []
     chunk_texts: List[str] = []
     chunk_metas: List[Dict[str, Any]] = []

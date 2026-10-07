@@ -396,8 +396,8 @@ def test_diff_manifest_ignores_path_and_mtime_drift_when_text_is_unchanged():
     current = {
         "A": {
             "item_key": "A",
-            "pdf_path": "/mnt/d/papers/A.pdf",
-            "text_file": "/mnt/d/texts/A.txt",
+            "pdf_path": "/posix-root/papers/A.pdf",
+            "text_file": "/posix-root/texts/A.txt",
             "text_sha1": compute_text_sha1("same text"),
             "text_size": len("same text"),
             "pdf_mtime": 200,
@@ -436,8 +436,8 @@ def test_diff_manifest_still_detects_real_text_change():
     current = {
         "A": {
             "item_key": "A",
-            "pdf_path": "/mnt/d/papers/A.pdf",
-            "text_file": "/mnt/d/texts/A.txt",
+            "pdf_path": "/posix-root/papers/A.pdf",
+            "text_file": "/posix-root/texts/A.txt",
             "text_sha1": compute_text_sha1("new text"),
             "text_size": len("new text"),
             "pdf_mtime": 200,

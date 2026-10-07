@@ -25,6 +25,11 @@ wiki/queries/
 wiki/topics/
 wiki/papers/
 wiki/methods/
+wiki/raw/
+
+# Hermes planning / local run artifacts
+.hermes/plans/
+.hermes/runs/
 
 # Build artifacts
 dist/
@@ -33,3 +38,9 @@ dist/
 .hermes/plans/
 
 *.pyc
+
+# Local test and ACL diagnostics
+pytest-of-*/
+pip-unpack-*/
+pip-metadata-*/
+.acl-recovery/

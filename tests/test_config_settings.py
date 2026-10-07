@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from paper_compass.config import resolve_indexing_settings, resolve_path_settings
 
 
@@ -42,10 +44,10 @@ def test_path_settings_uses_safe_defaults_for_missing_config(monkeypatch):
 
     settings = resolve_path_settings(configs={})
 
-    assert settings.library_json_path == "data/zotero-export/library.json"
-    assert settings.text_dir == "data/texts"
-    assert settings.wiki_root == "wiki"
-    assert settings.vectordb_path == "data/vectordb"
+    assert settings.library_json_path == str(Path.home() / ".paper-compass" / "library" / "library.json")
+    assert settings.text_dir == str(Path.home() / ".paper-compass" / "texts")
+    assert settings.wiki_root == str(Path.home() / ".paper-compass" / "wiki")
+    assert settings.vectordb_path == str(Path.home() / ".paper-compass" / "index" / "vectordb")
     assert settings.zotero_sqlite_path == ""
     assert settings.zotero_storage_path == ""
 
@@ -68,7 +70,7 @@ def test_path_settings_uses_local_state_before_safe_defaults(monkeypatch):
 
     assert settings.zotero_sqlite_path == "local/zotero.sqlite"
     assert settings.zotero_storage_path == "local/storage"
-    assert settings.library_json_path == "data/zotero-export/library.json"
+    assert settings.library_json_path == str(Path.home() / ".paper-compass" / "library" / "library.json")
 
 
 def test_path_settings_env_still_overrides_local_state(monkeypatch):
