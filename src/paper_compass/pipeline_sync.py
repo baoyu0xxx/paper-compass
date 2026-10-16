@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Sequence
 
+from paper_compass.console_window import child_creation_flags
 from paper_compass.index_health import inspect_index_health
 from paper_compass.local_state import save_last_successful_zotero_source
 
@@ -147,7 +148,8 @@ def _backup_vectordb(db_path: Path) -> Path | None:
 
 
 def _script_path(project_root: Path, script_name: str) -> str:
-    return (project_root / "scripts" / script_name).as_posix()
+    from paper_compass.resources import resolve_stage_script
+    return resolve_stage_script(script_name, project_root).as_posix()
 
 
 def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
@@ -160,6 +162,8 @@ def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
         if options.storage_path:
             cmd += ["--storage-path", options.storage_path]
         cmd += [
+            "--out-dir",
+            str(Path(options.library_path).parent),
             "--extract-text",
             "--text-dir",
             options.text_dir,
@@ -225,7 +229,9 @@ def _build_stage_command(options: SyncOptions, stage: str) -> list[str]:
 def _run_stage_command(project_root: Path, command: Sequence[str]) -> None:
     env = os.environ.copy()
     env["PAPER_COMPASS_SYNC_PARENT"] = "1"
-    completed = subprocess.run(list(command), cwd=str(project_root), text=True, env=env)
+    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONUTF8"] = "1"
+    completed = subprocess.run(list(command), cwd=str(project_root), text=True, env=env, creationflags=child_creation_flags())
     if completed.returncode != 0:
         raise RuntimeError(f"Command failed with exit code {completed.returncode}: {' '.join(command)}")
 
@@ -290,7 +296,34 @@ def _planned_stages(options: SyncOptions) -> list[str]:
 
 
 def _process_is_active(pid: int | None, process_start_time: float | None = None) -> bool:
-    return pid == os.getpid()
+    if not pid or pid <= 0:
+        return False
+    if os.name == "nt":
+        import ctypes
+        from ctypes import wintypes
+
+        kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        kernel.OpenProcess.restype = wintypes.HANDLE
+        kernel.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+        kernel.CloseHandle.argtypes = [wintypes.HANDLE]
+        handle = kernel.OpenProcess(0x1000, False, pid)
+        if not handle:
+            return ctypes.get_last_error() == 5  # Access denied is not evidence of a dead owner.
+        try:
+            code = wintypes.DWORD()
+            if not kernel.GetExitCodeProcess(handle, ctypes.byref(code)):
+                return True
+            return code.value == 259
+        finally:
+            kernel.CloseHandle(handle)
+    try:
+        os.kill(pid, 0)
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
 
 
 def inspect_sync_lock(
@@ -340,7 +373,11 @@ def _acquire_lock(project_root: Path, *, timeout_minutes: int = 360) -> Path:
         "process_start_time": 0.0,
         "command": "paper-compass sync",
     }
-    _write_json(lock, payload)
+    try:
+        with lock.open("x", encoding="utf-8") as stream:
+            json.dump(payload, stream, ensure_ascii=False, indent=2)
+    except FileExistsError as exc:
+        raise RuntimeError(f"sync lock acquired by another process: {lock}") from exc
     return lock
 
 
@@ -388,15 +425,20 @@ def run_sync_pipeline(options: SyncOptions) -> SyncResult:
             state_path=str(state_path),
         )
 
-    report = inspect_index_health(options.db_path)
-    if report.severity in {"warning", "corrupted"}:
-        if options.rebuild in {"papers", "all"} and options.backup_corrupted_db:
-            _backup_vectordb(options.db_path)
-        else:
-            raise VectordbHealthError(f"{report.summary}\n{report.recommended_action}")
-
     run_id = f"{datetime.now().strftime('%Y%m%d-%H%M%S')}-{os.getpid()}"
     lock = _acquire_lock(options.project_root, timeout_minutes=options.lock_timeout_minutes)
+    try:
+        report = inspect_index_health(options.db_path)
+        if report.severity == "blocked":
+            raise VectordbHealthError(f"{report.summary}\n{report.recommended_action}")
+        if report.severity in {"warning", "corrupted"}:
+            if options.rebuild in {"papers", "all"} and options.backup_corrupted_db:
+                _backup_vectordb(options.db_path)
+            else:
+                raise VectordbHealthError(f"{report.summary}\n{report.recommended_action}")
+    except Exception:
+        _release_lock(lock)
+        raise
     completed_stages: list[str] = []
     started_at = _utc_now_iso()
     _write_state(
@@ -458,7 +500,7 @@ def run_sync_pipeline(options: SyncOptions) -> SyncResult:
             run_id=run_id,
             started_at=started_at,
             status="failed",
-            stage=completed_stages[-1] if completed_stages else (planned[0] if planned else "completed"),
+            stage=stage,
             planned_stages=planned,
             completed_stages=completed_stages,
             error=str(exc),

@@ -230,11 +230,13 @@ class VectorStore:
         self._bm25_ids = []
 
     def clear(self) -> None:
-        """Delete all chunks in the collection."""
-        if self.count() > 0:
-            all_ids = self.collection.get()["ids"]
-            if all_ids:
-                self.collection.delete(ids=all_ids)
+        """Delete all chunks in bounded batches."""
+        while self.count() > 0:
+            batch = self.collection.get(limit=500)
+            batch_ids = batch.get("ids", []) or []
+            if not batch_ids:
+                break
+            self.collection.delete(ids=batch_ids)
         self._invalidate_bm25()
 
     def get_indexed_item_keys(self) -> Set[str]:

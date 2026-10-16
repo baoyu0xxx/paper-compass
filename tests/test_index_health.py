@@ -1,6 +1,18 @@
 from __future__ import annotations
 
 
+def test_health_detects_sqlite_corruption(tmp_path, monkeypatch):
+    from paper_compass import index_health
+
+    root = tmp_path / "db"
+    root.mkdir()
+    (root / "chroma.sqlite3").write_bytes(b"not a sqlite database")
+    monkeypatch.setattr(index_health, "_create_persistent_client", lambda _: None)
+    report = index_health.inspect_index_health(root)
+    assert report.severity == "corrupted"
+    assert "SQLite" in report.summary
+
+
 def test_inspect_index_health_reports_ok_for_missing_db(tmp_path):
     from paper_compass.index_health import inspect_index_health
 

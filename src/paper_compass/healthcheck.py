@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
-from paper_compass.config import resolve_embedding_runtime
+from paper_compass.config import resolve_embedding_runtime, resolve_path_settings
 from paper_compass.env_utils import PROJECT_ROOT, load_project_env
 from paper_compass.index_health import inspect_index_health
 from paper_compass.runtime_env import runtime_state
@@ -63,7 +63,7 @@ def _check_env() -> Status:
 
 
 def _check_library() -> Status:
-    lib_path = PROJECT_ROOT / "data" / "zotero-export" / "library.json"
+    lib_path = Path(resolve_path_settings().library_json_path)
     if not lib_path.exists():
         return ("library.json", "WARN: not found (run sync_zotero first)")
     try:
@@ -77,7 +77,7 @@ def _check_library() -> Status:
 
 
 def _check_vectordb() -> Status:
-    db_path = PROJECT_ROOT / "data" / "vectordb"
+    db_path = Path(resolve_path_settings().vectordb_path)
     if not db_path.exists():
         return ("vectordb", "WARN: not found (run build_index first)")
     try:
@@ -95,7 +95,7 @@ def _check_vectordb() -> Status:
 
 
 def _check_wiki() -> Status:
-    wiki_root = PROJECT_ROOT / "wiki"
+    wiki_root = Path(resolve_path_settings().wiki_root)
     if not wiki_root.exists():
         return ("wiki", "WARN: wiki/ not found")
     papers = list((wiki_root / "papers").glob("*.md"))

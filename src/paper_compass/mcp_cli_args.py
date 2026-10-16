@@ -5,13 +5,15 @@ from __future__ import annotations
 import argparse
 from typing import Any
 
+from paper_compass.config import resolve_path_settings
 from paper_compass.env_utils import PROJECT_ROOT
 from paper_compass.mcp_contracts import accepted_params, tool_names
 
-DEFAULT_VECTORDB_PATH = str(PROJECT_ROOT / "data" / "vectordb")
-DEFAULT_TEXT_DIR = str(PROJECT_ROOT / "data" / "texts")
-DEFAULT_LIBRARY_PATH = str(PROJECT_ROOT / "data" / "zotero-export" / "library.json")
-DEFAULT_WIKI_ROOT = "./wiki"
+_PATH_SETTINGS = resolve_path_settings()
+DEFAULT_VECTORDB_PATH = _PATH_SETTINGS.vectordb_path
+DEFAULT_TEXT_DIR = _PATH_SETTINGS.text_dir
+DEFAULT_LIBRARY_PATH = _PATH_SETTINGS.library_json_path
+DEFAULT_WIKI_ROOT = _PATH_SETTINGS.wiki_root
 
 
 def parse_filters(args: argparse.Namespace) -> dict[str, Any] | None:

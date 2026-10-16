@@ -154,6 +154,23 @@ class TestWriteDotenv:
         assert "EMBED_API_KEY=sk-embed" in content
 
 
+def test_zotero_onboarding_noninteractive_does_not_prompt(monkeypatch, tmp_path):
+    from paper_compass.cli.configure import _finish_zotero_setup
+    monkeypatch.setattr("builtins.input", lambda _: pytest.fail("unexpected prompt"))
+    args = argparse.Namespace(env_path=str(tmp_path / ".env"), db_source_path=None, storage_path=None, auto_update=None)
+    assert _finish_zotero_setup(args, interactive=False) == 0
+
+
+def test_zotero_onboarding_explicit_enable_confirms_source_first(monkeypatch, tmp_path):
+    from paper_compass.cli.configure import _finish_zotero_setup
+    calls = []
+    monkeypatch.setattr("paper_compass.watch_service.confirm_source", lambda db, storage: calls.append("confirm") or (db, storage))
+    monkeypatch.setattr("paper_compass.watch_service.offer", lambda *a, **kw: calls.append(kw["choice"]))
+    args = argparse.Namespace(env_path=str(tmp_path / ".env"), db_source_path="db", storage_path="storage", auto_update=True)
+    assert _finish_zotero_setup(args, interactive=False) == 0
+    assert calls == ["confirm", True]
+
+
 def test_execute_init_ensures_runtime_before_writing_env(monkeypatch, tmp_path):
     env_path = tmp_path / ".env"
     calls = []

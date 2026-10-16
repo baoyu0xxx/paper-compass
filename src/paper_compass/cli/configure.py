@@ -462,7 +462,71 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
         action="store_true",
         help="Install only runtime dependencies into the managed .venv",
     )
-    parser.set_defaults(func=execute_init)
+    parser.add_argument("--db-source-path", help="Confirmed Zotero SQLite database")
+    parser.add_argument("--storage-path", help="Confirmed Zotero storage directory")
+    auto = parser.add_mutually_exclusive_group()
+    auto.add_argument("--enable-auto-update", dest="auto_update", action="store_true")
+    auto.add_argument("--disable-auto-update", dest="auto_update", action="store_false")
+    parser.set_defaults(auto_update=None, func=execute_init)
+
+
+def _finish_zotero_setup(args: argparse.Namespace, *, interactive: bool) -> int:
+    from paper_compass import watch_service
+    from paper_compass.config import resolve_path_settings
+    from paper_compass.zotero_paths import resolve_zotero_source, ZoteroSourceNotFoundError
+    choice = getattr(args, "auto_update", None)
+    db = getattr(args, "db_source_path", None)
+    storage = getattr(args, "storage_path", None)
+    if not interactive and choice is None and not db and not storage:
+        return 0
+    settings = resolve_path_settings()
+    root = Path(settings.compass_root or Path.home() / ".paper-compass")
+    prior = watch_service.load_config(root)
+    db = db or prior.get("db_path") or settings.zotero_sqlite_path
+    storage = storage or prior.get("storage_path") or settings.zotero_storage_path
+    if choice is False:
+        watch_service.offer(root, db or "", storage or "", env_path=args.env_path, choice=False)
+        return 0
+    if not db:
+        try:
+            source = resolve_zotero_source(storage_path=storage or None)
+            db, storage = str(source.db_path), str(source.storage_path)
+        except ZoteroSourceNotFoundError:
+            pass
+    if interactive:
+        print("\nConfirm Zotero data location (leave database empty to skip):")
+        try:
+            entered = input(f"Database [{db or ''}]: ").strip()
+            db = entered or db
+            if not db:
+                print("Zotero setup skipped; automatic updates remain unconfigured.")
+                return 0
+            storage = input(f"Storage [{storage or str(Path(db).parent / 'storage')}]: ").strip() or storage or str(Path(db).parent / "storage")
+        except (EOFError, KeyboardInterrupt):
+            print("Zotero setup skipped.")
+            return 0
+    if not db or not storage:
+        print("Both Zotero database and storage paths are required for automatic updates.")
+        return 2
+    try:
+        db, storage = watch_service.confirm_source(db, storage)
+        if interactive:
+            print(f"Database: {db}\nStorage: {storage}")
+            if input("Use these Zotero paths? [y/N] ").strip().lower() not in {"y", "yes"}:
+                return 0
+        watch_service.offer(root, db, storage, env_path=args.env_path, interactive=interactive, choice=choice, python_path=getattr(args, "watch_python", None))
+        if choice is None and not interactive:
+            if prior.get("decision"):
+                if prior.get("db_path") != db or prior.get("storage_path") != storage:
+                    raise ValueError("Existing watcher source differs; use --enable-auto-update to explicitly replace it")
+            else:
+                watch_service.save_choice(root, enabled=False, db_path=db, storage_path=storage, env_path=args.env_path)
+        return 0
+    except (ValueError, OSError, RuntimeError) as exc:
+        print(f"Zotero automatic update setup failed: {exc}")
+        return 1
+    except (EOFError, KeyboardInterrupt):
+        return 0
 
 
 def execute_init(args: argparse.Namespace) -> int:
@@ -481,11 +545,12 @@ def execute_init(args: argparse.Namespace) -> int:
             "run python scripts/bootstrap_runtime.py or invoke paper-compass from the managed .venv"
         )
 
-    ensure_managed_runtime(
+    initialized_runtime = ensure_managed_runtime(
         project_root=runtime_project_root,
         bootstrap_python=Path(args.python) if getattr(args, "python", None) else None,
         with_dev=not getattr(args, "without_dev", False),
     )
+    args.watch_python = str(initialized_runtime.managed_python)
     ensure_runtime_root_integrity(Path.home() / ".paper-compass")
 
     # Always load existing .env into os.environ first, so config detection works
@@ -504,12 +569,12 @@ def execute_init(args: argparse.Namespace) -> int:
         _write_dotenv(env_path, llm_config, embed_config, wiki_prompt, force=args.force)
         print()
         print("  ✓ paper-compass configured (non-interactive mode)")
-        return 0
+        return _finish_zotero_setup(args, interactive=False)
 
-    # Check if already configured (from .env file content)
-    if has_env_file and not args.force:
-        _already_configured_guard(path)
-        # If guard returned without exiting, it means user chose to overwrite
+    interactive = sys.stdin.isatty() and not any((getattr(args, "db_source_path", None), getattr(args, "storage_path", None), getattr(args, "auto_update", None) is not None))
+    if has_env_file and not args.force and interactive:
+        if not _already_configured_guard(path):
+            return _finish_zotero_setup(args, interactive=True)
 
     # Check if env vars are already set in shell / .env (after load_project_env above)
     llm_from_env, embed_from_env = _build_config_from_env()
@@ -528,7 +593,10 @@ def execute_init(args: argparse.Namespace) -> int:
         print("  ✓ paper-compass configured")
         print("  Run `paper-compass validate` to test connectivity.")
         print()
-        return 0
+        return _finish_zotero_setup(args, interactive=interactive)
+
+    if not interactive:
+        return _finish_zotero_setup(args, interactive=False)
 
     # Interactive mode — only reached when no config is found anywhere
     print()
@@ -547,10 +615,10 @@ def execute_init(args: argparse.Namespace) -> int:
     print("  Run `paper-compass validate` to test connectivity.")
     print()
 
-    return 0
+    return _finish_zotero_setup(args, interactive=True)
 
 
-def _already_configured_guard(env_path: Path) -> None:
+def _already_configured_guard(env_path: Path) -> bool:
     """Check if .env already has all required keys; prompt to overwrite or abort.
 
     Returns (does not exit) only if the user confirms overwrite.
@@ -565,8 +633,9 @@ def _already_configured_guard(env_path: Path) -> None:
         print(f"  .env already configured at {env_path}")
         resp = input("  Overwrite? [y/N] ").strip().lower()
         if resp != "y" and resp != "yes":
-            print("  Aborted.")
-            sys.exit(0)
+            print("  Existing model configuration retained.")
+            return False
+    return True
 
 
 if __name__ == "__main__":

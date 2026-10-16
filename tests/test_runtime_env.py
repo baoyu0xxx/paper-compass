@@ -7,12 +7,21 @@ from unittest import mock
 import pytest
 
 
+def _source_checkout(root: Path) -> None:
+    (root / "src" / "paper_compass").mkdir(parents=True)
+    (root / "pyproject.toml").write_text(
+        '[project]\nname = "paper-compass"\nversion = "1.3.0"\nrequires-python = ">=3.12"\n',
+        encoding="utf-8",
+    )
+
+
 def _touch_python(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("#!/usr/bin/env python\n", encoding="utf-8")
 
 
 def test_runtime_state_reports_missing_when_managed_venv_absent(tmp_path):
+    _source_checkout(tmp_path)
     from paper_compass.runtime_env import runtime_state
 
     state = runtime_state(project_root=tmp_path, current_python=tmp_path / "python.exe")
@@ -24,6 +33,7 @@ def test_runtime_state_reports_missing_when_managed_venv_absent(tmp_path):
 
 
 def test_assert_managed_runtime_active_raises_clear_error_when_current_python_differs(tmp_path):
+    _source_checkout(tmp_path)
     from paper_compass.runtime_env import ManagedRuntimeError, assert_managed_runtime_active
 
     managed_python = tmp_path / ".venv" / "Scripts" / "python.exe"
@@ -64,11 +74,7 @@ def test_assert_managed_runtime_active_raises_clear_error_when_current_python_di
 def test_ensure_managed_runtime_creates_venv_and_writes_metadata(tmp_path, monkeypatch):
     from paper_compass.runtime_env import ensure_managed_runtime
 
-    pyproject = tmp_path / "pyproject.toml"
-    pyproject.write_text(
-        '[project]\nname = "paper-compass"\nversion = "1.3.0"\nrequires-python = ">=3.12"\n',
-        encoding="utf-8",
-    )
+    _source_checkout(tmp_path)
 
     bootstrap_python = tmp_path / "bootstrap" / "python.exe"
     _touch_python(bootstrap_python)
@@ -102,3 +108,29 @@ def test_ensure_managed_runtime_creates_venv_and_writes_metadata(tmp_path, monke
     assert metadata["extras"] == ["dev"]
     assert any(command[:3] == [str(bootstrap_python), "-m", "venv"] for command in calls)
     assert any(command[-1] == ".[dev]" for command in calls if len(command) >= 5)
+
+
+@pytest.mark.parametrize("operation", ["state", "assert", "ensure"])
+def test_wheel_runtime_uses_current_interpreter_without_bootstrapping(tmp_path, monkeypatch, operation):
+    from paper_compass import runtime_env
+
+    installed_root = tmp_path / "site-packages"
+    installed_root.mkdir()
+    monkeypatch.setattr(runtime_env, "detect_project_root", lambda: installed_root)
+    current = Path(runtime_env.sys.executable).resolve()
+    monkeypatch.setattr(runtime_env.subprocess, "run", mock.Mock(side_effect=AssertionError("no bootstrap or probe")))
+    monkeypatch.delenv(runtime_env.SKIP_RUNTIME_CHECK_ENV, raising=False)
+
+    if operation == "ensure":
+        state = runtime_env.ensure_managed_runtime(project_root=installed_root)
+    elif operation == "assert":
+        state = runtime_env.assert_managed_runtime_active()
+    else:
+        state = runtime_env.runtime_state(project_root=installed_root)
+
+    assert state.status == "unmanaged"
+    assert state.managed_active is True
+    assert state.managed_exists is False
+    assert state.managed_python == current
+    assert state.reasons == []
+    assert list(installed_root.iterdir()) == []

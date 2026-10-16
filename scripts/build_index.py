@@ -347,6 +347,16 @@ def _append_failure_report(report_path: Path, *, stage: str, key: str, pdf_path:
         fh.write(json.dumps(payload, ensure_ascii=False) + "\n")
 
 
+def _prunable_keys_excluding_raw_items(keys: Iterable[str], raw_items: Iterable[Dict[str, Any]]) -> list[str]:
+    """Keep prune candidates absent from the authoritative raw library."""
+    raw_keys = {
+        str(item.get("key", ""))
+        for item in raw_items
+        if isinstance(item, dict) and item.get("key")
+    }
+    return sorted(set(keys) - raw_keys)
+
+
 def _prepare_index_inputs(items: List[Dict[str, Any]], args, embedder_model_id: str) -> tuple[Dict[str, Dict[str, Any]], Dict[str, str], List[str], Dict[str, Any]]:
     fingerprints: Dict[str, Dict[str, Any]] = {}
     full_texts: Dict[str, str] = {}
@@ -512,20 +522,23 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         sys.exit(1)
 
     health = inspect_index_health(args.db_path)
-    if health.severity in {"warning", "corrupted"}:
+    if health.severity in {"blocked", "warning", "corrupted"}:
         can_incrementally_repair = (
             args.incremental
             and health.severity == "warning"
             and (getattr(health, "manifest_only_keys", {}) or getattr(health, "store_only_keys", {}))
             and not (health.has_journal or health.has_wal or health.has_shm)
         )
-        if not can_incrementally_repair:
+        if args.full_rebuild and health.severity == "warning" and not (health.has_journal or health.has_wal or health.has_shm):
+            print(f"WARNING: full rebuild will replace manifest/store mismatch: {health.summary}")
+        elif not can_incrementally_repair:
             label = "corrupted state" if health.severity == "corrupted" else "requires attention"
             print(f"ERROR: vectordb {label}: {args.db_path}")
             print(f"Detected: {health.summary}")
             print(f"Recommended action: {health.recommended_action}")
             sys.exit(2)
-        print(f"WARNING: vectordb manifest/store mismatch will be repaired incrementally: {health.summary}")
+        else:
+            print(f"WARNING: vectordb manifest/store mismatch will be repaired incrementally: {health.summary}")
 
     items = json.loads(library_path.read_text(encoding="utf-8"))
 
@@ -557,6 +570,8 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         manifest.setdefault("items", {})
 
     current_items, full_texts, skipped, failure_report = _prepare_index_inputs(items, args, embedder.model_id)
+    # A raw library item can be temporarily unindexable; it is not deletion evidence.
+    authoritative_keys = {str(item.get("key", "")) for item in items if item.get("key")}
     manifest_items = manifest.get("items", {})
     missing_vector_keys: list[str] = []
     orphan_vector_keys: list[str] = []
@@ -587,8 +602,8 @@ def index_papers(args, embedder: Any | None = None, store: VectorStore | None = 
         orphan_vector_keys = plan.orphan_in_store
         repair_keys = sorted(set(changed_keys) | set(missing_vector_keys))
         process_keys = plan.process_keys
-        deleted_keys = plan.deleted if args.prune_deleted else []
-        orphan_delete_keys = orphan_vector_keys if args.prune_deleted else []
+        deleted_keys = _prunable_keys_excluding_raw_items(plan.deleted, items) if args.prune_deleted else []
+        orphan_delete_keys = _prunable_keys_excluding_raw_items(orphan_vector_keys, items) if args.prune_deleted else []
         unchanged_keys = plan.unchanged
         indexing_settings = resolve_indexing_settings()
         risky = _large_incremental_keys(

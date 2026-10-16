@@ -26,7 +26,11 @@ def _nonempty_text(path: Path) -> bool:
 
 
 def _first_pdf(directory: Path) -> Path | None:
-    pdfs = sorted(path for path in directory.rglob("*.pdf") if path.is_file())
+    pdfs = sorted(
+        path
+        for path in directory.rglob("*.pdf")
+        if path.is_file() and not path.name.lower().endswith(".compare.pdf")
+    )
     return pdfs[0] if pdfs else None
 
 
@@ -41,7 +45,21 @@ def scan_storage(storage_root: str | Path) -> list[StorageCandidate]:
         cache = directory / ".zotero-ft-cache"
         cache_path = cache if cache.is_file() else None
         pdf_path = _first_pdf(directory)
-        if cache_path is not None and _nonempty_text(cache_path):
+        has_compare_pdf = any(
+            path.is_file() and path.name.lower().endswith(".compare.pdf")
+            for path in directory.rglob("*.pdf")
+        )
+        if pdf_path is None and has_compare_pdf:
+            candidates.append(StorageCandidate(
+                key=directory.name,
+                directory=directory,
+                cache_path=cache_path,
+                pdf_path=None,
+                source_kind="unavailable",
+                source_path=None,
+                skipped_reason="comparison PDF only",
+            ))
+        elif cache_path is not None and _nonempty_text(cache_path):
             candidates.append(StorageCandidate(
                 key=directory.name,
                 directory=directory,
@@ -127,4 +145,19 @@ def normalize_storage_items(
         item["skipped_reason"] = ""
         item["metadata_source"] = "sqlite" if candidate.key in metadata else "scan"
         normalized.append(item)
-    return normalized
+
+    # One paper can have multiple Zotero attachment folders. Keep one canonical
+    # record, preferring SQLite metadata and cached text over scan-only/PDF data.
+    deduplicated: dict[str, dict[str, Any]] = {}
+    for item in normalized:
+        key = str(item.get("key", "") or item.get("attachment_key", ""))
+        existing = deduplicated.get(key)
+        if existing is None or (
+            item.get("metadata_source") == "sqlite",
+            item.get("source_kind") == "ft_cache",
+        ) > (
+            existing.get("metadata_source") == "sqlite",
+            existing.get("source_kind") == "ft_cache",
+        ):
+            deduplicated[key] = item
+    return list(deduplicated.values())

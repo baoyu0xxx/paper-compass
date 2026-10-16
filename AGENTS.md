@@ -6,7 +6,7 @@ This document guides an AI agent (Claude Code, Codex, Hermes, etc.) through depl
 
 `paper-compass` is a personal academic paper retrieval infrastructure. It takes a Zotero PDF library, generates structured wiki pages via LLM, builds vector search indices, and exposes 6 MCP tools for AI agent consumption.
 
-**Tech stack**: Python ≥3.11, ChromaDB, PyMuPDF/pdfplumber PDF extraction, optional MarkItDown document extraction, Alibaba Cloud Bailian Qwen or Volcengine embeddings with local fallback, OpenAI-compatible LLM endpoint.
+**Tech stack**: Python ≥3.12, ChromaDB, PyMuPDF/pdfplumber PDF extraction, optional MarkItDown document extraction, Alibaba Cloud Bailian Qwen or Volcengine embeddings with local fallback, OpenAI-compatible LLM endpoint.
 
 ## Step-by-Step Deployment
 
@@ -30,6 +30,20 @@ paper-compass init
 ```
 
 Step through prompts to configure LLM, embedding endpoints, and wiki prompt style. API keys support `$ENV_VAR` syntax (e.g. enter `$OPENAI_API_KEY` to reference an existing env var).
+
+Installation via `pip install` itself never prompts or registers background tasks. `init` confirms the Zotero database and storage paths before offering automatic updates `[y/N]` (default: no), with a warning that cloud embeddings/wiki generation may incur API charges. Zotero's database and attachments remain read-only. Agents must preserve this opt-in choice.
+
+```bash
+paper-compass init --db-source-path /path/to/zotero.sqlite --storage-path /path/to/storage --enable-auto-update
+# Opt out instead: paper-compass init --disable-auto-update
+paper-compass watch --enable-autostart --sqlite-path /path/to/zotero.sqlite --storage-path /path/to/storage
+paper-compass watch --autostart-status
+paper-compass watch --disable-autostart
+```
+
+Autostart is scoped to the current user's login: Windows HKCU Run (no crash auto-restart), Linux systemd user, or macOS LaunchAgent. No password, administrator privileges, or Linux linger are required; this is not a logged-out system service. Configuration: `runtime/state/watch_config.json`; rotating logs: `runtime/logs/watch.log` (`runtime` means the selected runtime directory). Re-enable after changing the source/storage paths; after moving or recreating the interpreter/virtual environment, disable then re-enable. The managed watcher spawns every sync subprocess (stage scripts included) without a console window, so background monitoring never flashes a command prompt or steals focus; that suppression applies only when the spawning process has no console window itself, leaving interactive terminal runs unchanged. Native Linux/macOS testing has not been performed; Windows user-login behavior has not yet been reboot-tested.
+
+Source checkouts retain their existing project `.env` location. Wheel installations use `~/.paper-compass/.env`; `PAPER_COMPASS_ENV_PATH` overrides the dotenv path. Preserve existing configuration rather than overwriting it.
 
 Wiki prompt selection (Step 3) offers:
 - Default (通用): general-purpose academic prompts for any discipline

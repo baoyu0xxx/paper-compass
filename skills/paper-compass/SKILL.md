@@ -138,6 +138,20 @@ paper-compass search --json wiki-section \
 
 ### 被动监控与自动增量同步
 
+`pip install` 本身不会提示配置或注册后台任务。`paper-compass init` 先确认 Zotero 数据库与 storage 路径，再询问自动更新 `[y/N]`（默认不启用），并警告云端嵌入/wiki 生成可能产生 API 费用；Zotero 数据库和附件始终只读。Agent 不得替用户静默同意。
+
+```bash
+paper-compass init --db-source-path /path/to/zotero.sqlite --storage-path /path/to/storage --enable-auto-update
+# 显式不启用：paper-compass init --disable-auto-update
+paper-compass watch --enable-autostart --sqlite-path /path/to/zotero.sqlite --storage-path /path/to/storage
+paper-compass watch --autostart-status
+paper-compass watch --disable-autostart
+```
+
+自动启动仅针对当前用户登录：Windows HKCU Run（无崩溃自动重启）、Linux systemd user、macOS LaunchAgent；不需要密码、管理员权限或 Linux linger，也不保证未登录时运行。配置在 `runtime/state/watch_config.json`，轮转日志在 `runtime/logs/watch.log`（`runtime` 是实际运行目录）。更换数据源/storage 后须重新启用；移动或重建解释器/虚拟环境后先禁用再启用。源码部署沿用项目现有 `.env`，wheel 默认使用 `~/.paper-compass/.env`，`PAPER_COMPASS_ENV_PATH` 可覆盖路径；保留已有配置。
+
+验证范围：尚未进行 Linux/macOS 原生测试；Windows 当前用户登录流程尚未经过重启验证。
+
 完成一次 dry-run 后，可启动前台 watcher：
 
 ```powershell
@@ -149,7 +163,7 @@ paper-compass watch --debounce-seconds 3 --reconcile-seconds 600
 
 watcher 会合并 Zotero storage 的新增、修改、删除事件，在 debounce 后运行一次同步，并定期 reconciliation 修复漏事件。`paper-compass watch --once` 用于一次手工校准。删除 storage 内容后，下一次同步会从 library、论文向量和对应生成 wiki 中清理该 key；原始 Zotero 数据库不会被写入。
 
-若 `D:\zotero_backup` 的文件权限阻止创建 `.papercompass`，先由 Windows 管理员或目录所有者授予当前用户写权限，再重试；不要把运行数据写回 Zotero 原始目录之外的源码仓库。
+若运行目录不可写，选择当前用户可写的 `PAPER_COMPASS_ROOT`；不要要求管理员权限，也不要把运行数据写入 Zotero 原始目录或源码仓库。
 
 ## 维护与诊断
 

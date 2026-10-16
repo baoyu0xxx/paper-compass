@@ -92,7 +92,12 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
 
 def execute_sync(args: argparse.Namespace) -> int:
     local_source = Path(os.environ["PAPER_COMPASS_ROOT"]) / "state" / "source_config.json" if os.environ.get("PAPER_COMPASS_ROOT") else source_config_path(PROJECT_ROOT)
+    from paper_compass import watch_service
+    root = Path(os.environ.get("PAPER_COMPASS_ROOT") or resolve_path_settings().compass_root or Path.home() / ".paper-compass")
+    confirmed = watch_service.load_config(root)
     local_paths = load_last_successful_zotero_source(local_source)
+    if confirmed.get("enabled"):
+        local_paths.update({key: value for key, value in {"zotero_sqlite_path": confirmed.get("db_path", ""), "zotero_storage_path": confirmed.get("storage_path", "")}.items() if value})
     path_settings = resolve_path_settings(
         overrides={
             "library_json_path": args.library,
@@ -165,4 +170,15 @@ def execute_sync(args: argparse.Namespace) -> int:
         for command in result.planned_commands:
             print(f"    {shlex.join(command)}")
     print(f"  summary: {result.summary}")
+    import sys
+    if not args.dry_run and not args.skip_zotero_sync and sys.stdin.isatty() and not os.environ.get("PAPER_COMPASS_MANAGED_WATCH"):
+        successful = load_last_successful_zotero_source(root / "state" / "source_config.json")
+        db = successful.get("zotero_sqlite_path")
+        storage = successful.get("zotero_storage_path")
+        if db and storage:
+            try:
+                watch_service.offer(root, db, storage, interactive=True)
+            except (OSError, ValueError, RuntimeError) as exc:
+                print(f"Automatic update setup failed (sync already completed): {exc}")
+                return 1
     return 0

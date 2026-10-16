@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from importlib.resources import files
 from pathlib import Path
 
@@ -35,6 +36,18 @@ def project_root() -> Path:
     if root.name == "src":
         return root.parent
     return root
+
+
+def is_source_checkout(root: str | Path) -> bool:
+    path = Path(root)
+    return (path / "pyproject.toml").is_file() and (path / "src" / "paper_compass").is_dir()
+
+
+def resolve_stage_script(name: str, root: str | Path | None = None) -> Path:
+    source = (Path(root) if root is not None else project_root()) / "scripts" / name
+    if source.is_file() or is_source_checkout(Path(root) if root is not None else project_root()):
+        return source
+    return Path(sys.prefix) / "share" / "paper_compass" / "scripts" / name
 
 
 def resolve_package_path(relative_path: str | Path) -> Path:

@@ -331,8 +331,8 @@ def test_build_stage_command_passes_snapshot_flags(tmp_path):
 
     command = _build_stage_command(options, "sync_zotero")
 
-    assert "--snapshot-db" in command
-    assert command[command.index("--snapshot-db") + 1] == "always"
+    assert "--out-dir" in command
+    assert command[command.index("--out-dir") + 1] == "data\\zotero-export"
     assert "--snapshot-dir" in command
     assert command[command.index("--snapshot-dir") + 1] == "data/state/zotero-snapshots"
     assert "--snapshot-keep" in command
@@ -340,6 +340,32 @@ def test_build_stage_command_passes_snapshot_flags(tmp_path):
     assert "--snapshot-max-age-days" in command
     assert command[command.index("--snapshot-max-age-days") + 1] == "0"
     assert "--allow-live-zotero-read" in command
+
+
+def test_lock_detects_external_live_process():
+    import subprocess
+    import sys
+    from paper_compass import pipeline_sync
+
+    child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    import time
+    time.sleep(0.1)
+    try:
+        assert pipeline_sync._process_is_active(child.pid)
+    finally:
+        child.terminate()
+        child.wait(timeout=10)
+    assert not pipeline_sync._process_is_active(child.pid)
+
+
+def test_blocked_health_prevents_sync(tmp_path, monkeypatch):
+    import pytest
+    from paper_compass import pipeline_sync
+
+    monkeypatch.setattr(pipeline_sync, "inspect_index_health", lambda _: _report(severity="blocked"))
+    monkeypatch.setattr(pipeline_sync, "_run_stage_command", lambda *args: pytest.fail("must not run"))
+    with pytest.raises(pipeline_sync.VectordbHealthError):
+        pipeline_sync.run_sync_pipeline(pipeline_sync.SyncOptions(project_root=tmp_path, db_path=tmp_path / "db"))
 
 
 def test_build_stage_command_adds_sync_zotero_dry_run_flag(tmp_path):
@@ -371,15 +397,16 @@ def test_build_stage_command_adds_paper_index_dry_run_flag(tmp_path):
 
 
 def test_run_stage_command_sets_parent_sync_env(tmp_path, monkeypatch):
-    from paper_compass import pipeline_sync
+    from paper_compass import console_window, pipeline_sync
 
     captured = {}
 
-    def fake_run(command, cwd=None, text=None, env=None):
+    def fake_run(command, cwd=None, text=None, env=None, creationflags=None):
         captured["command"] = list(command)
         captured["cwd"] = cwd
         captured["text"] = text
         captured["env_parent"] = env.get("PAPER_COMPASS_SYNC_PARENT") if env else None
+        captured["creationflags"] = creationflags
 
         class Result:
             returncode = 0
@@ -393,3 +420,4 @@ def test_run_stage_command_sets_parent_sync_env(tmp_path, monkeypatch):
     assert captured["cwd"] == str(tmp_path)
     assert captured["text"] is True
     assert captured["env_parent"] == "1"
+    assert captured["creationflags"] == console_window.child_creation_flags()

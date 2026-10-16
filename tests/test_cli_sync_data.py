@@ -103,7 +103,7 @@ class TestSyncExecute:
         assert called_options.project_root == sync_data.PROJECT_ROOT
         assert called_options.db_path == Path.home() / ".paper-compass" / "index" / "vectordb"
         assert called_options.db_source_path == "D:/zotero_backup/zotero.sqlite"
-        assert called_options.storage_path == "D:/zotero_backup/storage"
+        assert Path(called_options.storage_path) == Path("D:/zotero_backup/storage")
         assert called_options.dry_run is True
         assert called_options.rebuild == "none"
         assert called_options.snapshot_db == "auto"

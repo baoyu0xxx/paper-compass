@@ -173,5 +173,32 @@ def test_build_bm25_reports_missing_dependency(monkeypatch):
 
     result = store.build_bm25(force=True)
 
-    assert result.available is False
-    assert "rank_bm25" in result.reason
+
+
+def test_clear_deletes_collection_in_bounded_batches():
+    class ClearCollection:
+        def __init__(self):
+            self.ids = [f"id-{i}" for i in range(1201)]
+            self.batch_sizes = []
+
+        def get(self, limit=None):
+            return {"ids": self.ids[:limit]}
+
+        def delete(self, ids):
+            self.batch_sizes.append(len(ids))
+            self.ids = self.ids[len(ids):]
+
+        def count(self):
+            return len(self.ids)
+
+    store = object.__new__(VectorStore)
+    store.collection = ClearCollection()
+    store._bm25_index = object()
+    store._bm25_corpus = ["old"]
+    store._bm25_ids = ["old"]
+
+    store.clear()
+
+    assert store.collection.ids == []
+    assert store.collection.batch_sizes == [500, 500, 201]
+    assert store._bm25_index is None

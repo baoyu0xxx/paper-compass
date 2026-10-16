@@ -13,6 +13,7 @@ Usage:
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -26,8 +27,108 @@ from paper_compass.source_scanner import normalize_storage_items, scan_storage
 from paper_compass.zotero_sqlite import ZoteroLibrary
 
 
+
+
+
+
 def _failure_report_path(out_dir: Path) -> Path:
     return out_dir.parent / "logs" / "pdf_extract_failures.jsonl"
+
+
+def _usable_source_path(path: str | Path, *, text: bool = False) -> bool:
+    if not path:
+        return False
+    candidate = Path(path)
+    try:
+        if not candidate.is_file() or candidate.stat().st_size == 0:
+            return False
+        if text:
+            return bool(candidate.read_text(encoding="utf-8").strip())
+        with candidate.open("rb") as stream:
+            return bool(stream.read(1))
+    except (OSError, UnicodeError):
+        return False
+
+
+def _candidate_has_usable_source(candidate) -> bool:
+    source_kind = str(getattr(candidate, "source_kind", "") or "")
+    source_path = getattr(candidate, "source_path", None)
+    if source_kind == "ft_cache":
+        return _usable_source_path(source_path, text=True)
+    if source_kind == "pdf":
+        return _usable_source_path(source_path)
+    return False
+
+
+def managed_source_safety_violations(previous_items, metadata_items, candidates) -> list[str]:
+    """Return prior active keys whose current Zotero source is unavailable.
+
+    Missing metadata means the item may have been deleted or moved to trash;
+    only keys still represented by the read-only Zotero query are protected.
+    """
+    candidate_by_key = {
+        str(getattr(candidate, "key", "")): candidate
+        for candidate in candidates
+        if getattr(candidate, "key", "")
+    }
+    active_by_key: dict[str, list[dict]] = {}
+    for item in metadata_items:
+        if not isinstance(item, dict):
+            continue
+        for key in (item.get("key", ""), item.get("attachment_key", "")):
+            if key:
+                active_by_key.setdefault(str(key), []).append(item)
+
+    violations: list[str] = []
+    for previous in previous_items:
+        if not isinstance(previous, dict):
+            continue
+        key = str(previous.get("key", "") or "")
+        if not key or not any(
+            previous.get(field)
+            for field in ("pdf_path", "text_file", "source_path")
+        ):
+            continue
+        active_records = active_by_key.get(key, [])
+        if not active_records:
+            continue
+
+        usable = False
+        for record in active_records:
+            attachment_key = str(record.get("attachment_key", "") or "")
+            candidate = candidate_by_key.get(attachment_key) or candidate_by_key.get(key)
+            if candidate is not None and _candidate_has_usable_source(candidate):
+                usable = True
+                break
+            if _usable_source_path(record.get("text_file", ""), text=True):
+                usable = True
+                break
+            if _usable_source_path(record.get("pdf_path", "")):
+                usable = True
+                break
+        if not usable:
+            violations.append(key)
+    return sorted(set(violations))
+
+
+def _managed_source_guard(out_dir: Path, metadata_items, candidates) -> None:
+    if os.environ.get("PAPER_COMPASS_MANAGED_WATCH", "").strip() != "1":
+        return
+    library_path = out_dir / "library.json"
+    if not library_path.is_file():
+        return
+    try:
+        previous_items = json.loads(library_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"cannot verify existing managed library before overwrite: {exc}") from exc
+    if not isinstance(previous_items, list) or not previous_items:
+        return
+    violations = managed_source_safety_violations(previous_items, metadata_items, candidates)
+    if violations:
+        raise RuntimeError(
+            "managed sync blocked: active Zotero records lost usable sources for "
+            + ", ".join(violations[:10])
+        )
 
 
 def _append_failure_report(report_path: Path, *, stage: str, key: str, pdf_path: str, reason: str, exception: str = "") -> None:
@@ -154,7 +255,12 @@ def main():
     for legacy in metadata_items:
         key = str(legacy.get("key", ""))
         pdf_path = str(legacy.get("pdf_path", "") or "")
-        if key and key not in normalized_keys and (pdf_path or legacy.get("text_file")):
+        if (
+            key
+            and key not in normalized_keys
+            and (pdf_path or legacy.get("text_file"))
+            and not pdf_path.lower().endswith(".compare.pdf")
+        ):
             item = dict(legacy)
             item["source_kind"] = "pdf" if pdf_path else "text"
             item["source_path"] = pdf_path or str(legacy.get("text_file", ""))
@@ -164,6 +270,13 @@ def main():
     skipped_missing_content = sum(1 for candidate in candidates if candidate.source_kind == "unavailable")
     print(f"  Storage candidates: {len(candidates)}")
     print(f"  Usable content sources: {len(items)}")
+
+    try:
+        _managed_source_guard(out_dir, metadata_items, candidates)
+    except RuntimeError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        write_standalone_stage_state(project_root, stage="sync_zotero", status="failed", error=str(exc))
+        sys.exit(2)
 
     if not items:
         print("WARNING: No usable cache or PDF sources found.")

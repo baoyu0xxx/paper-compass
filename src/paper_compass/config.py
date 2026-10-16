@@ -202,7 +202,12 @@ def resolve_path_settings(
             "vectordb_path": str(compass_root / "index" / "vectordb"),
         }
         for field_name, value in derived.items():
-            if not (_nonempty(overrides.get(field_name)) or os.environ.get(PATH_SETTINGS_ENV_MAP[field_name])):
+            if not (
+                _nonempty(overrides.get(field_name))
+                or os.environ.get(PATH_SETTINGS_ENV_MAP[field_name])
+                or _nonempty(yaml_paths.get(field_name))
+                or _nonempty(local_paths.get(field_name))
+            ):
                 resolved[field_name] = value
     if resolved["zotero_root"]:
         root = Path(resolved["zotero_root"])

@@ -87,6 +87,22 @@ paper-compass sync \
   --storage-path /path/to/storage
 ```
 
+### Initialization and Login Autostart
+
+`pip install` itself does not prompt for configuration or register background tasks. `paper-compass init` confirms the Zotero SQLite database and `storage/` paths before asking whether to enable automatic updates `[y/N]` (disabled by default). The prompt warns that cloud embeddings and wiki generation may incur API charges; Zotero's database and attachments remain read-only.
+
+```bash
+paper-compass init --db-source-path /path/to/zotero.sqlite --storage-path /path/to/storage --enable-auto-update
+# Explicitly opt out: paper-compass init --disable-auto-update
+paper-compass watch --enable-autostart --sqlite-path /path/to/zotero.sqlite --storage-path /path/to/storage
+paper-compass watch --autostart-status
+paper-compass watch --disable-autostart
+```
+
+Autostart runs at the current user's login using Windows HKCU Run (no crash auto-restart; pythonw.exe is preferred to hide the console), Linux systemd user, or macOS LaunchAgent. The managed watcher also runs every sync subprocess (stage scripts included) without a console window, so background monitoring never flashes a command prompt or steals focus; that suppression only applies when the current process has no console window itself, so a manual run in a terminal still shows output and honours Ctrl+C. It requires no password, administrator privileges, or Linux linger, and does not promise operation while logged out. Configuration is stored at `runtime/state/watch_config.json` and rotating logs at `runtime/logs/watch.log`, where `runtime` is the actual runtime directory. Re-run `--enable-autostart` after changing the Zotero source or storage path. After moving or recreating the Python interpreter/virtual environment, disable autostart and enable it again.
+
+Validation scope: native Linux/macOS testing has not been performed; Windows user-login behavior has not yet been verified after a reboot.
+
 If you prefer a manual deployment or a development environment install, use "From Source (Developers)" below.
 
 ### Option B: Agent Prompt Deployment
@@ -330,6 +346,8 @@ paper-compass-mcp --help
 ## Configuration
 
 ### Environment Variables
+
+Source checkouts retain the existing project `.env` location; wheel installations default to `~/.paper-compass/.env`. Set `PAPER_COMPASS_ENV_PATH` to override the dotenv path explicitly. Preserve existing configuration rather than overwriting it.
 
 Copy `.env.example` to `.env` and fill in your values, or use `paper-compass init` to generate it automatically:
 

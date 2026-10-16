@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import sqlite3
+from typing import Any
 from dataclasses import dataclass, field
 from pathlib import Path
 from paper_compass.windows_integrity import prepare_runtime_temp
@@ -92,7 +94,14 @@ def inspect_index_health(db_path: str | Path) -> IndexHealthReport:
     manifest_only_keys: dict[str, list[str]] = {}
     store_only_keys: dict[str, list[str]] = {}
     chroma_error = ""
-    if (db_root / "chroma.sqlite3").exists():
+    sqlite_errors: list[str] = []
+    sqlite_path = db_root / "chroma.sqlite3"
+    if sqlite_path.exists():
+        try:
+            with sqlite3.connect(sqlite_path.resolve().as_uri() + "?mode=ro", uri=True) as connection:
+                sqlite_errors = [str(row[0]) for row in connection.execute("PRAGMA quick_check") if row[0] != "ok"]
+        except sqlite3.Error as exc:
+            sqlite_errors = [str(exc)]
         try:
             client = _create_persistent_client(str(db_root))
             collections = client.list_collections()
@@ -169,6 +178,11 @@ def inspect_index_health(db_path: str | Path) -> IndexHealthReport:
                 "Chroma persistent state appears corrupted. Backup data/vectordb and rebuild via "
                 "paper-compass sync --rebuild papers --backup-corrupted-db (or --rebuild all if wiki is also affected)."
             )
+
+    if sqlite_errors:
+        severity = "corrupted"
+        problems.append(f"SQLite integrity check failed: {'; '.join(sqlite_errors)}")
+        recommendation = "Back up the complete vectordb before repairing SQLite or rebuilding papers and wiki."
 
     if not problems:
         problems.append("vectordb health looks normal")

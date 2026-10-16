@@ -92,6 +92,22 @@ paper-compass sync \
   --storage-path /path/to/storage
 ```
 
+### 初始化与登录后自动更新
+
+`pip install` 本身不会提示配置或注册后台任务。运行 `paper-compass init` 时，会先确认 Zotero SQLite 数据库及 `storage/` 路径，再询问是否启用自动更新 `[y/N]`（默认不启用）。提示会说明：自动同步的云端嵌入和 wiki 生成可能产生 API 费用；Zotero 数据库与附件始终只读。
+
+```bash
+paper-compass init --db-source-path /path/to/zotero.sqlite --storage-path /path/to/storage --enable-auto-update
+# 显式不启用：paper-compass init --disable-auto-update
+paper-compass watch --enable-autostart --sqlite-path /path/to/zotero.sqlite --storage-path /path/to/storage
+paper-compass watch --autostart-status
+paper-compass watch --disable-autostart
+```
+
+自动启动仅针对当前用户登录：Windows 使用当前用户 HKCU Run 注册表启动项（无崩溃自动重启；优先使用 pythonw.exe 隐藏窗口），Linux 使用 systemd user，macOS 使用 LaunchAgent；不需要密码、管理员权限或 Linux linger，不承诺未登录时运行。后台 watcher 派生的同步子进程（含各 stage 脚本）同样以无控制台方式启动，因此登录后的自动监控不会弹出命令行窗口或抢占焦点；该抑制只在当前进程本身没有控制台窗口时生效，在终端里手动运行仍照常显示输出并响应 Ctrl+C。配置保存在 `runtime/state/watch_config.json`，轮转日志在 `runtime/logs/watch.log`（`runtime` 指实际运行目录）。更换 Zotero 数据源或 storage 路径后，须重新执行 `--enable-autostart`；移动或重建 Python 解释器/虚拟环境后，先 `--disable-autostart` 再重新启用。
+
+验证范围：尚未进行 Linux/macOS 原生测试；Windows 当前用户登录流程尚未经过重启验证。
+
 如果你更倾向于手工部署或开发环境安装，可使用下方“从源码安装（开发）”方式。
 
 ### 方式二：Agent 提示词部署
@@ -338,6 +354,8 @@ paper-compass-mcp --help
 ## 配置
 
 ### 环境变量
+
+源码部署沿用项目现有 `.env` 位置；wheel 安装默认使用 `~/.paper-compass/.env`。可通过 `PAPER_COMPASS_ENV_PATH` 显式覆盖配置文件路径；保留已有配置，不要直接覆盖。
 
 将 `.env.example` 复制为 `.env` 并填写，或使用 `paper-compass init` 自动生成：
 

@@ -22,7 +22,11 @@ class ZoteroChangeHandler(FileSystemEventHandler):
 
     def _record(self, path: str) -> None:
         changed = Path(path)
-        if self.sqlite_path and changed == self.sqlite_path:
+        if self.sqlite_path and changed in {
+            self.sqlite_path,
+            Path(str(self.sqlite_path) + "-wal"),
+            Path(str(self.sqlite_path) + "-journal"),
+        }:
             key = "__metadata__"
         else:
             try:
@@ -39,10 +43,11 @@ class ZoteroChangeHandler(FileSystemEventHandler):
             return changed
 
     def on_any_event(self, event) -> None:  # watchdog event protocol
-        if not event.is_directory:
-            self._record(event.src_path)
-            if getattr(event, "dest_path", None):
-                self._record(event.dest_path)
+        if getattr(event, "event_type", "") in {"opened", "closed", "closed_no_write", "accessed"}:
+            return
+        self._record(event.src_path)
+        if getattr(event, "dest_path", None):
+            self._record(event.dest_path)
 
 
 def run_watch(
@@ -53,33 +58,51 @@ def run_watch(
     debounce_seconds: float = 3.0,
     reconcile_seconds: float = 600.0,
     stop_event: threading.Event | None = None,
+    require_existing: bool = False,
 ) -> None:
     """Run an event-driven watcher until stop_event is set or interrupted."""
     root = Path(storage_root)
     db_path = Path(sqlite_path) if sqlite_path else None
-    root.mkdir(parents=True, exist_ok=True)
+    if require_existing:
+        if not root.is_dir():
+            raise FileNotFoundError(f"Zotero storage unavailable: {root}")
+    else:
+        root.mkdir(parents=True, exist_ok=True)
     stopper = stop_event or threading.Event()
     handler = ZoteroChangeHandler(root, db_path, on_change)
     observer = Observer()
     observer.schedule(handler, str(root), recursive=True)
-    if db_path and db_path.exists():
-        observer.schedule(handler, str(db_path.parent), recursive=False)
+    if db_path:
+        db_parent = db_path.parent
+        if db_parent.exists():
+            observer.schedule(handler, str(db_parent), recursive=False)
     observer.start()
     pending: set[str] = set()
     pending_since: float | None = None
+    last_reconcile = time.monotonic()
+    source_identity = (root.stat().st_dev, root.stat().st_ino)
     try:
         while not stopper.is_set():
             time.sleep(0.25)
+            if require_existing:
+                if not root.is_dir():
+                    raise FileNotFoundError(f"Zotero storage unavailable: {root}")
+                identity = (root.stat().st_dev, root.stat().st_ino)
+                if identity != source_identity:
+                    raise FileNotFoundError("Zotero storage replaced; rebind observer")
             changed = handler.pop()
             if changed:
                 pending.update(changed)
-                pending_since = pending_since or time.monotonic()
+                if pending_since is None:
+                    pending_since = time.monotonic()
             now = time.monotonic()
+            due = now - last_reconcile >= reconcile_seconds
             if pending and pending_since is not None and now - pending_since >= debounce_seconds:
-                on_change(set(pending))
+                on_change(set(pending) | ({"__reconcile__"} if due else set()))
                 pending.clear()
                 pending_since = None
-            if now - last_reconcile >= reconcile_seconds:
+                last_reconcile = now
+            elif due:
                 on_change({"__reconcile__"})
                 last_reconcile = now
     finally:

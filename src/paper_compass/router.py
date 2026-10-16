@@ -6,7 +6,9 @@ Decides retrieval strategy (wiki vs papers vs hybrid) and executes queries.
 Uses ChromaDB vector search for wiki + PDF chunks, with keyword fallback.
 """
 
-from __future__ import annotations
+from paper_compass.config import resolve_path_settings
+
+_PATH_SETTINGS = resolve_path_settings()
 
 from typing import Any, Dict, List, Optional
 
@@ -44,12 +46,12 @@ def _should_escalate(query: str, wiki_count: int, wiki_top_score: float) -> Mode
 
 def ask_research(
     query: str,
-    wiki_root: str = "./wiki",
-    library_path: str = "data/zotero-export/library.json",
+    wiki_root: str = _PATH_SETTINGS.wiki_root,
+    library_path: str = _PATH_SETTINGS.library_json_path,
     force_mode: str = "auto",
     filters: Optional[Dict[str, Any]] = None,
     max_sources: int = 5,
-    db_path: str = "data/vectordb",
+    db_path: str = _PATH_SETTINGS.vectordb_path,
 ) -> Dict[str, Any]:
     """Multi-layer research query with auto-routing.
 

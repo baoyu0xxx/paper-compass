@@ -26,6 +26,36 @@ def test_scan_storage_prefers_nonempty_cache(tmp_path: Path):
     assert result["EMPTYKEY"].source_kind == "unavailable"
 
 
+def test_scan_storage_ignores_compare_pdf(tmp_path: Path):
+    storage = tmp_path / "storage" / "COMPAREKEY"
+    storage.mkdir(parents=True)
+    (storage / "paper.compare.pdf").write_bytes(b"comparison copy")
+
+    result = scan_storage(storage.parent)
+
+    assert result[0].source_kind == "unavailable"
+    assert result[0].pdf_path is None
+
+
+def test_normalize_storage_deduplicates_multiple_attachments_for_parent(tmp_path: Path):
+    storage = tmp_path / "storage"
+    for attachment in ("ATTACH1", "ATTACH2"):
+        folder = storage / attachment
+        folder.mkdir(parents=True)
+        (folder / ".zotero-ft-cache").write_text(f"cached {attachment}", encoding="utf-8")
+
+    items = normalize_storage_items(
+        storage,
+        [
+            {"key": "PARENTKEY", "attachment_key": "ATTACH1", "title": "Known"},
+            {"key": "PARENTKEY", "attachment_key": "ATTACH2", "title": "Known"},
+        ],
+    )
+
+    assert len(items) == 1
+    assert items[0]["key"] == "PARENTKEY"
+
+
 def test_normalize_storage_preserves_parent_metadata_key(tmp_path: Path):
     storage = tmp_path / "storage" / "ATTACHKEY"
     storage.mkdir(parents=True)

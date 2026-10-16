@@ -15,13 +15,14 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from paper_compass.env_utils import PROJECT_ROOT, load_project_env
-from paper_compass.config import load_all_configs, get_provider_config
+from paper_compass.config import load_all_configs, get_provider_config, resolve_path_settings
 from paper_compass.tokenization import tokenize_for_sparse_search
 from paper_compass.windows_integrity import prepare_runtime_temp
 
-DEFAULT_LIBRARY_PATH = PROJECT_ROOT / "data" / "zotero-export" / "library.json"
-DEFAULT_TEXT_DIR = PROJECT_ROOT / "data" / "texts"
-DEFAULT_VECTORDB_PATH = PROJECT_ROOT / "data" / "vectordb"
+_PATH_SETTINGS = resolve_path_settings()
+DEFAULT_LIBRARY_PATH = Path(_PATH_SETTINGS.library_json_path)
+DEFAULT_TEXT_DIR = Path(_PATH_SETTINGS.text_dir)
+DEFAULT_VECTORDB_PATH = Path(_PATH_SETTINGS.vectordb_path)
 
 
 def _resolved_path(path: str | None, default: Path) -> str:

@@ -25,6 +25,7 @@ from paper_compass.pipeline_sync import _state_path, inspect_sync_lock
 from paper_compass.resources import project_root
 from paper_compass.runtime_env import runtime_state
 from paper_compass.wiki_gen import describe_wiki_prompt_bundle
+from paper_compass.watch_service import status as watch_status
 from paper_compass.windows_integrity import prepare_runtime_temp
 
 
@@ -256,6 +257,7 @@ def collect_status() -> dict[str, Any]:
             "collections": _list_vectordb_collections(db_path),
         },
         "sync": sync_status,
+        "watch": watch_status(resolve_paths.compass_root or Path.home() / ".paper-compass"),
     }
 
 
@@ -369,6 +371,15 @@ def _print_status_report(status: dict[str, Any]) -> None:
         print(f"    source kind: {source.get('source_kind') or 'unknown'} | live candidate={'yes' if source.get('is_live_candidate') else 'no'}")
     else:
         print("    zotero source: unavailable")
+    watch = status.get("watch", {})
+    print()
+    print("  automatic updates")
+    print(f"    enabled: {'yes' if watch.get('enabled') else 'no'} | registered: {'yes' if watch.get('registered') else 'no'} | running: {'yes' if watch.get('manager_running') else 'no'}")
+    if watch.get("db_path"):
+        print(f"    zotero source: {watch['db_path']}")
+        print(f"    storage: {watch.get('storage_path') or 'n.a.'}")
+    if watch.get("last_error"):
+        print(f"    error: {watch['last_error']}")
 
 
 def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:

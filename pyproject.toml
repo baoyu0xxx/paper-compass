@@ -66,6 +66,13 @@ pythonpath = ["src"]
 [tool.setuptools]
 include-package-data = true
 
+[tool.setuptools.data-files]
+"share/paper_compass/scripts" = [
+  "scripts/sync_zotero.py",
+  "scripts/build_index.py",
+  "scripts/ingest_to_wiki.py",
+]
+
 [tool.setuptools.package-data]
 paper_compass = [
   "configs/*.yaml",

@@ -7,9 +7,9 @@ import sys
 import threading
 from typing import Any, Callable, TextIO
 
-from paper_compass.env_utils import PROJECT_ROOT
+from paper_compass.config import resolve_path_settings
 
-DEFAULT_VECTORDB_PATH = str(PROJECT_ROOT / "data" / "vectordb")
+DEFAULT_VECTORDB_PATH = resolve_path_settings().vectordb_path
 ToolHandler = Callable[[str, dict[str, Any]], dict[str, Any]]
 
 

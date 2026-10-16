@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from paper_compass.resources import project_root as detect_project_root
+from paper_compass.resources import is_source_checkout, project_root as detect_project_root
 
 MIN_PYTHON = (3, 12)
 VERSION_PROBE = "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')"
@@ -208,11 +208,25 @@ def runtime_state(
     current_python: str | Path | None = None,
 ) -> RuntimeState:
     root = project_root_path(project_root)
+    current = _current_python_path(current_python)
+    if not is_source_checkout(root):
+        return RuntimeState(
+            project_root=root,
+            managed_venv=root / ".venv",
+            managed_python=current,
+            metadata_path=runtime_metadata_path(root),
+            current_python=current,
+            current_python_version=".".join(str(part) for part in sys.version_info[:3]),
+            managed_exists=False,
+            managed_active=True,
+            status="unmanaged",
+            reasons=[],
+            metadata={},
+        )
     managed_venv = root / ".venv"
     managed_python = managed_python_path(root)
     metadata_path = runtime_metadata_path(root)
     metadata = _read_metadata(metadata_path)
-    current = _current_python_path(current_python)
 
     reasons: list[str] = []
     status = "active"
@@ -289,6 +303,8 @@ def ensure_managed_runtime(
     with_dev: bool = True,
 ) -> RuntimeState:
     root = project_root_path(project_root)
+    if not is_source_checkout(root):
+        return runtime_state(project_root=root)
     managed_venv = managed_venv_dir(root)
     managed_python = managed_python_path(root)
     metadata_path = runtime_metadata_path(root)
