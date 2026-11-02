@@ -7,6 +7,7 @@ Usage:
     paper-compass sync       Run incremental data sync for Zotero / index / wiki
     paper-compass update     Update to the latest version
     paper-compass validate   Test connectivity and configuration
+    paper-compass repair-fts Rebuild a corrupted full-text index without re-embedding
 
 See `paper-compass <command> --help` for details.
 """
@@ -17,7 +18,7 @@ import argparse
 import sys
 
 from paper_compass import __version__
-from paper_compass.cli import configure, search, status, sync_data, update, validate, watch
+from paper_compass.cli import configure, repair_fts, search, status, sync_data, update, validate, watch
 
 
 def main() -> int:
@@ -44,6 +45,7 @@ def main() -> int:
     watch.add_subcommand_parser(subparsers)
     update.add_subcommand_parser(subparsers)
     validate.add_subcommand_parser(subparsers)
+    repair_fts.add_subcommand_parser(subparsers)
 
     if len(sys.argv) < 2:
         parser.print_help()

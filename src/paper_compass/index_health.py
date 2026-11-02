@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import re
+import shutil
 import sqlite3
 from typing import Any
 from dataclasses import dataclass, field
@@ -182,7 +184,14 @@ def inspect_index_health(db_path: str | Path) -> IndexHealthReport:
     if sqlite_errors:
         severity = "corrupted"
         problems.append(f"SQLite integrity check failed: {'; '.join(sqlite_errors)}")
-        recommendation = "Back up the complete vectordb before repairing SQLite or rebuilding papers and wiki."
+        if _looks_like_fulltext_problem(sqlite_errors):
+            recommendation = (
+                "Run 'paper-compass repair-fts' to rebuild the full-text index in place "
+                "(no re-embedding, add --backup to keep a copy); only fall back to "
+                "paper-compass sync --rebuild papers --backup-corrupted-db if that repair fails."
+            )
+        else:
+            recommendation = "Back up the complete vectordb before repairing SQLite or rebuilding papers and wiki."
 
     if not problems:
         problems.append("vectordb health looks normal")
@@ -201,4 +210,197 @@ def inspect_index_health(db_path: str | Path) -> IndexHealthReport:
         recommended_action=recommendation,
         manifest_only_keys=manifest_only_keys,
         store_only_keys=store_only_keys,
+    )
+
+
+_FULLTEXT_PROBLEM_MARKERS = ("fts5", "inverted index", "fulltext")
+
+_FTS_TABLE_PATTERNS = (
+    re.compile(r"FTS5 table (?:main\.)?([A-Za-z0-9_]+)", re.IGNORECASE),
+    re.compile(r'from table "([A-Za-z0-9_]+)"', re.IGNORECASE),
+)
+
+_REBUILD_SQL = 'INSERT INTO "{table}"("{table}") VALUES(\'rebuild\')'
+
+
+def _looks_like_fulltext_problem(problems: list[str]) -> bool:
+    return any(
+        marker in problem.lower()
+        for problem in problems
+        for marker in _FULLTEXT_PROBLEM_MARKERS
+    )
+
+
+@dataclass
+class FulltextRepairReport:
+    ok: bool
+    db_path: str
+    sqlite_path: str
+    fulltext_tables: list[str]
+    corrupted_tables: list[str]
+    before: list[str]
+    after: list[str]
+    repaired: bool
+    backup_path: str
+    message: str
+
+
+class FulltextRepairError(RuntimeError):
+    """Raised when the Chroma full-text index cannot be inspected or repaired."""
+
+
+def _sqlite_path_for(db_path: str | Path) -> Path:
+    root = Path(db_path)
+    sqlite_path = root / "chroma.sqlite3"
+    if not sqlite_path.is_file():
+        raise FulltextRepairError(
+            f"Chroma database not found: {sqlite_path}. "
+            "Pass the directory that contains chroma.sqlite3 via --db-path."
+        )
+    return sqlite_path
+
+
+def _connect_sqlite(path: Path, *, readonly: bool) -> sqlite3.Connection:
+    mode = "ro" if readonly else "rw"
+    return sqlite3.connect(f"{path.resolve().as_uri()}?mode={mode}", uri=True, timeout=30)
+
+
+def _fulltext_tables(connection: sqlite3.Connection) -> list[str]:
+    rows = connection.execute(
+        "SELECT name, sql FROM sqlite_master WHERE type = 'table' AND sql IS NOT NULL"
+    ).fetchall()
+    tables = []
+    for name, ddl in rows:
+        lowered = str(ddl).lower()
+        if "virtual table" in lowered and "fts5" in lowered:
+            tables.append(str(name))
+    return sorted(tables)
+
+
+def _quick_check(connection: sqlite3.Connection) -> list[str]:
+    return [str(row[0]) for row in connection.execute("PRAGMA quick_check") if str(row[0]) != "ok"]
+
+
+def _corrupted_fulltext_tables(problems: list[str], tables: list[str]) -> list[str]:
+    if not _looks_like_fulltext_problem(problems):
+        return []
+    named: list[str] = []
+    for problem in problems:
+        for pattern in _FTS_TABLE_PATTERNS:
+            match = pattern.search(problem)
+            if match and match.group(1) not in named:
+                named.append(match.group(1))
+    if named:
+        return [table for table in tables if table in named]
+    return list(tables)
+
+
+def _backup_sqlite(sqlite_path: Path) -> Path:
+    from datetime import datetime, timezone
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    backup_path = sqlite_path.with_name(f"{sqlite_path.name}.bak-{timestamp}")
+    shutil.copy2(sqlite_path, backup_path)
+    for suffix in ("-wal", "-shm"):
+        sidecar = sqlite_path.with_name(sqlite_path.name + suffix)
+        if sidecar.is_file():
+            shutil.copy2(sidecar, backup_path.with_name(backup_path.name + suffix))
+    return backup_path
+
+
+def repair_fulltext_index(
+    db_path: str | Path,
+    *,
+    dry_run: bool = False,
+    backup: bool = False,
+) -> FulltextRepairReport:
+    """Rebuild Chroma's FTS5 full-text index in place without re-embedding.
+
+    ``PRAGMA quick_check`` reports "malformed inverted index" when FTS5's
+    shadow tables disagree with the content table.  Because Chroma keeps the
+    indexed text inside the FTS5 table itself, SQLite's ``rebuild`` command can
+    recreate the inverted index from that content; embeddings are untouched.
+    """
+    sqlite_path = _sqlite_path_for(db_path)
+    connection = _connect_sqlite(sqlite_path, readonly=True)
+    try:
+        tables = _fulltext_tables(connection)
+        before = _quick_check(connection)
+    finally:
+        connection.close()
+
+    corrupted = _corrupted_fulltext_tables(before, tables)
+
+    def report(ok: bool, after: list[str], repaired: bool, backup_path: Path | None, message: str) -> FulltextRepairReport:
+        return FulltextRepairReport(
+            ok=ok,
+            db_path=str(db_path),
+            sqlite_path=str(sqlite_path),
+            fulltext_tables=tables,
+            corrupted_tables=corrupted,
+            before=before,
+            after=after,
+            repaired=repaired,
+            backup_path=str(backup_path) if backup_path else "",
+            message=message,
+        )
+
+    if not tables:
+        return report(
+            not before,
+            before,
+            False,
+            None,
+            "No FTS5 table found; this database does not use a full-text index.",
+        )
+    if not before:
+        return report(True, [], False, None, "Full-text index is healthy; nothing to repair.")
+    if not corrupted:
+        raise FulltextRepairError(
+            "SQLite reports problems that are not FTS-related: " + "; ".join(before)
+        )
+    if dry_run:
+        return report(
+            False,
+            before,
+            False,
+            None,
+            "Dry run: would rebuild " + ", ".join(corrupted) + " (no changes written).",
+        )
+
+    backup_path = _backup_sqlite(sqlite_path) if backup else None
+    connection = _connect_sqlite(sqlite_path, readonly=False)
+    try:
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            for table in corrupted:
+                connection.execute(_REBUILD_SQL.format(table=table))
+            connection.commit()
+        except sqlite3.Error as exc:
+            connection.rollback()
+            raise FulltextRepairError(f"failed to rebuild full-text index: {exc}") from exc
+        if connection.execute("PRAGMA journal_mode").fetchone()[0].lower() == "wal":
+            connection.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+    finally:
+        connection.close()
+
+    connection = _connect_sqlite(sqlite_path, readonly=True)
+    try:
+        after = _quick_check(connection)
+    finally:
+        connection.close()
+    if after:
+        return report(
+            False,
+            after,
+            True,
+            backup_path,
+            "Rebuilt the full-text index but SQLite still reports: " + "; ".join(after),
+        )
+    return report(
+        True,
+        after,
+        True,
+        backup_path,
+        "Rebuilt the full-text index in place; no re-embedding was needed.",
     )

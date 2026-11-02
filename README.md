@@ -246,13 +246,18 @@ paper-compass sync \
   --backup-corrupted-db \
   --db-source-path /path/to/zotero.sqlite \
   --storage-path /path/to/storage
+
+# 若健康检查报告 FTS5 倒排索引损坏（malformed inverted index），只修复全文索引，无需重新嵌入
+paper-compass repair-fts --backup
 ```
+
+`paper-compass repair-fts` 会先检查 `PRAGMA quick_check`，仅当全文索引损坏时才从 FTS5 内容表就地重建倒排索引，向量、元数据与 collection 均不受影响；`--dry-run` 只报告状态，`--backup` 会在修复前复制 `chroma.sqlite3`。
 
 `paper-compass sync` 会：
 - 在写入前检查 `data/vectordb/` 是否存在 journal / WAL / manifest 损坏等异常状态
 - 顺序执行 `sync_zotero.py` → `build_index.py --incremental --prune-deleted` → `ingest_to_wiki.py --skip-existing` → `build_index.py --wiki`
 - 写入 `data/state/last_sync.json` 记录最近一次运行状态
-- 在检测到向量库损坏时停止写入，并给出 rebuild 建议
+- 在检测到向量库损坏时停止写入，并给出 rebuild / repair-fts 建议
 
 如果你只想手动执行某一个阶段，或想使用完整增量同步的便捷包装，可使用仓库内 shell 包装：
 
