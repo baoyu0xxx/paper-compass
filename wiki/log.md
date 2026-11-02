@@ -1731,3 +1731,691 @@
 ## [2026-05-08 14:30] writeback | queries
 - Page: [Test](wiki/queries/2026-05-08-test.md)
 - Type: queries
+
+## [2026-07-01 11:26] writeback | papers
+- Page: [Structured Event Representation and Stock Return Predictability](wiki\papers\2026-07-01-structured-event-representation-and-stock-return-predictability.md)
+- Type: papers
+
+## [2026-07-01 11:26] writeback | papers
+- Page: [Forecasting macroeconomic tail risk in real time: Do textual data add value?](wiki\papers\2026-07-01-forecasting-macroeconomic-tail-risk-in-real-time-do-textual-data-add-value.md)
+- Type: papers
+
+## [2026-07-01 11:26] writeback | papers
+- Page: [Nowcasting euro area GDP with news sentiment: A tale of two crises](wiki\papers\2026-07-01-nowcasting-euro-area-gdp-with-news-sentiment-a-tale-of-two-crises.md)
+- Type: papers
+
+## [2026-07-05 07:37] writeback | papers
+- Page: [Downside risk, financial conditions and systemic risk in China](wiki\papers\2026-07-05-downside-risk-financial-conditions-and-systemic-risk-in-china.md)
+- Type: papers
+
+## [2026-07-05 07:37] writeback | papers
+- Page: [Pretrained Time-Series Foundation Models for Financial Return Forecasting](wiki\papers\2026-07-05-pretrained-time-series-foundation-models-for-financial-return-forecasting.md)
+- Type: papers
+
+## [2026-07-06 02:09] writeback | papers
+- Page: [EGC: A novel event-oriented graph clustering framework for social media text](wiki\papers\2026-07-06-egc-a-novel-event-oriented-graph-clustering-framework-for-social-media-text.md)
+- Type: papers
+
+## [2026-07-06 14:30] writeback | papers
+- Page: [媒体信息、预期冲击与经济周期波动——基于中文财经类报刊数据](wiki\papers\2026-07-06-媒体信息预期冲击与经济周期波动基于中文财经类报刊数据.md)
+- Type: papers
+
+## [2026-07-06 15:26] writeback | papers
+- Page: [Bayesian dynamic variable selection in high dimensions](wiki\papers\2026-07-06-bayesian-dynamic-variable-selection-in-high-dimensions.md)
+- Type: papers
+
+## [2026-07-08 09:04] writeback | papers
+- Page: [Graph Laplacian-based Bayesian multi-fidelity modeling](wiki\papers\2026-07-08-graph-laplacian-based-bayesian-multi-fidelity-modeling.md)
+- Type: papers
+
+## [2026-07-08 09:04] writeback | papers
+- Page: [Bayesian Regularization via Graph Laplacian](wiki\papers\2026-07-08-bayesian-regularization-via-graph-laplacian.md)
+- Type: papers
+
+## [2026-07-08 09:04] writeback | papers
+- Page: [Inherited challenges: How second-generation involvement hinders green innovation in family firms](wiki\papers\2026-07-08-inherited-challenges-how-second-generation-involvement-hinders-green-innovation-.md)
+- Type: papers
+
+## [2026-07-18 12:29] writeback | papers
+- Page: [Node Role-Guided LLMs for Dynamic Graph Clustering](wiki\papers\2026-07-18-node-role-guided-llms-for-dynamic-graph-clustering.md)
+- Type: papers
+
+## [2026-07-18 12:29] writeback | papers
+- Page: [Online sparse regression with expanding observables](wiki\papers\2026-07-18-online-sparse-regression-with-expanding-observables.md)
+- Type: papers
+
+## [2026-08-03 02:46] writeback | papers
+- Page: [Macroeconomic expectations: news sentiment analysis](wiki\papers\2026-08-03-macroeconomic-expectations-news-sentiment-analysis.md)
+- Type: papers
+
+## [2026-08-03 02:46] writeback | papers
+- Page: [ODGNet: learning dynamic variable association for online time series forecasting](wiki\papers\2026-08-03-odgnet-learning-dynamic-variable-association-for-online-time-series-forecasting.md)
+- Type: papers
+
+## [2026-08-03 02:46] writeback | papers
+- Page: [Using transformers and reinforcement learning as narrative filters in macroeconomics](wiki\papers\2026-08-03-using-transformers-and-reinforcement-learning-as-narrative-filters-in-macroecono.md)
+- Type: papers
+
+## [2026-08-09 02:09] writeback | papers
+- Page: [Vacancies, employment outcomes and firm growth: Evidence from Denmark](wiki\papers\2026-08-09-vacancies-employment-outcomes-and-firm-growth-evidence-from-denmark.md)
+- Type: papers
+
+## [2026-08-09 02:09] writeback | papers
+- Page: [Paying more to get less: the effects of external hiring versus internal mobility](wiki\papers\2026-08-09-paying-more-to-get-less-the-effects-of-external-hiring-versus-internal-mobility.md)
+- Type: papers
+
+## [2026-08-09 02:09] writeback | papers
+- Page: [Why is there mandatory retirement?](wiki\papers\2026-08-09-why-is-there-mandatory-retirement.md)
+- Type: papers
+
+## [2026-10-05 09:07] writeback | papers
+- Page: [Using Structured Events to Predict Stock Price Movement: An Empirical Investigation](wiki\papers\2026-10-05-using-structured-events-to-predict-stock-price-movement-an-empirical-investigati.md)
+- Type: papers
+
+## [2026-10-05 09:07] writeback | papers
+- Page: [Large Language Models in Economics](wiki\papers\2026-10-05-large-language-models-in-economics.md)
+- Type: papers
+
+## [2026-10-05 09:07] writeback | papers
+- Page: [News-based forecasts of macroeconomic indicators: A semantic path model for interpretable predictions](wiki\papers\2026-10-05-news-based-forecasts-of-macroeconomic-indicators-a-semantic-path-model-for-inter.md)
+- Type: papers
+
+## [2026-10-05 09:07] writeback | papers
+- Page: [Forecasting GDP in Europe with textual data](wiki\papers\2026-10-05-forecasting-gdp-in-europe-with-textual-data.md)
+- Type: papers
+
+## [2026-10-05 09:07] writeback | papers
+- Page: [Measuring news sentiment](wiki\papers\2026-10-05-measuring-news-sentiment.md)
+- Type: papers
+
+## [2026-10-05 09:07] writeback | papers
+- Page: [Using Transformers and Reinforcement Learning as Narrative Filters in Macroeconomics](wiki\papers\2026-10-05-using-transformers-and-reinforcement-learning-as-narrative-filters-in-macroecono-3jss3iq6.md)
+- Type: papers
+
+## [2026-10-05 09:07] writeback | papers
+- Page: [The value of news for economic developments](wiki\papers\2026-10-05-the-value-of-news-for-economic-developments.md)
+- Type: papers
+
+## [2026-10-05 09:07] writeback | papers
+- Page: [Parsing the pulse: decomposing macroeconomic sentiment with LLMs](wiki\papers\2026-10-05-parsing-the-pulse-decomposing-macroeconomic-sentiment-with-llms-vcupsynd.md)
+- Type: papers
+
+## [2026-10-25 06:18] writeback | papers
+- Page: [A multi-graph learning framework to fuse heterogeneous market information for stock forecasting](D:\pyproject\paper-compass\wiki\papers\2026-10-25-a-multi-graph-learning-framework-to-fuse-heterogeneous-market-information-for-st.md)
+- Type: papers
+
+## [2026-10-25 06:18] writeback | papers
+- Page: [Directors with Foreign Experience and Corporate Tax Avoidance](D:\pyproject\paper-compass\wiki\papers\2026-10-25-directors-with-foreign-experience-and-corporate-tax-avoidance.md)
+- Type: papers
+
+## [2026-10-25 06:18] writeback | papers
+- Page: [COVID-19 and labour market resilience: evidence from large-scale recruitment behaviour](D:\pyproject\paper-compass\wiki\papers\2026-10-25-covid-19-and-labour-market-resilience-evidence-from-large-scale-recruitment-beha-4sewhtig.md)
+- Type: papers
+
+## [2026-10-25 06:18] writeback | papers
+- Page: [Customer–supplier Relationships and Corporate Tax Avoidance](D:\pyproject\paper-compass\wiki\papers\2026-10-25-customersupplier-relationships-and-corporate-tax-avoidance.md)
+- Type: papers
+
+## [2026-10-25 06:18] writeback | papers
+- Page: [Artificial Intelligence and Unemployment: New Insights](D:\pyproject\paper-compass\wiki\papers\2026-10-25-artificial-intelligence-and-unemployment-new-insights-3rtxhp8j.md)
+- Type: papers
+
+## [2026-10-25 06:18] writeback | papers
+- Page: [【深度】2022全球人工智能行业企业盈利大数据分析：全球仍有近半企业未盈利？](D:\pyproject\paper-compass\wiki\papers\2026-10-25-深度2022全球人工智能行业企业盈利大数据分析全球仍有近半企业未盈利.md)
+- Type: papers
+
+## [2026-10-25 06:18] writeback | papers
+- Page: [跳至主要内容](D:\pyproject\paper-compass\wiki\papers\2026-10-25-跳至主要内容.md)
+- Type: papers
+
+## [2026-10-25 06:18] writeback | papers
+- Page: [High-Tech Clusters, Labor Demand, and Inequality: Evidence from Made in China 2025](D:\pyproject\paper-compass\wiki\papers\2026-10-25-high-tech-clusters-labor-demand-and-inequality-evidence-from-made-in-china-2025-3in8jtj4.md)
+- Type: papers
+
+## [2026-10-25 06:18] writeback | papers
+- Page: [Online Sparse Regression with Expanding Observables](D:\pyproject\paper-compass\wiki\papers\2026-10-25-online-sparse-regression-with-expanding-observables-5bc3ajbr.md)
+- Type: papers
+
+## [2026-10-25 06:18] writeback | papers
+- Page: [Inside the Family Firm: The Role of Families in Succession Decisions and Performance](D:\pyproject\paper-compass\wiki\papers\2026-10-25-inside-the-family-firm-the-role-of-families-in-succession-decisions-and-performa-46y5bfki.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [The Humans Working Behind the AI Curtain](D:\pyproject\paper-compass\wiki\papers\2026-10-25-the-humans-working-behind-the-ai-curtain.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Job Title Inflation](D:\pyproject\paper-compass\wiki\papers\2026-10-25-job-title-inflation-6crp3qxz.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Revisiting Event-Study Designs: Robust and Efficient Estimation](D:\pyproject\paper-compass\wiki\papers\2026-10-25-revisiting-event-study-designs-robust-and-efficient-estimation-5dv45svd.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [The nexus between green finance development and green technological innovation: A potential way to achieve renewable energy transition](D:\pyproject\paper-compass\wiki\papers\2026-10-25-the-nexus-between-green-finance-development-and-green-technological-innovation-a.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Feature Augmentations for High-Dimensional Learning](D:\pyproject\paper-compass\wiki\papers\2026-10-25-feature-augmentations-for-high-dimensional-learning-7h5ftpjg.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [QRNN-MIDAS: A novel quantile regression neural network for mixed sampling frequency data](D:\pyproject\paper-compass\wiki\papers\2026-10-25-qrnn-midas-a-novel-quantile-regression-neural-network-for-mixed-sampling-frequen.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Entrepreneurial legacy: Toward a theory of how some family firms nurture transgenerational entrepreneurship](D:\pyproject\paper-compass\wiki\papers\2026-10-25-entrepreneurial-legacy-toward-a-theory-of-how-some-family-firms-nurture-transgen-7sjnklm4.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Development of Leadership Skills: Experience and Timing](D:\pyproject\paper-compass\wiki\papers\2026-10-25-development-of-leadership-skills-experience-and-timing-78pvv7my.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Tax Incidence and Tax Avoidance](D:\pyproject\paper-compass\wiki\papers\2026-10-25-tax-incidence-and-tax-avoidance-6vucr77f.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Mixing Family with Business: A Study of Thai Business Groups and the Families Behind Them](D:\pyproject\paper-compass\wiki\papers\2026-10-25-mixing-family-with-business-a-study-of-thai-business-groups-and-the-families-beh-7vaxixxk.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Faking Trade for Capital Control Evasion: Evidence from Dual Exchange Rate Arbitrage in China](D:\pyproject\paper-compass\wiki\papers\2026-10-25-faking-trade-for-capital-control-evasion-evidence-from-dual-exchange-rate-arbitr-83lh6jmn.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [民营经济与新质生产力 (Private Economy and New Quality Productive Forces)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-民营经济与新质生产力-private-economy-and-new-quality-productive-forces.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Impact of Artificial Intelligence on Business: From Research and Innovation to Market Deployment](D:\pyproject\paper-compass\wiki\papers\2026-10-25-impact-of-artificial-intelligence-on-business-from-research-and-innovation-to-ma.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Gender Discrimination in Job Ads: Evidence from China](D:\pyproject\paper-compass\wiki\papers\2026-10-25-gender-discrimination-in-job-ads-evidence-from-china-8mtleeva.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Factor-Augmented Sparse MIDAS Regressions with an Application to Nowcasting](D:\pyproject\paper-compass\wiki\papers\2026-10-25-factor-augmented-sparse-midas-regressions-with-an-application-to-nowcasting.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Tasks, Automation, and the Rise in U.S. Wage Inequality](D:\pyproject\paper-compass\wiki\papers\2026-10-25-tasks-automation-and-the-rise-in-us-wage-inequality-8eyqmint.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Forecasting China's Inflation with Macroeconomic and News Data: A Data Fusion Framework](D:\pyproject\paper-compass\wiki\papers\2026-10-25-forecasting-chinas-inflation-with-macroeconomic-and-news-data-a-data-fusion-fram.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [The Effects of Mandatory ESG Disclosure Around the World](D:\pyproject\paper-compass\wiki\papers\2026-10-25-the-effects-of-mandatory-esg-disclosure-around-the-world-8qlpfgrf.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Revisiting Event-Study Designs: Robust and Efficient Estimation](D:\pyproject\paper-compass\wiki\papers\2026-10-25-revisiting-event-study-designs-robust-and-efficient-estimation-93892t3d.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Governance through Shame and Aspiration: Index Creation and Corporate Behavior](D:\pyproject\paper-compass\wiki\papers\2026-10-25-governance-through-shame-and-aspiration-index-creation-and-corporate-behavior-9dawwjm3.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [The Value of News for Economic Developments](D:\pyproject\paper-compass\wiki\papers\2026-10-25-the-value-of-news-for-economic-developments-9qft9v63.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Firms' liquidity and employment decisions: Evidence from Australia](D:\pyproject\paper-compass\wiki\papers\2026-10-25-firms-liquidity-and-employment-decisions-evidence-from-australia-9upy9n7x.md)
+- Type: papers
+
+## [2026-10-25 06:19] writeback | papers
+- Page: [Rethinking Greenwashing: Corporate Discourse, Unethical Practice, and the Unmet Potential of Ethical Consumerism](D:\pyproject\paper-compass\wiki\papers\2026-10-25-rethinking-greenwashing-corporate-discourse-unethical-practice-and-the-unmet-pot.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [The Family Business Map: Framework, Selective Survey, and Evidence from Chinese Family Firm Succession](D:\pyproject\paper-compass\wiki\papers\2026-10-25-the-family-business-map-framework-selective-survey-and-evidence-from-chinese-fam-aw8k5bg5.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Appendix — Double Reduction Policy Effects on Private Tutoring Firms: Job Postings, Firm Entry and Exit](D:\pyproject\paper-compass\wiki\papers\2026-10-25-appendix-double-reduction-policy-effects-on-private-tutoring-firms-job-postings-.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [How Ownership and Corporate Governance Influence Chief Executive Pay in China's Listed Firms](D:\pyproject\paper-compass\wiki\papers\2026-10-25-how-ownership-and-corporate-governance-influence-chief-executive-pay-in-chinas-l-azf38qyz.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Collective Turnover Response Over Time to a Unit-Level Shock](D:\pyproject\paper-compass\wiki\papers\2026-10-25-collective-turnover-response-over-time-to-a-unit-level-shock.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [How does intergenerational transmission affect green innovation? Evidence from Chinese family businesses](D:\pyproject\paper-compass\wiki\papers\2026-10-25-how-does-intergenerational-transmission-affect-green-innovation-evidence-from-ch-bis65v45.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Innovation in the post-succession phase of family firms: Family CEO successors and leadership constellations as resources](D:\pyproject\paper-compass\wiki\papers\2026-10-25-innovation-in-the-post-succession-phase-of-family-firms-family-ceo-successors-an-bxsai8wg.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Family Firms and Labor Market Regulation](D:\pyproject\paper-compass\wiki\papers\2026-10-25-family-firms-and-labor-market-regulation-blnlmv5j.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Artificial Intelligence and Unemployment: International Evidence](D:\pyproject\paper-compass\wiki\papers\2026-10-25-artificial-intelligence-and-unemployment-international-evidence.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Digital Transformation and Income Inequality within Firms: Evidence from Chinese Listed Companies](D:\pyproject\paper-compass\wiki\papers\2026-10-25-digital-transformation-and-income-inequality-within-firms-evidence-from-chinese-.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [How Artificial Intelligence Technology Affects Productivity and Employment: Firm-level Evidence from Taiwan](D:\pyproject\paper-compass\wiki\papers\2026-10-25-how-artificial-intelligence-technology-affects-productivity-and-employment-firm--casb7b4e.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [The Influence of a Firm's Business Strategy on its Tax Aggressiveness](D:\pyproject\paper-compass\wiki\papers\2026-10-25-the-influence-of-a-firms-business-strategy-on-its-tax-aggressiveness-d24wldw2.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Inside the Family Firm: The Role of Families in Succession Decisions and Performance](D:\pyproject\paper-compass\wiki\papers\2026-10-25-inside-the-family-firm-the-role-of-families-in-succession-decisions-and-performa-cgq6z5a8.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [平台经济文献综述 (Platform Economy: A Literature Review)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-平台经济文献综述-platform-economy-a-literature-review.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [The Impact of Robots on Labor Income Share: Evidence from an Enterprise Survey (机器人应用与劳动收入份额 — 基于广东企业调查数据的实证研究)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-the-impact-of-robots-on-labor-income-share-evidence-from-an-enterprise-survey-机器.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [A multi-graph learning framework to fuse heterogeneous market information for stock forecasting](D:\pyproject\paper-compass\wiki\papers\2026-10-25-a-multi-graph-learning-framework-to-fuse-heterogeneous-market-information-for-st-vlhqnrfp.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Implications of Intra-Family and External Ownership Transfer of Family Firms: Short-Term and Long-Term Performance Differences](D:\pyproject\paper-compass\wiki\papers\2026-10-25-implications-of-intra-family-and-external-ownership-transfer-of-family-firms-sho-daydykxf.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [RoBERTa: A Robustly Optimized BERT Pretraining Approach](D:\pyproject\paper-compass\wiki\papers\2026-10-25-roberta-a-robustly-optimized-bert-pretraining-approach-dktq9ikf.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Skip to Main Content](D:\pyproject\paper-compass\wiki\papers\2026-10-25-skip-to-main-content.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [ODGNet: Online Time Series Forecasting with Dynamic Variable Correlation Learning](D:\pyproject\paper-compass\wiki\papers\2026-10-25-odgnet-online-time-series-forecasting-with-dynamic-variable-correlation-learning.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Did the SEC Impact Banks' Loan Loss Reserve Policies and Their Informativeness?](D:\pyproject\paper-compass\wiki\papers\2026-10-25-did-the-sec-impact-banks-loan-loss-reserve-policies-and-their-informativeness-dznik4ww.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Seeking Shelter: Empirically Modeling Tax Shelters Using Financial Statement Information](D:\pyproject\paper-compass\wiki\papers\2026-10-25-seeking-shelter-empirically-modeling-tax-shelters-using-financial-statement-info-ecezp7qh.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Institutional Investors' Horizons and Corporate Employment Decisions](D:\pyproject\paper-compass\wiki\papers\2026-10-25-institutional-investors-horizons-and-corporate-employment-decisions-eacma3qg.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Corporate Site Visits and Tax Avoidance: The Monitoring and Tax Knowledge Transfer Effects](D:\pyproject\paper-compass\wiki\papers\2026-10-25-corporate-site-visits-and-tax-avoidance-the-monitoring-and-tax-knowledge-transfe.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Artificial intelligence and productivity: global evidence from AI patent and bibliometric data](D:\pyproject\paper-compass\wiki\papers\2026-10-25-artificial-intelligence-and-productivity-global-evidence-from-ai-patent-and-bibl-ekv46gp9.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [创新与企业内部薪酬差距 (Innovation and Intra-Firm Wage Gaps)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-创新与企业内部薪酬差距-innovation-and-intra-firm-wage-gaps.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Intergenerational succession and internationalisation strategy of family SMEs: Evidence from China](D:\pyproject\paper-compass\wiki\papers\2026-10-25-intergenerational-succession-and-internationalisation-strategy-of-family-smes-ev-fdsjilaf.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Measuring News Sentiment](D:\pyproject\paper-compass\wiki\papers\2026-10-25-measuring-news-sentiment-fcu2sdb2.md)
+- Type: papers
+
+## [2026-10-25 06:20] writeback | papers
+- Page: [Structured Event Representation and Stock Return Predictability](D:\pyproject\paper-compass\wiki\papers\2026-10-25-structured-event-representation-and-stock-return-predictability-g6xzefpa.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Education Overabundance, Major Mismatch and Returns to Higher Education: Evidence from a Large Online Recruitment Platform in China (教育过剩、专业错配与回归高等教育层级)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-education-overabundance-major-mismatch-and-returns-to-higher-education-evidence-.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Beyond news headlines and TF-IDF: Enhancing text-based forecasting models with validated collocations and improved attention](D:\pyproject\paper-compass\wiki\papers\2026-10-25-beyond-news-headlines-and-tf-idf-enhancing-text-based-forecasting-models-with-va-gkcral5v.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Second Generation Involvement and Firm Innovation: Evidence from Chinese Family Listed Companies (二代介入与企业创新——来自中国家族上市公司的证据)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-second-generation-involvement-and-firm-innovation-evidence-from-chinese-family-l.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Skip to Article Content](D:\pyproject\paper-compass\wiki\papers\2026-10-25-skip-to-article-content.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Identifying Monetary Policy Shocks: A Natural Language Approach](D:\pyproject\paper-compass\wiki\papers\2026-10-25-identifying-monetary-policy-shocks-a-natural-language-approach-gnlqf4jk.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Can Digital Transformation Reduce R&D Investment Disruption During Top Executive Transition?](D:\pyproject\paper-compass\wiki\papers\2026-10-25-can-digital-transformation-reduce-rd-investment-disruption-during-top-executive-.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Risk News and Credit Market Sentiment](D:\pyproject\paper-compass\wiki\papers\2026-10-25-risk-news-and-credit-market-sentiment.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Opaque Financial Reports, R², and Crash Risk](D:\pyproject\paper-compass\wiki\papers\2026-10-25-opaque-financial-reports-r²-and-crash-risk.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [跳转到主要内容](D:\pyproject\paper-compass\wiki\papers\2026-10-25-跳转到主要内容.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Micro-work, artificial intelligence and the automotive industry](D:\pyproject\paper-compass\wiki\papers\2026-10-25-micro-work-artificial-intelligence-and-the-automotive-industry-hh8btpzx.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Financial Reporting Quality and Labor Investment Efficiency](D:\pyproject\paper-compass\wiki\papers\2026-10-25-financial-reporting-quality-and-labor-investment-efficiency-hpj45ll8.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Corporate Performance and Managerial Remuneration: An Empirical Analysis](D:\pyproject\paper-compass\wiki\papers\2026-10-25-corporate-performance-and-managerial-remuneration-an-empirical-analysis.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Institutional Ownership and Corporate Tax Avoidance: New Evidence](D:\pyproject\paper-compass\wiki\papers\2026-10-25-institutional-ownership-and-corporate-tax-avoidance-new-evidence.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Market Value, R&D and Intellectual Property: An Empirical Analysis of Large Australian Firms](D:\pyproject\paper-compass\wiki\papers\2026-10-25-market-value-rd-and-intellectual-property-an-empirical-analysis-of-large-austral.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Skip to Article Content](D:\pyproject\paper-compass\wiki\papers\2026-10-25-skip-to-article-content-ifd3yy4b.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Asymmetry in Unemployment Rate Forecast Errors](D:\pyproject\paper-compass\wiki\papers\2026-10-25-asymmetry-in-unemployment-rate-forecast-errors-in5yhq9w.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [继承挑战：第二代参与如何阻碍家族企业的绿色创新 (The Succession Challenge: How Second-Generation Involvement Hinders Green Innovation in Family Firms)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-继承挑战第二代参与如何阻碍家族企业的绿色创新-the-succession-challenge-how-second-generation-involvemen.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [E-commerce and Labour Tax Avoidance](D:\pyproject\paper-compass\wiki\papers\2026-10-25-e-commerce-and-labour-tax-avoidance.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Skip to Article Content](D:\pyproject\paper-compass\wiki\papers\2026-10-25-skip-to-article-content-jhfyrfcb.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Succession in Family Firms: A Mutual Role Adjustment between Entrepreneur and Next-generation Family Members](D:\pyproject\paper-compass\wiki\papers\2026-10-25-succession-in-family-firms-a-mutual-role-adjustment-between-entrepreneur-and-nex.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Are Family Firms More Tax Aggressive Than Non-Family Firms?](D:\pyproject\paper-compass\wiki\papers\2026-10-25-are-family-firms-more-tax-aggressive-than-non-family-firms.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Centralization and Regulatory Enforcement: Evidence from Personnel Reform in China](D:\pyproject\paper-compass\wiki\papers\2026-10-25-centralization-and-regulatory-enforcement-evidence-from-personnel-reform-in-chin.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [就业政策如何影响微观企业用工行为? (How Do Employment Policies Affect Firm-Level Hiring Behavior?)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-就业政策如何影响微观企业用工行为-how-do-employment-policies-affect-firm-level-hiring-behavior.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Lost in Time: Intergenerational Succession, Change, and Failure in Family Business](D:\pyproject\paper-compass\wiki\papers\2026-10-25-lost-in-time-intergenerational-succession-change-and-failure-in-family-business-jkvxb9ua.md)
+- Type: papers
+
+## [2026-10-25 06:21] writeback | papers
+- Page: [Confucianism, Successor Choice, and Firm Performance in Family Firms: Evidence from China](D:\pyproject\paper-compass\wiki\papers\2026-10-25-confucianism-successor-choice-and-firm-performance-in-family-firms-evidence-from-jxaqhk68.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Workers' Education, Spillovers, and Productivity: Evidence from Plant-Level Production Functions](D:\pyproject\paper-compass\wiki\papers\2026-10-25-workers-education-spillovers-and-productivity-evidence-from-plant-level-producti-k8cwuwwj.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Difference-in-Differences with Multiple Time Periods](D:\pyproject\paper-compass\wiki\papers\2026-10-25-difference-in-differences-with-multiple-time-periods-kmdk9xf5.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Does ESG Performance Affect Corporate Tax Avoidance? Evidence from China](D:\pyproject\paper-compass\wiki\papers\2026-10-25-does-esg-performance-affect-corporate-tax-avoidance-evidence-from-china.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Paving the Way for Children: Family Firm Succession and Corporate Philanthropy in China](D:\pyproject\paper-compass\wiki\papers\2026-10-25-paving-the-way-for-children-family-firm-succession-and-corporate-philanthropy-in-liptd48d.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [“Shadow emperor” or “loyal paladin”? – The Janus face of previous owner involvement in family firm successions](D:\pyproject\paper-compass\wiki\papers\2026-10-25-shadow-emperor-or-loyal-paladin-the-janus-face-of-previous-owner-involvement-in--l8unsww7.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [How does a succession influence investment decisions, credit financing and business performance in small and medium-sized family firms?](D:\pyproject\paper-compass\wiki\papers\2026-10-25-how-does-a-succession-influence-investment-decisions-credit-financing-and-busine-ljarazga.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [On the Mechanics of Economic Development](D:\pyproject\paper-compass\wiki\papers\2026-10-25-on-the-mechanics-of-economic-development.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Who Profits from Patents? Rent-Sharing at Innovative Firms](D:\pyproject\paper-compass\wiki\papers\2026-10-25-who-profits-from-patents-rent-sharing-at-innovative-firms-lq9ff8iy.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Simulating Macroeconomic Expectations in Survey Experiments with LLM-based Economic Agents](D:\pyproject\paper-compass\wiki\papers\2026-10-25-simulating-macroeconomic-expectations-in-survey-experiments-with-llm-based-econo-m78tg6nt.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [赋能民营经济发展新质生产力 (Empowering the Private Economy to Develop New Quality Productive Forces)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-赋能民营经济发展新质生产力-empowering-the-private-economy-to-develop-new-quality-productive-f.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [重新考虑绿色清洗 作者:埃利斯·琼斯](D:\pyproject\paper-compass\wiki\papers\2026-10-25-重新考虑绿色清洗-作者埃利斯琼斯.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [人工智能技术会诱致劳动收入不平等吗——模型推演与分类评估 (Does Artificial Intelligence Technology Induce Labor Income Inequality? Model Derivation and Classified Evaluation)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-人工智能技术会诱致劳动收入不平等吗模型推演与分类评估-does-artificial-intelligence-technology-induce-labor-.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Forecasting Value-at-Risk Using Deep Neural Network Quantile Regression](D:\pyproject\paper-compass\wiki\papers\2026-10-25-forecasting-value-at-risk-using-deep-neural-network-quantile-regression.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Gender-Targeted Job Ads in the Recruitment Process: Evidence from China](D:\pyproject\paper-compass\wiki\papers\2026-10-25-gender-targeted-job-ads-in-the-recruitment-process-evidence-from-china.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [News-based forecasts of macroeconomic indicators: A semantic path model for interpretable predictions](D:\pyproject\paper-compass\wiki\papers\2026-10-25-news-based-forecasts-of-macroeconomic-indicators-a-semantic-path-model-for-inter-qdt6fgvz.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Forecasting GDP in Europe with textual data](D:\pyproject\paper-compass\wiki\papers\2026-10-25-forecasting-gdp-in-europe-with-textual-data-pspvmthw.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Human Capital in Family Businesses: Focusing on the Individual Level](D:\pyproject\paper-compass\wiki\papers\2026-10-25-human-capital-in-family-businesses-focusing-on-the-individual-level-qdtvuhgv.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Lag-Llama: Towards Foundation Models for Probabilistic Time Series Forecasting](D:\pyproject\paper-compass\wiki\papers\2026-10-25-lag-llama-towards-foundation-models-for-probabilistic-time-series-forecasting-pun4wief.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Pre-Training With Whole Word Masking for Chinese BERT](D:\pyproject\paper-compass\wiki\papers\2026-10-25-pre-training-with-whole-word-masking-for-chinese-bert-q2w4gbs3.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [When does AI pay off? AI-adoption intensity, complementary investments, and R&D strategy](D:\pyproject\paper-compass\wiki\papers\2026-10-25-when-does-ai-pay-off-ai-adoption-intensity-complementary-investments-and-rd-stra-q7hvduub.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [AI-driven business model innovation: A systematic review and research agenda](D:\pyproject\paper-compass\wiki\papers\2026-10-25-ai-driven-business-model-innovation-a-systematic-review-and-research-agenda-rf4xi8je.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [CEO Narcissism and Corporate Tax Avoidance](D:\pyproject\paper-compass\wiki\papers\2026-10-25-ceo-narcissism-and-corporate-tax-avoidance.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Competition in Two-Sided Markets](D:\pyproject\paper-compass\wiki\papers\2026-10-25-competition-in-two-sided-markets-s3jq2vv2.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Can LLMs Take the Pulse of the Economy? A Real-Time Evaluation of LLM Nowcasts on Macroeconomic Indicators](D:\pyproject\paper-compass\wiki\papers\2026-10-25-can-llms-take-the-pulse-of-the-economy-a-real-time-evaluation-of-llm-nowcasts-on.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Bayesian Dynamic Variable Selection in High Dimensions](D:\pyproject\paper-compass\wiki\papers\2026-10-25-bayesian-dynamic-variable-selection-in-high-dimensions-qtskxjh6.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Organizational Capital, Corporate Tax Avoidance, and Firm Value](D:\pyproject\paper-compass\wiki\papers\2026-10-25-organizational-capital-corporate-tax-avoidance-and-firm-value.md)
+- Type: papers
+
+## [2026-10-25 06:22] writeback | papers
+- Page: [Sustainable Technology and Entrepreneurship 4 (2025) 100085](D:\pyproject\paper-compass\wiki\papers\2026-10-25-sustainable-technology-and-entrepreneurship-4-2025-100085.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [跳到主要内容](D:\pyproject\paper-compass\wiki\papers\2026-10-25-跳到主要内容.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Measured Skill Premium and Input Trade Liberalization: Evidence from Chinese Firms](D:\pyproject\paper-compass\wiki\papers\2026-10-25-measured-skill-premium-and-input-trade-liberalization-evidence-from-chinese-firm.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Family Firms](D:\pyproject\paper-compass\wiki\papers\2026-10-25-family-firms-t4f8ial8.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [The Political Dynamics of Corporate Tax Avoidance: The Chinese Experience](D:\pyproject\paper-compass\wiki\papers\2026-10-25-the-political-dynamics-of-corporate-tax-avoidance-the-chinese-experience.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Diversified Firms and Corporate Labor Policy: The Role of Managerial Equity Incentives](D:\pyproject\paper-compass\wiki\papers\2026-10-25-diversified-firms-and-corporate-labor-policy-the-role-of-managerial-equity-incen-tgnmhgt6.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Machine Learning Time Series Regressions With an Application to Nowcasting](D:\pyproject\paper-compass\wiki\papers\2026-10-25-machine-learning-time-series-regressions-with-an-application-to-nowcasting.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [An Examination of Corporate Tax Shelter Participants](D:\pyproject\paper-compass\wiki\papers\2026-10-25-an-examination-of-corporate-tax-shelter-participants.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Exploring Intergenerational Knowledge Transfer in Family Businesses: Insights from a Longitudinal Study](D:\pyproject\paper-compass\wiki\papers\2026-10-25-exploring-intergenerational-knowledge-transfer-in-family-businesses-insights-fro-tp32nbgl.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [A Data Appendix](D:\pyproject\paper-compass\wiki\papers\2026-10-25-a-data-appendix.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Too Many Managers: The Strategic Use of Titles to Avoid Overtime Payments](D:\pyproject\paper-compass\wiki\papers\2026-10-25-too-many-managers-the-strategic-use-of-titles-to-avoid-overtime-payments-u7vdmzcb.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Power in a Theory of the Firm](D:\pyproject\paper-compass\wiki\papers\2026-10-25-power-in-a-theory-of-the-firm.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [QRNN-MIDAS: a novel quantile regression neural network for mixed sampling frequency data](D:\pyproject\paper-compass\wiki\papers\2026-10-25-qrnn-midas-a-novel-quantile-regression-neural-network-for-mixed-sampling-frequen-ikfhwfb3.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Management (Robbins & Coulter) — catalog record only](D:\pyproject\paper-compass\wiki\papers\2026-10-25-management-robbins-coulter-catalog-record-only.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [守不住的“高”评级：代际传承下家族企业 ESG 理性降级与策略性承诺 (An Unsustainable “High” Rating: Intergenerational Succession, Rational ESG Downgrading, and Strategic Commitment in Family Firms)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-守不住的高评级代际传承下家族企业-esg-理性降级与策略性承诺-an-unsustainable-high-rating-intergenerational-s.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Artificial Intelligence and Productivity: Global Evidence from AI Patent and Bibliometric Data](D:\pyproject\paper-compass\wiki\papers\2026-10-25-artificial-intelligence-and-productivity-global-evidence-from-ai-patent-and-bibl-w9h8g82y.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Knowledge Graph-based Event Embedding Framework for Financial Quantitative Investments](D:\pyproject\paper-compass\wiki\papers\2026-10-25-knowledge-graph-based-event-embedding-framework-for-financial-quantitative-inves.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Artificial Intelligence Market Size, Share & Trends Analysis Report, 2024–2030 (Grand View Research)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-artificial-intelligence-market-size-share-trends-analysis-report-20242030-grand-.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Is the Dividend of Artificial Intelligence Distributed Equally Between Profits and Wages? Evidence from Chinese Private Enterprise Survey Data](D:\pyproject\paper-compass\wiki\papers\2026-10-25-is-the-dividend-of-artificial-intelligence-distributed-equally-between-profits-a.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [The determinants and effects of CEO–employee pay ratios](D:\pyproject\paper-compass\wiki\papers\2026-10-25-the-determinants-and-effects-of-ceoemployee-pay-ratios-webkzd7k.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Management succession and financial performance of family controlled firms](D:\pyproject\paper-compass\wiki\papers\2026-10-25-management-succession-and-financial-performance-of-family-controlled-firms-xsvyjd5u.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [认知劳动与数据标注中的劳动控制——以 N 人工智能公司为例 (Cognitive Labor and Labor Control in Data Annotation: The Case of N AI Company)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-认知劳动与数据标注中的劳动控制以-n-人工智能公司为例-cognitive-labor-and-labor-control-in-data-annotation.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Identifying Economic Narratives in Large Text Corpora: A Comprehensive Approach Using Large Language Models](D:\pyproject\paper-compass\wiki\papers\2026-10-25-identifying-economic-narratives-in-large-text-corpora-a-comprehensive-approach-u.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Text-Based Optimal Time Series Index](D:\pyproject\paper-compass\wiki\papers\2026-10-25-text-based-optimal-time-series-index.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Economic Transition, Higher Education and Worker Productivity](D:\pyproject\paper-compass\wiki\papers\2026-10-25-economic-transition-higher-education-and-worker-productivity-y5rnrl6c.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [Skill Requirements across Firms and Labor Markets: Evidence from Job Postings for Professionals](D:\pyproject\paper-compass\wiki\papers\2026-10-25-skill-requirements-across-firms-and-labor-markets-evidence-from-job-postings-for.md)
+- Type: papers
+
+## [2026-10-25 06:23] writeback | papers
+- Page: [人工智能如何提升企业生产效率？——基于劳动力技能结构调整的视角 (How Does Artificial Intelligence Improve Firm Production Efficiency? A Labor-Skill-Structure Adjustment Perspective)](D:\pyproject\paper-compass\wiki\papers\2026-10-25-人工智能如何提升企业生产效率基于劳动力技能结构调整的视角-how-does-artificial-intelligence-improve-firm-produ.md)
+- Type: papers
+
+## [2026-10-25 06:24] writeback | papers
+- Page: [Occupational, Industry, and Geographic Exposure to Artificial Intelligence: A Novel Dataset and Its Potential Uses](D:\pyproject\paper-compass\wiki\papers\2026-10-25-occupational-industry-and-geographic-exposure-to-artificial-intelligence-a-novel-ygkrac7l.md)
+- Type: papers
+
+## [2026-10-25 06:24] writeback | papers
+- Page: [Employment behavior of family firms during the financial crisis: Does generational stage matter?](D:\pyproject\paper-compass\wiki\papers\2026-10-25-employment-behavior-of-family-firms-during-the-financial-crisis-does-generationa.md)
+- Type: papers
+
+## [2026-10-25 06:24] writeback | papers
+- Page: [Income Inequality and Entrepreneurship: Lessons from the 2020 COVID-19 Recession](D:\pyproject\paper-compass\wiki\papers\2026-10-25-income-inequality-and-entrepreneurship-lessons-from-the-2020-covid-19-recession-zbbsd66j.md)
+- Type: papers
+
+## [2026-10-25 06:24] writeback | papers
+- Page: [Intergenerational dynamics of digital transformation in family firms](D:\pyproject\paper-compass\wiki\papers\2026-10-25-intergenerational-dynamics-of-digital-transformation-in-family-firms-zvq8f4tg.md)
+- Type: papers
+
+## [2026-10-25 06:24] writeback | papers
+- Page: [Mixing Family With Business: A Study of Thai Business Groups and the Families Behind Them](D:\pyproject\paper-compass\wiki\papers\2026-10-25-mixing-family-with-business-a-study-of-thai-business-groups-and-the-families-beh-zcd576di.md)
+- Type: papers
+
+## [2026-10-25 06:24] writeback | papers
+- Page: [The Impact of Executives on Corporate Tax Avoidance](D:\pyproject\paper-compass\wiki\papers\2026-10-25-the-impact-of-executives-on-corporate-tax-avoidance.md)
+- Type: papers
