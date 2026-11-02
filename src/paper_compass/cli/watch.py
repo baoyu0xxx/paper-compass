@@ -18,6 +18,7 @@ from paper_compass.console_window import child_creation_flags
 from paper_compass.env_utils import PROJECT_ROOT, load_project_env
 from paper_compass import watch_service
 from paper_compass.watcher import run_watch
+from paper_compass.zotero_process import zotero_running
 
 
 def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
@@ -31,6 +32,7 @@ def add_subcommand_parser(subparsers: argparse._SubParsersAction) -> None:
     modes.add_argument("--enable-autostart", action="store_true", help="Enable user-login automatic updates")
     modes.add_argument("--disable-autostart", action="store_true", help="Disable login updates and stop after current sync")
     modes.add_argument("--autostart-status", action="store_true", help="Report actual login service and watcher state")
+    modes.add_argument("--repair-autostart", action="store_true", help="Refresh the project runtime and login service definition")
     modes.add_argument("--managed", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--watch-config", help=argparse.SUPPRESS)
     parser.set_defaults(func=execute_watch)
@@ -80,24 +82,42 @@ def _managed(config_path: str) -> int:
             os.environ.update(PAPER_COMPASS_ROOT=str(root), PAPER_COMPASS_ENV_PATH=data["env_path"], PYTHONUTF8="1", PYTHONIOENCODING="utf-8", PAPER_COMPASS_MANAGED_WATCH="1")
             print(f"Managed watcher started: database={data['db_path']} storage={data['storage_path']}")
             record()
+            skip_while_zotero_running = bool(data.get("skip_while_zotero_running", True))
             def sync(events):
                 if stopped():
                     return
                 try:
-                    watch_service.confirm_source(data["db_path"], data["storage_path"])
+                    watch_service.confirm_source_paths(data["db_path"], data["storage_path"])
+                    if skip_while_zotero_running and zotero_running():
+                        # Zotero holds an exclusive lock on its live database while it
+                        # runs, so this round would only fail. The next storage change
+                        # or reconcile starts it again once Zotero is closed.
+                        print("Zotero is running; deferring this sync round until it exits")
+                        record()
+                        return
                     command = [data["python"], "-m", "paper_compass", "sync", "--snapshot-db", "always", "--db-source-path", data["db_path"], "--storage-path", data["storage_path"]]
                     print(f"Incremental sync: {', '.join(sorted(events))}")
                     # A pipe reader forwards child output into the bounded rotating log.
                     # The watcher runs detached with no console, so the console-less
                     # parent would otherwise give the child a fresh, focus-stealing window.
                     with subprocess.Popen(command, cwd=data["project_root"], env=os.environ.copy(), stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace", creationflags=child_creation_flags()) as child:
+                        locked = False
                         for line in child.stdout:
+                            if "database is locked" in line.lower():
+                                locked = True
                             print(line.rstrip())
                         code = child.wait()
-                    error = f"Sync failed with exit code {code}" if code else ""
-                    record(error)
-                    if error:
+                    if code and locked:
+                        # The database was in use when this round started; that is a
+                        # deferral, not a watcher failure.
+                        print("Sync deferred: the Zotero database was locked while another process used it")
+                        record()
+                    elif code:
+                        error = f"Sync failed with exit code {code}"
+                        record(error)
                         print(error, file=sys.stderr)
+                    else:
+                        record()
                 except (OSError, ValueError) as exc:
                     record(str(exc))
                     print(str(exc), file=sys.stderr)
@@ -110,7 +130,7 @@ def _managed(config_path: str) -> int:
             needs_reconcile = True
             while not stopped():
                 try:
-                    watch_service.confirm_source(data["db_path"], data["storage_path"])
+                    watch_service.confirm_source_paths(data["db_path"], data["storage_path"])
                     if needs_reconcile:
                         sync({"__startup__"})
                         needs_reconcile = False
@@ -148,6 +168,18 @@ def execute_watch(args: argparse.Namespace) -> int:
     root = Path(getattr(initial, "compass_root", "") or os.environ.get("PAPER_COMPASS_ROOT") or Path.home() / ".paper-compass")
     if getattr(args, "autostart_status", False):
         print(json.dumps(watch_service.status(root), indent=2, ensure_ascii=False))
+        return 0
+    if getattr(args, "repair_autostart", False):
+        saved = watch_service.load_config(root)
+        if not saved.get("db_path") or not saved.get("storage_path"):
+            print("Automatic updates are not configured; enable them first", file=sys.stderr)
+            return 2
+        try:
+            watch_service.enable(root, db_path=saved["db_path"], storage_path=saved["storage_path"], env_path=saved.get("env_path"))
+        except (OSError, RuntimeError, ValueError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+        print("Automatic updates runtime and login service refreshed (downloaded-file marks cleared)")
         return 0
     if getattr(args, "disable_autostart", False):
         try:

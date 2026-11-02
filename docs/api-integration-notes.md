@@ -31,12 +31,10 @@ paper-compass validate   # test connectivity
   - `VOLC_EMBED_API_KEY` — API key
   - `VOLC_EMBED_MODEL` — model endpoint ID
 
-## PaperQA Answer Provider
+## Answer Provider
 
-- Uses the same LLM endpoint as wiki generation
-- Base URL: configured via `PAPERQA_BASE_URL`
-- Model: configurable via `PAPERQA_MODEL` env (default: `gpt-4o`)
-- Auth: `PAPERQA_API_KEY` (env, supports `$ENV_VAR` syntax)
+- Uses the configured `wiki_generation` LLM role for research answers.
+- Base URL, model, and auth are configured with `LLM_BASE_URL`, `LLM_MODEL`, and `LLM_API_KEY`.
 
 ## Provider Cascade (Embedding)
 
@@ -45,7 +43,7 @@ Embedding tries providers in order until one succeeds:
 2. `embedding_volcengine` (Volcengine, `VOLC_EMBED_*` env vars)
 3. Local `bge-base` (no API key needed)
 
-Configured in `configs/providers.yaml`; roles `pdf_embedding` and `wiki_embedding` control which provider to target.
+Configured in `configs/providers.yaml`; the shared `embedding` role selects the active embedding provider.
 
 ## $ENV_VAR Reference Syntax
 

@@ -38,10 +38,11 @@ paper-compass init --db-source-path /path/to/zotero.sqlite --storage-path /path/
 # Opt out instead: paper-compass init --disable-auto-update
 paper-compass watch --enable-autostart --sqlite-path /path/to/zotero.sqlite --storage-path /path/to/storage
 paper-compass watch --autostart-status
+paper-compass watch --repair-autostart
 paper-compass watch --disable-autostart
 ```
 
-Autostart is scoped to the current user's login: Windows HKCU Run (no crash auto-restart), Linux systemd user, or macOS LaunchAgent. No password, administrator privileges, or Linux linger are required; this is not a logged-out system service. Configuration: `runtime/state/watch_config.json`; rotating logs: `runtime/logs/watch.log` (`runtime` means the selected runtime directory). Re-enable after changing the source/storage paths; after moving or recreating the interpreter/virtual environment, disable then re-enable. The managed watcher spawns every sync subprocess (stage scripts included) without a console window, so background monitoring never flashes a command prompt or steals focus; that suppression applies only when the spawning process has no console window itself, leaving interactive terminal runs unchanged. Native Linux/macOS testing has not been performed; Windows user-login behavior has not yet been reboot-tested.
+Autostart is scoped to the current user's login: Windows HKCU Run (no crash auto-restart), Linux systemd user, or macOS LaunchAgent. No password, administrator privileges, or Linux linger are required; this is not a logged-out system service. Configuration: `runtime/state/watch_config.json`; rotating logs: `runtime/logs/watch.log` (`runtime` means the selected runtime directory). Re-enable after changing the source/storage paths; after moving or recreating the interpreter/virtual environment, disable then re-enable. On Windows, enabling or repairing autostart clears the downloaded-file mark (`Zone.Identifier`) from the managed interpreter and the virtual environment's executables, so Explorer does not show an "unknown publisher" security warning on every login; if that mark cannot be removed (group policy, read-only media, file in use), the command warns and `--autostart-status` reports `"marked": true`, and you can clear it manually with `Unblock-File` or by re-running `--repair-autostart` from a higher-privilege shell. The managed watcher spawns every sync subprocess (stage scripts included) without a console window, so background monitoring never flashes a command prompt or steals focus; that suppression applies only when the spawning process has no console window itself, leaving interactive terminal runs unchanged. The managed watcher never opens the live Zotero database: it only checks that the source paths exist, defers a round while a Zotero client process is running (`skip_while_zotero_running`, default on), and lets each sync read a snapshot instead. Opening the live library from that long-lived process leaks file handles and keeps Zotero from starting, so every read-only open must close explicitly (`read_only()` in `sqlite_readonly.py`). Native Linux/macOS testing has not been performed; Windows user-login behavior has not yet been reboot-tested.
 
 Source checkouts retain their existing project `.env` location. Wheel installations use `~/.paper-compass/.env`; `PAPER_COMPASS_ENV_PATH` overrides the dotenv path. Preserve existing configuration rather than overwriting it.
 
@@ -158,6 +159,7 @@ paper-compass sync \
 - `data/state/last_sync.json` 状态记录
 - 损坏时阻断写入并给出恢复建议
 - `--rebuild papers|wiki|all` + `--backup-corrupted-db` 恢复路径
+- 若健康检查报告 `malformed inverted index for FTS5 table`，先运行 `paper-compass repair-fts`（可加 `--backup`）：它只从 FTS5 内容表就地重建全文倒排索引，不重新嵌入向量，也不重建 collection；`--dry-run` 只报告状态
 - 若 `status` 显示 sync lock 卡住，可先用 `paper-compass status --json` 查看 `sync.lock` / `last_sync`，再按需执行 `paper-compass sync --force-unlock`
 
 ### 6. 手动执行各阶段（仅在需要细粒度控制时）
@@ -299,6 +301,8 @@ mcp_servers:
 | Mac: multiple Python installs | `pip3 show pkg` says "not found" but `python3` can import it | Always use `python3 -m pip install ...` and `python3 -m pip show ...` instead of bare `pip` / `pip3` |
 | Shell env var pollution | API call uses wrong URL | `unset LLM_BASE_URL LLM_API_KEY EMBED_BASE_URL EMBED_API_KEY VOLC_EMBED_BASE_URL VOLC_EMBED_API_KEY` before running |
 | $ENV_VAR not resolved | "unauthorized" errors | Ensure the referenced env var is actually set in your shell |
+| Windows login shows "无法验证发布者 / 打开文件 - 安全警告" | The managed `pythonw.exe` carries a Mark-of-the-Web (`Zone.Identifier`), e.g. after copying the project or restoring it from a download | Re-run `paper-compass watch --repair-autostart` (clears the mark and re-registers); or `Unblock-File` the interpreter and `--autostart-status` should show `"marked": false` |
+| `malformed inverted index for FTS5 table` blocks sync | `PRAGMA quick_check` reports a corrupted full-text inverted index in `chroma.sqlite3`; the sync health gate then blocks every run (content and embeddings are usually intact) | Run `paper-compass repair-fts` (add `--backup` to keep a copy); it rebuilds only the FTS5 index in place with no re-embedding. Use `sync --rebuild papers --backup-corrupted-db` only if that repair fails |
 
 Before publishing a new version, follow `docs/release-checklist.md` to keep code, docs, tests, tags, and release assets aligned.
 

@@ -238,8 +238,11 @@ def main():
         storage_path=str(source.storage_path),
         immutable=prepared.use_immutable,
     )
-    metadata_items = lib.get_all_items_with_pdfs()
-    lib.close()
+    try:
+        metadata_items = lib.get_all_items_with_pdfs()
+    finally:
+        # Release the read handle before the stage does anything else.
+        lib.close()
 
     cleanup = cleanup_sqlite_snapshots(
         Path(args.snapshot_dir),

@@ -7,6 +7,7 @@ import sqlite3
 from typing import Any
 from dataclasses import dataclass, field
 from pathlib import Path
+from paper_compass.sqlite_readonly import read_only
 from paper_compass.windows_integrity import prepare_runtime_temp
 
 
@@ -100,7 +101,7 @@ def inspect_index_health(db_path: str | Path) -> IndexHealthReport:
     sqlite_path = db_root / "chroma.sqlite3"
     if sqlite_path.exists():
         try:
-            with sqlite3.connect(sqlite_path.resolve().as_uri() + "?mode=ro", uri=True) as connection:
+            with read_only(sqlite_path) as connection:
                 sqlite_errors = [str(row[0]) for row in connection.execute("PRAGMA quick_check") if row[0] != "ok"]
         except sqlite3.Error as exc:
             sqlite_errors = [str(exc)]

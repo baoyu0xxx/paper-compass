@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from paper_compass.sqlite_readonly import connect_readonly
+from paper_compass.sqlite_readonly import read_only
 from paper_compass.zotero_paths import ZoteroSourceResolution
 
 
@@ -39,9 +39,20 @@ def create_sqlite_snapshot(src: Path, snapshot_dir: Path, *, timeout: float = 30
     snapshot_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d-%H%M%S")
     dst = snapshot_dir / f"zotero.{ts}.sqlite"
-    with connect_readonly(src, timeout=timeout) as source:
-        with sqlite3.connect(dst) as target:
-            source.backup(target)
+    try:
+        # Both handles must be closed explicitly: the ``with connection`` block
+        # only commits or rolls back, and a leaked read handle on the live
+        # Zotero database is what kept Zotero from starting.
+        with read_only(src, timeout=timeout) as source:
+            target = sqlite3.connect(dst)
+            try:
+                source.backup(target)
+            finally:
+                target.close()
+    except BaseException:
+        # Never leave a half-written copy behind for cleanup to count as usable.
+        dst.unlink(missing_ok=True)
+        raise
     return dst
 
 

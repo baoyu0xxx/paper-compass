@@ -2,6 +2,20 @@
 
 All notable changes to paper-compass are documented here.
 
+## [Unreleased]
+
+### Added
+
+- `paper-compass repair-fts` rebuilds a corrupted ChromaDB FTS5 full-text index in place, without re-embedding any paper or rebuilding the vector collections; it supports `--dry-run`, `--json`, and `--backup`. The vectordb health check now points to this command when `PRAGMA quick_check` reports a malformed FTS5 inverted index.
+
+### Fixed
+
+- The managed watcher no longer keeps Zotero from starting: it stopped leaking read-only SQLite connections to the live Zotero database on every loop iteration and every sync (`confirm_source`, snapshot creation, and the vectordb health check all relied on `with sqlite3.connect(...)`, which only commits and never closes). Read-only opens now go through `read_only()`, the watcher only checks that the source paths exist, and each sync reads a snapshot instead.
+- The managed watcher defers a sync round while a Zotero client process is running (`skip_while_zotero_running`, default on) instead of repeatedly failing with `database is locked`; a sync that still hits the lock is reported as a deferral rather than a failure, so `last_error` no longer sticks.
+- `paper-compass init` / `watch --enable-autostart` no longer refuse a Zotero database that Zotero currently holds locked; the library check is skipped while the database cannot be inspected, and a wrong database then fails in the next sync.
+- Windows login no longer shows the "无法验证发布者 / 打开文件 - 安全警告" dialog for the managed watcher: enabling or repairing autostart now clears the Mark-of-the-Web (`Zone.Identifier`) from the managed interpreter and the virtual environment's executables, and the managed runtime bootstrap does the same after creating or updating `.venv`.
+- `paper-compass watch --autostart-status` reports `"marked"` so a downloaded interpreter is visible before the next login; `--repair-autostart` is an idempotent recovery path when the mark cannot be removed automatically.
+
 ## [1.5.0] - 2026-10-07
 
 ### Added

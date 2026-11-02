@@ -140,6 +140,56 @@ def test_prepare_zotero_database_reports_locked_snapshot_context(tmp_path, monke
     assert "sqlite-timeout 15.0" in message
 
 
+def test_create_sqlite_snapshot_closes_the_live_database_handle(tmp_path, monkeypatch):
+    from paper_compass import sqlite_readonly
+    from paper_compass.zotero_snapshot import create_sqlite_snapshot
+
+    source = _make_sqlite(tmp_path / "live" / "zotero.sqlite")
+    created = []
+    real_connect = sqlite_readonly.connect_readonly
+
+    def tracking(*args, **kwargs):
+        connection = real_connect(*args, **kwargs)
+        created.append(connection)
+        return connection
+
+    monkeypatch.setattr(sqlite_readonly, "connect_readonly", tracking)
+
+    snapshot = create_sqlite_snapshot(source, tmp_path / "snapshots")
+
+    assert len(created) == 1
+    with pytest.raises(sqlite3.ProgrammingError):
+        created[0].execute("SELECT 1")
+    # A closed handle also means the copy can be reopened and removed.
+    connection = sqlite3.connect(snapshot)
+    try:
+        assert connection.execute("SELECT count(*) FROM items").fetchone()[0] == 1
+    finally:
+        connection.close()
+    snapshot.unlink()
+    assert not snapshot.exists()
+
+
+def test_failed_snapshot_copy_leaves_no_partial_file(tmp_path, monkeypatch):
+    from contextlib import nullcontext
+
+    from paper_compass import zotero_snapshot
+
+    source = _make_sqlite(tmp_path / "live" / "zotero.sqlite")
+    snapshot_dir = tmp_path / "snapshots"
+
+    class BrokenSource:
+        def backup(self, target):
+            raise sqlite3.OperationalError("disk I/O error")
+
+    monkeypatch.setattr(zotero_snapshot, "read_only", lambda *args, **kwargs: nullcontext(BrokenSource()))
+
+    with pytest.raises(sqlite3.OperationalError, match="disk I/O error"):
+        zotero_snapshot.create_sqlite_snapshot(source, snapshot_dir)
+
+    assert list(snapshot_dir.glob("zotero.*.sqlite")) == []
+
+
 def test_cleanup_sqlite_snapshots_keeps_newest_n(tmp_path):
     from paper_compass.zotero_snapshot import cleanup_sqlite_snapshots
 
