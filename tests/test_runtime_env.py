@@ -134,3 +134,35 @@ def test_wheel_runtime_uses_current_interpreter_without_bootstrapping(tmp_path, 
     assert state.managed_python == current
     assert state.reasons == []
     assert list(installed_root.iterdir()) == []
+
+
+def test_ensure_managed_runtime_clears_download_marks(tmp_path, monkeypatch):
+    from paper_compass import runtime_env
+
+    _source_checkout(tmp_path)
+    bootstrap_python = tmp_path / "bootstrap" / "python.exe"
+    _touch_python(bootstrap_python)
+    managed_python = tmp_path / ".venv" / "Scripts" / "python.exe"
+    version_probe = runtime_env.VERSION_PROBE
+
+    def fake_run(command, *args, **kwargs):
+        command = [str(part) for part in command]
+        if command[:3] == [str(bootstrap_python), "-m", "venv"]:
+            _touch_python(managed_python)
+            return mock.Mock(returncode=0, stdout="", stderr="")
+        if command == [str(bootstrap_python), "-c", version_probe]:
+            return mock.Mock(returncode=0, stdout="3.12.7\n", stderr="")
+        if command == [str(managed_python), "-c", version_probe]:
+            return mock.Mock(returncode=0, stdout="3.12.7\n", stderr="")
+        if command[:4] == [str(managed_python), "-m", "pip", "install"]:
+            return mock.Mock(returncode=0, stdout="ok\n", stderr="")
+        raise AssertionError(f"unexpected subprocess call: {command}")
+
+    monkeypatch.setattr(runtime_env.subprocess, "run", fake_run)
+    cleared = []
+    monkeypatch.setattr(runtime_env.windows_integrity, "launcher_files", lambda executable: [Path(executable)])
+    monkeypatch.setattr(runtime_env.windows_integrity, "clear_zone_marks", lambda paths: cleared.append(list(paths)) or [])
+
+    runtime_env.ensure_managed_runtime(project_root=tmp_path, bootstrap_python=bootstrap_python, with_dev=False)
+
+    assert cleared == [[managed_python]]

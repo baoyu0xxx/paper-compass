@@ -24,10 +24,11 @@ def test_bootstrap_runtime_invokes_ensure_and_prints_managed_python(monkeypatch,
 
     captured = {}
 
-    def fake_ensure(*, project_root, bootstrap_python=None, with_dev=True):
+    def fake_ensure(*, project_root, bootstrap_python=None, with_dev=True, recreate=False):
         captured["project_root"] = project_root
         captured["bootstrap_python"] = bootstrap_python
         captured["with_dev"] = with_dev
+        captured["recreate"] = recreate
         return state
 
     monkeypatch.setattr(module, "ensure_managed_runtime", fake_ensure)
@@ -41,6 +42,7 @@ def test_bootstrap_runtime_invokes_ensure_and_prints_managed_python(monkeypatch,
     assert rc == 0
     assert captured["bootstrap_python"] == tmp_path / "bootstrap.exe"
     assert captured["with_dev"] is False
+    assert captured["recreate"] is False
     out = capsys.readouterr().out
     assert str(managed_python) in out
     assert "paper-compass init" in out

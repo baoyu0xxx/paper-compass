@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib
 import tomllib
 from pathlib import Path
 
@@ -55,3 +56,9 @@ def test_pdfplumber_is_not_a_core_dependency():
     assert not any(dep.startswith("pdfplumber") for dep in deps)
     assert "pdf-fallback" in optional
     assert any(dep.startswith("pdfplumber") for dep in optional["pdf-fallback"])
+
+
+def test_console_entry_modules_import():
+    for module_name in ("paper_compass.healthcheck", "paper_compass.mcp_entrypoint", "paper_compass.mcp_cli"):
+        module = importlib.import_module(module_name)
+        assert callable(module.main)

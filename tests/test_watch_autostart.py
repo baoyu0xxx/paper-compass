@@ -80,3 +80,56 @@ def test_registry_lifecycle_is_user_scoped_and_rolls_back_failed_launch(tmp_path
     with pytest.raises(OSError, match="cannot launch"):
         watch_autostart.enable(data)
     assert not values
+
+
+def _windows_registry(monkeypatch):
+    import sys
+    from types import SimpleNamespace
+    from unittest.mock import MagicMock
+
+    key = MagicMock()
+    key.__enter__.return_value = key
+    registry = SimpleNamespace(
+        HKEY_CURRENT_USER=123, KEY_SET_VALUE=2, REG_SZ=1,
+        CreateKeyEx=MagicMock(return_value=key),
+        SetValueEx=lambda *args: None,
+    )
+    monkeypatch.setitem(sys.modules, "winreg", registry)
+    monkeypatch.setattr(watch_autostart.sys, "platform", "win32")
+    monkeypatch.setattr(watch_autostart.subprocess, "DETACHED_PROCESS", 8, raising=False)
+    monkeypatch.setattr(watch_autostart.subprocess, "CREATE_NEW_PROCESS_GROUP", 512, raising=False)
+    return registry
+
+
+def test_enable_clears_the_download_mark_before_launching(tmp_path, monkeypatch):
+    data = config(tmp_path)
+    python = tmp_path / "python.exe"
+    python.touch()
+    (tmp_path / "pythonw.exe").touch()
+    data["python"] = str(python)
+    _windows_registry(monkeypatch)
+    order = []
+    monkeypatch.setattr(watch_autostart.windows_integrity, "launcher_files", lambda executable: [Path(executable)])
+    monkeypatch.setattr(
+        watch_autostart.windows_integrity, "clear_zone_marks",
+        lambda paths: order.append(("clear", [str(path) for path in paths])) or [],
+    )
+    monkeypatch.setattr(watch_autostart.subprocess, "Popen", lambda *args, **kwargs: order.append(("launch", args[0])))
+
+    assert watch_autostart.enable(data) == []
+    assert [step for step, _ in order] == ["clear", "launch"]
+    assert order[0][1] == [str(python)]
+
+
+def test_enable_returns_marks_it_could_not_clear(tmp_path, monkeypatch):
+    data = config(tmp_path)
+    python = tmp_path / "python.exe"
+    python.touch()
+    (tmp_path / "pythonw.exe").touch()
+    data["python"] = str(python)
+    _windows_registry(monkeypatch)
+    monkeypatch.setattr(watch_autostart.windows_integrity, "launcher_files", lambda executable: [Path(executable)])
+    monkeypatch.setattr(watch_autostart.windows_integrity, "clear_zone_marks", lambda paths: [python])
+    monkeypatch.setattr(watch_autostart.subprocess, "Popen", lambda *args, **kwargs: None)
+
+    assert watch_autostart.enable(data) == [python]

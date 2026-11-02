@@ -8,6 +8,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from paper_compass import windows_integrity
+
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
 
 
@@ -72,8 +74,6 @@ def _reg_query(name: str) -> str | None:
     return None
 
 
-    return '"' + text.replace("\\", "\\\\").replace('"', '\\"').replace("%", "%%").replace("$", "$$").replace("\n", "\\n").replace("\r", "\\r") + '"'
-
 
 def _unit_quote(text: str) -> str:
     return '"' + text.replace("\\", "\\\\").replace('"', '\\"').replace("%", "%%").replace("$", "$$").replace("\n", "\\n").replace("\r", "\\r") + '"'
@@ -105,15 +105,18 @@ def _definition_path(config: dict) -> Path:
     return Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "systemd" / "user" / (name + ".service")
 
 
-def enable(config: dict) -> None:
+def enable(config: dict) -> list[Path]:
     if not Path(config["python"]).is_file() or not Path(config["project_root"]).is_dir():
         raise RuntimeError("Watcher interpreter or working directory no longer exists")
     name = service_name(config["runtime_root"])
+    remaining: list[Path] = []
     if sys.platform == "win32":
         import winreg
         definition = windows_definition(config)
-        if len(definition["command"]) > 260:
-            raise RuntimeError("Windows Run command exceeds 260 characters; use shorter runtime paths")
+        # A downloaded interpreter makes Explorer show "unknown publisher" on
+        # every login before the watcher can start. Clear the mark first so
+        # the autostart entry launches silently.
+        remaining = windows_integrity.clear_zone_marks(windows_integrity.launcher_files(config["python"]))
         try:
             with winreg.CreateKeyEx(winreg.HKEY_CURRENT_USER, RUN_KEY, 0, winreg.KEY_SET_VALUE) as key:
                 winreg.SetValueEx(key, name, 0, winreg.REG_SZ, definition["command"])
@@ -128,6 +131,7 @@ def enable(config: dict) -> None:
         except OSError:
             disable(config)
             raise
+        return remaining
     elif sys.platform.startswith("linux"):
         _run(["systemctl", "--user", "show-environment"])
         path = _definition_path(config)
@@ -204,6 +208,15 @@ def inspect(config: dict) -> dict:
                 result["manager"] = "startup-folder"
                 result["registered"] = path.read_text(encoding="utf-8") == _startup_script(config)
                 result["error"] = "" if result["registered"] else "Startup script differs from configuration; re-enable autostart"
+            interpreter = Path(config["python"]) if config.get("python") else None
+            result["interpreter"] = str(interpreter) if interpreter else ""
+            result["marked"] = bool(
+                interpreter
+                and (
+                    windows_integrity.has_zone_mark(interpreter)
+                    or windows_integrity.has_zone_mark(interpreter.with_name("pythonw.exe"))
+                )
+            )
         elif sys.platform.startswith("linux"):
             response = _run(["systemctl", "--user", "show", result["name"] + ".service", "--property=LoadState,ActiveState,UnitFileState"], check=False)
             values = dict(line.split("=", 1) for line in response.stdout.splitlines() if "=" in line)

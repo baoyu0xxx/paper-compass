@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tomllib
@@ -13,6 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from paper_compass import windows_integrity
 from paper_compass.resources import is_source_checkout, project_root as detect_project_root
 
 MIN_PYTHON = (3, 12)
@@ -67,7 +69,7 @@ def managed_python_path(project_root: str | Path | None = None) -> Path:
     root = project_root_path(project_root) / ".venv"
     windows = root / "Scripts" / "python.exe"
     posix = root / "bin" / "python"
-    if windows.exists() or os.name == "nt":
+    if os.name == "nt":
         return windows
     return posix
 
@@ -301,6 +303,7 @@ def ensure_managed_runtime(
     project_root: str | Path | None = None,
     bootstrap_python: str | Path | None = None,
     with_dev: bool = True,
+    recreate: bool = False,
 ) -> RuntimeState:
     root = project_root_path(project_root)
     if not is_source_checkout(root):
@@ -312,7 +315,20 @@ def ensure_managed_runtime(
     bootstrap = _current_python_path(bootstrap_python)
     _ensure_python_supported(bootstrap, root)
 
+    if recreate and managed_venv.exists():
+        if managed_venv.is_symlink() or managed_venv.is_junction():
+            managed_venv.unlink()
+        else:
+            shutil.rmtree(managed_venv)
+        managed_python = managed_python_path(root)
+        metadata_path = runtime_metadata_path(root)
+
     if not managed_python.exists():
+        if managed_venv.exists() and any(managed_venv.iterdir()):
+            raise ManagedRuntimeError(
+                f"managed runtime is incomplete at {managed_venv}; "
+                f"rerun {BOOTSTRAP_HINT} --recreate to rebuild it"
+            )
         managed_venv.mkdir(parents=True, exist_ok=True)
         create_result = subprocess.run(
             [str(bootstrap), "-m", "venv", str(managed_venv)],
@@ -342,6 +358,10 @@ def ensure_managed_runtime(
         if install_result.returncode != 0:
             stderr = install_result.stderr.strip() or install_result.stdout.strip() or "unknown error"
             raise ManagedRuntimeError(f"failed to install paper-compass into managed runtime: {stderr}")
+
+    # A runtime copied from a downloaded archive keeps the Mark-of-the-Web on
+    # its launchers; Windows then asks for publisher confirmation at login.
+    windows_integrity.clear_zone_marks(windows_integrity.launcher_files(managed_python))
 
     project_version, _, pyproject_sha = _pyproject_meta(root)
     managed_version = _probe_python_version(managed_python)

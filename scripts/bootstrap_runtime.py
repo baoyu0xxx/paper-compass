@@ -23,6 +23,11 @@ def main() -> int:
         action="store_true",
         help="Install only runtime dependencies (skip dev extras)",
     )
+    parser.add_argument(
+        "--recreate",
+        action="store_true",
+        help="Remove and recreate an incomplete or stale project runtime",
+    )
     args = parser.parse_args()
 
     try:
@@ -30,6 +35,7 @@ def main() -> int:
             project_root=PROJECT_ROOT,
             bootstrap_python=Path(args.python) if args.python else None,
             with_dev=not args.without_dev,
+            recreate=args.recreate,
         )
     except ManagedRuntimeError as exc:
         print(exc, file=sys.stderr)

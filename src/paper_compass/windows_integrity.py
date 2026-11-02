@@ -1,12 +1,15 @@
-"""Windows runtime-directory integrity helpers."""
+"""Windows runtime-directory integrity and file-mark helpers."""
 
 from __future__ import annotations
 
+import base64
 import os
 import subprocess
+from collections.abc import Iterable
 from pathlib import Path
 
 _LOW_INTEGRITY_SID = "S-1-16-4096"
+_ZONE_STREAM = ":Zone.Identifier"
 
 
 def default_runtime_root() -> Path:
@@ -91,3 +94,94 @@ def prepare_runtime_temp(db_path: str | Path) -> None:
 def ensure_runtime_root_integrity(root: str | Path) -> None:
     """Best-effort initialization hook for the default runtime root."""
     set_low_integrity_runtime_root(root)
+
+
+def _zone_stream(path: Path) -> str:
+    return str(path) + _ZONE_STREAM
+
+
+def has_zone_mark(path: str | Path) -> bool:
+    """Return whether ``path`` carries the Windows Mark-of-the-Web.
+
+    A file with that mark is treated as downloaded from the Internet and
+    triggers the "Open File - Security Warning" prompt when Explorer or a
+    login autostart entry launches it.
+    """
+    if os.name != "nt":
+        return False
+    try:
+        with open(_zone_stream(Path(path)), "rb"):
+            return True
+    except OSError:
+        return False
+
+
+def _powershell_unblock(paths: list[Path]) -> None:
+    lines = []
+    for path in paths:
+        literal = "'" + str(path).replace("'", "''") + "'"
+        lines.append(f"Unblock-File -LiteralPath {literal} -ErrorAction SilentlyContinue")
+    script = "\n".join(lines)
+    encoded = base64.b64encode(script.encode("utf-16-le")).decode("ascii")
+    try:
+        subprocess.run(
+            ["powershell.exe", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded],
+            check=False,
+            capture_output=True,
+        )
+    except OSError:
+        pass
+
+
+def clear_zone_marks(paths: Iterable[str | Path]) -> list[Path]:
+    """Remove the Mark-of-the-Web from ``paths``; return those still marked.
+
+    Removal is best effort: a running executable can hold the stream, and
+    group policy or read-only media can block it. ``Unblock-File`` is only
+    used as a fallback for the files that the direct stream deletion missed.
+    """
+    if os.name != "nt":
+        return []
+    remaining: list[Path] = []
+    for raw_path in paths:
+        path = Path(raw_path)
+        if not path.is_file():
+            continue
+        try:
+            os.remove(_zone_stream(path))
+            continue
+        except FileNotFoundError:
+            continue
+        except OSError:
+            pass
+        remaining.append(path)
+    if remaining:
+        _powershell_unblock(remaining)
+        remaining = [path for path in remaining if has_zone_mark(path)]
+    return remaining
+
+
+def launcher_files(python_executable: str | Path) -> list[Path]:
+    """Executables Windows may launch for a managed interpreter.
+
+    Outside a virtual environment only the interpreter pair is returned so
+    that clearing never touches an unrelated base installation. Inside a
+    virtual environment every console script is included because users can
+    launch those wrappers directly too.
+    """
+    if os.name != "nt":
+        return []
+    python = Path(python_executable)
+    scripts = python.parent
+    candidates = [python, scripts / "pythonw.exe"]
+    if (scripts.parent / "pyvenv.cfg").is_file():
+        candidates.extend(sorted(scripts.glob("*.exe")))
+    result: list[Path] = []
+    seen: set[str] = set()
+    for path in candidates:
+        key = os.path.normcase(str(path))
+        if key in seen or not path.is_file():
+            continue
+        seen.add(key)
+        result.append(path)
+    return result
