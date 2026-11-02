@@ -16,7 +16,7 @@ rtk python3 scripts/healthcheck.py --deps-only
 
 ```bash
 rtk pytest tests/test_healthcheck.py tests/test_zotero_snapshot.py tests/test_sync_zotero_paths.py tests/test_pipeline_sync.py tests/test_cli_sync_data.py tests/test_cli_status.py tests/test_incremental_index.py tests/test_index_manifest_v2.py tests/test_pdf_extract_reporting.py tests/test_wiki_store.py tests/test_ingest_to_wiki.py -q
-rtk pytest tests/test_config.py tests/test_packaged_configs_sync.py tests/test_packaging_metadata.py tests/test_console_scripts.py -q
+rtk pytest tests/test_config.py tests/test_packaged_configs_sync.py tests/test_packaging_metadata.py -q
 ```
 
 ## Full tests
